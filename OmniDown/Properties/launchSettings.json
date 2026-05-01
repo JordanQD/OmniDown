@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "OmniDown (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "OmniDown (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
