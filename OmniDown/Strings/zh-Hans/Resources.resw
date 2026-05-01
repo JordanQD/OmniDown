@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="TasksNavItem.Content" xml:space="preserve"><value>任务</value></data>
+  <data name="ActiveNavItem.Content" xml:space="preserve"><value>下载中</value></data>
+  <data name="CompletedNavItem.Content" xml:space="preserve"><value>已完成</value></data>
+  <data name="SettingsNavItem.Content" xml:space="preserve"><value>设置</value></data>
+  <data name="DownloadsTitleText.Text" xml:space="preserve"><value>下载</value></data>
+  <data name="DownloadsSubtitleText.Text" xml:space="preserve"><value>通过本地 aria2 sidecar 和 JSON-RPC 同步下载任务。</value></data>
+  <data name="NewDownloadButton.Label" xml:space="preserve"><value>新建</value></data>
+  <data name="ResumeTasksButton.Label" xml:space="preserve"><value>开始</value></data>
+  <data name="PauseTasksButton.Label" xml:space="preserve"><value>暂停</value></data>
+  <data name="DeleteTasksButton.Label" xml:space="preserve"><value>删除</value></data>
+  <data name="StartAriaButton.Label" xml:space="preserve"><value>启动 aria2</value></data>
+  <data name="StopAriaButton.Label" xml:space="preserve"><value>停止</value></data>
+  <data name="TotalMetricLabel.Text" xml:space="preserve"><value>总数</value></data>
+  <data name="ActiveMetricLabel.Text" xml:space="preserve"><value>活跃</value></data>
+  <data name="DownloadSpeedMetricLabel.Text" xml:space="preserve"><value>下载速度</value></data>
+  <data name="Aria2MetricLabel.Text" xml:space="preserve"><value>aria2</value></data>
+  <data name="NameColumnHeader.Text" xml:space="preserve"><value>名称</value></data>
+  <data name="StatusColumnHeader.Text" xml:space="preserve"><value>状态</value></data>
+  <data name="ProgressColumnHeader.Text" xml:space="preserve"><value>进度</value></data>
+  <data name="DirectoryColumnHeader.Text" xml:space="preserve"><value>目录</value></data>
+  <data name="SettingsTitleText.Text" xml:space="preserve"><value>设置</value></data>
+  <data name="SettingsSubtitleText.Text" xml:space="preserve"><value>管理本地 aria2 进程和默认下载行为。</value></data>
+  <data name="AriaPathLabel.Text" xml:space="preserve"><value>aria2c 路径</value></data>
+  <data name="AriaPathTextBox.PlaceholderText" xml:space="preserve"><value>留空则从 PATH 中查找 aria2c.exe</value></data>
+  <data name="RpcPortLabel.Text" xml:space="preserve"><value>RPC 端口</value></data>
+  <data name="DefaultDirectoryLabel.Text" xml:space="preserve"><value>默认目录</value></data>
+  <data name="ProxyLabel.Text" xml:space="preserve"><value>代理</value></data>
+  <data name="UseSystemProxyCheckBox.Content" xml:space="preserve"><value>启动 aria2 时使用 Windows 系统代理</value></data>
+  <data name="ProcessStatusLabel.Text" xml:space="preserve"><value>进程状态</value></data>
+  <data name="SettingsAriaStatusText.Text" xml:space="preserve"><value>已停止</value></data>
+  <data name="SettingsStartButton.Content" xml:space="preserve"><value>启动</value></data>
+  <data name="SettingsStopButton.Content" xml:space="preserve"><value>停止</value></data>
+  <data name="DebugEngineText.Text" xml:space="preserve"><value>aria2 已停止</value></data>
+  <data name="TerminalSummaryText.Text" xml:space="preserve"><value>aria2 终端输出</value></data>
+  <data name="ClearTerminalButton.Content" xml:space="preserve"><value>清空</value></data>
+  <data name="TerminalToggleButton.Content" xml:space="preserve"><value>终端</value></data>
+  <data name="TerminalTextBlock.Text" xml:space="preserve"><value>aria2 终端输出会显示在这里。</value></data>
+  <data name="NewDownloadDialogTitle" xml:space="preserve"><value>新建下载</value></data>
+  <data name="NewDownloadUrlHeader" xml:space="preserve"><value>下载 URL</value></data>
+  <data name="NewDownloadTaskNameHeader" xml:space="preserve"><value>任务名称</value></data>
+  <data name="NewDownloadTaskNamePlaceholder" xml:space="preserve"><value>留空则从 URL 推断</value></data>
+  <data name="NewDownloadDirectoryHeader" xml:space="preserve"><value>保存目录</value></data>
+  <data name="AddButtonText" xml:space="preserve"><value>添加</value></data>
+  <data name="CancelButtonText" xml:space="preserve"><value>取消</value></data>
+  <data name="DeleteButtonText" xml:space="preserve"><value>删除</value></data>
+  <data name="DownloadUrlRequiredMessage" xml:space="preserve"><value>请输入下载 URL。</value></data>
+  <data name="TaskAddedMessage" xml:space="preserve"><value>任务已添加到 aria2。</value></data>
+  <data name="AddTaskFailedMessage" xml:space="preserve"><value>通过 aria2 RPC 添加任务失败：{0}</value></data>
+  <data name="AriaStoppedMessage" xml:space="preserve"><value>aria2 已停止。</value></data>
+  <data name="RpcRefreshFailedMessage" xml:space="preserve"><value>aria2 RPC 刷新失败：{0}</value></data>
+  <data name="AriaRunningStatus" xml:space="preserve"><value>运行中 #{0}</value></data>
+  <data name="AriaStoppedStatus" xml:space="preserve"><value>已停止</value></data>
+  <data name="DebugAriaRunningStatus" xml:space="preserve"><value>aria2 运行中 #{0}</value></data>
+  <data name="DebugAriaStoppedStatus" xml:space="preserve"><value>aria2 已停止</value></data>
+  <data name="DeleteDialogTitle" xml:space="preserve"><value>删除选中的下载？</value></data>
+  <data name="DeleteDialogContent" xml:space="preserve"><value>这会从 aria2 和任务列表中移除选中的任务。</value></data>
+  <data name="TasksResumedMessage" xml:space="preserve"><value>已开始选中的任务。</value></data>
+  <data name="TasksPausedMessage" xml:space="preserve"><value>已暂停选中的任务。</value></data>
+  <data name="TasksDeletedMessage" xml:space="preserve"><value>已删除选中的任务。</value></data>
+  <data name="TaskOperationFailedMessage" xml:space="preserve"><value>任务操作失败：{0}</value></data>
+  <data name="TaskStatusDownloading" xml:space="preserve"><value>下载中</value></data>
+  <data name="TaskStatusWaiting" xml:space="preserve"><value>等待中</value></data>
+  <data name="TaskStatusPaused" xml:space="preserve"><value>已暂停</value></data>
+  <data name="TaskStatusCompleted" xml:space="preserve"><value>已完成</value></data>
+  <data name="TaskStatusError" xml:space="preserve"><value>错误</value></data>
+  <data name="TaskStatusRemoved" xml:space="preserve"><value>已移除</value></data>
+</root>

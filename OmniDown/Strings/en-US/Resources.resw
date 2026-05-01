@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="TasksNavItem.Content" xml:space="preserve"><value>Tasks</value></data>
+  <data name="ActiveNavItem.Content" xml:space="preserve"><value>Active</value></data>
+  <data name="CompletedNavItem.Content" xml:space="preserve"><value>Completed</value></data>
+  <data name="SettingsNavItem.Content" xml:space="preserve"><value>Settings</value></data>
+  <data name="DownloadsTitleText.Text" xml:space="preserve"><value>Downloads</value></data>
+  <data name="DownloadsSubtitleText.Text" xml:space="preserve"><value>Local aria2 sidecar control with JSON-RPC task sync.</value></data>
+  <data name="NewDownloadButton.Label" xml:space="preserve"><value>New</value></data>
+  <data name="ResumeTasksButton.Label" xml:space="preserve"><value>Resume</value></data>
+  <data name="PauseTasksButton.Label" xml:space="preserve"><value>Pause</value></data>
+  <data name="DeleteTasksButton.Label" xml:space="preserve"><value>Delete</value></data>
+  <data name="StartAriaButton.Label" xml:space="preserve"><value>Start aria2</value></data>
+  <data name="StopAriaButton.Label" xml:space="preserve"><value>Stop</value></data>
+  <data name="TotalMetricLabel.Text" xml:space="preserve"><value>Total</value></data>
+  <data name="ActiveMetricLabel.Text" xml:space="preserve"><value>Active</value></data>
+  <data name="DownloadSpeedMetricLabel.Text" xml:space="preserve"><value>Download speed</value></data>
+  <data name="Aria2MetricLabel.Text" xml:space="preserve"><value>aria2</value></data>
+  <data name="NameColumnHeader.Text" xml:space="preserve"><value>Name</value></data>
+  <data name="StatusColumnHeader.Text" xml:space="preserve"><value>Status</value></data>
+  <data name="ProgressColumnHeader.Text" xml:space="preserve"><value>Progress</value></data>
+  <data name="DirectoryColumnHeader.Text" xml:space="preserve"><value>Directory</value></data>
+  <data name="SettingsTitleText.Text" xml:space="preserve"><value>Settings</value></data>
+  <data name="SettingsSubtitleText.Text" xml:space="preserve"><value>Manage the local aria2 process and default download behavior.</value></data>
+  <data name="AriaPathLabel.Text" xml:space="preserve"><value>aria2c path</value></data>
+  <data name="AriaPathTextBox.PlaceholderText" xml:space="preserve"><value>Leave empty to resolve aria2c.exe from PATH</value></data>
+  <data name="RpcPortLabel.Text" xml:space="preserve"><value>RPC port</value></data>
+  <data name="DefaultDirectoryLabel.Text" xml:space="preserve"><value>Default directory</value></data>
+  <data name="ProxyLabel.Text" xml:space="preserve"><value>Proxy</value></data>
+  <data name="UseSystemProxyCheckBox.Content" xml:space="preserve"><value>Use Windows system proxy when aria2 starts</value></data>
+  <data name="ProcessStatusLabel.Text" xml:space="preserve"><value>Process status</value></data>
+  <data name="SettingsAriaStatusText.Text" xml:space="preserve"><value>Stopped</value></data>
+  <data name="SettingsStartButton.Content" xml:space="preserve"><value>Start</value></data>
+  <data name="SettingsStopButton.Content" xml:space="preserve"><value>Stop</value></data>
+  <data name="DebugEngineText.Text" xml:space="preserve"><value>aria2 stopped</value></data>
+  <data name="TerminalSummaryText.Text" xml:space="preserve"><value>aria2 terminal output</value></data>
+  <data name="ClearTerminalButton.Content" xml:space="preserve"><value>Clear</value></data>
+  <data name="TerminalToggleButton.Content" xml:space="preserve"><value>Terminal</value></data>
+  <data name="TerminalTextBlock.Text" xml:space="preserve"><value>aria2 terminal output will appear here.</value></data>
+  <data name="NewDownloadDialogTitle" xml:space="preserve"><value>New download</value></data>
+  <data name="NewDownloadUrlHeader" xml:space="preserve"><value>Download URL</value></data>
+  <data name="NewDownloadTaskNameHeader" xml:space="preserve"><value>Task name</value></data>
+  <data name="NewDownloadTaskNamePlaceholder" xml:space="preserve"><value>Leave empty to infer from the URL</value></data>
+  <data name="NewDownloadDirectoryHeader" xml:space="preserve"><value>Save directory</value></data>
+  <data name="AddButtonText" xml:space="preserve"><value>Add</value></data>
+  <data name="CancelButtonText" xml:space="preserve"><value>Cancel</value></data>
+  <data name="DeleteButtonText" xml:space="preserve"><value>Delete</value></data>
+  <data name="DownloadUrlRequiredMessage" xml:space="preserve"><value>A download URL is required.</value></data>
+  <data name="TaskAddedMessage" xml:space="preserve"><value>Task added to aria2.</value></data>
+  <data name="AddTaskFailedMessage" xml:space="preserve"><value>Failed to add task through aria2 RPC: {0}</value></data>
+  <data name="AriaStoppedMessage" xml:space="preserve"><value>aria2 stopped.</value></data>
+  <data name="RpcRefreshFailedMessage" xml:space="preserve"><value>aria2 RPC refresh failed: {0}</value></data>
+  <data name="AriaRunningStatus" xml:space="preserve"><value>Running #{0}</value></data>
+  <data name="AriaStoppedStatus" xml:space="preserve"><value>Stopped</value></data>
+  <data name="DebugAriaRunningStatus" xml:space="preserve"><value>aria2 running #{0}</value></data>
+  <data name="DebugAriaStoppedStatus" xml:space="preserve"><value>aria2 stopped</value></data>
+  <data name="DeleteDialogTitle" xml:space="preserve"><value>Delete selected downloads?</value></data>
+  <data name="DeleteDialogContent" xml:space="preserve"><value>This removes the selected task(s) from aria2 and the task list.</value></data>
+  <data name="TasksResumedMessage" xml:space="preserve"><value>Selected task(s) resumed.</value></data>
+  <data name="TasksPausedMessage" xml:space="preserve"><value>Selected task(s) paused.</value></data>
+  <data name="TasksDeletedMessage" xml:space="preserve"><value>Selected task(s) deleted.</value></data>
+  <data name="TaskOperationFailedMessage" xml:space="preserve"><value>Task operation failed: {0}</value></data>
+  <data name="TaskStatusDownloading" xml:space="preserve"><value>Downloading</value></data>
+  <data name="TaskStatusWaiting" xml:space="preserve"><value>Waiting</value></data>
+  <data name="TaskStatusPaused" xml:space="preserve"><value>Paused</value></data>
+  <data name="TaskStatusCompleted" xml:space="preserve"><value>Completed</value></data>
+  <data name="TaskStatusError" xml:space="preserve"><value>Error</value></data>
+  <data name="TaskStatusRemoved" xml:space="preserve"><value>Removed</value></data>
+</root>

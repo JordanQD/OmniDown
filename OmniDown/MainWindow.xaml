@@ -12,7 +12,7 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <Grid RowDefinitions="Auto,*">
+    <Grid RowDefinitions="Auto,*,Auto">
         <InfoBar
             x:Name="StatusInfoBar"
             Grid.Row="0"
@@ -33,6 +33,7 @@
                     x:Name="TasksNavItem"
                     Content="Tasks"
                     IsSelected="True"
+                    x:Uid="TasksNavItem"
                     Tag="Tasks">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Download" />
@@ -40,6 +41,7 @@
                 </NavigationViewItem>
                 <NavigationViewItem
                     Content="Active"
+                    x:Uid="ActiveNavItem"
                     Tag="Active">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Play" />
@@ -47,6 +49,7 @@
                 </NavigationViewItem>
                 <NavigationViewItem
                     Content="Completed"
+                    x:Uid="CompletedNavItem"
                     Tag="Completed">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Accept" />
@@ -56,6 +59,7 @@
             <NavigationView.FooterMenuItems>
                 <NavigationViewItem
                     Content="Settings"
+                    x:Uid="SettingsNavItem"
                     Tag="Settings">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Setting" />
@@ -72,10 +76,12 @@
                             <TextBlock
                                 FontSize="28"
                                 FontWeight="SemiBold"
+                                x:Uid="DownloadsTitleText"
                                 Text="Downloads" />
                             <TextBlock
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Text="Phase 1 workspace: new downloads, task list, settings, and local aria2 process control." />
+                                x:Uid="DownloadsSubtitleText"
+                                Text="Local aria2 sidecar control with JSON-RPC task sync." />
                         </StackPanel>
 
                         <CommandBar
@@ -85,15 +91,40 @@
                             <AppBarButton
                                 Click="NewDownloadButton_Click"
                                 Icon="Add"
+                                x:Uid="NewDownloadButton"
                                 Label="New" />
+                            <AppBarSeparator />
+                            <AppBarButton
+                                x:Name="ResumeTasksButton"
+                                Click="ResumeTasksButton_Click"
+                                Icon="Play"
+                                IsEnabled="False"
+                                x:Uid="ResumeTasksButton"
+                                Label="Resume" />
+                            <AppBarButton
+                                x:Name="PauseTasksButton"
+                                Click="PauseTasksButton_Click"
+                                Icon="Pause"
+                                IsEnabled="False"
+                                x:Uid="PauseTasksButton"
+                                Label="Pause" />
+                            <AppBarButton
+                                x:Name="DeleteTasksButton"
+                                Click="DeleteTasksButton_Click"
+                                Icon="Delete"
+                                IsEnabled="False"
+                                x:Uid="DeleteTasksButton"
+                                Label="Delete" />
                             <AppBarSeparator />
                             <AppBarButton
                                 Click="StartAriaButton_Click"
                                 Icon="Play"
+                                x:Uid="StartAriaButton"
                                 Label="Start aria2" />
                             <AppBarButton
                                 Click="StopAriaButton_Click"
                                 Icon="Stop"
+                                x:Uid="StopAriaButton"
                                 Label="Stop" />
                         </CommandBar>
                     </Grid>
@@ -105,6 +136,7 @@
                         <StackPanel Spacing="4">
                             <TextBlock
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                x:Uid="TotalMetricLabel"
                                 Text="Total" />
                             <TextBlock
                                 x:Name="TotalTasksText"
@@ -117,6 +149,7 @@
                             Spacing="4">
                             <TextBlock
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                x:Uid="ActiveMetricLabel"
                                 Text="Active" />
                             <TextBlock
                                 x:Name="ActiveTasksText"
@@ -129,6 +162,7 @@
                             Spacing="4">
                             <TextBlock
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                x:Uid="DownloadSpeedMetricLabel"
                                 Text="Download speed" />
                             <TextBlock
                                 x:Name="DownloadSpeedText"
@@ -141,6 +175,7 @@
                             Spacing="4">
                             <TextBlock
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                x:Uid="Aria2MetricLabel"
                                 Text="aria2" />
                             <TextBlock
                                 x:Name="AriaStatusText"
@@ -153,26 +188,32 @@
                     <ListView
                         x:Name="TasksListView"
                         Grid.Row="2"
-                        SelectionMode="Single">
+                        IsMultiSelectCheckBoxEnabled="True"
+                        SelectionChanged="TasksListView_SelectionChanged"
+                        SelectionMode="Multiple">
                         <ListView.Header>
                             <Grid
                                 Padding="12,0,12,8"
                                 ColumnDefinitions="2*,Auto,*,*">
                                 <TextBlock
                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    x:Uid="NameColumnHeader"
                                     Text="Name" />
                                 <TextBlock
                                     Grid.Column="1"
                                     Width="96"
                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    x:Uid="StatusColumnHeader"
                                     Text="Status" />
                                 <TextBlock
                                     Grid.Column="2"
                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    x:Uid="ProgressColumnHeader"
                                     Text="Progress" />
                                 <TextBlock
                                     Grid.Column="3"
                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    x:Uid="DirectoryColumnHeader"
                                     Text="Directory" />
                             </Grid>
                         </ListView.Header>
@@ -194,7 +235,7 @@
                                         Grid.Column="1"
                                         Width="96"
                                         VerticalAlignment="Center"
-                                        Text="{Binding Status}" />
+                                        Text="{Binding StatusText}" />
                                     <ProgressBar
                                         Grid.Column="2"
                                         VerticalAlignment="Center"
@@ -220,29 +261,34 @@
                         <TextBlock
                             FontSize="28"
                             FontWeight="SemiBold"
+                            x:Uid="SettingsTitleText"
                             Text="Settings" />
                         <TextBlock
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            x:Uid="SettingsSubtitleText"
                             Text="Manage the local aria2 process and default download behavior." />
                     </StackPanel>
 
                     <Grid
                         Grid.Row="1"
                         ColumnDefinitions="220,*"
-                        RowDefinitions="Auto,Auto,Auto,Auto"
+                        RowDefinitions="Auto,Auto,Auto,Auto,Auto"
                         ColumnSpacing="20"
                         RowSpacing="14">
                         <TextBlock
                             VerticalAlignment="Center"
+                            x:Uid="AriaPathLabel"
                             Text="aria2c path" />
                         <TextBox
                             x:Name="AriaPathTextBox"
                             Grid.Column="1"
+                            x:Uid="AriaPathTextBox"
                             PlaceholderText="Leave empty to resolve aria2c.exe from PATH" />
 
                         <TextBlock
                             Grid.Row="1"
                             VerticalAlignment="Center"
+                            x:Uid="RpcPortLabel"
                             Text="RPC port" />
                         <NumberBox
                             x:Name="RpcPortNumberBox"
@@ -255,6 +301,7 @@
                         <TextBlock
                             Grid.Row="2"
                             VerticalAlignment="Center"
+                            x:Uid="DefaultDirectoryLabel"
                             Text="Default directory" />
                         <TextBox
                             x:Name="DownloadDirectoryTextBox"
@@ -264,26 +311,109 @@
                         <TextBlock
                             Grid.Row="3"
                             VerticalAlignment="Center"
+                            x:Uid="ProxyLabel"
+                            Text="Proxy" />
+                        <CheckBox
+                            x:Name="UseSystemProxyCheckBox"
+                            Grid.Row="3"
+                            Grid.Column="1"
+                            Checked="UseSystemProxyCheckBox_Changed"
+                            Content="Use Windows system proxy when aria2 starts"
+                            IsChecked="True"
+                            x:Uid="UseSystemProxyCheckBox"
+                            Unchecked="UseSystemProxyCheckBox_Changed" />
+
+                        <TextBlock
+                            Grid.Row="4"
+                            VerticalAlignment="Center"
+                            x:Uid="ProcessStatusLabel"
                             Text="Process status" />
                         <StackPanel
-                            Grid.Row="3"
+                            Grid.Row="4"
                             Grid.Column="1"
                             Orientation="Horizontal"
                             Spacing="12">
                             <TextBlock
                                 x:Name="SettingsAriaStatusText"
                                 VerticalAlignment="Center"
+                                x:Uid="SettingsAriaStatusText"
                                 Text="Stopped" />
                             <Button
                                 Click="StartAriaButton_Click"
+                                x:Uid="SettingsStartButton"
                                 Content="Start" />
                             <Button
                                 Click="StopAriaButton_Click"
+                                x:Uid="SettingsStopButton"
                                 Content="Stop" />
                         </StackPanel>
                     </Grid>
                 </Grid>
             </Grid>
         </NavigationView>
+
+        <Border
+            Grid.Row="2"
+            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="0,1,0,0">
+            <Grid RowDefinitions="Auto,Auto">
+                <Grid
+                    Padding="12,6"
+                    ColumnDefinitions="Auto,*,Auto,Auto"
+                    ColumnSpacing="12">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <FontIcon FontSize="12" Glyph="&#xE756;" />
+                        <TextBlock
+                            x:Name="DebugEngineText"
+                            VerticalAlignment="Center"
+                            x:Uid="DebugEngineText"
+                            Text="aria2 stopped" />
+                    </StackPanel>
+                    <TextBlock
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        x:Uid="TerminalSummaryText"
+                        Text="aria2 terminal output"
+                        TextTrimming="CharacterEllipsis" />
+                    <Button
+                        x:Name="ClearTerminalButton"
+                        Grid.Column="2"
+                        Click="ClearTerminalButton_Click"
+                        x:Uid="ClearTerminalButton"
+                        Content="Clear" />
+                    <ToggleButton
+                        x:Name="TerminalToggleButton"
+                        Grid.Column="3"
+                        Checked="TerminalToggleButton_Changed"
+                        Content="Terminal"
+                        x:Uid="TerminalToggleButton"
+                        Unchecked="TerminalToggleButton_Changed" />
+                </Grid>
+
+                <Border
+                    x:Name="TerminalPanel"
+                    Grid.Row="1"
+                    Height="180"
+                    Padding="12"
+                    Background="#FF1E1E1E"
+                    Visibility="Collapsed">
+                    <ScrollViewer
+                        x:Name="TerminalScrollViewer"
+                        HorizontalScrollBarVisibility="Auto"
+                        VerticalScrollBarVisibility="Auto">
+                        <TextBlock
+                            x:Name="TerminalTextBlock"
+                            FontFamily="Cascadia Mono, Consolas"
+                            FontSize="12"
+                            Foreground="#FFD4D4D4"
+                            x:Uid="TerminalTextBlock"
+                            Text="aria2 terminal output will appear here."
+                            TextWrapping="NoWrap" />
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+        </Border>
     </Grid>
 </Window>
