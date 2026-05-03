@@ -20,6 +20,9 @@ public sealed record Aria2TaskStatus
     [JsonPropertyName("downloadSpeed")]
     public string DownloadSpeed { get; init; } = "0";
 
+    [JsonPropertyName("uploadSpeed")]
+    public string UploadSpeed { get; init; } = "0";
+
     [JsonPropertyName("dir")]
     public string Directory { get; init; } = string.Empty;
 
@@ -46,6 +49,9 @@ public sealed record Aria2GlobalStat
 {
     [JsonPropertyName("downloadSpeed")]
     public string DownloadSpeed { get; init; } = "0";
+
+    [JsonPropertyName("uploadSpeed")]
+    public string UploadSpeed { get; init; } = "0";
 
     [JsonPropertyName("numActive")]
     public string NumActive { get; init; } = "0";

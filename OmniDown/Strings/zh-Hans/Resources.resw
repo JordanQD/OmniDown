@@ -12,25 +12,41 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="TasksNavItem.Content" xml:space="preserve"><value>任务</value></data>
-  <data name="ActiveNavItem.Content" xml:space="preserve"><value>下载中</value></data>
+  <data name="TasksNavItem.Content" xml:space="preserve"><value>首页</value></data>
+  <data name="ActiveNavItem.Content" xml:space="preserve"><value>进行中</value></data>
   <data name="CompletedNavItem.Content" xml:space="preserve"><value>已完成</value></data>
+  <data name="IssuesNavItem.Content" xml:space="preserve"><value>异常</value></data>
   <data name="SettingsNavItem.Content" xml:space="preserve"><value>设置</value></data>
   <data name="DownloadsTitleText.Text" xml:space="preserve"><value>下载</value></data>
   <data name="DownloadsSubtitleText.Text" xml:space="preserve"><value>通过本地 aria2 sidecar 和 JSON-RPC 同步下载任务。</value></data>
+  <data name="HomePageTitle" xml:space="preserve"><value>首页</value></data>
+  <data name="HomePageSubtitle" xml:space="preserve"><value>查看全部下载任务和当前概况。</value></data>
+  <data name="DownloadingPageTitle" xml:space="preserve"><value>进行中</value></data>
+  <data name="DownloadingPageSubtitle" xml:space="preserve"><value>下载中和等待中的任务都在这里。</value></data>
+  <data name="CompletedPageTitle" xml:space="preserve"><value>已完成</value></data>
+  <data name="CompletedPageSubtitle" xml:space="preserve"><value>已经完成的下载任务。</value></data>
+  <data name="IssuesPageTitle" xml:space="preserve"><value>异常</value></data>
+  <data name="IssuesPageSubtitle" xml:space="preserve"><value>失败、移除或需要处理的任务。</value></data>
   <data name="NewDownloadButton.Label" xml:space="preserve"><value>新建</value></data>
+  <data name="SortTasksButton.Label" xml:space="preserve"><value>排序 v</value></data>
+  <data name="SortByCreatedAtMenuItem.Text" xml:space="preserve"><value>添加时间</value></data>
+  <data name="SortByNameMenuItem.Text" xml:space="preserve"><value>项目名称</value></data>
+  <data name="SortBySizeMenuItem.Text" xml:space="preserve"><value>项目大小</value></data>
+  <data name="SortAscendingMenuItem.Text" xml:space="preserve"><value>递增</value></data>
+  <data name="SortDescendingMenuItem.Text" xml:space="preserve"><value>递减</value></data>
   <data name="ResumeTasksButton.Label" xml:space="preserve"><value>开始</value></data>
   <data name="PauseTasksButton.Label" xml:space="preserve"><value>暂停</value></data>
   <data name="DeleteTasksButton.Label" xml:space="preserve"><value>删除</value></data>
   <data name="StartAriaButton.Label" xml:space="preserve"><value>启动 aria2</value></data>
   <data name="StopAriaButton.Label" xml:space="preserve"><value>停止</value></data>
   <data name="TotalMetricLabel.Text" xml:space="preserve"><value>总数</value></data>
-  <data name="ActiveMetricLabel.Text" xml:space="preserve"><value>活跃</value></data>
-  <data name="DownloadSpeedMetricLabel.Text" xml:space="preserve"><value>下载速度</value></data>
-  <data name="Aria2MetricLabel.Text" xml:space="preserve"><value>aria2</value></data>
+  <data name="ActiveMetricLabel.Text" xml:space="preserve"><value>进行中</value></data>
+  <data name="DownloadSpeedMetricLabel.Text" xml:space="preserve"><value>已完成</value></data>
+  <data name="Aria2MetricLabel.Text" xml:space="preserve"><value>异常</value></data>
   <data name="NameColumnHeader.Text" xml:space="preserve"><value>名称</value></data>
   <data name="StatusColumnHeader.Text" xml:space="preserve"><value>状态</value></data>
   <data name="ProgressColumnHeader.Text" xml:space="preserve"><value>进度</value></data>
+  <data name="SpeedColumnHeader.Text" xml:space="preserve"><value>速度</value></data>
   <data name="DirectoryColumnHeader.Text" xml:space="preserve"><value>目录</value></data>
   <data name="SettingsTitleText.Text" xml:space="preserve"><value>设置</value></data>
   <data name="SettingsSubtitleText.Text" xml:space="preserve"><value>管理本地 aria2 进程和默认下载行为。</value></data>
@@ -54,6 +70,7 @@
   <data name="NewDownloadTaskNameHeader" xml:space="preserve"><value>任务名称</value></data>
   <data name="NewDownloadTaskNamePlaceholder" xml:space="preserve"><value>留空则从 URL 推断</value></data>
   <data name="NewDownloadDirectoryHeader" xml:space="preserve"><value>保存目录</value></data>
+  <data name="NewDownloadSplitCountHeader" xml:space="preserve"><value>下载分段数</value></data>
   <data name="AddButtonText" xml:space="preserve"><value>添加</value></data>
   <data name="CancelButtonText" xml:space="preserve"><value>取消</value></data>
   <data name="DeleteButtonText" xml:space="preserve"><value>删除</value></data>
@@ -68,6 +85,7 @@
   <data name="DebugAriaStoppedStatus" xml:space="preserve"><value>aria2 已停止</value></data>
   <data name="DeleteDialogTitle" xml:space="preserve"><value>删除选中的下载？</value></data>
   <data name="DeleteDialogContent" xml:space="preserve"><value>这会从 aria2 和任务列表中移除选中的任务。</value></data>
+  <data name="DeleteFilesCheckBoxContent" xml:space="preserve"><value>同时删除对应的文件</value></data>
   <data name="TasksResumedMessage" xml:space="preserve"><value>已开始选中的任务。</value></data>
   <data name="TasksPausedMessage" xml:space="preserve"><value>已暂停选中的任务。</value></data>
   <data name="TasksDeletedMessage" xml:space="preserve"><value>已删除选中的任务。</value></data>
@@ -78,4 +96,9 @@
   <data name="TaskStatusCompleted" xml:space="preserve"><value>已完成</value></data>
   <data name="TaskStatusError" xml:space="preserve"><value>错误</value></data>
   <data name="TaskStatusRemoved" xml:space="preserve"><value>已移除</value></data>
+  <data name="DownloadSpeedPrefix" xml:space="preserve"><value>下行</value></data>
+  <data name="UploadSpeedPrefix" xml:space="preserve"><value>上行</value></data>
+  <data name="TitleSearchBox.PlaceholderText" xml:space="preserve"><value>搜索下载和设置...</value></data>
+  <data name="SearchDownloadsPlaceholder" xml:space="preserve"><value>搜索下载...</value></data>
+  <data name="SearchSettingsPlaceholder" xml:space="preserve"><value>搜索设置...</value></data>
 </root>

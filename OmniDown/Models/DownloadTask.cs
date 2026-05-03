@@ -1,6 +1,7 @@
 namespace OmniDown.Models;
 
 using OmniDown.Services.Localization;
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -10,11 +11,15 @@ public sealed class DownloadTask : INotifyPropertyChanged
     private string _name = string.Empty;
     private string _sourceUri = string.Empty;
     private string _saveDirectory = string.Empty;
+    private string _localFilePath = string.Empty;
     private string _status = "Waiting";
     private double _progress;
     private long _completedLength;
     private long _totalLength;
     private long _downloadSpeed;
+    private long _uploadSpeed;
+    private DateTimeOffset _createdAt = DateTimeOffset.Now;
+    private bool _isSelected;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -40,6 +45,12 @@ public sealed class DownloadTask : INotifyPropertyChanged
     {
         get => _saveDirectory;
         set => SetProperty(ref _saveDirectory, value);
+    }
+
+    public string LocalFilePath
+    {
+        get => _localFilePath;
+        set => SetProperty(ref _localFilePath, value);
     }
 
     public string Status
@@ -68,8 +79,16 @@ public sealed class DownloadTask : INotifyPropertyChanged
     public double Progress
     {
         get => _progress;
-        set => SetProperty(ref _progress, value);
+        set
+        {
+            if (SetProperty(ref _progress, value))
+            {
+                OnPropertyChanged(nameof(ProgressText));
+            }
+        }
     }
+
+    public string ProgressText => $"{Progress:0}%";
 
     public long CompletedLength
     {
@@ -80,14 +99,58 @@ public sealed class DownloadTask : INotifyPropertyChanged
     public long TotalLength
     {
         get => _totalLength;
-        set => SetProperty(ref _totalLength, value);
+        set
+        {
+            if (SetProperty(ref _totalLength, value))
+            {
+                OnPropertyChanged(nameof(SizeText));
+            }
+        }
+    }
+
+    public string SizeText => TotalLength <= 0 ? "-" : FormatBytes(TotalLength);
+
+    public DateTimeOffset CreatedAt
+    {
+        get => _createdAt;
+        set => SetProperty(ref _createdAt, value);
+    }
+
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set => SetProperty(ref _isSelected, value);
     }
 
     public long DownloadSpeed
     {
         get => _downloadSpeed;
-        set => SetProperty(ref _downloadSpeed, value);
+        set
+        {
+            if (SetProperty(ref _downloadSpeed, value))
+            {
+                OnPropertyChanged(nameof(SpeedText));
+                OnPropertyChanged(nameof(CombinedSpeed));
+            }
+        }
     }
+
+    public long UploadSpeed
+    {
+        get => _uploadSpeed;
+        set
+        {
+            if (SetProperty(ref _uploadSpeed, value))
+            {
+                OnPropertyChanged(nameof(SpeedText));
+                OnPropertyChanged(nameof(CombinedSpeed));
+            }
+        }
+    }
+
+    public long CombinedSpeed => DownloadSpeed + UploadSpeed;
+
+    public string SpeedText => $"{Strings.Get("DownloadSpeedPrefix")} {FormatSpeed(DownloadSpeed)}  {Strings.Get("UploadSpeedPrefix")} {FormatSpeed(UploadSpeed)}";
 
     private bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string? propertyName = null)
     {
@@ -104,5 +167,33 @@ public sealed class DownloadTask : INotifyPropertyChanged
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    private static string FormatSpeed(long bytesPerSecond)
+    {
+        string[] units = ["B/s", "KB/s", "MB/s", "GB/s"];
+        double speed = bytesPerSecond;
+        int unitIndex = 0;
+        while (speed >= 1024 && unitIndex < units.Length - 1)
+        {
+            speed /= 1024;
+            unitIndex++;
+        }
+
+        return $"{speed:0.#} {units[unitIndex]}";
+    }
+
+    private static string FormatBytes(long bytes)
+    {
+        string[] units = ["B", "KB", "MB", "GB", "TB"];
+        double size = bytes;
+        int unitIndex = 0;
+        while (size >= 1024 && unitIndex < units.Length - 1)
+        {
+            size /= 1024;
+            unitIndex++;
+        }
+
+        return $"{size:0.#} {units[unitIndex]}";
     }
 }

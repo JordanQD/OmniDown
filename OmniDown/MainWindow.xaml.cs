@@ -1,5 +1,9 @@
+using Microsoft.UI;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 using OmniDown.Models;
 using OmniDown.Services.Downloads;
 using OmniDown.Services.Engine;
@@ -8,8 +12,10 @@ using OmniDown.Services.Rpc;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using WinRT.Interop;
 
 namespace OmniDown
 {
@@ -20,14 +26,24 @@ namespace OmniDown
         private readonly DownloadCoordinator _downloadCoordinator;
         private readonly DispatcherTimer _refreshTimer = new();
         private readonly string _rpcSecret = Convert.ToHexString(RandomNumberGenerator.GetBytes(16));
-        private string _currentTaskFilter = "Tasks";
+        private readonly ObservableCollection<DownloadTask> _visibleTasks = new();
+        private string _currentTaskFilter = "Home";
+        private TaskSortColumn _sortColumn = TaskSortColumn.CreatedAt;
+        private bool _sortAscending = false;
         private bool _isRefreshing;
+        private bool _isUpdatingSelectAllCheckBox;
+        private bool _isUpdatingTaskSelection;
 
         public ObservableCollection<DownloadTask> Tasks { get; } = new();
 
         public MainWindow()
         {
             InitializeComponent();
+            TasksListView.ItemsSource = _visibleTasks;
+            SetWindowIcon();
+            ExtendsContentIntoTitleBar = true;
+            SetTitleBar(AppTitleBar);
+            AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
             _downloadCoordinator = new DownloadCoordinator(_aria2RpcClient, Tasks);
             Closed += MainWindow_Closed;
             _refreshTimer.Interval = TimeSpan.FromSeconds(2);
@@ -37,10 +53,15 @@ namespace OmniDown
                 Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                 "Downloads");
 
-            ApplyTaskFilter("Tasks");
+            UpdateSearchPlaceholder();
+            UpdateDownloadsHeader("Home");
+            UpdateStatsVisibility("Home");
+            ApplyTaskFilter("Home");
+            ApplySettingsFilter();
             UpdateDashboard();
             UpdateAriaStatus();
             UpdateDebugStatus();
+            _ = StartAriaOnLaunchAsync();
         }
 
         private async void NewDownloadButton_Click(object sender, RoutedEventArgs e)
@@ -65,6 +86,17 @@ namespace OmniDown
             };
             directoryTextBox.Header = Strings.Get("NewDownloadDirectoryHeader");
 
+            NumberBox splitCountNumberBox = new()
+            {
+                Header = Strings.Get("NewDownloadSplitCountHeader"),
+                Value = 16,
+                Minimum = 1,
+                Maximum = 128,
+                SmallChange = 1,
+                LargeChange = 8,
+                SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Compact
+            };
+
             StackPanel content = new()
             {
                 Spacing = 12,
@@ -72,7 +104,8 @@ namespace OmniDown
                 {
                     uriTextBox,
                     fileNameTextBox,
-                    directoryTextBox
+                    directoryTextBox,
+                    splitCountNumberBox
                 }
             };
 
@@ -109,10 +142,11 @@ namespace OmniDown
             string saveDirectory = string.IsNullOrWhiteSpace(directoryTextBox.Text)
                 ? DownloadDirectoryTextBox.Text
                 : directoryTextBox.Text.Trim();
+            int splitCount = GetDownloadSplitCount(splitCountNumberBox);
 
             try
             {
-                await _downloadCoordinator.AddDownloadAsync(sourceUri, fileNameTextBox.Text, saveDirectory);
+                await _downloadCoordinator.AddDownloadAsync(sourceUri, fileNameTextBox.Text, saveDirectory, splitCount);
                 await RefreshDownloadsAsync();
                 ShowMessage(Strings.Get("TaskAddedMessage"), InfoBarSeverity.Success);
             }
@@ -124,6 +158,16 @@ namespace OmniDown
             UpdateDashboard();
         }
 
+        private static int GetDownloadSplitCount(NumberBox numberBox)
+        {
+            if (double.IsNaN(numberBox.Value))
+            {
+                return 1;
+            }
+
+            return Math.Clamp((int)Math.Round(numberBox.Value), 1, 128);
+        }
+
         private async void StartAriaButton_Click(object sender, RoutedEventArgs e)
         {
             Aria2EngineStartResult result = await EnsureAria2StartedAsync();
@@ -131,9 +175,10 @@ namespace OmniDown
             ShowMessage(result.Message, result.Started ? InfoBarSeverity.Success : InfoBarSeverity.Error);
         }
 
-        private void StopAriaButton_Click(object sender, RoutedEventArgs e)
+        private async void StopAriaButton_Click(object sender, RoutedEventArgs e)
         {
             _refreshTimer.Stop();
+            await SaveAriaSessionIfRunningAsync();
             _aria2EngineHost.Stop();
             UpdateAriaStatus();
             ShowMessage(Strings.Get("AriaStoppedMessage"), InfoBarSeverity.Informational);
@@ -146,29 +191,59 @@ namespace OmniDown
                 return;
             }
 
-            string tag = item.Tag?.ToString() ?? "Tasks";
+            string tag = item.Tag?.ToString() ?? "Home";
             _currentTaskFilter = tag;
             SettingsPage.Visibility = tag == "Settings" ? Visibility.Visible : Visibility.Collapsed;
             TasksPage.Visibility = tag == "Settings" ? Visibility.Collapsed : Visibility.Visible;
 
+            UpdateSearchPlaceholder();
+            UpdateDownloadsHeader(tag);
+            UpdateStatsVisibility(tag);
             ApplyTaskFilter(tag);
+            ApplySettingsFilter();
         }
 
-        private void MainWindow_Closed(object sender, WindowEventArgs args)
+        private void AppTitleBar_PaneToggleRequested(TitleBar sender, object args)
+        {
+            RootNavigation.IsPaneOpen = !RootNavigation.IsPaneOpen;
+        }
+
+        private async System.Threading.Tasks.Task StartAriaOnLaunchAsync()
+        {
+            Aria2EngineStartResult result = await EnsureAria2StartedAsync();
+            UpdateAriaStatus();
+            if (!result.Started)
+            {
+                ShowMessage(result.Message, InfoBarSeverity.Warning);
+            }
+        }
+
+        private async void MainWindow_Closed(object sender, WindowEventArgs args)
         {
             _refreshTimer.Stop();
+            await SaveAriaSessionIfRunningAsync();
             _aria2RpcClient.Dispose();
             _aria2EngineHost.Dispose();
         }
 
         private void ApplyTaskFilter(string tag)
         {
-            TasksListView.ItemsSource = tag switch
+            string query = GetSearchQuery();
+            HashSet<string> selectedGids = GetSelectedTasks()
+                .Select(task => task.Gid)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            IEnumerable<DownloadTask> filteredTasks = tag switch
             {
-                "Active" => Tasks.Where(IsActiveTask),
-                "Completed" => Tasks.Where(task => task.Status.Contains("complete", StringComparison.OrdinalIgnoreCase)),
-                _ => Tasks
+                "Downloading" => Tasks.Where(task => IsDownloadingTask(task) && IsTaskSearchMatch(task, query)),
+                "Completed" => Tasks.Where(task => IsCompletedTask(task) && IsTaskSearchMatch(task, query)),
+                "Issues" => Tasks.Where(task => IsIssueTask(task) && IsTaskSearchMatch(task, query)),
+                _ => Tasks.Where(task => IsTaskSearchMatch(task, query))
             };
+
+            SyncVisibleTasks(SortTasks(filteredTasks).ToList());
+            RestoreSelection(selectedGids);
+            UpdateSelectionCommands();
         }
 
         private async void RefreshTimer_Tick(object? sender, object e)
@@ -209,6 +284,23 @@ namespace OmniDown
             return result;
         }
 
+        private async System.Threading.Tasks.Task SaveAriaSessionIfRunningAsync()
+        {
+            if (!_aria2EngineHost.IsRunning)
+            {
+                return;
+            }
+
+            try
+            {
+                await _aria2RpcClient.SaveSessionAsync();
+            }
+            catch
+            {
+                // Best-effort: Stop/close must continue even if aria2 is no longer reachable.
+            }
+        }
+
         private async System.Threading.Tasks.Task RefreshDownloadsAsync()
         {
             if (_isRefreshing || !_aria2EngineHost.IsRunning)
@@ -221,9 +313,7 @@ namespace OmniDown
             {
                 DownloadSnapshot snapshot = await _downloadCoordinator.RefreshAsync();
                 ApplyTaskFilter(_currentTaskFilter);
-                UpdateDashboard(updateSpeed: false);
-                ActiveTasksText.Text = snapshot.ActiveCount.ToString();
-                DownloadSpeedText.Text = FormatSpeed(snapshot.DownloadSpeed);
+                UpdateDashboard();
                 UpdateAriaStatus();
             }
             catch (Exception ex)
@@ -237,14 +327,12 @@ namespace OmniDown
             }
         }
 
-        private void UpdateDashboard(bool updateSpeed = true)
+        private void UpdateDashboard()
         {
             TotalTasksText.Text = Tasks.Count.ToString();
-            ActiveTasksText.Text = Tasks.Count(IsActiveTask).ToString();
-            if (updateSpeed)
-            {
-                DownloadSpeedText.Text = "0 KB/s";
-            }
+            ActiveTasksText.Text = Tasks.Count(IsDownloadingTask).ToString();
+            CompletedTasksText.Text = Tasks.Count(IsCompletedTask).ToString();
+            IssueTasksText.Text = Tasks.Count(IsIssueTask).ToString();
         }
 
         private void UpdateAriaStatus()
@@ -253,7 +341,6 @@ namespace OmniDown
                 ? Strings.Format("AriaRunningStatus", _aria2EngineHost.ProcessId ?? 0)
                 : Strings.Get("AriaStoppedStatus");
 
-            AriaStatusText.Text = status;
             SettingsAriaStatusText.Text = status;
             UpdateDebugStatus();
         }
@@ -305,11 +392,30 @@ namespace OmniDown
                 return;
             }
 
+            CheckBox deleteFilesCheckBox = new()
+            {
+                Content = Strings.Get("DeleteFilesCheckBoxContent")
+            };
+
+            StackPanel dialogContent = new()
+            {
+                Spacing = 12,
+                Children =
+                {
+                    new TextBlock
+                    {
+                        Text = Strings.Get("DeleteDialogContent"),
+                        TextWrapping = TextWrapping.Wrap
+                    },
+                    deleteFilesCheckBox
+                }
+            };
+
             ContentDialog dialog = new()
             {
                 XamlRoot = Content.XamlRoot,
                 Title = Strings.Get("DeleteDialogTitle"),
-                Content = Strings.Get("DeleteDialogContent"),
+                Content = dialogContent,
                 PrimaryButtonText = Strings.Get("DeleteButtonText"),
                 CloseButtonText = Strings.Get("CancelButtonText"),
                 DefaultButton = ContentDialogButton.Close
@@ -322,18 +428,192 @@ namespace OmniDown
             }
 
             await RunSelectedTaskOperationAsync(
-                tasks => _downloadCoordinator.DeleteAsync(tasks),
+                tasks => _downloadCoordinator.DeleteAsync(tasks, deleteFilesCheckBox.IsChecked == true),
                 Strings.Get("TasksDeletedMessage"));
+        }
+
+        private void TaskCheckBox_Changed(object sender, RoutedEventArgs e)
+        {
+            if (_isUpdatingTaskSelection ||
+                sender is not CheckBox checkBox ||
+                checkBox.DataContext is not DownloadTask task)
+            {
+                return;
+            }
+
+            _isUpdatingTaskSelection = true;
+            try
+            {
+                if (checkBox.IsChecked == true)
+                {
+                    if (!TasksListView.SelectedItems.Contains(task))
+                    {
+                        TasksListView.SelectedItems.Add(task);
+                    }
+                }
+                else
+                {
+                    TasksListView.SelectedItems.Remove(task);
+                }
+            }
+            finally
+            {
+                _isUpdatingTaskSelection = false;
+            }
+
+            UpdateTaskSelectionGlyphVisibility(task);
+            UpdateSelectionCommands();
         }
 
         private void TasksListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (_isUpdatingTaskSelection)
+            {
+                return;
+            }
+
+            _isUpdatingTaskSelection = true;
+            try
+            {
+                foreach (DownloadTask task in e.AddedItems.OfType<DownloadTask>())
+                {
+                    task.IsSelected = true;
+                    UpdateTaskSelectionGlyphVisibility(task);
+                }
+
+                foreach (DownloadTask task in e.RemovedItems.OfType<DownloadTask>())
+                {
+                    task.IsSelected = false;
+                    UpdateTaskSelectionGlyphVisibility(task);
+                }
+            }
+            finally
+            {
+                _isUpdatingTaskSelection = false;
+            }
+
             UpdateSelectionCommands();
+        }
+
+        private void SelectAllTasksCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (_isUpdatingSelectAllCheckBox)
+            {
+                return;
+            }
+
+            _isUpdatingTaskSelection = true;
+            try
+            {
+                TasksListView.SelectedItems.Clear();
+                foreach (DownloadTask task in _visibleTasks)
+                {
+                    task.IsSelected = true;
+                    TasksListView.SelectedItems.Add(task);
+                }
+            }
+            finally
+            {
+                _isUpdatingTaskSelection = false;
+            }
+
+            UpdateSelectionCommands();
+        }
+
+        private void SelectAllTasksCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (_isUpdatingSelectAllCheckBox)
+            {
+                return;
+            }
+
+            _isUpdatingTaskSelection = true;
+            try
+            {
+                TasksListView.SelectedItems.Clear();
+                foreach (DownloadTask task in _visibleTasks)
+                {
+                    task.IsSelected = false;
+                }
+            }
+            finally
+            {
+                _isUpdatingTaskSelection = false;
+            }
+
+            UpdateSelectionCommands();
+        }
+
+        private void SelectAllTasksCheckBox_Indeterminate(object sender, RoutedEventArgs e)
+        {
+        }
+
+        private void TaskIconSelectionBox_PointerEntered(object sender, PointerRoutedEventArgs e)
+        {
+            if (sender is FrameworkElement element)
+            {
+                UpdateTaskSelectionGlyphVisibility(element, true);
+            }
+        }
+
+        private void TaskIconSelectionBox_PointerExited(object sender, PointerRoutedEventArgs e)
+        {
+            if (sender is FrameworkElement element)
+            {
+                UpdateTaskSelectionGlyphVisibility(element, false);
+            }
+        }
+
+        private void TaskItem_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is UserControl userControl &&
+                userControl.DataContext is DownloadTask task)
+            {
+                VisualStateManager.GoToState(userControl, task.IsSelected ? "ShowCheckbox" : "HideCheckbox", false);
+            }
+        }
+
+        private void SortColumnMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not ToggleMenuFlyoutItem menuItem ||
+                !Enum.TryParse(menuItem.Tag?.ToString(), out TaskSortColumn selectedColumn))
+            {
+                return;
+            }
+
+            _sortColumn = selectedColumn;
+            ApplyTaskFilter(_currentTaskFilter);
+        }
+
+        private void SortDirectionMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not ToggleMenuFlyoutItem menuItem)
+            {
+                return;
+            }
+
+            _sortAscending = string.Equals(menuItem.Tag?.ToString(), "Ascending", StringComparison.Ordinal);
+            ApplyTaskFilter(_currentTaskFilter);
+        }
+
+        private void SortMenuFlyout_Opening(object sender, object e)
+        {
+            SortByCreatedAtMenuItem.IsChecked = _sortColumn == TaskSortColumn.CreatedAt;
+            SortByNameMenuItem.IsChecked = _sortColumn == TaskSortColumn.Name;
+            SortBySizeMenuItem.IsChecked = _sortColumn == TaskSortColumn.Size;
+            SortAscendingMenuItem.IsChecked = _sortAscending;
+            SortDescendingMenuItem.IsChecked = !_sortAscending;
         }
 
         private void UseSystemProxyCheckBox_Changed(object sender, RoutedEventArgs e)
         {
             UpdateDebugStatus();
+        }
+
+        private void TitleSearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+        {
+            ApplyTaskFilter(_currentTaskFilter);
+            ApplySettingsFilter();
         }
 
         private void TerminalToggleButton_Changed(object sender, RoutedEventArgs e)
@@ -400,12 +680,258 @@ namespace OmniDown
             ResumeTasksButton.IsEnabled = hasSelection;
             PauseTasksButton.IsEnabled = hasSelection;
             DeleteTasksButton.IsEnabled = hasSelection;
+            UpdateSelectAllCheckBox();
         }
 
-        private static bool IsActiveTask(DownloadTask task)
+        private static bool IsDownloadingTask(DownloadTask task)
         {
             return task.Status.Contains("download", StringComparison.OrdinalIgnoreCase)
                 || task.Status.Contains("waiting", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsCompletedTask(DownloadTask task)
+        {
+            return task.Status.Contains("complete", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsIssueTask(DownloadTask task)
+        {
+            return task.Status.Contains("error", StringComparison.OrdinalIgnoreCase)
+                || task.Status.Contains("removed", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private string GetSearchQuery()
+        {
+            return TitleSearchBox?.Text.Trim() ?? string.Empty;
+        }
+
+        private static bool IsTaskSearchMatch(DownloadTask task, string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return true;
+            }
+
+            return Contains(task.Name, query)
+                || Contains(task.SourceUri, query)
+                || Contains(task.SaveDirectory, query)
+                || Contains(task.StatusText, query);
+        }
+
+        private void ApplySettingsFilter()
+        {
+            if (SettingsPage is null)
+            {
+                return;
+            }
+
+            string query = GetSearchQuery();
+            SetSettingVisibility(AriaPathSettingLabel, AriaPathTextBox, query, "aria2c", "path", Strings.Get("AriaPathLabel.Text"), Strings.Get("AriaPathTextBox.PlaceholderText"));
+            SetSettingVisibility(RpcPortSettingLabel, RpcPortNumberBox, query, "rpc", "port", Strings.Get("RpcPortLabel.Text"));
+            SetSettingVisibility(DefaultDirectorySettingLabel, DownloadDirectoryTextBox, query, "default", "directory", "download", Strings.Get("DefaultDirectoryLabel.Text"));
+            SetSettingVisibility(ProxySettingLabel, UseSystemProxyCheckBox, query, "proxy", "system proxy", Strings.Get("ProxyLabel.Text"), Strings.Get("UseSystemProxyCheckBox.Content"));
+            SetSettingVisibility(ProcessStatusSettingLabel, ProcessStatusSettingControl, query, "process", "status", "aria2", Strings.Get("ProcessStatusLabel.Text"));
+        }
+
+        private static void SetSettingVisibility(FrameworkElement label, FrameworkElement control, string query, params string[] searchableText)
+        {
+            bool isVisible = string.IsNullOrWhiteSpace(query) || searchableText.Any(text => Contains(text, query));
+            Visibility visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
+            label.Visibility = visibility;
+            control.Visibility = visibility;
+        }
+
+        private void UpdateSearchPlaceholder()
+        {
+            if (TitleSearchBox is null)
+            {
+                return;
+            }
+
+            TitleSearchBox.PlaceholderText = _currentTaskFilter == "Settings"
+                ? Strings.Get("SearchSettingsPlaceholder")
+                : Strings.Get("SearchDownloadsPlaceholder");
+        }
+
+        private void UpdateDownloadsHeader(string tag)
+        {
+            if (DownloadsTitleText is null || DownloadsSubtitleText is null || tag == "Settings")
+            {
+                return;
+            }
+
+            string resourceKey = tag switch
+            {
+                "Downloading" => "DownloadingPage",
+                "Completed" => "CompletedPage",
+                "Issues" => "IssuesPage",
+                _ => "HomePage"
+            };
+
+            DownloadsTitleText.Text = Strings.Get($"{resourceKey}Title");
+            DownloadsSubtitleText.Text = Strings.Get($"{resourceKey}Subtitle");
+        }
+
+        private void UpdateStatsVisibility(string tag)
+        {
+            if (StatsPanel is null)
+            {
+                return;
+            }
+
+            StatsPanel.Visibility = tag == "Home" ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private IEnumerable<DownloadTask> SortTasks(IEnumerable<DownloadTask> tasks)
+        {
+            IOrderedEnumerable<DownloadTask> orderedTasks = _sortColumn switch
+            {
+                TaskSortColumn.CreatedAt => tasks.OrderBy(task => task.CreatedAt),
+                TaskSortColumn.Size => tasks.OrderBy(task => task.TotalLength),
+                _ => tasks.OrderBy(task => task.Name, StringComparer.CurrentCultureIgnoreCase)
+            };
+
+            return _sortAscending ? orderedTasks : orderedTasks.Reverse();
+        }
+
+        private void RestoreSelection(HashSet<string> selectedGids)
+        {
+            _isUpdatingTaskSelection = true;
+            try
+            {
+                TasksListView.SelectedItems.Clear();
+                foreach (DownloadTask task in _visibleTasks)
+                {
+                    bool isSelected = selectedGids.Contains(task.Gid);
+                    task.IsSelected = isSelected;
+                    if (isSelected)
+                    {
+                        TasksListView.SelectedItems.Add(task);
+                    }
+                    UpdateTaskSelectionGlyphVisibility(task);
+                }
+            }
+            finally
+            {
+                _isUpdatingTaskSelection = false;
+            }
+        }
+
+        private void SyncVisibleTasks(IReadOnlyList<DownloadTask> desiredTasks)
+        {
+            for (int index = _visibleTasks.Count - 1; index >= 0; index--)
+            {
+                if (!desiredTasks.Contains(_visibleTasks[index]))
+                {
+                    _visibleTasks.RemoveAt(index);
+                }
+            }
+
+            for (int desiredIndex = 0; desiredIndex < desiredTasks.Count; desiredIndex++)
+            {
+                DownloadTask desiredTask = desiredTasks[desiredIndex];
+                int currentIndex = _visibleTasks.IndexOf(desiredTask);
+                if (currentIndex == desiredIndex)
+                {
+                    continue;
+                }
+
+                if (currentIndex >= 0)
+                {
+                    _visibleTasks.Move(currentIndex, desiredIndex);
+                }
+                else
+                {
+                    _visibleTasks.Insert(desiredIndex, desiredTask);
+                }
+            }
+        }
+
+        private void UpdateSelectAllCheckBox()
+        {
+            if (SelectAllTasksCheckBox is null)
+            {
+                return;
+            }
+
+            _isUpdatingSelectAllCheckBox = true;
+            try
+            {
+                int itemCount = _visibleTasks.Count;
+                int selectedCount = TasksListView.SelectedItems.Count;
+                SelectAllTasksCheckBox.IsEnabled = itemCount > 0;
+                SelectAllTasksCheckBox.IsChecked = selectedCount switch
+                {
+                    0 => false,
+                    _ when selectedCount == itemCount => true,
+                    _ => null
+                };
+            }
+            finally
+            {
+                _isUpdatingSelectAllCheckBox = false;
+            }
+        }
+
+        private void UpdateTaskSelectionGlyphVisibility(DownloadTask task)
+        {
+            if (TasksListView.ContainerFromItem(task) is ListViewItem itemContainer &&
+                FindDescendant<UserControl>(itemContainer) is UserControl userControl)
+            {
+                VisualStateManager.GoToState(userControl, task.IsSelected ? "ShowCheckbox" : "HideCheckbox", true);
+            }
+        }
+
+        private static void UpdateTaskSelectionGlyphVisibility(FrameworkElement element, bool isPointerOver)
+        {
+            UserControl? userControl = FindAncestor<UserControl>(element);
+            if (userControl?.DataContext is DownloadTask task)
+            {
+                VisualStateManager.GoToState(userControl, task.IsSelected || isPointerOver ? "ShowCheckbox" : "HideCheckbox", true);
+            }
+        }
+
+        private static T? FindAncestor<T>(DependencyObject? start) where T : DependencyObject
+        {
+            DependencyObject? current = start;
+            while (current is not null)
+            {
+                if (current is T match)
+                {
+                    return match;
+                }
+
+                current = VisualTreeHelper.GetParent(current);
+            }
+
+            return null;
+        }
+
+        private static T? FindDescendant<T>(DependencyObject start) where T : DependencyObject
+        {
+            int count = VisualTreeHelper.GetChildrenCount(start);
+            for (int index = 0; index < count; index++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(start, index);
+                if (child is T match)
+                {
+                    return match;
+                }
+
+                T? descendant = FindDescendant<T>(child);
+                if (descendant is not null)
+                {
+                    return descendant;
+                }
+            }
+
+            return null;
+        }
+
+        private static bool Contains(string? value, string query)
+        {
+            return !string.IsNullOrWhiteSpace(value)
+                && value.Contains(query, StringComparison.CurrentCultureIgnoreCase);
         }
 
         private static string FormatSpeed(long bytesPerSecond)
@@ -421,5 +947,43 @@ namespace OmniDown
 
             return $"{speed:0.#} {units[unitIndex]}";
         }
+
+        private void SetWindowIcon()
+        {
+            nint windowHandle = WindowNative.GetWindowHandle(this);
+            WindowId windowId = Win32Interop.GetWindowIdFromWindow(windowHandle);
+            AppWindow appWindow = AppWindow.GetFromWindowId(windowId);
+            string? iconPath = ResolveAssetPath("Assets", "OmniDown.ico");
+            if (!string.IsNullOrWhiteSpace(iconPath))
+            {
+                appWindow.SetIcon(iconPath);
+            }
+        }
+
+        private static string? ResolveAssetPath(params string[] pathSegments)
+        {
+            string basePath = AppContext.BaseDirectory;
+            string candidate = Path.Combine([basePath, .. pathSegments]);
+            if (File.Exists(candidate))
+            {
+                return candidate;
+            }
+
+            string? parentPath = Directory.GetParent(basePath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))?.FullName;
+            if (parentPath is null)
+            {
+                return null;
+            }
+
+            candidate = Path.Combine([parentPath, .. pathSegments]);
+            return File.Exists(candidate) ? candidate : null;
+        }
+    }
+
+    internal enum TaskSortColumn
+    {
+        CreatedAt,
+        Name,
+        Size
     }
 }

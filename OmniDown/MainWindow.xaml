@@ -12,37 +12,62 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <Grid RowDefinitions="Auto,*,Auto">
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+        <TitleBar
+            x:Name="AppTitleBar"
+            Grid.Row="0"
+            Height="48"
+            MinHeight="48"
+            VerticalAlignment="Stretch"
+            FontSize="13"
+            IsPaneToggleButtonVisible="True"
+            PaneToggleRequested="AppTitleBar_PaneToggleRequested"
+            Title="OmniDown">
+            <TitleBar.IconSource>
+                <ImageIconSource ImageSource="/Assets/OmniDown.ico" />
+            </TitleBar.IconSource>
+            <TitleBar.Content>
+                <AutoSuggestBox
+                    x:Name="TitleSearchBox"
+                    Width="320"
+                    VerticalAlignment="Center"
+                    PlaceholderText="Search downloads and settings..."
+                    QueryIcon="Find"
+                    TextChanged="TitleSearchBox_TextChanged"
+                    x:Uid="TitleSearchBox" />
+            </TitleBar.Content>
+        </TitleBar>
+
         <InfoBar
             x:Name="StatusInfoBar"
-            Grid.Row="0"
+            Grid.Row="1"
             Margin="12,12,12,0"
             IsClosable="True"
             IsOpen="False" />
 
         <NavigationView
             x:Name="RootNavigation"
-            Grid.Row="1"
+            Grid.Row="2"
             IsBackButtonVisible="Collapsed"
+            IsPaneToggleButtonVisible="False"
             IsSettingsVisible="False"
             PaneDisplayMode="Left"
-            PaneTitle="OmniDown"
             SelectionChanged="RootNavigation_SelectionChanged">
             <NavigationView.MenuItems>
                 <NavigationViewItem
                     x:Name="TasksNavItem"
-                    Content="Tasks"
+                    Content="Home"
                     IsSelected="True"
                     x:Uid="TasksNavItem"
-                    Tag="Tasks">
+                    Tag="Home">
                     <NavigationViewItem.Icon>
-                        <SymbolIcon Symbol="Download" />
+                        <SymbolIcon Symbol="Home" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem
-                    Content="Active"
+                    Content="Downloading"
                     x:Uid="ActiveNavItem"
-                    Tag="Active">
+                    Tag="Downloading">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Play" />
                     </NavigationViewItem.Icon>
@@ -53,6 +78,14 @@
                     Tag="Completed">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Accept" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem
+                    Content="Issues"
+                    x:Uid="IssuesNavItem"
+                    Tag="Issues">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Important" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
             </NavigationView.MenuItems>
@@ -70,15 +103,17 @@
             <Grid Padding="28,20,28,24">
                 <Grid
                     x:Name="TasksPage"
-                    RowDefinitions="Auto,Auto,*">
+                    RowDefinitions="Auto,Auto,Auto,*">
                     <Grid ColumnDefinitions="*,Auto">
                         <StackPanel Spacing="4">
                             <TextBlock
+                                x:Name="DownloadsTitleText"
                                 FontSize="28"
                                 FontWeight="SemiBold"
                                 x:Uid="DownloadsTitleText"
                                 Text="Downloads" />
                             <TextBlock
+                                x:Name="DownloadsSubtitleText"
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                 x:Uid="DownloadsSubtitleText"
                                 Text="Local aria2 sidecar control with JSON-RPC task sync." />
@@ -93,6 +128,50 @@
                                 Icon="Add"
                                 x:Uid="NewDownloadButton"
                                 Label="New" />
+                            <AppBarSeparator />
+                            <AppBarButton
+                                x:Name="SortTasksButton"
+                                x:Uid="SortTasksButton"
+                                Label="Sort v">
+                                <AppBarButton.Icon>
+                                    <FontIcon Glyph="&#xE8CB;" />
+                                </AppBarButton.Icon>
+                                <AppBarButton.Flyout>
+                                    <MenuFlyout Opening="SortMenuFlyout_Opening">
+                                        <ToggleMenuFlyoutItem
+                                            x:Name="SortByCreatedAtMenuItem"
+                                            Click="SortColumnMenuItem_Click"
+                                            x:Uid="SortByCreatedAtMenuItem"
+                                            Tag="CreatedAt"
+                                            Text="Added time" />
+                                        <ToggleMenuFlyoutItem
+                                            x:Name="SortByNameMenuItem"
+                                            Click="SortColumnMenuItem_Click"
+                                            x:Uid="SortByNameMenuItem"
+                                            Tag="Name"
+                                            Text="Name" />
+                                        <ToggleMenuFlyoutItem
+                                            x:Name="SortBySizeMenuItem"
+                                            Click="SortColumnMenuItem_Click"
+                                            x:Uid="SortBySizeMenuItem"
+                                            Tag="Size"
+                                            Text="Size" />
+                                        <MenuFlyoutSeparator />
+                                        <ToggleMenuFlyoutItem
+                                            x:Name="SortAscendingMenuItem"
+                                            Click="SortDirectionMenuItem_Click"
+                                            x:Uid="SortAscendingMenuItem"
+                                            Tag="Ascending"
+                                            Text="Ascending" />
+                                        <ToggleMenuFlyoutItem
+                                            x:Name="SortDescendingMenuItem"
+                                            Click="SortDirectionMenuItem_Click"
+                                            x:Uid="SortDescendingMenuItem"
+                                            Tag="Descending"
+                                            Text="Descending" />
+                                    </MenuFlyout>
+                                </AppBarButton.Flyout>
+                            </AppBarButton>
                             <AppBarSeparator />
                             <AppBarButton
                                 x:Name="ResumeTasksButton"
@@ -130,6 +209,7 @@
                     </Grid>
 
                     <Grid
+                        x:Name="StatsPanel"
                         Grid.Row="1"
                         Margin="0,20,0,14"
                         ColumnDefinitions="*,*,*,*">
@@ -150,7 +230,7 @@
                             <TextBlock
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                 x:Uid="ActiveMetricLabel"
-                                Text="Active" />
+                                Text="Downloading" />
                             <TextBlock
                                 x:Name="ActiveTasksText"
                                 FontSize="24"
@@ -163,12 +243,12 @@
                             <TextBlock
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                 x:Uid="DownloadSpeedMetricLabel"
-                                Text="Download speed" />
+                                Text="Completed" />
                             <TextBlock
-                                x:Name="DownloadSpeedText"
+                                x:Name="CompletedTasksText"
                                 FontSize="24"
                                 FontWeight="SemiBold"
-                                Text="0 KB/s" />
+                                Text="0" />
                         </StackPanel>
                         <StackPanel
                             Grid.Column="3"
@@ -176,77 +256,173 @@
                             <TextBlock
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                 x:Uid="Aria2MetricLabel"
-                                Text="aria2" />
+                                Text="Issues" />
                             <TextBlock
-                                x:Name="AriaStatusText"
+                                x:Name="IssueTasksText"
                                 FontSize="24"
                                 FontWeight="SemiBold"
-                                Text="Stopped" />
+                                Text="0" />
                         </StackPanel>
                     </Grid>
 
+                    <Border
+                        Grid.Row="2"
+                        Margin="0,0,0,4"
+                        Background="{ThemeResource LayerFillColorDefaultBrush}"
+                        CornerRadius="4">
+                        <Grid
+                            MinHeight="38"
+                            Padding="0,0,20,0"
+                            ColumnDefinitions="48,*,120,80,220"
+                            ColumnSpacing="16">
+                            <CheckBox
+                                x:Name="SelectAllTasksCheckBox"
+                                Width="20"
+                                Height="20"
+                                MinWidth="0"
+                                Padding="0"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Checked="SelectAllTasksCheckBox_Checked"
+                                Indeterminate="SelectAllTasksCheckBox_Indeterminate"
+                                IsThreeState="True"
+                                Unchecked="SelectAllTasksCheckBox_Unchecked" />
+                            <TextBlock
+                                Grid.Column="1"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Center"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                x:Uid="NameColumnHeader"
+                                Text="Name" />
+                            <TextBlock
+                                Grid.Column="2"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Center"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                x:Uid="StatusColumnHeader"
+                                Text="Status" />
+                            <TextBlock
+                                Grid.Column="3"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Center"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                x:Uid="ProgressColumnHeader"
+                                Text="Progress" />
+                            <TextBlock
+                                Grid.Column="4"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Center"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                x:Uid="SpeedColumnHeader"
+                                Text="Speed" />
+                        </Grid>
+                    </Border>
+
                     <ListView
                         x:Name="TasksListView"
-                        Grid.Row="2"
-                        IsMultiSelectCheckBoxEnabled="True"
+                        Grid.Row="3"
+                        IsMultiSelectCheckBoxEnabled="False"
                         SelectionChanged="TasksListView_SelectionChanged"
                         SelectionMode="Multiple">
-                        <ListView.Header>
-                            <Grid
-                                Padding="12,0,12,8"
-                                ColumnDefinitions="2*,Auto,*,*">
-                                <TextBlock
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    x:Uid="NameColumnHeader"
-                                    Text="Name" />
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Width="96"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    x:Uid="StatusColumnHeader"
-                                    Text="Status" />
-                                <TextBlock
-                                    Grid.Column="2"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    x:Uid="ProgressColumnHeader"
-                                    Text="Progress" />
-                                <TextBlock
-                                    Grid.Column="3"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    x:Uid="DirectoryColumnHeader"
-                                    Text="Directory" />
-                            </Grid>
-                        </ListView.Header>
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="MinHeight" Value="52" />
+                                <Setter Property="Margin" Value="0,0,0,4" />
+                                <Setter Property="Padding" Value="0" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.ItemContainerTransitions>
+                            <TransitionCollection />
+                        </ListView.ItemContainerTransitions>
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <Grid
-                                    Padding="12"
-                                    ColumnDefinitions="2*,Auto,*,*"
-                                    ColumnSpacing="16">
-                                    <StackPanel Spacing="4">
-                                        <TextBlock
-                                            FontWeight="SemiBold"
-                                            Text="{Binding Name}" />
-                                        <TextBlock
-                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                            Text="{Binding SourceUri}" />
-                                    </StackPanel>
-                                    <TextBlock
-                                        Grid.Column="1"
-                                        Width="96"
-                                        VerticalAlignment="Center"
-                                        Text="{Binding StatusText}" />
-                                    <ProgressBar
-                                        Grid.Column="2"
-                                        VerticalAlignment="Center"
-                                        Maximum="100"
-                                        Value="{Binding Progress}" />
-                                    <TextBlock
-                                        Grid.Column="3"
-                                        VerticalAlignment="Center"
-                                        Text="{Binding SaveDirectory}"
-                                        TextTrimming="CharacterEllipsis" />
-                                </Grid>
+                                <UserControl Loaded="TaskItem_Loaded">
+                                    <Grid
+                                        MinHeight="52"
+                                        Padding="0,0,20,0"
+                                        RowDefinitions="*,3">
+                                        <Grid
+                                            ColumnDefinitions="48,*,120,80,220"
+                                            ColumnSpacing="16">
+                                            <Grid
+                                                Width="40"
+                                                Height="40"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                PointerCanceled="TaskIconSelectionBox_PointerExited"
+                                                PointerEntered="TaskIconSelectionBox_PointerEntered"
+                                                PointerExited="TaskIconSelectionBox_PointerExited">
+                                                <FontIcon
+                                                    x:Name="TaskIcon"
+                                                    Width="18"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    FontSize="16"
+                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                    Glyph="&#xE7C3;" />
+                                                <CheckBox
+                                                    x:Name="SelectionCheckbox"
+                                                    Width="20"
+                                                    Height="20"
+                                                    MinWidth="0"
+                                                    Padding="0"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    Checked="TaskCheckBox_Changed"
+                                                    Content=""
+                                                    IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                    Opacity="0"
+                                                    Unchecked="TaskCheckBox_Changed" />
+                                            </Grid>
+                                            <TextBlock
+                                                Grid.Column="1"
+                                                VerticalAlignment="Center"
+                                                FontWeight="SemiBold"
+                                                Text="{Binding Name}"
+                                                TextTrimming="CharacterEllipsis" />
+                                            <TextBlock
+                                                Grid.Column="2"
+                                                VerticalAlignment="Center"
+                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                Text="{Binding StatusText}"
+                                                TextTrimming="CharacterEllipsis" />
+                                            <TextBlock
+                                                Grid.Column="3"
+                                                VerticalAlignment="Center"
+                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                Text="{Binding ProgressText}"
+                                                TextAlignment="Right" />
+                                            <TextBlock
+                                                Grid.Column="4"
+                                                VerticalAlignment="Center"
+                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                Text="{Binding SpeedText}"
+                                                TextTrimming="CharacterEllipsis" />
+                                        </Grid>
+                                        <ProgressBar
+                                            Grid.Row="1"
+                                            Height="3"
+                                            Margin="0"
+                                            VerticalAlignment="Bottom"
+                                            Background="{ThemeResource ControlFillColorDefaultBrush}"
+                                            Foreground="{ThemeResource AccentFillColorDefaultBrush}"
+                                            Maximum="100"
+                                            Value="{Binding Progress}" />
+
+                                        <VisualStateManager.VisualStateGroups>
+                                            <VisualStateGroup x:Name="CheckboxVisibilityStates">
+                                                <VisualState x:Name="HideCheckbox" />
+                                                <VisualState x:Name="ShowCheckbox">
+                                                    <VisualState.Setters>
+                                                        <Setter Target="SelectionCheckbox.Opacity" Value="1" />
+                                                        <Setter Target="TaskIcon.Opacity" Value="0" />
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                            </VisualStateGroup>
+                                        </VisualStateManager.VisualStateGroups>
+                                    </Grid>
+                                </UserControl>
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
@@ -276,6 +452,7 @@
                         ColumnSpacing="20"
                         RowSpacing="14">
                         <TextBlock
+                            x:Name="AriaPathSettingLabel"
                             VerticalAlignment="Center"
                             x:Uid="AriaPathLabel"
                             Text="aria2c path" />
@@ -286,6 +463,7 @@
                             PlaceholderText="Leave empty to resolve aria2c.exe from PATH" />
 
                         <TextBlock
+                            x:Name="RpcPortSettingLabel"
                             Grid.Row="1"
                             VerticalAlignment="Center"
                             x:Uid="RpcPortLabel"
@@ -299,6 +477,7 @@
                             Value="6800" />
 
                         <TextBlock
+                            x:Name="DefaultDirectorySettingLabel"
                             Grid.Row="2"
                             VerticalAlignment="Center"
                             x:Uid="DefaultDirectoryLabel"
@@ -309,6 +488,7 @@
                             Grid.Column="1" />
 
                         <TextBlock
+                            x:Name="ProxySettingLabel"
                             Grid.Row="3"
                             VerticalAlignment="Center"
                             x:Uid="ProxyLabel"
@@ -324,11 +504,13 @@
                             Unchecked="UseSystemProxyCheckBox_Changed" />
 
                         <TextBlock
+                            x:Name="ProcessStatusSettingLabel"
                             Grid.Row="4"
                             VerticalAlignment="Center"
                             x:Uid="ProcessStatusLabel"
                             Text="Process status" />
                         <StackPanel
+                            x:Name="ProcessStatusSettingControl"
                             Grid.Row="4"
                             Grid.Column="1"
                             Orientation="Horizontal"
@@ -353,7 +535,7 @@
         </NavigationView>
 
         <Border
-            Grid.Row="2"
+            Grid.Row="3"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
             BorderThickness="0,1,0,0">

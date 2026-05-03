@@ -51,6 +51,7 @@ public sealed class Aria2EngineHost : IDisposable
         Directory.CreateDirectory(options.DownloadDirectory);
         string appDataDirectory = GetAppDataDirectory();
         Directory.CreateDirectory(appDataDirectory);
+        await CleanupRpcPortAsync(options.RpcPort);
 
         var startInfo = new ProcessStartInfo
         {
@@ -61,7 +62,7 @@ public sealed class Aria2EngineHost : IDisposable
             RedirectStandardOutput = true
         };
 
-        foreach (string argument in BuildArguments(options, appDataDirectory))
+        foreach (string argument in BuildArguments(options, appDataDirectory, resolvedPath))
         {
             startInfo.ArgumentList.Add(argument);
         }
@@ -224,29 +225,46 @@ public sealed class Aria2EngineHost : IDisposable
         ];
     }
 
-    private static List<string> BuildArguments(Aria2EngineOptions options, string appDataDirectory)
+    private static List<string> BuildArguments(Aria2EngineOptions options, string appDataDirectory, string resolvedExecutablePath)
     {
-        string sessionPath = Path.Combine(appDataDirectory, "aria2.session");
-        if (!File.Exists(sessionPath))
-        {
-            File.WriteAllText(sessionPath, string.Empty);
-        }
+        string sessionPath = Path.Combine(appDataDirectory, "download.session");
+        string dhtPath = Path.Combine(appDataDirectory, "dht.dat");
+        string dht6Path = Path.Combine(appDataDirectory, "dht6.dat");
 
         List<string> arguments =
         [
-            "--enable-rpc=true",
-            "--rpc-listen-all=false",
             $"--rpc-listen-port={options.RpcPort}",
             $"--rpc-secret={options.RpcSecret}",
             "--continue=true",
             "--max-concurrent-downloads=5",
-            "--split=8",
-            "--min-split-size=1M",
+            "--split=64",
             $"--dir={options.DownloadDirectory}",
-            $"--input-file={sessionPath}",
             $"--save-session={sessionPath}",
-            "--save-session-interval=30"
+            $"--dht-file-path={dhtPath}",
+            $"--dht-file-path6={dht6Path}"
         ];
+
+        string? confPath = ResolveBundledConfigPath(resolvedExecutablePath);
+        if (!string.IsNullOrWhiteSpace(confPath))
+        {
+            arguments.Insert(0, $"--conf-path={confPath}");
+        }
+        else
+        {
+            arguments.InsertRange(0,
+            [
+                "--enable-rpc=true",
+                "--rpc-listen-all=false",
+                "--rpc-allow-origin-all=false",
+                "--save-session-interval=10",
+                "--min-split-size=1M"
+            ]);
+        }
+
+        if (File.Exists(sessionPath))
+        {
+            arguments.Add($"--input-file={sessionPath}");
+        }
 
         if (options.UseSystemProxy)
         {
@@ -263,6 +281,36 @@ public sealed class Aria2EngineHost : IDisposable
         }
 
         return arguments;
+    }
+
+    private static string? ResolveBundledConfigPath(string resolvedExecutablePath)
+    {
+        string? executableDirectory = Path.GetDirectoryName(resolvedExecutablePath);
+        string appBase = AppContext.BaseDirectory;
+        string assemblyDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? appBase;
+        string? appBaseParent = Directory.GetParent(appBase.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))?.FullName;
+        string? assemblyDirectoryParent = Directory.GetParent(assemblyDirectory)?.FullName;
+
+        string[] candidates =
+        [
+            Path.Combine(executableDirectory ?? appBase, "..", "aria2.conf"),
+            Path.Combine(executableDirectory ?? appBase, "aria2.conf"),
+            Path.Combine(appBase, "Engines", "aria2", "aria2.conf"),
+            Path.Combine(assemblyDirectory, "Engines", "aria2", "aria2.conf"),
+            Path.Combine(appBaseParent ?? appBase, "Engines", "aria2", "aria2.conf"),
+            Path.Combine(assemblyDirectoryParent ?? assemblyDirectory, "Engines", "aria2", "aria2.conf")
+        ];
+
+        foreach (string candidate in candidates)
+        {
+            string fullPath = Path.GetFullPath(candidate);
+            if (File.Exists(fullPath))
+            {
+                return fullPath;
+            }
+        }
+
+        return null;
     }
 
     private static async Task<bool> WaitForRpcPortAsync(int rpcPort, Process process)
@@ -287,6 +335,67 @@ public sealed class Aria2EngineHost : IDisposable
         }
 
         return false;
+    }
+
+    private static async Task CleanupRpcPortAsync(int rpcPort)
+    {
+        using Process netstat = new()
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = "netstat.exe",
+                ArgumentList = { "-ano", "-p", "tcp" },
+                CreateNoWindow = true,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            }
+        };
+
+        try
+        {
+            netstat.Start();
+            string output = await netstat.StandardOutput.ReadToEndAsync();
+            await netstat.WaitForExitAsync();
+
+            foreach (string line in output.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries))
+            {
+                string[] parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length < 5 ||
+                    !parts[1].EndsWith($":{rpcPort}", StringComparison.OrdinalIgnoreCase) ||
+                    !parts[3].Equals("LISTENING", StringComparison.OrdinalIgnoreCase) ||
+                    !int.TryParse(parts[4], out int pid))
+                {
+                    continue;
+                }
+
+                TryKillLeftoverAria2Process(pid);
+            }
+        }
+        catch
+        {
+            // Best-effort cleanup only. If this fails, aria2 startup diagnostics
+            // will still report the real bind/startup error.
+        }
+    }
+
+    private static void TryKillLeftoverAria2Process(int pid)
+    {
+        try
+        {
+            using Process process = Process.GetProcessById(pid);
+            if (!process.ProcessName.Contains("aria2c", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            process.Kill(entireProcessTree: true);
+            process.WaitForExit(1000);
+        }
+        catch
+        {
+            // The process may have exited between netstat and kill.
+        }
     }
 
     private static string GetAppDataDirectory()

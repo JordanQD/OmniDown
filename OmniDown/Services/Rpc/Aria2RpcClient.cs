@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Net.Http;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,7 +20,6 @@ public sealed class Aria2RpcClient : IDisposable
     {
         Timeout = TimeSpan.FromSeconds(8)
     };
-    private readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.Web);
     private Uri _endpoint = new("http://127.0.0.1:6800/jsonrpc");
     private string _secret = string.Empty;
     private int _nextRequestId;
@@ -41,11 +41,13 @@ public sealed class Aria2RpcClient : IDisposable
         string uri,
         string? outputFileName,
         string directory,
+        int splitCount,
         CancellationToken cancellationToken = default)
     {
         Dictionary<string, string> options = new()
         {
-            ["dir"] = directory
+            ["dir"] = directory,
+            ["split"] = Math.Clamp(splitCount, 1, 128).ToString(CultureInfo.InvariantCulture)
         };
 
         if (!string.IsNullOrWhiteSpace(outputFileName))
@@ -96,6 +98,11 @@ public sealed class Aria2RpcClient : IDisposable
         return SendAsync<string>("aria2.removeDownloadResult", [gid], cancellationToken);
     }
 
+    public Task SaveSessionAsync(CancellationToken cancellationToken = default)
+    {
+        return SendAsync<string>("aria2.saveSession", [], cancellationToken);
+    }
+
     public void Dispose()
     {
         _httpClient.Dispose();
@@ -114,13 +121,10 @@ public sealed class Aria2RpcClient : IDisposable
 
         parameters.AddRange(methodParameters);
 
-        var request = new Aria2RpcRequest(
-            JsonRpc: "2.0",
-            Id: Interlocked.Increment(ref _nextRequestId).ToString(),
-            Method: method,
-            Params: parameters);
-
-        string payload = JsonSerializer.Serialize(request, _jsonOptions);
+        string payload = BuildPayload(
+            Interlocked.Increment(ref _nextRequestId).ToString(),
+            method,
+            parameters);
         using StringContent content = new(payload, Encoding.UTF8, "application/json");
         HttpResponseMessage response;
         try
@@ -141,23 +145,191 @@ public sealed class Aria2RpcClient : IDisposable
             response.EnsureSuccessStatusCode();
 
             await using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            Aria2RpcResponse<T>? rpcResponse = await JsonSerializer.DeserializeAsync<Aria2RpcResponse<T>>(
-                responseStream,
-                _jsonOptions,
-                cancellationToken);
-
-            if (rpcResponse is null)
+            using JsonDocument rpcResponse = await JsonDocument.ParseAsync(responseStream, cancellationToken: cancellationToken);
+            JsonElement root = rpcResponse.RootElement;
+            if (root.ValueKind is not JsonValueKind.Object)
             {
                 throw new InvalidOperationException("aria2 returned an empty RPC response.");
             }
 
-            if (rpcResponse.Error is not null)
+            if (root.TryGetProperty("error", out JsonElement error) &&
+                error.ValueKind is JsonValueKind.Object)
             {
-                throw new InvalidOperationException($"aria2 RPC error {rpcResponse.Error.Code}: {rpcResponse.Error.Message}");
+                int code = TryGetInt32(error, "code");
+                string message = TryGetString(error, "message");
+                throw new InvalidOperationException($"aria2 RPC error {code}: {message}");
             }
 
-            return rpcResponse.Result ?? throw new InvalidOperationException("aria2 RPC response did not include a result.");
+            if (!root.TryGetProperty("result", out JsonElement result))
+            {
+                throw new InvalidOperationException("aria2 RPC response did not include a result.");
+            }
+
+            return ReadResult<T>(result);
         }
+    }
+
+    private static string BuildPayload(string id, string method, IReadOnlyList<object> parameters)
+    {
+        using MemoryStream stream = new();
+        using (Utf8JsonWriter writer = new(stream))
+        {
+            writer.WriteStartObject();
+            writer.WriteString("jsonrpc", "2.0");
+            writer.WriteString("id", id);
+            writer.WriteString("method", method);
+            writer.WritePropertyName("params");
+            writer.WriteStartArray();
+            foreach (object parameter in parameters)
+            {
+                WriteParameter(writer, parameter);
+            }
+
+            writer.WriteEndArray();
+            writer.WriteEndObject();
+        }
+
+        return Encoding.UTF8.GetString(stream.ToArray());
+    }
+
+    private static void WriteParameter(Utf8JsonWriter writer, object parameter)
+    {
+        switch (parameter)
+        {
+            case string value:
+                writer.WriteStringValue(value);
+                break;
+            case int value:
+                writer.WriteNumberValue(value);
+                break;
+            case string[] values:
+                writer.WriteStartArray();
+                foreach (string value in values)
+                {
+                    writer.WriteStringValue(value);
+                }
+
+                writer.WriteEndArray();
+                break;
+            case Dictionary<string, string> options:
+                writer.WriteStartObject();
+                foreach (KeyValuePair<string, string> option in options)
+                {
+                    writer.WriteString(option.Key, option.Value);
+                }
+
+                writer.WriteEndObject();
+                break;
+            default:
+                throw new NotSupportedException($"aria2 RPC parameter type {parameter.GetType().Name} is not supported.");
+        }
+    }
+
+    private static T ReadResult<T>(JsonElement result)
+    {
+        Type resultType = typeof(T);
+        if (resultType == typeof(object))
+        {
+            return (T)(object)new object();
+        }
+
+        if (resultType == typeof(string))
+        {
+            return (T)(object)(result.GetString() ?? string.Empty);
+        }
+
+        if (resultType == typeof(Aria2GlobalStat))
+        {
+            return (T)(object)new Aria2GlobalStat
+            {
+                DownloadSpeed = TryGetString(result, "downloadSpeed"),
+                UploadSpeed = TryGetString(result, "uploadSpeed"),
+                NumActive = TryGetString(result, "numActive")
+            };
+        }
+
+        if (resultType == typeof(IReadOnlyList<Aria2TaskStatus>))
+        {
+            List<Aria2TaskStatus> tasks = [];
+            foreach (JsonElement item in result.EnumerateArray())
+            {
+                tasks.Add(ReadTaskStatus(item));
+            }
+
+            return (T)(object)tasks;
+        }
+
+        throw new NotSupportedException($"aria2 RPC result type {resultType.Name} is not supported.");
+    }
+
+    private static Aria2TaskStatus ReadTaskStatus(JsonElement item)
+    {
+        return new Aria2TaskStatus
+        {
+            Gid = TryGetString(item, "gid"),
+            Status = TryGetString(item, "status"),
+            TotalLength = TryGetString(item, "totalLength"),
+            CompletedLength = TryGetString(item, "completedLength"),
+            DownloadSpeed = TryGetString(item, "downloadSpeed"),
+            UploadSpeed = TryGetString(item, "uploadSpeed"),
+            Directory = TryGetString(item, "dir"),
+            Files = ReadFiles(item)
+        };
+    }
+
+    private static IReadOnlyList<Aria2FileStatus> ReadFiles(JsonElement item)
+    {
+        if (!item.TryGetProperty("files", out JsonElement files) ||
+            files.ValueKind is not JsonValueKind.Array)
+        {
+            return [];
+        }
+
+        List<Aria2FileStatus> result = [];
+        foreach (JsonElement file in files.EnumerateArray())
+        {
+            result.Add(new Aria2FileStatus
+            {
+                Path = TryGetString(file, "path"),
+                Uris = ReadUris(file)
+            });
+        }
+
+        return result;
+    }
+
+    private static IReadOnlyList<Aria2UriStatus> ReadUris(JsonElement file)
+    {
+        if (!file.TryGetProperty("uris", out JsonElement uris) ||
+            uris.ValueKind is not JsonValueKind.Array)
+        {
+            return [];
+        }
+
+        List<Aria2UriStatus> result = [];
+        foreach (JsonElement uri in uris.EnumerateArray())
+        {
+            result.Add(new Aria2UriStatus
+            {
+                Uri = TryGetString(uri, "uri")
+            });
+        }
+
+        return result;
+    }
+
+    private static string TryGetString(JsonElement element, string propertyName)
+    {
+        return element.TryGetProperty(propertyName, out JsonElement property) && property.ValueKind is JsonValueKind.String
+            ? property.GetString() ?? string.Empty
+            : string.Empty;
+    }
+
+    private static int TryGetInt32(JsonElement element, string propertyName)
+    {
+        return element.TryGetProperty(propertyName, out JsonElement property) && property.TryGetInt32(out int value)
+            ? value
+            : 0;
     }
 
     private static string FormatRequestError(HttpRequestException exception)
@@ -177,31 +349,9 @@ public sealed class Aria2RpcClient : IDisposable
         "totalLength",
         "completedLength",
         "downloadSpeed",
+        "uploadSpeed",
         "dir",
         "files"
     ];
 
-    private sealed record Aria2RpcRequest(
-        [property: JsonPropertyName("jsonrpc")] string JsonRpc,
-        [property: JsonPropertyName("id")] string Id,
-        [property: JsonPropertyName("method")] string Method,
-        [property: JsonPropertyName("params")] IReadOnlyList<object> Params);
-
-    private sealed record Aria2RpcResponse<T>
-    {
-        [JsonPropertyName("result")]
-        public T? Result { get; init; }
-
-        [JsonPropertyName("error")]
-        public Aria2RpcError? Error { get; init; }
-    }
-
-    private sealed record Aria2RpcError
-    {
-        [JsonPropertyName("code")]
-        public int Code { get; init; }
-
-        [JsonPropertyName("message")]
-        public string Message { get; init; } = string.Empty;
-    }
 }
