@@ -13,17 +13,17 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="TasksNavItem.Content" xml:space="preserve"><value>首页</value></data>
-  <data name="ActiveNavItem.Content" xml:space="preserve"><value>进行中</value></data>
-  <data name="CompletedNavItem.Content" xml:space="preserve"><value>已完成</value></data>
+  <data name="ActiveNavItem.Content" xml:space="preserve"><value>传输</value></data>
+  <data name="CompletedNavItem.Content" xml:space="preserve"><value>完成</value></data>
   <data name="IssuesNavItem.Content" xml:space="preserve"><value>异常</value></data>
   <data name="SettingsNavItem.Content" xml:space="preserve"><value>设置</value></data>
   <data name="DownloadsTitleText.Text" xml:space="preserve"><value>下载</value></data>
   <data name="DownloadsSubtitleText.Text" xml:space="preserve"><value>通过本地 aria2 sidecar 和 JSON-RPC 同步下载任务。</value></data>
   <data name="HomePageTitle" xml:space="preserve"><value>首页</value></data>
   <data name="HomePageSubtitle" xml:space="preserve"><value>查看全部下载任务和当前概况。</value></data>
-  <data name="DownloadingPageTitle" xml:space="preserve"><value>进行中</value></data>
-  <data name="DownloadingPageSubtitle" xml:space="preserve"><value>下载中和等待中的任务都在这里。</value></data>
-  <data name="CompletedPageTitle" xml:space="preserve"><value>已完成</value></data>
+  <data name="DownloadingPageTitle" xml:space="preserve"><value>传输</value></data>
+  <data name="DownloadingPageSubtitle" xml:space="preserve"><value>下载、等待和暂停的任务都在这里。</value></data>
+  <data name="CompletedPageTitle" xml:space="preserve"><value>完成</value></data>
   <data name="CompletedPageSubtitle" xml:space="preserve"><value>已经完成的下载任务。</value></data>
   <data name="IssuesPageTitle" xml:space="preserve"><value>异常</value></data>
   <data name="IssuesPageSubtitle" xml:space="preserve"><value>失败、移除或需要处理的任务。</value></data>
@@ -90,12 +90,12 @@
   <data name="TasksPausedMessage" xml:space="preserve"><value>已暂停选中的任务。</value></data>
   <data name="TasksDeletedMessage" xml:space="preserve"><value>已删除选中的任务。</value></data>
   <data name="TaskOperationFailedMessage" xml:space="preserve"><value>任务操作失败：{0}</value></data>
-  <data name="TaskStatusDownloading" xml:space="preserve"><value>下载中</value></data>
-  <data name="TaskStatusWaiting" xml:space="preserve"><value>等待中</value></data>
-  <data name="TaskStatusPaused" xml:space="preserve"><value>已暂停</value></data>
-  <data name="TaskStatusCompleted" xml:space="preserve"><value>已完成</value></data>
+  <data name="TaskStatusDownloading" xml:space="preserve"><value>下载</value></data>
+  <data name="TaskStatusWaiting" xml:space="preserve"><value>等待</value></data>
+  <data name="TaskStatusPaused" xml:space="preserve"><value>暂停</value></data>
+  <data name="TaskStatusCompleted" xml:space="preserve"><value>完成</value></data>
   <data name="TaskStatusError" xml:space="preserve"><value>错误</value></data>
-  <data name="TaskStatusRemoved" xml:space="preserve"><value>已移除</value></data>
+  <data name="TaskStatusRemoved" xml:space="preserve"><value>移除</value></data>
   <data name="DownloadSpeedPrefix" xml:space="preserve"><value>下行</value></data>
   <data name="UploadSpeedPrefix" xml:space="preserve"><value>上行</value></data>
   <data name="TitleSearchBox.PlaceholderText" xml:space="preserve"><value>搜索下载和设置...</value></data>

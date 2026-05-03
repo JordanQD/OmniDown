@@ -13,17 +13,17 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="TasksNavItem.Content" xml:space="preserve"><value>Home</value></data>
-  <data name="ActiveNavItem.Content" xml:space="preserve"><value>In progress</value></data>
-  <data name="CompletedNavItem.Content" xml:space="preserve"><value>Completed</value></data>
+  <data name="ActiveNavItem.Content" xml:space="preserve"><value>Transfers</value></data>
+  <data name="CompletedNavItem.Content" xml:space="preserve"><value>Complete</value></data>
   <data name="IssuesNavItem.Content" xml:space="preserve"><value>Issues</value></data>
   <data name="SettingsNavItem.Content" xml:space="preserve"><value>Settings</value></data>
   <data name="DownloadsTitleText.Text" xml:space="preserve"><value>Downloads</value></data>
   <data name="DownloadsSubtitleText.Text" xml:space="preserve"><value>Local aria2 sidecar control with JSON-RPC task sync.</value></data>
   <data name="HomePageTitle" xml:space="preserve"><value>Home</value></data>
   <data name="HomePageSubtitle" xml:space="preserve"><value>Review all download tasks and the current summary.</value></data>
-  <data name="DownloadingPageTitle" xml:space="preserve"><value>In progress</value></data>
-  <data name="DownloadingPageSubtitle" xml:space="preserve"><value>Downloading and waiting tasks are grouped here.</value></data>
-  <data name="CompletedPageTitle" xml:space="preserve"><value>Completed</value></data>
+  <data name="DownloadingPageTitle" xml:space="preserve"><value>Transfers</value></data>
+  <data name="DownloadingPageSubtitle" xml:space="preserve"><value>Downloading, waiting, and paused tasks are grouped here.</value></data>
+  <data name="CompletedPageTitle" xml:space="preserve"><value>Complete</value></data>
   <data name="CompletedPageSubtitle" xml:space="preserve"><value>Download tasks that have finished.</value></data>
   <data name="IssuesPageTitle" xml:space="preserve"><value>Issues</value></data>
   <data name="IssuesPageSubtitle" xml:space="preserve"><value>Failed, removed, or attention-needed tasks.</value></data>

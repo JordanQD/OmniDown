@@ -65,7 +65,7 @@
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem
-                    Content="Downloading"
+                    Content="Transfers"
                     x:Uid="ActiveNavItem"
                     Tag="Downloading">
                     <NavigationViewItem.Icon>
@@ -73,7 +73,7 @@
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem
-                    Content="Completed"
+                    Content="Complete"
                     x:Uid="CompletedNavItem"
                     Tag="Completed">
                     <NavigationViewItem.Icon>
@@ -379,12 +379,13 @@
                                                 Grid.Column="1"
                                                 VerticalAlignment="Center"
                                                 FontWeight="SemiBold"
+                                                Foreground="{Binding NameBrush}"
                                                 Text="{Binding Name}"
                                                 TextTrimming="CharacterEllipsis" />
                                             <TextBlock
                                                 Grid.Column="2"
                                                 VerticalAlignment="Center"
-                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                Foreground="{Binding StatusBrush}"
                                                 Text="{Binding StatusText}"
                                                 TextTrimming="CharacterEllipsis" />
                                             <TextBlock
@@ -392,13 +393,46 @@
                                                 VerticalAlignment="Center"
                                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                 Text="{Binding ProgressText}"
-                                                TextAlignment="Right" />
+                                                TextAlignment="Left" />
                                             <TextBlock
                                                 Grid.Column="4"
                                                 VerticalAlignment="Center"
                                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                Text="{Binding SpeedText}"
-                                                TextTrimming="CharacterEllipsis" />
+                                                Text="{Binding DownloadSpeedText}"
+                                                TextTrimming="CharacterEllipsis"
+                                                Visibility="{Binding NormalSpeedVisibility}" />
+                                            <StackPanel
+                                                Grid.Column="4"
+                                                VerticalAlignment="Center"
+                                                Spacing="2"
+                                                Visibility="{Binding PeerSpeedVisibility}">
+                                                <StackPanel
+                                                    Orientation="Horizontal"
+                                                    Spacing="6">
+                                                    <FontIcon
+                                                        Width="14"
+                                                        FontSize="12"
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Glyph="&#xE896;" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="{Binding DownloadSpeedText}"
+                                                        TextTrimming="CharacterEllipsis" />
+                                                </StackPanel>
+                                                <StackPanel
+                                                    Orientation="Horizontal"
+                                                    Spacing="6">
+                                                    <FontIcon
+                                                        Width="14"
+                                                        FontSize="12"
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Glyph="&#xE898;" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="{Binding UploadSpeedText}"
+                                                        TextTrimming="CharacterEllipsis" />
+                                                </StackPanel>
+                                            </StackPanel>
                                         </Grid>
                                         <ProgressBar
                                             Grid.Row="1"
@@ -406,7 +440,7 @@
                                             Margin="0"
                                             VerticalAlignment="Bottom"
                                             Background="{ThemeResource ControlFillColorDefaultBrush}"
-                                            Foreground="{ThemeResource AccentFillColorDefaultBrush}"
+                                            Foreground="{Binding ProgressBrush}"
                                             Maximum="100"
                                             Value="{Binding Progress}" />
 

@@ -41,6 +41,7 @@ public sealed class DownloadCoordinator
             SaveDirectory = saveDirectory,
             LocalFilePath = string.IsNullOrWhiteSpace(name) ? string.Empty : Path.Combine(saveDirectory, name),
             Status = "Waiting",
+            IsPeerTransfer = IsPeerTransfer(sourceUri),
             Progress = 0
         };
 
@@ -141,6 +142,7 @@ public sealed class DownloadCoordinator
         task.CompletedLength = completedLength;
         task.DownloadSpeed = ParseLong(remoteTask.DownloadSpeed);
         task.UploadSpeed = ParseLong(remoteTask.UploadSpeed);
+        task.IsPeerTransfer = IsPeerTransfer(remoteTask);
         task.Progress = totalLength <= 0 ? 0 : Math.Clamp(completedLength * 100d / totalLength, 0, 100);
 
         if (string.IsNullOrWhiteSpace(task.Name))
@@ -202,6 +204,23 @@ public sealed class DownloadCoordinator
             .SelectMany(file => file.Uris)
             .Select(uri => uri.Uri)
             .FirstOrDefault(uri => !string.IsNullOrWhiteSpace(uri)) ?? string.Empty;
+    }
+
+    private static bool IsPeerTransfer(Aria2TaskStatus task)
+    {
+        if (task.BitTorrent.HasValue)
+        {
+            return true;
+        }
+
+        string sourceUri = ResolveRemoteUri(task);
+        return IsPeerTransfer(sourceUri);
+    }
+
+    private static bool IsPeerTransfer(string sourceUri)
+    {
+        return sourceUri.StartsWith("magnet:", StringComparison.OrdinalIgnoreCase)
+            || sourceUri.EndsWith(".torrent", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string NormalizeStatus(string status)

@@ -686,7 +686,8 @@ namespace OmniDown
         private static bool IsDownloadingTask(DownloadTask task)
         {
             return task.Status.Contains("download", StringComparison.OrdinalIgnoreCase)
-                || task.Status.Contains("waiting", StringComparison.OrdinalIgnoreCase);
+                || task.Status.Contains("waiting", StringComparison.OrdinalIgnoreCase)
+                || task.Status.Contains("paused", StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool IsCompletedTask(DownloadTask task)

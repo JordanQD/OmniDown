@@ -1,5 +1,8 @@
 namespace OmniDown.Models;
 
+using Microsoft.UI;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Media;
 using OmniDown.Services.Localization;
 using System;
 using System.ComponentModel;
@@ -7,6 +10,12 @@ using System.Runtime.CompilerServices;
 
 public sealed class DownloadTask : INotifyPropertyChanged
 {
+    private static readonly SolidColorBrush DefaultNameBrush = new(Colors.Black);
+    private static readonly SolidColorBrush DefaultProgressBrush = new(Colors.DodgerBlue);
+    private static readonly SolidColorBrush SuccessBrush = new(Colors.ForestGreen);
+    private static readonly SolidColorBrush CautionBrush = new(Colors.Goldenrod);
+    private static readonly SolidColorBrush CriticalBrush = new(Colors.Firebrick);
+
     private string _gid = string.Empty;
     private string _name = string.Empty;
     private string _sourceUri = string.Empty;
@@ -18,6 +27,7 @@ public sealed class DownloadTask : INotifyPropertyChanged
     private long _totalLength;
     private long _downloadSpeed;
     private long _uploadSpeed;
+    private bool _isPeerTransfer;
     private DateTimeOffset _createdAt = DateTimeOffset.Now;
     private bool _isSelected;
 
@@ -61,6 +71,10 @@ public sealed class DownloadTask : INotifyPropertyChanged
             if (SetProperty(ref _status, value))
             {
                 OnPropertyChanged(nameof(StatusText));
+                OnPropertyChanged(nameof(StatusBrushKey));
+                OnPropertyChanged(nameof(NameBrush));
+                OnPropertyChanged(nameof(StatusBrush));
+                OnPropertyChanged(nameof(ProgressBrush));
             }
         }
     }
@@ -89,6 +103,38 @@ public sealed class DownloadTask : INotifyPropertyChanged
     }
 
     public string ProgressText => $"{Progress:0}%";
+
+    public string StatusBrushKey => Status.ToLowerInvariant() switch
+    {
+        "completed" => "Success",
+        "paused" => "Caution",
+        "error" => "Critical",
+        _ => "Default"
+    };
+
+    public Brush NameBrush => StatusBrushKey switch
+    {
+        "Success" => GetResourceBrush("SystemFillColorSuccessBrush", SuccessBrush),
+        "Caution" => GetResourceBrush("SystemFillColorCautionBrush", CautionBrush),
+        "Critical" => GetResourceBrush("SystemFillColorCriticalBrush", CriticalBrush),
+        _ => GetResourceBrush("TextFillColorPrimaryBrush", DefaultNameBrush)
+    };
+
+    public Brush StatusBrush => StatusBrushKey switch
+    {
+        "Success" => GetResourceBrush("SystemFillColorSuccessBrush", SuccessBrush),
+        "Caution" => GetResourceBrush("SystemFillColorCautionBrush", CautionBrush),
+        "Critical" => GetResourceBrush("SystemFillColorCriticalBrush", CriticalBrush),
+        _ => GetResourceBrush("TextFillColorSecondaryBrush", DefaultNameBrush)
+    };
+
+    public Brush ProgressBrush => StatusBrushKey switch
+    {
+        "Success" => GetResourceBrush("SystemFillColorSuccessBrush", SuccessBrush),
+        "Caution" => GetResourceBrush("SystemFillColorCautionBrush", CautionBrush),
+        "Critical" => GetResourceBrush("SystemFillColorCriticalBrush", CriticalBrush),
+        _ => GetResourceBrush("AccentFillColorDefaultBrush", DefaultProgressBrush)
+    };
 
     public long CompletedLength
     {
@@ -131,6 +177,7 @@ public sealed class DownloadTask : INotifyPropertyChanged
             {
                 OnPropertyChanged(nameof(SpeedText));
                 OnPropertyChanged(nameof(CombinedSpeed));
+                OnPropertyChanged(nameof(DownloadSpeedText));
             }
         }
     }
@@ -144,13 +191,38 @@ public sealed class DownloadTask : INotifyPropertyChanged
             {
                 OnPropertyChanged(nameof(SpeedText));
                 OnPropertyChanged(nameof(CombinedSpeed));
+                OnPropertyChanged(nameof(UploadSpeedText));
             }
         }
     }
 
     public long CombinedSpeed => DownloadSpeed + UploadSpeed;
 
-    public string SpeedText => $"{Strings.Get("DownloadSpeedPrefix")} {FormatSpeed(DownloadSpeed)}  {Strings.Get("UploadSpeedPrefix")} {FormatSpeed(UploadSpeed)}";
+    public bool IsPeerTransfer
+    {
+        get => _isPeerTransfer;
+        set
+        {
+            if (SetProperty(ref _isPeerTransfer, value))
+            {
+                OnPropertyChanged(nameof(SpeedText));
+                OnPropertyChanged(nameof(NormalSpeedVisibility));
+                OnPropertyChanged(nameof(PeerSpeedVisibility));
+            }
+        }
+    }
+
+    public Visibility NormalSpeedVisibility => IsPeerTransfer ? Visibility.Collapsed : Visibility.Visible;
+
+    public Visibility PeerSpeedVisibility => IsPeerTransfer ? Visibility.Visible : Visibility.Collapsed;
+
+    public string DownloadSpeedText => FormatSpeed(DownloadSpeed);
+
+    public string UploadSpeedText => FormatSpeed(UploadSpeed);
+
+    public string SpeedText => IsPeerTransfer
+        ? $"{Strings.Get("DownloadSpeedPrefix")} {DownloadSpeedText}  {Strings.Get("UploadSpeedPrefix")} {UploadSpeedText}"
+        : DownloadSpeedText;
 
     private bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string? propertyName = null)
     {
@@ -195,5 +267,12 @@ public sealed class DownloadTask : INotifyPropertyChanged
         }
 
         return $"{size:0.#} {units[unitIndex]}";
+    }
+
+    private static Brush GetResourceBrush(string key, Brush fallback)
+    {
+        return Application.Current.Resources.TryGetValue(key, out object value) && value is Brush brush
+            ? brush
+            : fallback;
     }
 }

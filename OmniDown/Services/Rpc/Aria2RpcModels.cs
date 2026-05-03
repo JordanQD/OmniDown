@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace OmniDown.Services.Rpc;
@@ -22,6 +23,9 @@ public sealed record Aria2TaskStatus
 
     [JsonPropertyName("uploadSpeed")]
     public string UploadSpeed { get; init; } = "0";
+
+    [JsonPropertyName("bittorrent")]
+    public JsonElement? BitTorrent { get; init; }
 
     [JsonPropertyName("dir")]
     public string Directory { get; init; } = string.Empty;
