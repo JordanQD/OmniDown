@@ -28,7 +28,7 @@
   <data name="IssuesPageTitle" xml:space="preserve"><value>异常</value></data>
   <data name="IssuesPageSubtitle" xml:space="preserve"><value>失败、移除或需要处理的任务。</value></data>
   <data name="NewDownloadButton.Label" xml:space="preserve"><value>新建</value></data>
-  <data name="SortTasksButton.Label" xml:space="preserve"><value>排序 v</value></data>
+  <data name="SortTasksButton.Content" xml:space="preserve"><value>排序</value></data>
   <data name="SortByCreatedAtMenuItem.Text" xml:space="preserve"><value>添加时间</value></data>
   <data name="SortByNameMenuItem.Text" xml:space="preserve"><value>项目名称</value></data>
   <data name="SortBySizeMenuItem.Text" xml:space="preserve"><value>项目大小</value></data>
@@ -37,6 +37,7 @@
   <data name="ResumeTasksButton.Label" xml:space="preserve"><value>开始</value></data>
   <data name="PauseTasksButton.Label" xml:space="preserve"><value>暂停</value></data>
   <data name="DeleteTasksButton.Label" xml:space="preserve"><value>删除</value></data>
+  <data name="ClearCompletedTasksButton.Label" xml:space="preserve"><value>清除已完成记录</value></data>
   <data name="StartAriaButton.Label" xml:space="preserve"><value>启动 aria2</value></data>
   <data name="StopAriaButton.Label" xml:space="preserve"><value>停止</value></data>
   <data name="TotalMetricLabel.Text" xml:space="preserve"><value>总数</value></data>
@@ -44,6 +45,7 @@
   <data name="DownloadSpeedMetricLabel.Text" xml:space="preserve"><value>已完成</value></data>
   <data name="Aria2MetricLabel.Text" xml:space="preserve"><value>异常</value></data>
   <data name="NameColumnHeader.Text" xml:space="preserve"><value>名称</value></data>
+  <data name="TasksLoadingRing.AutomationProperties.Name" xml:space="preserve"><value>正在加载下载任务</value></data>
   <data name="StatusColumnHeader.Text" xml:space="preserve"><value>状态</value></data>
   <data name="ProgressColumnHeader.Text" xml:space="preserve"><value>进度</value></data>
   <data name="RemainingTimeColumnHeader.Text" xml:space="preserve"><value>剩余</value></data>
@@ -87,9 +89,16 @@
   <data name="DeleteDialogTitle" xml:space="preserve"><value>删除选中的下载？</value></data>
   <data name="DeleteDialogContent" xml:space="preserve"><value>这会从 aria2 和任务列表中移除选中的任务。</value></data>
   <data name="DeleteFilesCheckBoxContent" xml:space="preserve"><value>同时删除对应的文件</value></data>
+  <data name="ClearRecordsDialogTitle" xml:space="preserve"><value>清除记录</value></data>
+  <data name="ClearRecordsDialogContent" xml:space="preserve"><value>确定清除所有已完成记录？</value></data>
+  <data name="ClearRecordsDeleteFilesCheckBoxContent" xml:space="preserve"><value>同时删除文件</value></data>
+  <data name="ClearRecordsNoButtonText" xml:space="preserve"><value>否</value></data>
+  <data name="ClearRecordsYesButtonText" xml:space="preserve"><value>是</value></data>
   <data name="TasksResumedMessage" xml:space="preserve"><value>已开始选中的任务。</value></data>
   <data name="TasksPausedMessage" xml:space="preserve"><value>已暂停选中的任务。</value></data>
   <data name="TasksDeletedMessage" xml:space="preserve"><value>已删除选中的任务。</value></data>
+  <data name="ClearCompletedTasksMessage" xml:space="preserve"><value>已清除完成记录。</value></data>
+  <data name="ClearCompletedTasksEmptyMessage" xml:space="preserve"><value>没有可清除的完成记录。</value></data>
   <data name="TaskOpenFileActionText" xml:space="preserve"><value>打开文件</value></data>
   <data name="TaskOpenFolderActionText" xml:space="preserve"><value>打开文件夹</value></data>
   <data name="TaskCopyLinkActionText" xml:space="preserve"><value>复制项目链接</value></data>

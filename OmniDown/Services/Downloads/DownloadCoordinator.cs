@@ -64,6 +64,10 @@ public sealed class DownloadCoordinator
         foreach (Aria2TaskStatus remoteTask in remoteTasks)
         {
             UpsertTask(remoteTask);
+            if (IsCompletedStatus(remoteTask.Status))
+            {
+                await RemoveCompletedDownloadResultAsync(remoteTask.Gid, cancellationToken);
+            }
         }
 
         Aria2GlobalStat stat = await _rpcClient.GetGlobalStatAsync(cancellationToken);
@@ -113,6 +117,37 @@ public sealed class DownloadCoordinator
         }
 
         SaveTaskCache();
+    }
+
+    public async Task<int> ClearCompletedAsync(bool deleteFiles = false, CancellationToken cancellationToken = default)
+    {
+        DownloadTask[] completedTasks = _tasks
+            .Where(task => IsCompletedStatus(task.Status))
+            .ToArray();
+
+        foreach (DownloadTask task in completedTasks)
+        {
+            if (deleteFiles)
+            {
+                DeleteLocalFiles(task);
+            }
+
+            await RemoveCompletedDownloadResultAsync(task.Gid, cancellationToken);
+            _tasks.Remove(task);
+        }
+
+        SaveTaskCache();
+        return completedTasks.Length;
+    }
+
+    public async Task RemoveCompletedDownloadResultsAsync(CancellationToken cancellationToken = default)
+    {
+        foreach (DownloadTask task in _tasks
+            .Where(task => !string.IsNullOrWhiteSpace(task.Gid) && IsCompletedStatus(task.Status))
+            .ToArray())
+        {
+            await RemoveCompletedDownloadResultAsync(task.Gid, cancellationToken);
+        }
     }
 
     private void UpsertTask(Aria2TaskStatus remoteTask)
@@ -422,6 +457,28 @@ public sealed class DownloadCoordinator
         return Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "OmniDown");
+    }
+
+    private async Task RemoveCompletedDownloadResultAsync(string gid, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(gid))
+        {
+            return;
+        }
+
+        try
+        {
+            await _rpcClient.RemoveDownloadResultAsync(gid, cancellationToken);
+        }
+        catch
+        {
+            // The completed result may already be gone; cached task metadata remains the UI source of truth.
+        }
+    }
+
+    private static bool IsCompletedStatus(string status)
+    {
+        return NormalizeStatus(status).Contains("complete", StringComparison.OrdinalIgnoreCase);
     }
 }
 

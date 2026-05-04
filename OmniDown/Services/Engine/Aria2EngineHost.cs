@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace OmniDown.Services.Engine;
@@ -51,6 +52,7 @@ public sealed class Aria2EngineHost : IDisposable
         Directory.CreateDirectory(options.DownloadDirectory);
         string appDataDirectory = GetAppDataDirectory();
         Directory.CreateDirectory(appDataDirectory);
+        RemoveCachedCompletedTasksFromSession(appDataDirectory);
         await CleanupRpcPortAsync(options.RpcPort);
 
         var startInfo = new ProcessStartInfo
@@ -227,7 +229,7 @@ public sealed class Aria2EngineHost : IDisposable
 
     private static List<string> BuildArguments(Aria2EngineOptions options, string appDataDirectory, string resolvedExecutablePath)
     {
-        string sessionPath = Path.Combine(appDataDirectory, "download.session");
+        string sessionPath = GetSessionPath(appDataDirectory);
         string dhtPath = Path.Combine(appDataDirectory, "dht.dat");
         string dht6Path = Path.Combine(appDataDirectory, "dht6.dat");
 
@@ -397,6 +399,127 @@ public sealed class Aria2EngineHost : IDisposable
         {
             // The process may have exited between netstat and kill.
         }
+    }
+
+    private static void RemoveCachedCompletedTasksFromSession(string appDataDirectory)
+    {
+        string sessionPath = GetSessionPath(appDataDirectory);
+        if (!File.Exists(sessionPath))
+        {
+            return;
+        }
+
+        HashSet<string> completedGids = ReadCachedCompletedGids(appDataDirectory);
+        if (completedGids.Count == 0)
+        {
+            return;
+        }
+
+        try
+        {
+            string[] lines = File.ReadAllLines(sessionPath);
+            List<string> filteredLines = [];
+            List<string> currentEntry = [];
+
+            foreach (string line in lines)
+            {
+                if (currentEntry.Count > 0 && !IsSessionOptionLine(line))
+                {
+                    AddSessionEntryIfNotCompleted(filteredLines, currentEntry, completedGids);
+                    currentEntry.Clear();
+                }
+
+                currentEntry.Add(line);
+            }
+
+            AddSessionEntryIfNotCompleted(filteredLines, currentEntry, completedGids);
+
+            if (filteredLines.Count != lines.Length)
+            {
+                File.WriteAllLines(sessionPath, filteredLines);
+            }
+        }
+        catch
+        {
+            // Startup should continue even if a legacy session file cannot be cleaned.
+        }
+    }
+
+    private static HashSet<string> ReadCachedCompletedGids(string appDataDirectory)
+    {
+        string cachePath = Path.Combine(appDataDirectory, "tasks.json");
+        HashSet<string> completedGids = new(StringComparer.OrdinalIgnoreCase);
+        if (!File.Exists(cachePath))
+        {
+            return completedGids;
+        }
+
+        try
+        {
+            using JsonDocument document = JsonDocument.Parse(File.ReadAllText(cachePath));
+            if (document.RootElement.ValueKind is not JsonValueKind.Array)
+            {
+                return completedGids;
+            }
+
+            foreach (JsonElement task in document.RootElement.EnumerateArray())
+            {
+                string gid = TryGetString(task, "Gid");
+                string status = TryGetString(task, "Status");
+                if (!string.IsNullOrWhiteSpace(gid) &&
+                    status.Contains("complete", StringComparison.OrdinalIgnoreCase))
+                {
+                    completedGids.Add(gid);
+                }
+            }
+        }
+        catch
+        {
+            // A corrupt UI cache should not block aria2 startup.
+        }
+
+        return completedGids;
+    }
+
+    private static void AddSessionEntryIfNotCompleted(
+        List<string> filteredLines,
+        List<string> entryLines,
+        HashSet<string> completedGids)
+    {
+        if (entryLines.Count == 0)
+        {
+            return;
+        }
+
+        foreach (string line in entryLines)
+        {
+            string trimmed = line.Trim();
+            if (trimmed.StartsWith("gid=", StringComparison.OrdinalIgnoreCase) &&
+                completedGids.Contains(trimmed["gid=".Length..]))
+            {
+                return;
+            }
+        }
+
+        filteredLines.AddRange(entryLines);
+    }
+
+    private static bool IsSessionOptionLine(string line)
+    {
+        return line.Length > 0 && char.IsWhiteSpace(line[0]);
+    }
+
+    private static string TryGetString(JsonElement element, string propertyName)
+    {
+        return element.TryGetProperty(propertyName, out JsonElement property) &&
+            property.ValueKind is JsonValueKind.String
+            ? property.GetString() ?? string.Empty
+            : string.Empty;
+    }
+
+    private static string GetSessionPath(string appDataDirectory)
+    {
+        return Path.Combine(appDataDirectory, "download.session");
     }
 
     private static string GetAppDataDirectory()

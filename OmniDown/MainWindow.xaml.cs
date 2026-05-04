@@ -16,6 +16,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 using WinRT.Interop;
 
@@ -35,6 +36,7 @@ namespace OmniDown
         private bool _isRefreshing;
         private bool _isUpdatingSelectAllCheckBox;
         private bool _isUpdatingTaskSelection;
+        private bool _hasStartedInitialLoad;
 
         public ObservableCollection<DownloadTask> Tasks { get; } = new();
 
@@ -60,10 +62,10 @@ namespace OmniDown
             UpdateStatsVisibility("Home");
             ApplyTaskFilter("Home");
             ApplySettingsFilter();
+            SetTaskListLoading(true);
             UpdateDashboard();
             UpdateAriaStatus();
             UpdateDebugStatus();
-            _ = StartAriaOnLaunchAsync();
         }
 
         private async void NewDownloadButton_Click(object sender, RoutedEventArgs e)
@@ -210,14 +212,48 @@ namespace OmniDown
             RootNavigation.IsPaneOpen = !RootNavigation.IsPaneOpen;
         }
 
+        private async void RootGrid_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (_hasStartedInitialLoad)
+            {
+                return;
+            }
+
+            _hasStartedInitialLoad = true;
+            SetTaskListLoading(true);
+            await WaitForNextRenderAsync();
+            await StartAriaOnLaunchAsync();
+        }
+
         private async System.Threading.Tasks.Task StartAriaOnLaunchAsync()
         {
-            Aria2EngineStartResult result = await EnsureAria2StartedAsync();
-            UpdateAriaStatus();
-            if (!result.Started)
+            try
             {
-                ShowMessage(result.Message, InfoBarSeverity.Warning);
+                Aria2EngineStartResult result = await EnsureAria2StartedAsync();
+                UpdateAriaStatus();
+                if (!result.Started)
+                {
+                    ShowMessage(result.Message, InfoBarSeverity.Warning);
+                }
             }
+            finally
+            {
+                SetTaskListLoading(false);
+            }
+        }
+
+        private static Task WaitForNextRenderAsync()
+        {
+            TaskCompletionSource completionSource = new();
+            EventHandler<object>? renderingHandler = null;
+            renderingHandler = (sender, args) =>
+            {
+                CompositionTarget.Rendering -= renderingHandler;
+                completionSource.TrySetResult();
+            };
+
+            CompositionTarget.Rendering += renderingHandler;
+            return completionSource.Task;
         }
 
         private async void MainWindow_Closed(object sender, WindowEventArgs args)
@@ -274,6 +310,7 @@ namespace OmniDown
             {
                 await _aria2RpcClient.PingAsync();
                 _refreshTimer.Start();
+                await _downloadCoordinator.RemoveCompletedDownloadResultsAsync();
                 await RefreshDownloadsAsync();
             }
             catch (Exception ex)
@@ -295,6 +332,7 @@ namespace OmniDown
 
             try
             {
+                await _downloadCoordinator.RemoveCompletedDownloadResultsAsync();
                 await _aria2RpcClient.SaveSessionAsync();
             }
             catch
@@ -354,6 +392,18 @@ namespace OmniDown
             StatusInfoBar.IsOpen = true;
         }
 
+        private void SetTaskListLoading(bool isLoading)
+        {
+            if (TasksLoadingPanel is null || TasksLoadingRing is null)
+            {
+                return;
+            }
+
+            TasksLoadingRing.IsActive = isLoading;
+            TasksLoadingPanel.Visibility = isLoading ? Visibility.Visible : Visibility.Collapsed;
+            TasksListView.Visibility = isLoading ? Visibility.Collapsed : Visibility.Visible;
+        }
+
         private void UpdateDebugStatus()
         {
             if (DebugEngineText is null ||
@@ -403,6 +453,25 @@ namespace OmniDown
             await RunSelectedTaskOperationAsync(
                 tasks => _downloadCoordinator.DeleteAsync(tasks, deleteFiles.Value),
                 Strings.Get("TasksDeletedMessage"));
+        }
+
+        private async void ClearCompletedTasksButton_Click(object sender, RoutedEventArgs e)
+        {
+            bool? deleteFiles = await ConfirmClearRecordsAsync();
+            if (deleteFiles is null)
+            {
+                return;
+            }
+
+            int clearedCount = await _downloadCoordinator.ClearCompletedAsync(deleteFiles.Value);
+            ApplyTaskFilter(_currentTaskFilter);
+            UpdateDashboard();
+            UpdateSelectionCommands();
+
+            string message = clearedCount == 0
+                ? Strings.Get("ClearCompletedTasksEmptyMessage")
+                : Strings.Get("ClearCompletedTasksMessage");
+            ShowMessage(message, InfoBarSeverity.Success);
         }
 
         private async void TaskTogglePauseResumeButton_Click(object sender, RoutedEventArgs e)
@@ -569,22 +638,7 @@ namespace OmniDown
                 return;
             }
 
-            _isUpdatingTaskSelection = true;
-            try
-            {
-                TasksListView.SelectedItems.Clear();
-                foreach (DownloadTask task in _visibleTasks)
-                {
-                    task.IsSelected = true;
-                    TasksListView.SelectedItems.Add(task);
-                }
-            }
-            finally
-            {
-                _isUpdatingTaskSelection = false;
-            }
-
-            UpdateSelectionCommands();
+            SetVisibleTasksSelected(true);
         }
 
         private void SelectAllTasksCheckBox_Unchecked(object sender, RoutedEventArgs e)
@@ -594,13 +648,34 @@ namespace OmniDown
                 return;
             }
 
+            SetVisibleTasksSelected(false);
+        }
+
+        private void SelectAllTasksCheckBox_Indeterminate(object sender, RoutedEventArgs e)
+        {
+            if (_isUpdatingSelectAllCheckBox)
+            {
+                return;
+            }
+
+            SetVisibleTasksSelected(false);
+        }
+
+        private void SetVisibleTasksSelected(bool isSelected)
+        {
             _isUpdatingTaskSelection = true;
             try
             {
                 TasksListView.SelectedItems.Clear();
                 foreach (DownloadTask task in _visibleTasks)
                 {
-                    task.IsSelected = false;
+                    task.IsSelected = isSelected;
+                    if (isSelected)
+                    {
+                        TasksListView.SelectedItems.Add(task);
+                    }
+
+                    UpdateTaskSelectionGlyphVisibility(task);
                 }
             }
             finally
@@ -609,10 +684,6 @@ namespace OmniDown
             }
 
             UpdateSelectionCommands();
-        }
-
-        private void SelectAllTasksCheckBox_Indeterminate(object sender, RoutedEventArgs e)
-        {
         }
 
         private void TaskIconSelectionBox_PointerEntered(object sender, PointerRoutedEventArgs e)
@@ -761,6 +832,64 @@ namespace OmniDown
                 Content = dialogContent,
                 PrimaryButtonText = Strings.Get("DeleteButtonText"),
                 CloseButtonText = Strings.Get("CancelButtonText"),
+                DefaultButton = ContentDialogButton.Close
+            };
+
+            ContentDialogResult result = await dialog.ShowAsync();
+            return result == ContentDialogResult.Primary
+                ? deleteFilesCheckBox.IsChecked == true
+                : null;
+        }
+
+        private async System.Threading.Tasks.Task<bool?> ConfirmClearRecordsAsync()
+        {
+            CheckBox deleteFilesCheckBox = new()
+            {
+                Content = Strings.Get("ClearRecordsDeleteFilesCheckBoxContent")
+            };
+
+            StackPanel dialogContent = new()
+            {
+                Spacing = 16,
+                Children =
+                {
+                    new TextBlock
+                    {
+                        Text = Strings.Get("ClearRecordsDialogContent"),
+                        TextWrapping = TextWrapping.Wrap
+                    },
+                    deleteFilesCheckBox
+                }
+            };
+
+            StackPanel title = new()
+            {
+                Orientation = Orientation.Horizontal,
+                Spacing = 10,
+                Children =
+                {
+                    new FontIcon
+                    {
+                        Glyph = "\uE946",
+                        Foreground = Application.Current.Resources.TryGetValue("SystemFillColorCautionBrush", out object brush) && brush is Brush cautionBrush
+                            ? cautionBrush
+                            : null
+                    },
+                    new TextBlock
+                    {
+                        Text = Strings.Get("ClearRecordsDialogTitle"),
+                        FontWeight = Microsoft.UI.Text.FontWeights.SemiBold
+                    }
+                }
+            };
+
+            ContentDialog dialog = new()
+            {
+                XamlRoot = Content.XamlRoot,
+                Title = title,
+                Content = dialogContent,
+                PrimaryButtonText = Strings.Get("ClearRecordsYesButtonText"),
+                CloseButtonText = Strings.Get("ClearRecordsNoButtonText"),
                 DefaultButton = ContentDialogButton.Close
             };
 

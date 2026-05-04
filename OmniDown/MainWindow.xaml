@@ -12,7 +12,9 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <Grid RowDefinitions="Auto,Auto,*,Auto">
+    <Grid
+        Loaded="RootGrid_Loaded"
+        RowDefinitions="Auto,Auto,*,Auto">
         <TitleBar
             x:Name="AppTitleBar"
             Grid.Row="0"
@@ -129,49 +131,58 @@
                                 x:Uid="NewDownloadButton"
                                 Label="New" />
                             <AppBarSeparator />
-                            <AppBarButton
-                                x:Name="SortTasksButton"
-                                x:Uid="SortTasksButton"
-                                Label="Sort v">
-                                <AppBarButton.Icon>
-                                    <FontIcon Glyph="&#xE8CB;" />
-                                </AppBarButton.Icon>
-                                <AppBarButton.Flyout>
-                                    <MenuFlyout Opening="SortMenuFlyout_Opening">
-                                        <ToggleMenuFlyoutItem
-                                            x:Name="SortByCreatedAtMenuItem"
-                                            Click="SortColumnMenuItem_Click"
-                                            x:Uid="SortByCreatedAtMenuItem"
-                                            Tag="CreatedAt"
-                                            Text="Added time" />
-                                        <ToggleMenuFlyoutItem
-                                            x:Name="SortByNameMenuItem"
-                                            Click="SortColumnMenuItem_Click"
-                                            x:Uid="SortByNameMenuItem"
-                                            Tag="Name"
-                                            Text="Name" />
-                                        <ToggleMenuFlyoutItem
-                                            x:Name="SortBySizeMenuItem"
-                                            Click="SortColumnMenuItem_Click"
-                                            x:Uid="SortBySizeMenuItem"
-                                            Tag="Size"
-                                            Text="Size" />
-                                        <MenuFlyoutSeparator />
-                                        <ToggleMenuFlyoutItem
-                                            x:Name="SortAscendingMenuItem"
-                                            Click="SortDirectionMenuItem_Click"
-                                            x:Uid="SortAscendingMenuItem"
-                                            Tag="Ascending"
-                                            Text="Ascending" />
-                                        <ToggleMenuFlyoutItem
-                                            x:Name="SortDescendingMenuItem"
-                                            Click="SortDirectionMenuItem_Click"
-                                            x:Uid="SortDescendingMenuItem"
-                                            Tag="Descending"
-                                            Text="Descending" />
-                                    </MenuFlyout>
-                                </AppBarButton.Flyout>
-                            </AppBarButton>
+                            <AppBarElementContainer VerticalAlignment="Center">
+                                <DropDownButton
+                                    x:Name="SortTasksButton"
+                                    MinWidth="74"
+                                    Height="40"
+                                    Padding="12,0"
+                                    VerticalAlignment="Center"
+                                    HorizontalContentAlignment="Center"
+                                    VerticalContentAlignment="Center"
+                                    Background="{ThemeResource ControlFillColorDefaultBrush}"
+                                    BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="4"
+                                    x:Uid="SortTasksButton"
+                                    Content="Sort">
+                                    <DropDownButton.Flyout>
+                                        <MenuFlyout Opening="SortMenuFlyout_Opening">
+                                            <ToggleMenuFlyoutItem
+                                                x:Name="SortByCreatedAtMenuItem"
+                                                Click="SortColumnMenuItem_Click"
+                                                x:Uid="SortByCreatedAtMenuItem"
+                                                Tag="CreatedAt"
+                                                Text="Added time" />
+                                            <ToggleMenuFlyoutItem
+                                                x:Name="SortByNameMenuItem"
+                                                Click="SortColumnMenuItem_Click"
+                                                x:Uid="SortByNameMenuItem"
+                                                Tag="Name"
+                                                Text="Name" />
+                                            <ToggleMenuFlyoutItem
+                                                x:Name="SortBySizeMenuItem"
+                                                Click="SortColumnMenuItem_Click"
+                                                x:Uid="SortBySizeMenuItem"
+                                                Tag="Size"
+                                                Text="Size" />
+                                            <MenuFlyoutSeparator />
+                                            <ToggleMenuFlyoutItem
+                                                x:Name="SortAscendingMenuItem"
+                                                Click="SortDirectionMenuItem_Click"
+                                                x:Uid="SortAscendingMenuItem"
+                                                Tag="Ascending"
+                                                Text="Ascending" />
+                                            <ToggleMenuFlyoutItem
+                                                x:Name="SortDescendingMenuItem"
+                                                Click="SortDirectionMenuItem_Click"
+                                                x:Uid="SortDescendingMenuItem"
+                                                Tag="Descending"
+                                                Text="Descending" />
+                                        </MenuFlyout>
+                                    </DropDownButton.Flyout>
+                                </DropDownButton>
+                            </AppBarElementContainer>
                             <AppBarSeparator />
                             <AppBarButton
                                 x:Name="ResumeTasksButton"
@@ -194,17 +205,12 @@
                                 IsEnabled="False"
                                 x:Uid="DeleteTasksButton"
                                 Label="Delete" />
-                            <AppBarSeparator />
                             <AppBarButton
-                                Click="StartAriaButton_Click"
-                                Icon="Play"
-                                x:Uid="StartAriaButton"
-                                Label="Start aria2" />
-                            <AppBarButton
-                                Click="StopAriaButton_Click"
-                                Icon="Stop"
-                                x:Uid="StopAriaButton"
-                                Label="Stop" />
+                                x:Name="ClearCompletedTasksButton"
+                                Click="ClearCompletedTasksButton_Click"
+                                Icon="Clear"
+                                x:Uid="ClearCompletedTasksButton"
+                                Label="Clear completed records" />
                         </CommandBar>
                     </Grid>
 
@@ -325,31 +331,31 @@
                         </Grid>
                     </Border>
 
-                    <ListView
-                        x:Name="TasksListView"
-                        Grid.Row="3"
-                        IsMultiSelectCheckBoxEnabled="False"
-                        SelectionChanged="TasksListView_SelectionChanged"
-                        SelectionMode="Multiple">
-                        <ListView.ItemContainerStyle>
-                            <Style TargetType="ListViewItem">
-                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                                <Setter Property="MinHeight" Value="52" />
-                                <Setter Property="Margin" Value="0,0,0,4" />
-                                <Setter Property="Padding" Value="0" />
-                            </Style>
-                        </ListView.ItemContainerStyle>
-                        <ListView.ItemContainerTransitions>
-                            <TransitionCollection />
-                        </ListView.ItemContainerTransitions>
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <UserControl Loaded="TaskItem_Loaded">
+                    <Grid Grid.Row="3">
+                        <ListView
+                            x:Name="TasksListView"
+                            IsMultiSelectCheckBoxEnabled="False"
+                            SelectionChanged="TasksListView_SelectionChanged"
+                            SelectionMode="Multiple">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    <Setter Property="MinHeight" Value="52" />
+                                    <Setter Property="Margin" Value="0,0,0,4" />
+                                    <Setter Property="Padding" Value="0" />
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.ItemContainerTransitions>
+                                <TransitionCollection />
+                            </ListView.ItemContainerTransitions>
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <UserControl Loaded="TaskItem_Loaded">
                                     <Grid
                                         MinHeight="52"
-                                        Padding="0,0,20,0"
                                         RowDefinitions="*,3">
                                         <Grid
+                                            Padding="0,0,20,0"
                                             ColumnDefinitions="48,*,120,80,110,220,224"
                                             ColumnSpacing="16">
                                             <Grid
@@ -531,10 +537,26 @@
                                             </VisualStateGroup>
                                         </VisualStateManager.VisualStateGroups>
                                     </Grid>
-                                </UserControl>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
+                                    </UserControl>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+
+                        <Grid
+                            x:Name="TasksLoadingPanel"
+                            Background="{ThemeResource LayerFillColorDefaultBrush}"
+                            Visibility="Visible">
+                            <ProgressRing
+                                x:Name="TasksLoadingRing"
+                                Width="36"
+                                Height="36"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                AutomationProperties.Name="Loading downloads"
+                                IsActive="True"
+                                x:Uid="TasksLoadingRing" />
+                        </Grid>
+                    </Grid>
                 </Grid>
 
                 <Grid
