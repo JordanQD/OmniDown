@@ -240,6 +240,7 @@ public sealed class Aria2EngineHost : IDisposable
             "--split=64",
             $"--dir={options.DownloadDirectory}",
             $"--save-session={sessionPath}",
+            "--force-save=true",
             $"--dht-file-path={dhtPath}",
             $"--dht-file-path6={dht6Path}"
         ];

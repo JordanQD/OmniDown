@@ -46,6 +46,7 @@
   <data name="NameColumnHeader.Text" xml:space="preserve"><value>名称</value></data>
   <data name="StatusColumnHeader.Text" xml:space="preserve"><value>状态</value></data>
   <data name="ProgressColumnHeader.Text" xml:space="preserve"><value>进度</value></data>
+  <data name="RemainingTimeColumnHeader.Text" xml:space="preserve"><value>剩余</value></data>
   <data name="SpeedColumnHeader.Text" xml:space="preserve"><value>速度</value></data>
   <data name="DirectoryColumnHeader.Text" xml:space="preserve"><value>目录</value></data>
   <data name="SettingsTitleText.Text" xml:space="preserve"><value>设置</value></data>
@@ -89,6 +90,15 @@
   <data name="TasksResumedMessage" xml:space="preserve"><value>已开始选中的任务。</value></data>
   <data name="TasksPausedMessage" xml:space="preserve"><value>已暂停选中的任务。</value></data>
   <data name="TasksDeletedMessage" xml:space="preserve"><value>已删除选中的任务。</value></data>
+  <data name="TaskOpenFileActionText" xml:space="preserve"><value>打开文件</value></data>
+  <data name="TaskOpenFolderActionText" xml:space="preserve"><value>打开文件夹</value></data>
+  <data name="TaskCopyLinkActionText" xml:space="preserve"><value>复制项目链接</value></data>
+  <data name="TaskDeleteEntryActionText" xml:space="preserve"><value>删除条目</value></data>
+  <data name="TaskFileNotFoundMessage" xml:space="preserve"><value>文件还不存在或路径不可用。</value></data>
+  <data name="TaskFolderNotFoundMessage" xml:space="preserve"><value>文件夹不存在或路径不可用。</value></data>
+  <data name="TaskLinkNotFoundMessage" xml:space="preserve"><value>这个任务没有可复制的链接。</value></data>
+  <data name="TaskLinkCopiedMessage" xml:space="preserve"><value>已复制项目链接。</value></data>
+  <data name="TaskEntryDeletedMessage" xml:space="preserve"><value>已删除条目。</value></data>
   <data name="TaskOperationFailedMessage" xml:space="preserve"><value>任务操作失败：{0}</value></data>
   <data name="TaskStatusDownloading" xml:space="preserve"><value>下载</value></data>
   <data name="TaskStatusWaiting" xml:space="preserve"><value>等待</value></data>

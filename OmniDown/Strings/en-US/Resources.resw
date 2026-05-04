@@ -46,6 +46,7 @@
   <data name="NameColumnHeader.Text" xml:space="preserve"><value>Name</value></data>
   <data name="StatusColumnHeader.Text" xml:space="preserve"><value>Status</value></data>
   <data name="ProgressColumnHeader.Text" xml:space="preserve"><value>Progress</value></data>
+  <data name="RemainingTimeColumnHeader.Text" xml:space="preserve"><value>Remaining</value></data>
   <data name="SpeedColumnHeader.Text" xml:space="preserve"><value>Speed</value></data>
   <data name="DirectoryColumnHeader.Text" xml:space="preserve"><value>Directory</value></data>
   <data name="SettingsTitleText.Text" xml:space="preserve"><value>Settings</value></data>
@@ -89,6 +90,15 @@
   <data name="TasksResumedMessage" xml:space="preserve"><value>Selected task(s) resumed.</value></data>
   <data name="TasksPausedMessage" xml:space="preserve"><value>Selected task(s) paused.</value></data>
   <data name="TasksDeletedMessage" xml:space="preserve"><value>Selected task(s) deleted.</value></data>
+  <data name="TaskOpenFileActionText" xml:space="preserve"><value>Open file</value></data>
+  <data name="TaskOpenFolderActionText" xml:space="preserve"><value>Open folder</value></data>
+  <data name="TaskCopyLinkActionText" xml:space="preserve"><value>Copy item link</value></data>
+  <data name="TaskDeleteEntryActionText" xml:space="preserve"><value>Delete entry</value></data>
+  <data name="TaskFileNotFoundMessage" xml:space="preserve"><value>The file does not exist yet or the path is unavailable.</value></data>
+  <data name="TaskFolderNotFoundMessage" xml:space="preserve"><value>The folder does not exist or the path is unavailable.</value></data>
+  <data name="TaskLinkNotFoundMessage" xml:space="preserve"><value>This task does not have a link to copy.</value></data>
+  <data name="TaskLinkCopiedMessage" xml:space="preserve"><value>Item link copied.</value></data>
+  <data name="TaskEntryDeletedMessage" xml:space="preserve"><value>Entry deleted.</value></data>
   <data name="TaskOperationFailedMessage" xml:space="preserve"><value>Task operation failed: {0}</value></data>
   <data name="TaskStatusDownloading" xml:space="preserve"><value>Downloading</value></data>
   <data name="TaskStatusWaiting" xml:space="preserve"><value>Waiting</value></data>

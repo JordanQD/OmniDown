@@ -75,6 +75,10 @@ public sealed class DownloadTask : INotifyPropertyChanged
                 OnPropertyChanged(nameof(NameBrush));
                 OnPropertyChanged(nameof(StatusBrush));
                 OnPropertyChanged(nameof(ProgressBrush));
+                OnPropertyChanged(nameof(RemainingTimeText));
+                OnPropertyChanged(nameof(IsPaused));
+                OnPropertyChanged(nameof(ToggleActionGlyph));
+                OnPropertyChanged(nameof(ToggleActionText));
             }
         }
     }
@@ -98,6 +102,7 @@ public sealed class DownloadTask : INotifyPropertyChanged
             if (SetProperty(ref _progress, value))
             {
                 OnPropertyChanged(nameof(ProgressText));
+                OnPropertyChanged(nameof(RemainingTimeText));
             }
         }
     }
@@ -139,7 +144,13 @@ public sealed class DownloadTask : INotifyPropertyChanged
     public long CompletedLength
     {
         get => _completedLength;
-        set => SetProperty(ref _completedLength, value);
+        set
+        {
+            if (SetProperty(ref _completedLength, value))
+            {
+                OnPropertyChanged(nameof(RemainingTimeText));
+            }
+        }
     }
 
     public long TotalLength
@@ -150,6 +161,7 @@ public sealed class DownloadTask : INotifyPropertyChanged
             if (SetProperty(ref _totalLength, value))
             {
                 OnPropertyChanged(nameof(SizeText));
+                OnPropertyChanged(nameof(RemainingTimeText));
             }
         }
     }
@@ -178,6 +190,7 @@ public sealed class DownloadTask : INotifyPropertyChanged
                 OnPropertyChanged(nameof(SpeedText));
                 OnPropertyChanged(nameof(CombinedSpeed));
                 OnPropertyChanged(nameof(DownloadSpeedText));
+                OnPropertyChanged(nameof(RemainingTimeText));
             }
         }
     }
@@ -216,9 +229,27 @@ public sealed class DownloadTask : INotifyPropertyChanged
 
     public Visibility PeerSpeedVisibility => IsPeerTransfer ? Visibility.Visible : Visibility.Collapsed;
 
+    public bool IsPaused => Status.Contains("paused", StringComparison.OrdinalIgnoreCase);
+
+    public string ToggleActionGlyph => IsPaused ? "\uE768" : "\uE769";
+
+    public string ToggleActionText => IsPaused
+        ? Strings.Get("ResumeTasksButton.Label")
+        : Strings.Get("PauseTasksButton.Label");
+
+    public string OpenFileActionText => Strings.Get("TaskOpenFileActionText");
+
+    public string OpenFolderActionText => Strings.Get("TaskOpenFolderActionText");
+
+    public string CopyLinkActionText => Strings.Get("TaskCopyLinkActionText");
+
+    public string DeleteEntryActionText => Strings.Get("TaskDeleteEntryActionText");
+
     public string DownloadSpeedText => FormatSpeed(DownloadSpeed);
 
     public string UploadSpeedText => FormatSpeed(UploadSpeed);
+
+    public string RemainingTimeText => FormatRemainingTime();
 
     public string SpeedText => IsPeerTransfer
         ? $"{Strings.Get("DownloadSpeedPrefix")} {DownloadSpeedText}  {Strings.Get("UploadSpeedPrefix")} {UploadSpeedText}"
@@ -267,6 +298,42 @@ public sealed class DownloadTask : INotifyPropertyChanged
         }
 
         return $"{size:0.#} {units[unitIndex]}";
+    }
+
+    private string FormatRemainingTime()
+    {
+        if (Status.Contains("complete", StringComparison.OrdinalIgnoreCase))
+        {
+            return "0s";
+        }
+
+        if (!Status.Contains("download", StringComparison.OrdinalIgnoreCase) ||
+            TotalLength <= 0 ||
+            CompletedLength < 0 ||
+            CompletedLength >= TotalLength ||
+            DownloadSpeed <= 0)
+        {
+            return "-";
+        }
+
+        long remainingSeconds = (long)Math.Ceiling((TotalLength - CompletedLength) / (double)DownloadSpeed);
+        TimeSpan remaining = TimeSpan.FromSeconds(Math.Max(remainingSeconds, 0));
+        if (remaining.TotalDays >= 1)
+        {
+            return $"{(int)remaining.TotalDays}d {remaining.Hours}h";
+        }
+
+        if (remaining.TotalHours >= 1)
+        {
+            return $"{(int)remaining.TotalHours}h {remaining.Minutes}m";
+        }
+
+        if (remaining.TotalMinutes >= 1)
+        {
+            return $"{(int)remaining.TotalMinutes}m {remaining.Seconds}s";
+        }
+
+        return $"{remaining.Seconds}s";
     }
 
     private static Brush GetResourceBrush(string key, Brush fallback)

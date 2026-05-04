@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,11 +16,14 @@ public sealed class DownloadCoordinator
 {
     private readonly Aria2RpcClient _rpcClient;
     private readonly ObservableCollection<DownloadTask> _tasks;
+    private readonly string _taskCachePath;
 
     public DownloadCoordinator(Aria2RpcClient rpcClient, ObservableCollection<DownloadTask> tasks)
     {
         _rpcClient = rpcClient;
         _tasks = tasks;
+        _taskCachePath = Path.Combine(GetAppDataDirectory(), "tasks.json");
+        LoadTaskCache();
     }
 
     public async Task<DownloadTask> AddDownloadAsync(
@@ -46,6 +50,7 @@ public sealed class DownloadCoordinator
         };
 
         _tasks.Insert(0, task);
+        SaveTaskCache();
         return task;
     }
 
@@ -106,6 +111,8 @@ public sealed class DownloadCoordinator
 
             _tasks.Remove(task);
         }
+
+        SaveTaskCache();
     }
 
     private void UpsertTask(Aria2TaskStatus remoteTask)
@@ -116,6 +123,7 @@ public sealed class DownloadCoordinator
             if (removedTask is not null)
             {
                 _tasks.Remove(removedTask);
+                SaveTaskCache();
             }
 
             return;
@@ -137,17 +145,31 @@ public sealed class DownloadCoordinator
 
         long totalLength = ParseLong(remoteTask.TotalLength);
         long completedLength = ParseLong(remoteTask.CompletedLength);
-        task.Status = NormalizeStatus(remoteTask.Status);
-        task.TotalLength = totalLength;
-        task.CompletedLength = completedLength;
-        task.DownloadSpeed = ParseLong(remoteTask.DownloadSpeed);
-        task.UploadSpeed = ParseLong(remoteTask.UploadSpeed);
+        string normalizedStatus = NormalizeStatus(remoteTask.Status);
+        bool isDownloading = normalizedStatus.Contains("download", StringComparison.OrdinalIgnoreCase);
+        task.Status = normalizedStatus;
+        if (totalLength > 0)
+        {
+            task.TotalLength = totalLength;
+        }
+
+        if (completedLength > 0 || totalLength > 0 || isDownloading)
+        {
+            task.CompletedLength = completedLength;
+        }
+
+        task.DownloadSpeed = isDownloading ? ParseLong(remoteTask.DownloadSpeed) : 0;
+        task.UploadSpeed = isDownloading ? ParseLong(remoteTask.UploadSpeed) : 0;
         task.IsPeerTransfer = IsPeerTransfer(remoteTask);
-        task.Progress = totalLength <= 0 ? 0 : Math.Clamp(completedLength * 100d / totalLength, 0, 100);
+        task.Progress = task.TotalLength <= 0 ? task.Progress : Math.Clamp(task.CompletedLength * 100d / task.TotalLength, 0, 100);
 
         if (string.IsNullOrWhiteSpace(task.Name))
         {
-            task.Name = ResolveRemoteName(remoteTask);
+            string remoteName = ResolveRemoteName(remoteTask);
+            if (!string.IsNullOrWhiteSpace(remoteName))
+            {
+                task.Name = remoteName;
+            }
         }
 
         if (string.IsNullOrWhiteSpace(task.SourceUri))
@@ -164,7 +186,20 @@ public sealed class DownloadCoordinator
         if (!string.IsNullOrWhiteSpace(remotePath))
         {
             task.LocalFilePath = remotePath;
+            string remoteName = Path.GetFileName(remotePath);
+            if (!string.IsNullOrWhiteSpace(remoteName) &&
+                (string.IsNullOrWhiteSpace(task.Name) || task.Name.Equals(task.Gid, StringComparison.OrdinalIgnoreCase)))
+            {
+                task.Name = remoteName;
+            }
         }
+
+        if (normalizedStatus.Contains("complete", StringComparison.OrdinalIgnoreCase))
+        {
+            DeleteControlFiles(task, remoteTask);
+        }
+
+        SaveTaskCache();
     }
 
     private static string ResolveTaskName(string sourceUri, string requestedName)
@@ -190,7 +225,7 @@ public sealed class DownloadCoordinator
     {
         string path = task.Files.FirstOrDefault(file => !string.IsNullOrWhiteSpace(file.Path))?.Path ?? string.Empty;
         string fileName = Path.GetFileName(path);
-        return string.IsNullOrWhiteSpace(fileName) ? task.Gid : fileName;
+        return string.IsNullOrWhiteSpace(fileName) ? string.Empty : fileName;
     }
 
     private static string ResolveRemotePath(Aria2TaskStatus task)
@@ -256,6 +291,38 @@ public sealed class DownloadCoordinator
         DeleteFileIfExists($"{path}.aria2");
     }
 
+    private static void DeleteControlFiles(DownloadTask task, Aria2TaskStatus remoteTask)
+    {
+        HashSet<string> candidatePaths = new(StringComparer.OrdinalIgnoreCase);
+        AddControlFileCandidate(candidatePaths, task.LocalFilePath);
+
+        if (!string.IsNullOrWhiteSpace(task.SaveDirectory) &&
+            !string.IsNullOrWhiteSpace(task.Name))
+        {
+            AddControlFileCandidate(candidatePaths, Path.Combine(task.SaveDirectory, task.Name));
+        }
+
+        foreach (Aria2FileStatus file in remoteTask.Files)
+        {
+            AddControlFileCandidate(candidatePaths, file.Path);
+        }
+
+        foreach (string candidatePath in candidatePaths)
+        {
+            TryDeleteFileIfExists(candidatePath);
+        }
+    }
+
+    private static void AddControlFileCandidate(HashSet<string> candidatePaths, string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return;
+        }
+
+        candidatePaths.Add($"{path}.aria2");
+    }
+
     private static void DeleteFileIfExists(string path)
     {
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
@@ -265,6 +332,110 @@ public sealed class DownloadCoordinator
 
         File.Delete(path);
     }
+
+    private static void TryDeleteFileIfExists(string path)
+    {
+        try
+        {
+            DeleteFileIfExists(path);
+        }
+        catch
+        {
+            // aria2 may still briefly hold the control file; the next refresh will retry.
+        }
+    }
+
+    private void LoadTaskCache()
+    {
+        if (!File.Exists(_taskCachePath))
+        {
+            return;
+        }
+
+        try
+        {
+            string json = File.ReadAllText(_taskCachePath);
+            List<CachedDownloadTask>? cachedTasks = JsonSerializer.Deserialize<List<CachedDownloadTask>>(json);
+            if (cachedTasks is null)
+            {
+                return;
+            }
+
+            foreach (CachedDownloadTask cachedTask in cachedTasks.Where(task => !string.IsNullOrWhiteSpace(task.Gid)))
+            {
+                _tasks.Add(new DownloadTask
+                {
+                    Gid = cachedTask.Gid,
+                    Name = cachedTask.Name,
+                    SourceUri = cachedTask.SourceUri,
+                    SaveDirectory = cachedTask.SaveDirectory,
+                    LocalFilePath = cachedTask.LocalFilePath,
+                    Status = cachedTask.Status,
+                    Progress = cachedTask.Progress,
+                    CompletedLength = cachedTask.CompletedLength,
+                    TotalLength = cachedTask.TotalLength,
+                    IsPeerTransfer = cachedTask.IsPeerTransfer,
+                    CreatedAt = cachedTask.CreatedAt
+                });
+            }
+        }
+        catch
+        {
+            // A corrupt cache should not stop aria2 from being the source of truth.
+        }
+    }
+
+    private void SaveTaskCache()
+    {
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(_taskCachePath)!);
+            List<CachedDownloadTask> cachedTasks = _tasks
+                .Where(task => !string.IsNullOrWhiteSpace(task.Gid))
+                .Select(task => new CachedDownloadTask(
+                    task.Gid,
+                    task.Name,
+                    task.SourceUri,
+                    task.SaveDirectory,
+                    task.LocalFilePath,
+                    task.Status,
+                    task.Progress,
+                    task.CompletedLength,
+                    task.TotalLength,
+                    task.IsPeerTransfer,
+                    task.CreatedAt))
+                .ToList();
+
+            File.WriteAllText(_taskCachePath, JsonSerializer.Serialize(cachedTasks, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            }));
+        }
+        catch
+        {
+            // Cache persistence is best-effort; aria2 session data still controls downloads.
+        }
+    }
+
+    private static string GetAppDataDirectory()
+    {
+        return Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "OmniDown");
+    }
 }
 
 public sealed record DownloadSnapshot(long ActiveCount, long DownloadSpeed, long UploadSpeed);
+
+internal sealed record CachedDownloadTask(
+    string Gid,
+    string Name,
+    string SourceUri,
+    string SaveDirectory,
+    string LocalFilePath,
+    string Status,
+    double Progress,
+    long CompletedLength,
+    long TotalLength,
+    bool IsPeerTransfer,
+    DateTimeOffset CreatedAt);

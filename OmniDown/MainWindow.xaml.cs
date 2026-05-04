@@ -12,9 +12,11 @@ using OmniDown.Services.Rpc;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using Windows.ApplicationModel.DataTransfer;
 using WinRT.Interop;
 
 namespace OmniDown
@@ -392,44 +394,109 @@ namespace OmniDown
                 return;
             }
 
-            CheckBox deleteFilesCheckBox = new()
-            {
-                Content = Strings.Get("DeleteFilesCheckBoxContent")
-            };
-
-            StackPanel dialogContent = new()
-            {
-                Spacing = 12,
-                Children =
-                {
-                    new TextBlock
-                    {
-                        Text = Strings.Get("DeleteDialogContent"),
-                        TextWrapping = TextWrapping.Wrap
-                    },
-                    deleteFilesCheckBox
-                }
-            };
-
-            ContentDialog dialog = new()
-            {
-                XamlRoot = Content.XamlRoot,
-                Title = Strings.Get("DeleteDialogTitle"),
-                Content = dialogContent,
-                PrimaryButtonText = Strings.Get("DeleteButtonText"),
-                CloseButtonText = Strings.Get("CancelButtonText"),
-                DefaultButton = ContentDialogButton.Close
-            };
-
-            ContentDialogResult result = await dialog.ShowAsync();
-            if (result != ContentDialogResult.Primary)
+            bool? deleteFiles = await ConfirmDeleteAsync();
+            if (deleteFiles is null)
             {
                 return;
             }
 
             await RunSelectedTaskOperationAsync(
-                tasks => _downloadCoordinator.DeleteAsync(tasks, deleteFilesCheckBox.IsChecked == true),
+                tasks => _downloadCoordinator.DeleteAsync(tasks, deleteFiles.Value),
                 Strings.Get("TasksDeletedMessage"));
+        }
+
+        private async void TaskTogglePauseResumeButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (GetTaskFromSender(sender) is not DownloadTask task)
+            {
+                return;
+            }
+
+            if (task.IsPaused)
+            {
+                await RunTaskOperationAsync(
+                    task,
+                    tasks => _downloadCoordinator.ResumeAsync(tasks),
+                    Strings.Get("TasksResumedMessage"));
+            }
+            else
+            {
+                await RunTaskOperationAsync(
+                    task,
+                    tasks => _downloadCoordinator.PauseAsync(tasks),
+                    Strings.Get("TasksPausedMessage"));
+            }
+        }
+
+        private void TaskOpenFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (GetTaskFromSender(sender) is not DownloadTask task)
+            {
+                return;
+            }
+
+            string filePath = ResolveTaskFilePath(task);
+            if (!File.Exists(filePath))
+            {
+                ShowMessage(Strings.Get("TaskFileNotFoundMessage"), InfoBarSeverity.Warning);
+                return;
+            }
+
+            OpenShellTarget(filePath);
+        }
+
+        private void TaskOpenFolderButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (GetTaskFromSender(sender) is not DownloadTask task)
+            {
+                return;
+            }
+
+            string folderPath = !string.IsNullOrWhiteSpace(task.SaveDirectory) && Directory.Exists(task.SaveDirectory)
+                ? task.SaveDirectory
+                : Path.GetDirectoryName(ResolveTaskFilePath(task)) ?? string.Empty;
+
+            if (!Directory.Exists(folderPath))
+            {
+                ShowMessage(Strings.Get("TaskFolderNotFoundMessage"), InfoBarSeverity.Warning);
+                return;
+            }
+
+            OpenShellTarget(folderPath);
+        }
+
+        private void TaskCopyLinkButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (GetTaskFromSender(sender) is not DownloadTask task ||
+                string.IsNullOrWhiteSpace(task.SourceUri))
+            {
+                ShowMessage(Strings.Get("TaskLinkNotFoundMessage"), InfoBarSeverity.Warning);
+                return;
+            }
+
+            DataPackage package = new();
+            package.SetText(task.SourceUri);
+            Clipboard.SetContent(package);
+            ShowMessage(Strings.Get("TaskLinkCopiedMessage"), InfoBarSeverity.Success);
+        }
+
+        private async void TaskDeleteEntryButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (GetTaskFromSender(sender) is not DownloadTask task)
+            {
+                return;
+            }
+
+            bool? deleteFiles = await ConfirmDeleteAsync();
+            if (deleteFiles is null)
+            {
+                return;
+            }
+
+            await RunTaskOperationAsync(
+                task,
+                tasks => _downloadCoordinator.DeleteAsync(tasks, deleteFiles.Value),
+                Strings.Get("TaskEntryDeletedMessage"));
         }
 
         private void TaskCheckBox_Changed(object sender, RoutedEventArgs e)
@@ -664,6 +731,102 @@ namespace OmniDown
             {
                 ShowMessage(Strings.Format("TaskOperationFailedMessage", ex.Message), InfoBarSeverity.Error);
             }
+        }
+
+        private async System.Threading.Tasks.Task<bool?> ConfirmDeleteAsync()
+        {
+            CheckBox deleteFilesCheckBox = new()
+            {
+                Content = Strings.Get("DeleteFilesCheckBoxContent")
+            };
+
+            StackPanel dialogContent = new()
+            {
+                Spacing = 12,
+                Children =
+                {
+                    new TextBlock
+                    {
+                        Text = Strings.Get("DeleteDialogContent"),
+                        TextWrapping = TextWrapping.Wrap
+                    },
+                    deleteFilesCheckBox
+                }
+            };
+
+            ContentDialog dialog = new()
+            {
+                XamlRoot = Content.XamlRoot,
+                Title = Strings.Get("DeleteDialogTitle"),
+                Content = dialogContent,
+                PrimaryButtonText = Strings.Get("DeleteButtonText"),
+                CloseButtonText = Strings.Get("CancelButtonText"),
+                DefaultButton = ContentDialogButton.Close
+            };
+
+            ContentDialogResult result = await dialog.ShowAsync();
+            return result == ContentDialogResult.Primary
+                ? deleteFilesCheckBox.IsChecked == true
+                : null;
+        }
+
+        private async System.Threading.Tasks.Task RunTaskOperationAsync(
+            DownloadTask task,
+            Func<IReadOnlyList<DownloadTask>, System.Threading.Tasks.Task> operation,
+            string successMessage)
+        {
+            if (string.IsNullOrWhiteSpace(task.Gid))
+            {
+                return;
+            }
+
+            Aria2EngineStartResult startResult = await EnsureAria2StartedAsync();
+            if (!startResult.Started)
+            {
+                ShowMessage(startResult.Message, InfoBarSeverity.Error);
+                return;
+            }
+
+            try
+            {
+                await operation([task]);
+                await RefreshDownloadsAsync();
+                ApplyTaskFilter(_currentTaskFilter);
+                UpdateSelectionCommands();
+                ShowMessage(successMessage, InfoBarSeverity.Success);
+            }
+            catch (Exception ex)
+            {
+                ShowMessage(Strings.Format("TaskOperationFailedMessage", ex.Message), InfoBarSeverity.Error);
+            }
+        }
+
+        private static DownloadTask? GetTaskFromSender(object sender)
+        {
+            return sender is FrameworkElement { DataContext: DownloadTask task }
+                ? task
+                : null;
+        }
+
+        private static string ResolveTaskFilePath(DownloadTask task)
+        {
+            if (!string.IsNullOrWhiteSpace(task.LocalFilePath))
+            {
+                return task.LocalFilePath;
+            }
+
+            return string.IsNullOrWhiteSpace(task.SaveDirectory) || string.IsNullOrWhiteSpace(task.Name)
+                ? string.Empty
+                : Path.Combine(task.SaveDirectory, task.Name);
+        }
+
+        private static void OpenShellTarget(string path)
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = path,
+                UseShellExecute = true
+            });
         }
 
         private List<DownloadTask> GetSelectedTasks()

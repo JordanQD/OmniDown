@@ -273,7 +273,7 @@
                         <Grid
                             MinHeight="38"
                             Padding="0,0,20,0"
-                            ColumnDefinitions="48,*,120,80,220"
+                            ColumnDefinitions="48,*,120,80,110,220,224"
                             ColumnSpacing="16">
                             <CheckBox
                                 x:Name="SelectAllTasksCheckBox"
@@ -313,6 +313,13 @@
                                 HorizontalAlignment="Stretch"
                                 VerticalAlignment="Center"
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                x:Uid="RemainingTimeColumnHeader"
+                                Text="Remaining" />
+                            <TextBlock
+                                Grid.Column="5"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Center"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                 x:Uid="SpeedColumnHeader"
                                 Text="Speed" />
                         </Grid>
@@ -343,7 +350,7 @@
                                         Padding="0,0,20,0"
                                         RowDefinitions="*,3">
                                         <Grid
-                                            ColumnDefinitions="48,*,120,80,220"
+                                            ColumnDefinitions="48,*,120,80,110,220,224"
                                             ColumnSpacing="16">
                                             <Grid
                                                 Width="40"
@@ -398,11 +405,17 @@
                                                 Grid.Column="4"
                                                 VerticalAlignment="Center"
                                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                Text="{Binding RemainingTimeText}"
+                                                TextTrimming="CharacterEllipsis" />
+                                            <TextBlock
+                                                Grid.Column="5"
+                                                VerticalAlignment="Center"
+                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                 Text="{Binding DownloadSpeedText}"
                                                 TextTrimming="CharacterEllipsis"
                                                 Visibility="{Binding NormalSpeedVisibility}" />
                                             <StackPanel
-                                                Grid.Column="4"
+                                                Grid.Column="5"
                                                 VerticalAlignment="Center"
                                                 Spacing="2"
                                                 Visibility="{Binding PeerSpeedVisibility}">
@@ -432,6 +445,68 @@
                                                         Text="{Binding UploadSpeedText}"
                                                         TextTrimming="CharacterEllipsis" />
                                                 </StackPanel>
+                                            </StackPanel>
+                                            <StackPanel
+                                                Grid.Column="6"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Center"
+                                                Orientation="Horizontal"
+                                                Spacing="6">
+                                                <Button
+                                                    Width="34"
+                                                    Height="34"
+                                                    MinWidth="0"
+                                                    Padding="0"
+                                                    Click="TaskTogglePauseResumeButton_Click"
+                                                    ToolTipService.ToolTip="{Binding ToggleActionText}">
+                                                    <FontIcon
+                                                        FontSize="15"
+                                                        Glyph="{Binding ToggleActionGlyph}" />
+                                                </Button>
+                                                <Button
+                                                    Width="34"
+                                                    Height="34"
+                                                    MinWidth="0"
+                                                    Padding="0"
+                                                    Click="TaskOpenFileButton_Click"
+                                                    ToolTipService.ToolTip="{Binding OpenFileActionText}">
+                                                    <FontIcon
+                                                        FontSize="15"
+                                                        Glyph="&#xE8A7;" />
+                                                </Button>
+                                                <Button
+                                                    Width="34"
+                                                    Height="34"
+                                                    MinWidth="0"
+                                                    Padding="0"
+                                                    Click="TaskOpenFolderButton_Click"
+                                                    ToolTipService.ToolTip="{Binding OpenFolderActionText}">
+                                                    <FontIcon
+                                                        FontSize="15"
+                                                        Glyph="&#xE8B7;" />
+                                                </Button>
+                                                <Button
+                                                    Width="34"
+                                                    Height="34"
+                                                    MinWidth="0"
+                                                    Padding="0"
+                                                    Click="TaskCopyLinkButton_Click"
+                                                    ToolTipService.ToolTip="{Binding CopyLinkActionText}">
+                                                    <FontIcon
+                                                        FontSize="15"
+                                                        Glyph="&#xE71B;" />
+                                                </Button>
+                                                <Button
+                                                    Width="34"
+                                                    Height="34"
+                                                    MinWidth="0"
+                                                    Padding="0"
+                                                    Click="TaskDeleteEntryButton_Click"
+                                                    ToolTipService.ToolTip="{Binding DeleteEntryActionText}">
+                                                    <FontIcon
+                                                        FontSize="15"
+                                                        Glyph="&#xE711;" />
+                                                </Button>
                                             </StackPanel>
                                         </Grid>
                                         <ProgressBar

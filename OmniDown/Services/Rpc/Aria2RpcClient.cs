@@ -272,6 +272,7 @@ public sealed class Aria2RpcClient : IDisposable
             CompletedLength = TryGetString(item, "completedLength"),
             DownloadSpeed = TryGetString(item, "downloadSpeed"),
             UploadSpeed = TryGetString(item, "uploadSpeed"),
+            BitTorrent = item.TryGetProperty("bittorrent", out JsonElement bitTorrent) ? bitTorrent.Clone() : null,
             Directory = TryGetString(item, "dir"),
             Files = ReadFiles(item)
         };
@@ -350,6 +351,7 @@ public sealed class Aria2RpcClient : IDisposable
         "completedLength",
         "downloadSpeed",
         "uploadSpeed",
+        "bittorrent",
         "dir",
         "files"
     ];
