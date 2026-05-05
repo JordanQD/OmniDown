@@ -14,7 +14,7 @@
 
     <Grid
         Loaded="RootGrid_Loaded"
-        RowDefinitions="Auto,Auto,*,Auto">
+        RowDefinitions="Auto,*">
         <TitleBar
             x:Name="AppTitleBar"
             Grid.Row="0"
@@ -42,16 +42,9 @@
             </TitleBar.Content>
         </TitleBar>
 
-        <InfoBar
-            x:Name="StatusInfoBar"
-            Grid.Row="1"
-            Margin="12,12,12,0"
-            IsClosable="True"
-            IsOpen="False" />
-
         <NavigationView
             x:Name="RootNavigation"
-            Grid.Row="2"
+            Grid.Row="1"
             IsBackButtonVisible="Collapsed"
             IsPaneToggleButtonVisible="False"
             IsSettingsVisible="False"
@@ -104,10 +97,11 @@
                 </NavigationViewItem>
             </NavigationView.FooterMenuItems>
 
-            <Grid Padding="28,20,28,24">
-                <Grid
-                    x:Name="TasksPage"
-                    RowDefinitions="Auto,Auto,Auto,*">
+            <Grid RowDefinitions="*,Auto">
+                <Grid Padding="28,20,28,24">
+                    <Grid
+                        x:Name="TasksPage"
+                        RowDefinitions="Auto,Auto,Auto,*">
                     <Grid ColumnDefinitions="*,Auto">
                         <StackPanel Spacing="4">
                             <TextBlock
@@ -213,6 +207,13 @@
                                 x:Uid="PauseTasksButton"
                                 Label="Pause" />
                             <AppBarButton
+                                x:Name="RecoverTasksButton"
+                                Click="RecoverTasksButton_Click"
+                                Icon="Refresh"
+                                IsEnabled="False"
+                                x:Uid="RecoverTasksButton"
+                                Label="Recover" />
+                            <AppBarButton
                                 x:Name="DeleteTasksButton"
                                 Click="DeleteTasksButton_Click"
                                 Icon="Delete"
@@ -232,7 +233,7 @@
                         x:Name="StatsPanel"
                         Grid.Row="1"
                         Margin="0,20,0,14"
-                        ColumnDefinitions="*,*,*,*">
+                        ColumnDefinitions="*,*,*,*,Auto">
                         <StackPanel Spacing="4">
                             <TextBlock
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -283,6 +284,230 @@
                                 FontWeight="SemiBold"
                                 Text="0" />
                         </StackPanel>
+                        <DropDownButton
+                            x:Name="SpeedLimitButton"
+                            Grid.Column="4"
+                            MinWidth="292"
+                            Margin="-14,0,0,0"
+                            Padding="14,0,14,6"
+                            HorizontalAlignment="Right"
+                            HorizontalContentAlignment="Left"
+                            VerticalAlignment="Top"
+                            AutomationProperties.Name="Realtime speed and speed limit"
+                            Background="Transparent"
+                            BorderBrush="Transparent"
+                            BorderThickness="0"
+                            x:Uid="SpeedLimitButton">
+                            <DropDownButton.Content>
+                                <Grid
+                                    Width="264"
+                                    RowDefinitions="Auto,Auto,16"
+                                    RowSpacing="4">
+                                    <TextBlock
+                                        HorizontalAlignment="Left"
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        x:Uid="RealtimeSpeedLabel"
+                                        Text="Realtime speed" />
+                                    <StackPanel
+                                        Grid.Row="1"
+                                        HorizontalAlignment="Left"
+                                        Orientation="Horizontal"
+                                        Spacing="18">
+                                        <Grid
+                                            ColumnDefinitions="22,96">
+                                            <Grid
+                                                Width="22"
+                                                HorizontalAlignment="Center">
+                                                <FontIcon
+                                                    HorizontalAlignment="Center"
+                                                    FontSize="16"
+                                                    Glyph="&#xE898;" />
+                                            </Grid>
+                                            <TextBlock
+                                                x:Name="GlobalUploadSpeedText"
+                                                Grid.Column="1"
+                                                Width="96"
+                                                FontSize="18"
+                                                FontWeight="SemiBold"
+                                                TextTrimming="CharacterEllipsis"
+                                                Text="0 B/s" />
+                                        </Grid>
+                                        <Grid
+                                            ColumnDefinitions="22,96">
+                                            <Grid
+                                                Width="22"
+                                                HorizontalAlignment="Center">
+                                                <FontIcon
+                                                    HorizontalAlignment="Center"
+                                                    FontSize="16"
+                                                    Glyph="&#xE896;" />
+                                            </Grid>
+                                            <TextBlock
+                                                x:Name="GlobalDownloadSpeedText"
+                                                Grid.Column="1"
+                                                Width="96"
+                                                FontSize="18"
+                                                FontWeight="SemiBold"
+                                                TextTrimming="CharacterEllipsis"
+                                                Text="0 B/s" />
+                                        </Grid>
+                                    </StackPanel>
+                                    <StackPanel
+                                        Grid.Row="2"
+                                        HorizontalAlignment="Left"
+                                        Orientation="Horizontal"
+                                        Spacing="18">
+                                        <Grid
+                                            ColumnDefinitions="22,96">
+                                            <Grid
+                                                x:Name="GlobalUploadLimitIconPanel"
+                                                Width="22"
+                                                HorizontalAlignment="Center"
+                                                Opacity="0">
+                                                <Grid
+                                                    Width="22"
+                                                    HorizontalAlignment="Center">
+                                                    <FontIcon
+                                                        HorizontalAlignment="Center"
+                                                        FontSize="11"
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Glyph="&#xE72E;" />
+                                                </Grid>
+                                            </Grid>
+                                            <TextBlock
+                                                x:Name="GlobalUploadLimitText"
+                                                Grid.Column="1"
+                                                Width="96"
+                                                FontSize="12"
+                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                Opacity="0"
+                                                Text="0 B/s"
+                                                TextTrimming="CharacterEllipsis" />
+                                        </Grid>
+                                        <Grid
+                                            ColumnDefinitions="22,96">
+                                            <Grid
+                                                x:Name="GlobalDownloadLimitIconPanel"
+                                                Width="22"
+                                                HorizontalAlignment="Center"
+                                                Opacity="0">
+                                                <Grid
+                                                    Width="22"
+                                                    HorizontalAlignment="Center">
+                                                    <FontIcon
+                                                        HorizontalAlignment="Center"
+                                                        FontSize="11"
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Glyph="&#xE72E;" />
+                                                </Grid>
+                                            </Grid>
+                                            <TextBlock
+                                                x:Name="GlobalDownloadLimitText"
+                                                Grid.Column="1"
+                                                Width="96"
+                                                FontSize="12"
+                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                Opacity="0"
+                                                Text="0 B/s"
+                                                TextTrimming="CharacterEllipsis" />
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </DropDownButton.Content>
+                            <DropDownButton.Flyout>
+                                <Flyout Placement="BottomEdgeAlignedRight">
+                                    <StackPanel
+                                        Width="260"
+                                        Spacing="12">
+                                        <StackPanel Spacing="8">
+                                            <Grid
+                                                Width="260"
+                                                ColumnDefinitions="*,92"
+                                                ColumnSpacing="8">
+                                                <TextBlock
+                                                    VerticalAlignment="Center"
+                                                    x:Uid="UploadLimitLabel"
+                                                    Text="Upload limit" />
+                                                <ToggleSwitch
+                                                    x:Name="UploadLimitToggleSwitch"
+                                                    Grid.Column="1"
+                                                    Width="48"
+                                                    MinWidth="0"
+                                                    Padding="0"
+                                                    HorizontalAlignment="Right"
+                                                    OffContent=""
+                                                    OnContent=""
+                                                    Toggled="UploadLimitToggleSwitch_Toggled" />
+                                            </Grid>
+                                            <Grid ColumnDefinitions="*,92" ColumnSpacing="8">
+                                                <NumberBox
+                                                    x:Name="UploadLimitNumberBox"
+                                                    IsEnabled="False"
+                                                    Minimum="1"
+                                                    SmallChange="128"
+                                                    LargeChange="1024"
+                                                    SpinButtonPlacementMode="Compact"
+                                                    Value="1024" />
+                                                <ComboBox
+                                                    x:Name="UploadLimitUnitComboBox"
+                                                    Grid.Column="1"
+                                                    HorizontalAlignment="Right"
+                                                    IsEnabled="False"
+                                                    SelectedIndex="0">
+                                                    <ComboBoxItem Content="KB/s" />
+                                                    <ComboBoxItem Content="MB/s" />
+                                                </ComboBox>
+                                            </Grid>
+                                        </StackPanel>
+                                        <StackPanel Spacing="8">
+                                            <Grid
+                                                Width="260"
+                                                ColumnDefinitions="*,92"
+                                                ColumnSpacing="8">
+                                                <TextBlock
+                                                    VerticalAlignment="Center"
+                                                    x:Uid="DownloadLimitLabel"
+                                                    Text="Download limit" />
+                                                <ToggleSwitch
+                                                    x:Name="DownloadLimitToggleSwitch"
+                                                    Grid.Column="1"
+                                                    Width="48"
+                                                    MinWidth="0"
+                                                    Padding="0"
+                                                    HorizontalAlignment="Right"
+                                                    OffContent=""
+                                                    OnContent=""
+                                                    Toggled="DownloadLimitToggleSwitch_Toggled" />
+                                            </Grid>
+                                            <Grid ColumnDefinitions="*,92" ColumnSpacing="8">
+                                                <NumberBox
+                                                    x:Name="DownloadLimitNumberBox"
+                                                    IsEnabled="False"
+                                                    Minimum="1"
+                                                    SmallChange="128"
+                                                    LargeChange="1024"
+                                                    SpinButtonPlacementMode="Compact"
+                                                    Value="1024" />
+                                                <ComboBox
+                                                    x:Name="DownloadLimitUnitComboBox"
+                                                    Grid.Column="1"
+                                                    HorizontalAlignment="Right"
+                                                    IsEnabled="False"
+                                                    SelectedIndex="0">
+                                                    <ComboBoxItem Content="KB/s" />
+                                                    <ComboBoxItem Content="MB/s" />
+                                                </ComboBox>
+                                            </Grid>
+                                        </StackPanel>
+                                        <Button
+                                            HorizontalAlignment="Right"
+                                            Click="ApplySpeedLimitButton_Click"
+                                            Content="Apply"
+                                            x:Uid="ApplySpeedLimitButton" />
+                                    </StackPanel>
+                                </Flyout>
+                            </DropDownButton.Flyout>
+                        </DropDownButton>
                     </Grid>
 
                     <Border
@@ -446,10 +671,10 @@
                                                         Width="14"
                                                         FontSize="12"
                                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                        Glyph="&#xE896;" />
+                                                        Glyph="&#xE898;" />
                                                     <TextBlock
                                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                        Text="{Binding DownloadSpeedText}"
+                                                        Text="{Binding UploadSpeedText}"
                                                         TextTrimming="CharacterEllipsis" />
                                                 </StackPanel>
                                                 <StackPanel
@@ -459,10 +684,10 @@
                                                         Width="14"
                                                         FontSize="12"
                                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                        Glyph="&#xE898;" />
+                                                        Glyph="&#xE896;" />
                                                     <TextBlock
                                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                        Text="{Binding UploadSpeedText}"
+                                                        Text="{Binding DownloadSpeedText}"
                                                         TextTrimming="CharacterEllipsis" />
                                                 </StackPanel>
                                             </StackPanel>
@@ -573,11 +798,11 @@
                     </Grid>
                 </Grid>
 
-                <Grid
-                    x:Name="SettingsPage"
-                    Visibility="Collapsed"
-                    RowDefinitions="Auto,Auto,*"
-                    RowSpacing="20">
+                    <Grid
+                        x:Name="SettingsPage"
+                        Visibility="Collapsed"
+                        RowDefinitions="Auto,Auto,*"
+                        RowSpacing="20">
                     <StackPanel Spacing="4">
                         <TextBlock
                             FontSize="28"
@@ -675,72 +900,179 @@
                                 Content="Stop" />
                         </StackPanel>
                     </Grid>
+                    </Grid>
+                </Grid>
+
+                <Grid
+                    Grid.Row="1"
+                    RowDefinitions="*,Auto">
+                    <Border
+                        Grid.Row="1"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="0,1,0,0">
+                        <Grid RowDefinitions="Auto,Auto">
+                            <Grid
+                            Padding="12,6"
+                            ColumnDefinitions="Auto,*,Auto,Auto,Auto"
+                            ColumnSpacing="12">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon FontSize="12" Glyph="&#xE756;" />
+                                <TextBlock
+                                    x:Name="DebugEngineText"
+                                    VerticalAlignment="Center"
+                                    x:Uid="DebugEngineText"
+                                    Text="aria2 stopped" />
+                            </StackPanel>
+                            <TextBlock
+                                Grid.Column="1"
+                                VerticalAlignment="Center"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                x:Uid="TerminalSummaryText"
+                                Text="aria2 terminal output"
+                                TextTrimming="CharacterEllipsis" />
+                            <Button
+                                x:Name="ClearTerminalButton"
+                                Grid.Column="2"
+                                Click="ClearTerminalButton_Click"
+                                Padding="10,4">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon FontSize="14" Glyph="&#xE75C;" />
+                                    <TextBlock
+                                        x:Uid="ClearTerminalButtonLabel"
+                                        Text="Clear" />
+                                </StackPanel>
+                            </Button>
+                            <ToggleButton
+                                x:Name="TerminalToggleButton"
+                                Grid.Column="3"
+                                Checked="TerminalToggleButton_Changed"
+                                Padding="10,4"
+                                Unchecked="TerminalToggleButton_Changed">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon FontSize="14" Glyph="&#xE756;" />
+                                    <TextBlock
+                                        x:Uid="TerminalToggleButtonLabel"
+                                        Text="Terminal" />
+                                </StackPanel>
+                            </ToggleButton>
+                            <Button
+                                x:Name="NotificationHistoryButton"
+                                Grid.Column="4"
+                                Padding="10,4"
+                                HorizontalAlignment="Right">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon FontSize="14" Glyph="&#xE7F4;" />
+                                    <TextBlock
+                                        x:Uid="NotificationHistoryButtonLabel"
+                                        Text="Notifications" />
+                                </StackPanel>
+                                <Button.Flyout>
+                                    <Flyout Placement="TopEdgeAlignedRight">
+                                        <Grid
+                                            Width="380"
+                                            MaxHeight="420"
+                                            RowDefinitions="Auto,*"
+                                            RowSpacing="8">
+                                            <TextBlock
+                                                FontSize="16"
+                                                FontWeight="SemiBold"
+                                                x:Uid="NotificationHistoryTitleText"
+                                                Text="Notifications" />
+                                            <ListView
+                                                x:Name="NotificationHistoryListView"
+                                                Grid.Row="1"
+                                                MaxHeight="380"
+                                                SelectionMode="None">
+                                                <ListView.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Grid
+                                                            Padding="0,8"
+                                                            ColumnDefinitions="Auto,*"
+                                                            ColumnSpacing="10">
+                                                            <FontIcon
+                                                                Width="20"
+                                                                VerticalAlignment="Top"
+                                                                FontSize="15"
+                                                                Foreground="{Binding SeverityBrush}"
+                                                                Glyph="{Binding SeverityGlyph}" />
+                                                            <StackPanel
+                                                                Grid.Column="1"
+                                                                Spacing="2">
+                                                                <TextBlock
+                                                                    FontWeight="SemiBold"
+                                                                    Foreground="{Binding SeverityBrush}"
+                                                                    Text="{Binding SeverityText}" />
+                                                                <TextBlock
+                                                                    Text="{Binding Message}"
+                                                                    TextWrapping="WrapWholeWords" />
+                                                                <TextBlock
+                                                                    FontSize="12"
+                                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                    Text="{Binding DetailText}" />
+                                                            </StackPanel>
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </ListView.ItemTemplate>
+                                            </ListView>
+                                        </Grid>
+                                    </Flyout>
+                                </Button.Flyout>
+                            </Button>
+                            </Grid>
+
+                        <Border
+                            x:Name="TerminalPanel"
+                            Grid.Row="1"
+                            Height="180"
+                            Padding="12"
+                            Background="#FF1E1E1E"
+                            Visibility="Collapsed">
+                            <ScrollViewer
+                                x:Name="TerminalScrollViewer"
+                                HorizontalScrollBarVisibility="Auto"
+                                VerticalScrollBarVisibility="Auto">
+                                <TextBlock
+                                    x:Name="TerminalTextBlock"
+                                    FontFamily="Cascadia Mono, Consolas"
+                                    FontSize="12"
+                                    Foreground="#FFD4D4D4"
+                                    x:Uid="TerminalTextBlock"
+                                    Text="aria2 terminal output will appear here."
+                                    TextWrapping="NoWrap" />
+                            </ScrollViewer>
+                        </Border>
+                        </Grid>
+                    </Border>
+
+                    <Border
+                        x:Name="StatusToastPanel"
+                        Width="360"
+                        MinHeight="72"
+                        Margin="0,0,16,54"
+                        Padding="14,12"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Visibility="Collapsed">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                            <FontIcon
+                                x:Name="StatusToastGlyph"
+                                Width="22"
+                                VerticalAlignment="Top"
+                                FontSize="18"
+                                Glyph="&#xE946;" />
+                            <TextBlock
+                                x:Name="StatusToastMessageText"
+                                Grid.Column="1"
+                                TextWrapping="WrapWholeWords" />
+                        </Grid>
+                    </Border>
                 </Grid>
             </Grid>
         </NavigationView>
-
-        <Border
-            Grid.Row="3"
-            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-            BorderThickness="0,1,0,0">
-            <Grid RowDefinitions="Auto,Auto">
-                <Grid
-                    Padding="12,6"
-                    ColumnDefinitions="Auto,*,Auto,Auto"
-                    ColumnSpacing="12">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                        <FontIcon FontSize="12" Glyph="&#xE756;" />
-                        <TextBlock
-                            x:Name="DebugEngineText"
-                            VerticalAlignment="Center"
-                            x:Uid="DebugEngineText"
-                            Text="aria2 stopped" />
-                    </StackPanel>
-                    <TextBlock
-                        Grid.Column="1"
-                        VerticalAlignment="Center"
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        x:Uid="TerminalSummaryText"
-                        Text="aria2 terminal output"
-                        TextTrimming="CharacterEllipsis" />
-                    <Button
-                        x:Name="ClearTerminalButton"
-                        Grid.Column="2"
-                        Click="ClearTerminalButton_Click"
-                        x:Uid="ClearTerminalButton"
-                        Content="Clear" />
-                    <ToggleButton
-                        x:Name="TerminalToggleButton"
-                        Grid.Column="3"
-                        Checked="TerminalToggleButton_Changed"
-                        Content="Terminal"
-                        x:Uid="TerminalToggleButton"
-                        Unchecked="TerminalToggleButton_Changed" />
-                </Grid>
-
-                <Border
-                    x:Name="TerminalPanel"
-                    Grid.Row="1"
-                    Height="180"
-                    Padding="12"
-                    Background="#FF1E1E1E"
-                    Visibility="Collapsed">
-                    <ScrollViewer
-                        x:Name="TerminalScrollViewer"
-                        HorizontalScrollBarVisibility="Auto"
-                        VerticalScrollBarVisibility="Auto">
-                        <TextBlock
-                            x:Name="TerminalTextBlock"
-                            FontFamily="Cascadia Mono, Consolas"
-                            FontSize="12"
-                            Foreground="#FFD4D4D4"
-                            x:Uid="TerminalTextBlock"
-                            Text="aria2 terminal output will appear here."
-                            TextWrapping="NoWrap" />
-                    </ScrollViewer>
-                </Border>
-            </Grid>
-        </Border>
     </Grid>
 </Window>

@@ -77,6 +77,7 @@ public sealed class DownloadTask : INotifyPropertyChanged
                 OnPropertyChanged(nameof(ProgressBrush));
                 OnPropertyChanged(nameof(RemainingTimeText));
                 OnPropertyChanged(nameof(IsPaused));
+                OnPropertyChanged(nameof(IsError));
                 OnPropertyChanged(nameof(ToggleActionGlyph));
                 OnPropertyChanged(nameof(ToggleActionText));
             }
@@ -231,9 +232,15 @@ public sealed class DownloadTask : INotifyPropertyChanged
 
     public bool IsPaused => Status.Contains("paused", StringComparison.OrdinalIgnoreCase);
 
-    public string ToggleActionGlyph => IsPaused ? "\uE768" : "\uE769";
+    public bool IsError => Status.Contains("error", StringComparison.OrdinalIgnoreCase);
 
-    public string ToggleActionText => IsPaused
+    public string ToggleActionGlyph => IsError
+        ? "\uE72C"
+        : IsPaused ? "\uE768" : "\uE769";
+
+    public string ToggleActionText => IsError
+        ? Strings.Get("RecoverTasksButton.Label")
+        : IsPaused
         ? Strings.Get("ResumeTasksButton.Label")
         : Strings.Get("PauseTasksButton.Label");
 
@@ -252,7 +259,7 @@ public sealed class DownloadTask : INotifyPropertyChanged
     public string RemainingTimeText => FormatRemainingTime();
 
     public string SpeedText => IsPeerTransfer
-        ? $"{Strings.Get("DownloadSpeedPrefix")} {DownloadSpeedText}  {Strings.Get("UploadSpeedPrefix")} {UploadSpeedText}"
+        ? $"{Strings.Get("UploadSpeedPrefix")} {UploadSpeedText}  {Strings.Get("DownloadSpeedPrefix")} {DownloadSpeedText}"
         : DownloadSpeedText;
 
     private bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string? propertyName = null)

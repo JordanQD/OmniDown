@@ -78,6 +78,13 @@ public sealed class Aria2RpcClient : IDisposable
         return SendAsync<Aria2GlobalStat>("aria2.getGlobalStat", [], cancellationToken);
     }
 
+    public Task ChangeGlobalOptionAsync(
+        Dictionary<string, string> options,
+        CancellationToken cancellationToken = default)
+    {
+        return SendAsync<string>("aria2.changeGlobalOption", [options], cancellationToken);
+    }
+
     public Task PauseAsync(string gid, CancellationToken cancellationToken = default)
     {
         return SendAsync<string>("aria2.pause", [gid], cancellationToken);

@@ -8,6 +8,7 @@ using OmniDown.Models;
 using OmniDown.Services.Downloads;
 using OmniDown.Services.Engine;
 using OmniDown.Services.Localization;
+using OmniDown.Services.Notifications;
 using OmniDown.Services.Rpc;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 using WinRT.Interop;
@@ -29,9 +31,12 @@ namespace OmniDown
         private readonly Aria2EngineHost _aria2EngineHost = new();
         private readonly Aria2RpcClient _aria2RpcClient = new();
         private readonly DownloadCoordinator _downloadCoordinator;
+        private readonly SystemNotificationService _notifications;
         private readonly DispatcherTimer _refreshTimer = new();
+        private readonly DispatcherTimer _statusMessageTimer = new();
         private readonly string _rpcSecret = Convert.ToHexString(RandomNumberGenerator.GetBytes(16));
         private readonly ObservableCollection<DownloadTask> _visibleTasks = new();
+        private readonly ObservableCollection<AppStatusMessage> _statusMessages = new();
         private string _currentTaskFilter = "Home";
         private TaskSortColumn _sortColumn = TaskSortColumn.CreatedAt;
         private bool _sortAscending = false;
@@ -39,6 +44,12 @@ namespace OmniDown
         private bool _isUpdatingSelectAllCheckBox;
         private bool _isUpdatingTaskSelection;
         private bool _hasStartedInitialLoad;
+        private bool _isDownloadSpeedLimitEnabled;
+        private bool _isUploadSpeedLimitEnabled;
+        private long _downloadLimitBytesPerSecond;
+        private long _uploadLimitBytesPerSecond;
+        private readonly Dictionary<string, string> _observedTaskStatuses = new(StringComparer.OrdinalIgnoreCase);
+        private readonly string _speedLimitSettingsPath = Path.Combine(GetAppDataDirectory(), "speed-limits.json");
 
         public ObservableCollection<DownloadTask> Tasks { get; } = new();
 
@@ -46,19 +57,25 @@ namespace OmniDown
         {
             InitializeComponent();
             TasksListView.ItemsSource = _visibleTasks;
+            NotificationHistoryListView.ItemsSource = _statusMessages;
             SetWindowIcon();
             ExtendsContentIntoTitleBar = true;
             SetTitleBar(AppTitleBar);
             AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
             _downloadCoordinator = new DownloadCoordinator(_aria2RpcClient, Tasks);
+            _notifications = ((App)Application.Current).Notifications;
+            RecordObservedTaskStatuses();
             Closed += MainWindow_Closed;
             _refreshTimer.Interval = TimeSpan.FromSeconds(2);
             _refreshTimer.Tick += RefreshTimer_Tick;
+            _statusMessageTimer.Interval = TimeSpan.FromSeconds(3);
+            _statusMessageTimer.Tick += StatusMessageTimer_Tick;
 
             DownloadDirectoryTextBox.Text = System.IO.Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                 "Downloads");
 
+            LoadSpeedLimitSettings();
             UpdateSearchPlaceholder();
             UpdateDownloadsHeader("Home");
             UpdateStatsVisibility("Home");
@@ -66,6 +83,8 @@ namespace OmniDown
             ApplySettingsFilter();
             SetTaskListLoading(true);
             UpdateDashboard();
+            UpdateGlobalSpeeds(0, 0);
+            UpdateGlobalSpeedLimitText();
             UpdateAriaStatus();
             UpdateDebugStatus();
         }
@@ -152,9 +171,11 @@ namespace OmniDown
 
             try
             {
-                await _downloadCoordinator.AddDownloadAsync(sourceUri, fileNameTextBox.Text, saveDirectory, splitCount);
-                await RefreshDownloadsAsync();
+                DownloadTask task = await _downloadCoordinator.AddDownloadAsync(sourceUri, fileNameTextBox.Text, saveDirectory, splitCount);
+                _observedTaskStatuses[task.Gid] = task.Status;
                 ShowMessage(Strings.Get("TaskAddedMessage"), InfoBarSeverity.Success);
+                _notifications.ShowTaskAdded(task);
+                await RefreshDownloadsAsync();
             }
             catch (Exception ex)
             {
@@ -186,6 +207,8 @@ namespace OmniDown
             _refreshTimer.Stop();
             await SaveAriaSessionIfRunningAsync();
             _aria2EngineHost.Stop();
+            UpdateGlobalSpeeds(0, 0);
+            UpdateGlobalSpeedLimitText();
             UpdateAriaStatus();
             ShowMessage(Strings.Get("AriaStoppedMessage"), InfoBarSeverity.Informational);
         }
@@ -261,7 +284,9 @@ namespace OmniDown
         private async void MainWindow_Closed(object sender, WindowEventArgs args)
         {
             _refreshTimer.Stop();
+            SaveSpeedLimitSettings();
             await SaveAriaSessionIfRunningAsync();
+            _notifications.Unregister();
             _aria2RpcClient.Dispose();
             _aria2EngineHost.Dispose();
         }
@@ -311,6 +336,7 @@ namespace OmniDown
             try
             {
                 await _aria2RpcClient.PingAsync();
+                await ApplyConfiguredSpeedLimitsAsync();
                 _refreshTimer.Start();
                 await _downloadCoordinator.RemoveCompletedDownloadResultsAsync();
                 await RefreshDownloadsAsync();
@@ -347,6 +373,11 @@ namespace OmniDown
         {
             if (_isRefreshing || !_aria2EngineHost.IsRunning)
             {
+                if (!_aria2EngineHost.IsRunning)
+                {
+                    UpdateGlobalSpeeds(0, 0);
+                }
+
                 return;
             }
 
@@ -354,8 +385,10 @@ namespace OmniDown
             try
             {
                 DownloadSnapshot snapshot = await _downloadCoordinator.RefreshAsync();
+                ShowTaskStatusNotifications();
                 ApplyTaskFilter(_currentTaskFilter);
                 UpdateDashboard();
+                UpdateGlobalSpeeds(snapshot.DownloadSpeed, snapshot.UploadSpeed);
                 UpdateAriaStatus();
             }
             catch (Exception ex)
@@ -377,6 +410,46 @@ namespace OmniDown
             IssueTasksText.Text = Tasks.Count(IsIssueTask).ToString();
         }
 
+        private void UpdateGlobalSpeeds(long downloadSpeed, long uploadSpeed)
+        {
+            if (GlobalDownloadSpeedText is not null)
+            {
+                GlobalDownloadSpeedText.Text = FormatSpeed(downloadSpeed);
+            }
+
+            if (GlobalUploadSpeedText is not null)
+            {
+                GlobalUploadSpeedText.Text = FormatSpeed(uploadSpeed);
+            }
+        }
+
+        private void UpdateGlobalSpeedLimitText()
+        {
+            bool showUploadLimit = _isUploadSpeedLimitEnabled && _uploadLimitBytesPerSecond > 0;
+            if (GlobalUploadLimitIconPanel is not null)
+            {
+                GlobalUploadLimitIconPanel.Opacity = showUploadLimit ? 1 : 0;
+            }
+
+            if (GlobalUploadLimitText is not null)
+            {
+                GlobalUploadLimitText.Opacity = showUploadLimit ? 1 : 0;
+                GlobalUploadLimitText.Text = showUploadLimit ? FormatSpeed(_uploadLimitBytesPerSecond) : string.Empty;
+            }
+
+            bool showDownloadLimit = _isDownloadSpeedLimitEnabled && _downloadLimitBytesPerSecond > 0;
+            if (GlobalDownloadLimitIconPanel is not null)
+            {
+                GlobalDownloadLimitIconPanel.Opacity = showDownloadLimit ? 1 : 0;
+            }
+
+            if (GlobalDownloadLimitText is not null)
+            {
+                GlobalDownloadLimitText.Opacity = showDownloadLimit ? 1 : 0;
+                GlobalDownloadLimitText.Text = showDownloadLimit ? FormatSpeed(_downloadLimitBytesPerSecond) : string.Empty;
+            }
+        }
+
         private void UpdateAriaStatus()
         {
             string status = _aria2EngineHost.IsRunning
@@ -389,9 +462,106 @@ namespace OmniDown
 
         private void ShowMessage(string message, InfoBarSeverity severity)
         {
-            StatusInfoBar.Message = message;
-            StatusInfoBar.Severity = severity;
-            StatusInfoBar.IsOpen = true;
+            _statusMessages.Insert(0, new AppStatusMessage(
+                message,
+                FormatStatusMessageDetail(DateTimeOffset.Now),
+                GetSeverityText(severity),
+                GetSeverityGlyph(severity),
+                GetSeverityBrush(severity)));
+            StatusToastMessageText.Text = message;
+            StatusToastGlyph.Glyph = GetSeverityGlyph(severity);
+            StatusToastGlyph.Foreground = GetSeverityBrush(severity);
+            StatusToastPanel.BorderBrush = GetSeverityBrush(severity);
+            StatusToastPanel.Visibility = Visibility.Visible;
+            _statusMessageTimer.Stop();
+            _statusMessageTimer.Start();
+        }
+
+        private void StatusMessageTimer_Tick(object? sender, object e)
+        {
+            _statusMessageTimer.Stop();
+            StatusToastPanel.Visibility = Visibility.Collapsed;
+        }
+
+        private static string FormatStatusMessageDetail(DateTimeOffset timestamp)
+        {
+            return timestamp.ToString("HH:mm:ss", CultureInfo.CurrentCulture);
+        }
+
+        private static string GetSeverityText(InfoBarSeverity severity)
+        {
+            return severity switch
+            {
+                InfoBarSeverity.Success => Strings.Get("NotificationSeveritySuccess"),
+                InfoBarSeverity.Warning => Strings.Get("NotificationSeverityWarning"),
+                InfoBarSeverity.Error => Strings.Get("NotificationSeverityError"),
+                _ => Strings.Get("NotificationSeverityInfo")
+            };
+        }
+
+        private static string GetSeverityGlyph(InfoBarSeverity severity)
+        {
+            return severity switch
+            {
+                InfoBarSeverity.Success => "\uE73E",
+                InfoBarSeverity.Warning => "\uE7BA",
+                InfoBarSeverity.Error => "\uEA39",
+                _ => "\uE946"
+            };
+        }
+
+        private static Brush GetSeverityBrush(InfoBarSeverity severity)
+        {
+            return severity switch
+            {
+                InfoBarSeverity.Success => GetResourceBrush("SystemFillColorSuccessBrush", new SolidColorBrush(Colors.ForestGreen)),
+                InfoBarSeverity.Warning => GetResourceBrush("SystemFillColorCautionBrush", new SolidColorBrush(Colors.Goldenrod)),
+                InfoBarSeverity.Error => GetResourceBrush("SystemFillColorCriticalBrush", new SolidColorBrush(Colors.Firebrick)),
+                _ => GetResourceBrush("AccentFillColorDefaultBrush", new SolidColorBrush(Colors.DodgerBlue))
+            };
+        }
+
+        private static Brush GetResourceBrush(string key, Brush fallback)
+        {
+            return Application.Current.Resources.TryGetValue(key, out object value) && value is Brush brush
+                ? brush
+                : fallback;
+        }
+
+        private void RecordObservedTaskStatuses()
+        {
+            foreach (DownloadTask task in Tasks.Where(task => !string.IsNullOrWhiteSpace(task.Gid)))
+            {
+                _observedTaskStatuses[task.Gid] = task.Status;
+            }
+        }
+
+        private void ShowTaskStatusNotifications()
+        {
+            HashSet<string> currentGids = new(StringComparer.OrdinalIgnoreCase);
+
+            foreach (DownloadTask task in Tasks.Where(task => !string.IsNullOrWhiteSpace(task.Gid)))
+            {
+                currentGids.Add(task.Gid);
+                if (_observedTaskStatuses.TryGetValue(task.Gid, out string? previousStatus))
+                {
+                    if (!IsCompletedTaskStatus(previousStatus) && IsCompletedTask(task))
+                    {
+                        _notifications.ShowDownloadCompleted(task);
+                    }
+                    else if (!IsErrorTaskStatus(previousStatus) && IsErrorTaskStatus(task.Status))
+                    {
+                        _notifications.ShowDownloadFailed(task);
+                    }
+                }
+
+                _observedTaskStatuses[task.Gid] = task.Status;
+            }
+
+            foreach (string staleGid in _observedTaskStatuses.Keys.Except(currentGids, StringComparer.OrdinalIgnoreCase).ToArray())
+            {
+                _observedTaskStatuses.Remove(staleGid);
+            }
         }
 
         private void SetTaskListLoading(bool isLoading)
@@ -436,6 +606,13 @@ namespace OmniDown
             await RunSelectedTaskOperationAsync(
                 tasks => _downloadCoordinator.PauseAsync(tasks),
                 Strings.Get("TasksPausedMessage"));
+        }
+
+        private async void RecoverTasksButton_Click(object sender, RoutedEventArgs e)
+        {
+            await RunSelectedTaskOperationAsync(
+                tasks => _downloadCoordinator.RecoverAsync(tasks, GetDefaultRecoverySplitCount()),
+                Strings.Get("TasksRecoveredMessage"));
         }
 
         private async void DeleteTasksButton_Click(object sender, RoutedEventArgs e)
@@ -483,7 +660,14 @@ namespace OmniDown
                 return;
             }
 
-            if (task.IsPaused)
+            if (IsErrorTaskStatus(task.Status))
+            {
+                await RunTaskOperationAsync(
+                    task,
+                    tasks => _downloadCoordinator.RecoverAsync(tasks, GetDefaultRecoverySplitCount()),
+                    Strings.Get("TasksRecoveredMessage"));
+            }
+            else if (task.IsPaused)
             {
                 await RunTaskOperationAsync(
                     task,
@@ -750,6 +934,182 @@ namespace OmniDown
             UpdateDebugStatus();
         }
 
+        private async void ApplySpeedLimitButton_Click(object sender, RoutedEventArgs e)
+        {
+            _isDownloadSpeedLimitEnabled = DownloadLimitToggleSwitch.IsOn;
+            _isUploadSpeedLimitEnabled = UploadLimitToggleSwitch.IsOn;
+            _downloadLimitBytesPerSecond = _isDownloadSpeedLimitEnabled
+                ? GetSpeedLimitBytesPerSecond(DownloadLimitNumberBox, GetSelectedSpeedLimitUnit(DownloadLimitUnitComboBox))
+                : 0;
+            _uploadLimitBytesPerSecond = _isUploadSpeedLimitEnabled
+                ? GetSpeedLimitBytesPerSecond(UploadLimitNumberBox, GetSelectedSpeedLimitUnit(UploadLimitUnitComboBox))
+                : 0;
+
+            Aria2EngineStartResult startResult = await EnsureAria2StartedAsync();
+            if (!startResult.Started)
+            {
+                ShowMessage(startResult.Message, InfoBarSeverity.Error);
+                return;
+            }
+
+            try
+            {
+                await ApplyConfiguredSpeedLimitsAsync();
+                SaveSpeedLimitSettings();
+                UpdateGlobalSpeedLimitText();
+                SpeedLimitButton.Flyout?.Hide();
+                ShowMessage(Strings.Get("SpeedLimitAppliedMessage"), InfoBarSeverity.Success);
+            }
+            catch (Exception ex)
+            {
+                ShowMessage(Strings.Format("SpeedLimitApplyFailedMessage", ex.Message), InfoBarSeverity.Error);
+            }
+        }
+
+        private Task ApplyConfiguredSpeedLimitsAsync()
+        {
+            return _downloadCoordinator.SetGlobalSpeedLimitsAsync(
+                _isDownloadSpeedLimitEnabled ? _downloadLimitBytesPerSecond : 0,
+                _isUploadSpeedLimitEnabled ? _uploadLimitBytesPerSecond : 0);
+        }
+
+        private static long GetSpeedLimitBytesPerSecond(NumberBox numberBox, string unit)
+        {
+            if (numberBox is null || double.IsNaN(numberBox.Value))
+            {
+                return 0;
+            }
+
+            long multiplier = unit.Equals("MB/s", StringComparison.OrdinalIgnoreCase)
+                ? 1024L * 1024L
+                : 1024L;
+
+            return Math.Max(1, (long)Math.Round(numberBox.Value)) * multiplier;
+        }
+
+        private void DownloadLimitToggleSwitch_Toggled(object sender, RoutedEventArgs e)
+        {
+            SetDownloadSpeedLimitInputsEnabled(DownloadLimitToggleSwitch.IsOn);
+        }
+
+        private void UploadLimitToggleSwitch_Toggled(object sender, RoutedEventArgs e)
+        {
+            SetUploadSpeedLimitInputsEnabled(UploadLimitToggleSwitch.IsOn);
+        }
+
+        private void SetDownloadSpeedLimitInputsEnabled(bool isEnabled)
+        {
+            if (DownloadLimitNumberBox is not null)
+            {
+                DownloadLimitNumberBox.IsEnabled = isEnabled;
+            }
+
+            if (DownloadLimitUnitComboBox is not null)
+            {
+                DownloadLimitUnitComboBox.IsEnabled = isEnabled;
+            }
+        }
+
+        private void SetUploadSpeedLimitInputsEnabled(bool isEnabled)
+        {
+            if (UploadLimitNumberBox is not null)
+            {
+                UploadLimitNumberBox.IsEnabled = isEnabled;
+            }
+
+            if (UploadLimitUnitComboBox is not null)
+            {
+                UploadLimitUnitComboBox.IsEnabled = isEnabled;
+            }
+        }
+
+        private static string GetSelectedSpeedLimitUnit(ComboBox comboBox)
+        {
+            return comboBox?.SelectedItem is ComboBoxItem item &&
+                item.Content?.ToString() is string unit &&
+                !string.IsNullOrWhiteSpace(unit)
+                ? unit
+                : "KB/s";
+        }
+
+        private void LoadSpeedLimitSettings()
+        {
+            SpeedLimitSettings settings = ReadSpeedLimitSettings();
+
+            SetSpeedLimitUnit(UploadLimitUnitComboBox, settings.UploadUnit);
+            SetSpeedLimitUnit(DownloadLimitUnitComboBox, settings.DownloadUnit);
+            UploadLimitNumberBox.Value = Math.Max(settings.UploadValue, 1);
+            DownloadLimitNumberBox.Value = Math.Max(settings.DownloadValue, 1);
+
+            _isUploadSpeedLimitEnabled = settings.UploadEnabled;
+            _isDownloadSpeedLimitEnabled = settings.DownloadEnabled;
+            _uploadLimitBytesPerSecond = settings.UploadEnabled
+                ? GetSpeedLimitBytesPerSecond(UploadLimitNumberBox, GetSelectedSpeedLimitUnit(UploadLimitUnitComboBox))
+                : 0;
+            _downloadLimitBytesPerSecond = settings.DownloadEnabled
+                ? GetSpeedLimitBytesPerSecond(DownloadLimitNumberBox, GetSelectedSpeedLimitUnit(DownloadLimitUnitComboBox))
+                : 0;
+
+            UploadLimitToggleSwitch.IsOn = settings.UploadEnabled;
+            DownloadLimitToggleSwitch.IsOn = settings.DownloadEnabled;
+            SetUploadSpeedLimitInputsEnabled(settings.UploadEnabled);
+            SetDownloadSpeedLimitInputsEnabled(settings.DownloadEnabled);
+        }
+
+        private SpeedLimitSettings ReadSpeedLimitSettings()
+        {
+            if (!File.Exists(_speedLimitSettingsPath))
+            {
+                return SpeedLimitSettings.Default;
+            }
+
+            try
+            {
+                string json = File.ReadAllText(_speedLimitSettingsPath);
+                return JsonSerializer.Deserialize<SpeedLimitSettings>(json) ?? SpeedLimitSettings.Default;
+            }
+            catch
+            {
+                return SpeedLimitSettings.Default;
+            }
+        }
+
+        private void SaveSpeedLimitSettings()
+        {
+            try
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(_speedLimitSettingsPath)!);
+                SpeedLimitSettings settings = new(
+                    DownloadLimitToggleSwitch?.IsOn == true,
+                    GetValidNumberBoxValue(DownloadLimitNumberBox),
+                    GetSelectedSpeedLimitUnit(DownloadLimitUnitComboBox),
+                    UploadLimitToggleSwitch?.IsOn == true,
+                    GetValidNumberBoxValue(UploadLimitNumberBox),
+                    GetSelectedSpeedLimitUnit(UploadLimitUnitComboBox));
+
+                File.WriteAllText(_speedLimitSettingsPath, JsonSerializer.Serialize(settings, new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                }));
+            }
+            catch
+            {
+                // Settings persistence is best-effort; aria2 can still run with default limits.
+            }
+        }
+
+        private static double GetValidNumberBoxValue(NumberBox numberBox)
+        {
+            return numberBox is null || double.IsNaN(numberBox.Value) || numberBox.Value < 1
+                ? 1
+                : numberBox.Value;
+        }
+
+        private static void SetSpeedLimitUnit(ComboBox comboBox, string unit)
+        {
+            comboBox.SelectedIndex = unit.Equals("MB/s", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
+        }
+
         private void TitleSearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
             ApplySearchFilters();
@@ -985,9 +1345,11 @@ namespace OmniDown
 
         private void UpdateSelectionCommands()
         {
-            bool hasSelection = GetSelectedTasks().Count > 0;
+            List<DownloadTask> selectedTasks = GetSelectedTasks();
+            bool hasSelection = selectedTasks.Count > 0;
             ResumeTasksButton.IsEnabled = hasSelection;
             PauseTasksButton.IsEnabled = hasSelection;
+            RecoverTasksButton.IsEnabled = selectedTasks.Any(IsRecoverableTask);
             DeleteTasksButton.IsEnabled = hasSelection;
             UpdateSelectAllCheckBox();
         }
@@ -1001,13 +1363,33 @@ namespace OmniDown
 
         private static bool IsCompletedTask(DownloadTask task)
         {
-            return task.Status.Contains("complete", StringComparison.OrdinalIgnoreCase);
+            return IsCompletedTaskStatus(task.Status);
         }
 
         private static bool IsIssueTask(DownloadTask task)
         {
-            return task.Status.Contains("error", StringComparison.OrdinalIgnoreCase)
+            return IsErrorTaskStatus(task.Status)
                 || task.Status.Contains("removed", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsRecoverableTask(DownloadTask task)
+        {
+            return IsErrorTaskStatus(task.Status);
+        }
+
+        private static bool IsCompletedTaskStatus(string status)
+        {
+            return status.Contains("complete", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsErrorTaskStatus(string status)
+        {
+            return status.Contains("error", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static int GetDefaultRecoverySplitCount()
+        {
+            return 16;
         }
 
         private string GetSearchQuery()
@@ -1338,7 +1720,38 @@ namespace OmniDown
             candidate = Path.Combine([parentPath, .. pathSegments]);
             return File.Exists(candidate) ? candidate : null;
         }
+
+        private static string GetAppDataDirectory()
+        {
+            return Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "OmniDown");
+        }
     }
+
+    internal sealed record SpeedLimitSettings(
+        bool DownloadEnabled,
+        double DownloadValue,
+        string DownloadUnit,
+        bool UploadEnabled,
+        double UploadValue,
+        string UploadUnit)
+    {
+        public static SpeedLimitSettings Default { get; } = new(
+            DownloadEnabled: false,
+            DownloadValue: 1024,
+            DownloadUnit: "KB/s",
+            UploadEnabled: false,
+            UploadValue: 1024,
+            UploadUnit: "KB/s");
+    }
+
+    internal sealed record AppStatusMessage(
+        string Message,
+        string DetailText,
+        string SeverityText,
+        string SeverityGlyph,
+        Brush SeverityBrush);
 
     internal enum TaskSortColumn
     {

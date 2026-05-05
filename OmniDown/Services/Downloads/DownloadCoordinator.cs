@@ -95,18 +95,48 @@ public sealed class DownloadCoordinator
         }
     }
 
+    public async Task RecoverAsync(IEnumerable<DownloadTask> tasks, int splitCount = 16, CancellationToken cancellationToken = default)
+    {
+        foreach (DownloadTask task in tasks.Where(IsErrorTask).ToArray())
+        {
+            if (string.IsNullOrWhiteSpace(task.SourceUri))
+            {
+                throw new InvalidOperationException($"Task {task.Name} does not have a source URI to recover.");
+            }
+
+            string oldGid = task.Gid;
+            string saveDirectory = ResolveRecoveryDirectory(task);
+            string? outputFileName = string.IsNullOrWhiteSpace(task.Name) || task.Name.Equals(task.Gid, StringComparison.OrdinalIgnoreCase)
+                ? null
+                : task.Name;
+
+            string newGid = await _rpcClient.AddUriAsync(
+                task.SourceUri,
+                outputFileName,
+                saveDirectory,
+                splitCount,
+                cancellationToken);
+
+            await RemoveCompletedDownloadResultAsync(oldGid, cancellationToken);
+
+            task.Gid = newGid;
+            task.SaveDirectory = saveDirectory;
+            task.LocalFilePath = string.IsNullOrWhiteSpace(task.Name) ? string.Empty : Path.Combine(saveDirectory, task.Name);
+            task.Status = "Waiting";
+            task.Progress = 0;
+            task.CompletedLength = 0;
+            task.DownloadSpeed = 0;
+            task.UploadSpeed = 0;
+        }
+
+        SaveTaskCache();
+    }
+
     public async Task DeleteAsync(IEnumerable<DownloadTask> tasks, bool deleteFiles = false, CancellationToken cancellationToken = default)
     {
         foreach (DownloadTask task in tasks.Where(task => !string.IsNullOrWhiteSpace(task.Gid)).ToArray())
         {
-            try
-            {
-                await _rpcClient.RemoveAsync(task.Gid, cancellationToken);
-            }
-            catch
-            {
-                await _rpcClient.RemoveDownloadResultAsync(task.Gid, cancellationToken);
-            }
+            await RemoveTaskFromAria2Async(task, cancellationToken);
 
             if (deleteFiles)
             {
@@ -117,6 +147,46 @@ public sealed class DownloadCoordinator
         }
 
         SaveTaskCache();
+    }
+
+    private async Task RemoveTaskFromAria2Async(DownloadTask task, CancellationToken cancellationToken)
+    {
+        if (IsResultOnlyStatus(task.Status))
+        {
+            try
+            {
+                await _rpcClient.RemoveDownloadResultAsync(task.Gid, cancellationToken);
+                return;
+            }
+            catch
+            {
+                // Terminal aria2 records may already be gone; the local list can still forget them.
+                return;
+            }
+        }
+
+        Exception? removeError = null;
+        try
+        {
+            await _rpcClient.RemoveAsync(task.Gid, cancellationToken);
+            return;
+        }
+        catch (Exception ex)
+        {
+            removeError = ex;
+        }
+
+        try
+        {
+            await _rpcClient.RemoveDownloadResultAsync(task.Gid, cancellationToken);
+        }
+        catch when (IsResultOnlyStatus(task.Status))
+        {
+        }
+        catch
+        {
+            throw removeError;
+        }
     }
 
     public async Task<int> ClearCompletedAsync(bool deleteFiles = false, CancellationToken cancellationToken = default)
@@ -148,6 +218,20 @@ public sealed class DownloadCoordinator
         {
             await RemoveCompletedDownloadResultAsync(task.Gid, cancellationToken);
         }
+    }
+
+    public Task SetGlobalSpeedLimitsAsync(
+        long downloadLimitBytesPerSecond,
+        long uploadLimitBytesPerSecond,
+        CancellationToken cancellationToken = default)
+    {
+        Dictionary<string, string> options = new()
+        {
+            ["max-overall-download-limit"] = FormatAria2SpeedLimit(downloadLimitBytesPerSecond),
+            ["max-overall-upload-limit"] = FormatAria2SpeedLimit(uploadLimitBytesPerSecond)
+        };
+
+        return _rpcClient.ChangeGlobalOptionAsync(options, cancellationToken);
     }
 
     private void UpsertTask(Aria2TaskStatus remoteTask)
@@ -312,6 +396,11 @@ public sealed class DownloadCoordinator
         return long.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out long result)
             ? result
             : 0;
+    }
+
+    private static string FormatAria2SpeedLimit(long bytesPerSecond)
+    {
+        return Math.Max(bytesPerSecond, 0).ToString(CultureInfo.InvariantCulture);
     }
 
     private static void DeleteLocalFiles(DownloadTask task)
@@ -479,6 +568,37 @@ public sealed class DownloadCoordinator
     private static bool IsCompletedStatus(string status)
     {
         return NormalizeStatus(status).Contains("complete", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsResultOnlyStatus(string status)
+    {
+        string normalizedStatus = NormalizeStatus(status);
+        return normalizedStatus.Contains("complete", StringComparison.OrdinalIgnoreCase)
+            || normalizedStatus.Contains("error", StringComparison.OrdinalIgnoreCase)
+            || normalizedStatus.Contains("removed", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsErrorTask(DownloadTask task)
+    {
+        return task.Status.Contains("error", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string ResolveRecoveryDirectory(DownloadTask task)
+    {
+        if (!string.IsNullOrWhiteSpace(task.SaveDirectory))
+        {
+            return task.SaveDirectory;
+        }
+
+        string? localDirectory = Path.GetDirectoryName(task.LocalFilePath);
+        if (!string.IsNullOrWhiteSpace(localDirectory))
+        {
+            return localDirectory;
+        }
+
+        return Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            "Downloads");
     }
 }
 
