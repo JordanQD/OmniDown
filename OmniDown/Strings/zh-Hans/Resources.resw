@@ -28,7 +28,7 @@
   <data name="IssuesPageTitle" xml:space="preserve"><value>异常</value></data>
   <data name="IssuesPageSubtitle" xml:space="preserve"><value>失败、移除或需要处理的任务。</value></data>
   <data name="NewDownloadButton.Label" xml:space="preserve"><value>新建</value></data>
-  <data name="SortTasksButton.Content" xml:space="preserve"><value>排序</value></data>
+  <data name="SortTasksButtonLabel.Text" xml:space="preserve"><value>排序</value></data>
   <data name="SortByCreatedAtMenuItem.Text" xml:space="preserve"><value>添加时间</value></data>
   <data name="SortByNameMenuItem.Text" xml:space="preserve"><value>项目名称</value></data>
   <data name="SortBySizeMenuItem.Text" xml:space="preserve"><value>项目大小</value></data>

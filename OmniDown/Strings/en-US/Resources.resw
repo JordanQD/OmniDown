@@ -28,7 +28,7 @@
   <data name="IssuesPageTitle" xml:space="preserve"><value>Issues</value></data>
   <data name="IssuesPageSubtitle" xml:space="preserve"><value>Failed, removed, or attention-needed tasks.</value></data>
   <data name="NewDownloadButton.Label" xml:space="preserve"><value>New</value></data>
-  <data name="SortTasksButton.Content" xml:space="preserve"><value>Sort</value></data>
+  <data name="SortTasksButtonLabel.Text" xml:space="preserve"><value>Sort</value></data>
   <data name="SortByCreatedAtMenuItem.Text" xml:space="preserve"><value>Added time</value></data>
   <data name="SortByNameMenuItem.Text" xml:space="preserve"><value>Name</value></data>
   <data name="SortBySizeMenuItem.Text" xml:space="preserve"><value>Size</value></data>

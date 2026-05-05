@@ -13,9 +13,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 using WinRT.Interop;
@@ -750,6 +752,21 @@ namespace OmniDown
 
         private void TitleSearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
+            ApplySearchFilters();
+        }
+
+        private void TitleSearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+        {
+            ApplySearchFilters();
+        }
+
+        private void TitleSearchBox_KeyUp(object sender, KeyRoutedEventArgs e)
+        {
+            ApplySearchFilters();
+        }
+
+        private void ApplySearchFilters()
+        {
             ApplyTaskFilter(_currentTaskFilter);
             ApplySettingsFilter();
         }
@@ -1000,15 +1017,35 @@ namespace OmniDown
 
         private static bool IsTaskSearchMatch(DownloadTask task, string query)
         {
-            if (string.IsNullOrWhiteSpace(query))
+            string normalizedQuery = NormalizeSearchText(query);
+            if (string.IsNullOrWhiteSpace(normalizedQuery))
             {
                 return true;
             }
 
-            return Contains(task.Name, query)
-                || Contains(task.SourceUri, query)
-                || Contains(task.SaveDirectory, query)
-                || Contains(task.StatusText, query);
+            string[] terms = query
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if (terms.Length == 0)
+            {
+                terms = [query];
+            }
+
+            string searchableText = string.Join(' ', new[]
+            {
+                task.Name,
+                task.StatusText,
+                task.ProgressText,
+                task.SizeText,
+                task.RemainingTimeText,
+                task.DownloadSpeedText,
+                task.UploadSpeedText
+            });
+
+            string normalizedSearchableText = NormalizeSearchText(searchableText);
+            return terms
+                .Select(NormalizeSearchText)
+                .Where(term => !string.IsNullOrWhiteSpace(term))
+                .All(normalizedSearchableText.Contains);
         }
 
         private void ApplySettingsFilter()
@@ -1028,7 +1065,7 @@ namespace OmniDown
 
         private static void SetSettingVisibility(FrameworkElement label, FrameworkElement control, string query, params string[] searchableText)
         {
-            bool isVisible = string.IsNullOrWhiteSpace(query) || searchableText.Any(text => Contains(text, query));
+            bool isVisible = string.IsNullOrWhiteSpace(query) || searchableText.Any(text => SearchContains(text, query));
             Visibility visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
             label.Visibility = visibility;
             control.Visibility = visibility;
@@ -1221,10 +1258,40 @@ namespace OmniDown
             return null;
         }
 
-        private static bool Contains(string? value, string query)
+        private static bool SearchContains(string? value, string query)
         {
-            return !string.IsNullOrWhiteSpace(value)
-                && value.Contains(query, StringComparison.CurrentCultureIgnoreCase);
+            string normalizedValue = NormalizeSearchText(value);
+            string normalizedQuery = NormalizeSearchText(query);
+            return !string.IsNullOrWhiteSpace(normalizedValue)
+                && !string.IsNullOrWhiteSpace(normalizedQuery)
+                && normalizedValue.Contains(normalizedQuery, StringComparison.Ordinal);
+        }
+
+        private static string NormalizeSearchText(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return string.Empty;
+            }
+
+            StringBuilder builder = new(value.Length);
+            foreach (char character in value.Normalize(NormalizationForm.FormKC))
+            {
+                UnicodeCategory category = CharUnicodeInfo.GetUnicodeCategory(character);
+                if (category is UnicodeCategory.LowercaseLetter
+                    or UnicodeCategory.UppercaseLetter
+                    or UnicodeCategory.TitlecaseLetter
+                    or UnicodeCategory.ModifierLetter
+                    or UnicodeCategory.OtherLetter
+                    or UnicodeCategory.DecimalDigitNumber
+                    or UnicodeCategory.LetterNumber
+                    or UnicodeCategory.OtherNumber)
+                {
+                    builder.Append(char.ToLowerInvariant(character));
+                }
+            }
+
+            return builder.ToString();
         }
 
         private static string FormatSpeed(long bytesPerSecond)
