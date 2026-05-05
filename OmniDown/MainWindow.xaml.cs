@@ -10,6 +10,7 @@ using OmniDown.Services.Engine;
 using OmniDown.Services.Localization;
 using OmniDown.Services.Notifications;
 using OmniDown.Services.Rpc;
+using OmniDown.Services.Storage;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -49,7 +50,7 @@ namespace OmniDown
         private long _downloadLimitBytesPerSecond;
         private long _uploadLimitBytesPerSecond;
         private readonly Dictionary<string, string> _observedTaskStatuses = new(StringComparer.OrdinalIgnoreCase);
-        private readonly string _speedLimitSettingsPath = Path.Combine(GetAppDataDirectory(), "speed-limits.json");
+        private readonly string _speedLimitSettingsPath = Path.Combine(AppPaths.LocalDataDirectory, "speed-limits.json");
 
         public ObservableCollection<DownloadTask> Tasks { get; } = new();
 
@@ -71,9 +72,7 @@ namespace OmniDown
             _statusMessageTimer.Interval = TimeSpan.FromSeconds(3);
             _statusMessageTimer.Tick += StatusMessageTimer_Tick;
 
-            DownloadDirectoryTextBox.Text = System.IO.Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                "Downloads");
+            DownloadDirectoryTextBox.Text = AppPaths.DefaultDownloadDirectory;
 
             LoadSpeedLimitSettings();
             UpdateSearchPlaceholder();
@@ -1721,12 +1720,6 @@ namespace OmniDown
             return File.Exists(candidate) ? candidate : null;
         }
 
-        private static string GetAppDataDirectory()
-        {
-            return Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "OmniDown");
-        }
     }
 
     internal sealed record SpeedLimitSettings(

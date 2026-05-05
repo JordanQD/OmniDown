@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading.Tasks;
+using OmniDown.Services.Storage;
 
 namespace OmniDown.Services.Engine;
 
@@ -50,7 +51,7 @@ public sealed class Aria2EngineHost : IDisposable
         }
 
         Directory.CreateDirectory(options.DownloadDirectory);
-        string appDataDirectory = GetAppDataDirectory();
+        string appDataDirectory = AppPaths.LocalDataDirectory;
         Directory.CreateDirectory(appDataDirectory);
         RemoveCachedCompletedTasksFromSession(appDataDirectory);
         await CleanupRpcPortAsync(options.RpcPort);
@@ -522,10 +523,4 @@ public sealed class Aria2EngineHost : IDisposable
         return Path.Combine(appDataDirectory, "download.session");
     }
 
-    private static string GetAppDataDirectory()
-    {
-        return Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "OmniDown");
-    }
 }

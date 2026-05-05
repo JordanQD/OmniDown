@@ -1,5 +1,6 @@
 using OmniDown.Models;
 using OmniDown.Services.Rpc;
+using OmniDown.Services.Storage;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -22,7 +23,7 @@ public sealed class DownloadCoordinator
     {
         _rpcClient = rpcClient;
         _tasks = tasks;
-        _taskCachePath = Path.Combine(GetAppDataDirectory(), "tasks.json");
+        _taskCachePath = Path.Combine(AppPaths.LocalDataDirectory, "tasks.json");
         LoadTaskCache();
     }
 
@@ -541,13 +542,6 @@ public sealed class DownloadCoordinator
         }
     }
 
-    private static string GetAppDataDirectory()
-    {
-        return Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "OmniDown");
-    }
-
     private async Task RemoveCompletedDownloadResultAsync(string gid, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(gid))
@@ -596,9 +590,7 @@ public sealed class DownloadCoordinator
             return localDirectory;
         }
 
-        return Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-            "Downloads");
+        return AppPaths.DefaultDownloadDirectory;
     }
 }
 
