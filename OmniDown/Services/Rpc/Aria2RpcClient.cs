@@ -58,6 +58,28 @@ public sealed class Aria2RpcClient : IDisposable
         return await SendAsync<string>("aria2.addUri", [new[] { uri }, options], cancellationToken);
     }
 
+    public async Task<string> AddTorrentAsync(
+        byte[] torrentBytes,
+        string directory,
+        int splitCount,
+        IReadOnlyList<int> selectedFileIndexes,
+        CancellationToken cancellationToken = default)
+    {
+        Dictionary<string, string> options = new()
+        {
+            ["dir"] = directory,
+            ["split"] = Math.Clamp(splitCount, 1, 128).ToString(CultureInfo.InvariantCulture)
+        };
+
+        if (selectedFileIndexes.Count > 0)
+        {
+            options["select-file"] = string.Join(",", selectedFileIndexes);
+        }
+
+        string torrent = Convert.ToBase64String(torrentBytes);
+        return await SendAsync<string>("aria2.addTorrent", [torrent, Array.Empty<string>(), options], cancellationToken);
+    }
+
     public Task<IReadOnlyList<Aria2TaskStatus>> TellActiveAsync(CancellationToken cancellationToken = default)
     {
         return SendAsync<IReadOnlyList<Aria2TaskStatus>>("aria2.tellActive", [TaskKeys], cancellationToken);

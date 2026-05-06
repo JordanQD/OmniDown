@@ -23,12 +23,21 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Storage;
+using Windows.Storage.Pickers;
+using Windows.UI;
 using WinRT.Interop;
 
 namespace OmniDown
 {
     public sealed partial class MainWindow : Window
     {
+        private sealed record TorrentSelection(
+            string Path,
+            string DisplayName,
+            byte[] Bytes,
+            TorrentMetadata Metadata);
+
         private readonly Aria2EngineHost _aria2EngineHost = new();
         private readonly Aria2RpcClient _aria2RpcClient = new();
         private readonly DownloadCoordinator _downloadCoordinator;
@@ -47,6 +56,9 @@ namespace OmniDown
         private bool _hasStartedInitialLoad;
         private bool _isDownloadSpeedLimitEnabled;
         private bool _isUploadSpeedLimitEnabled;
+        private bool _isTaskDetailsPaneOpen;
+        private SelectorBar? _taskDetailsSelectorBar;
+        private SelectorBarItem? _taskDetailsSummaryItem;
         private long _downloadLimitBytesPerSecond;
         private long _uploadLimitBytesPerSecond;
         private readonly Dictionary<string, string> _observedTaskStatuses = new(StringComparer.OrdinalIgnoreCase);
@@ -59,6 +71,7 @@ namespace OmniDown
             InitializeComponent();
             TasksListView.ItemsSource = _visibleTasks;
             NotificationHistoryListView.ItemsSource = _statusMessages;
+            InitializeTaskDetailsSelectorBar();
             SetWindowIcon();
             ExtendsContentIntoTitleBar = true;
             SetTitleBar(AppTitleBar);
@@ -88,6 +101,8 @@ namespace OmniDown
             UpdateGlobalSpeedLimitText();
             UpdateAriaStatus();
             UpdateDebugStatus();
+            ShowTaskDetailsSection("Summary");
+            UpdateTaskDetailsPane();
         }
 
         private async void NewDownloadButton_Click(object sender, RoutedEventArgs e)
@@ -142,6 +157,178 @@ namespace OmniDown
             };
             Grid.SetColumn(pasteUriButton, 1);
 
+            TorrentSelection? torrentSelection = null;
+            ObservableCollection<TorrentFileEntry> torrentFiles = [];
+            StackPanel torrentRowsPanel = new()
+            {
+                Spacing = 0
+            };
+            TextBlock torrentFileNameText = new()
+            {
+                Text = Strings.Get("TorrentNoFileSelectedText"),
+                TextTrimming = TextTrimming.CharacterEllipsis,
+                VerticalAlignment = VerticalAlignment.Center,
+                Foreground = GetThemeBrush("TextFillColorSecondaryBrush", Colors.Gray)
+            };
+            Border torrentTag = CreateTorrentTag();
+            Button clearTorrentButton = CreateIconButton("\uE711", Strings.Get("ClearTorrentFileButtonText"));
+            Button openTorrentButton = CreateIconButton("\uE8E5", Strings.Get("OpenTorrentFileButtonText"));
+            Grid torrentInputRow = CreateTorrentInputRow(torrentFileNameText, torrentTag, openTorrentButton, clearTorrentButton);
+            torrentInputRow.Visibility = Visibility.Collapsed;
+            torrentTag.Visibility = Visibility.Collapsed;
+            clearTorrentButton.Visibility = Visibility.Collapsed;
+
+            TextBlock torrentSummaryText = new()
+            {
+                Text = Strings.Get("TorrentNoFileSelectedText"),
+                Foreground = GetThemeBrush("TextFillColorSecondaryBrush", Colors.Gray),
+                Visibility = Visibility.Collapsed
+            };
+            CheckBox selectAllTorrentFilesCheckBox = new()
+            {
+                IsChecked = true,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            Action updateTorrentPanelVisibility = () => { };
+            Action<TorrentSelection> setTorrentSelection = selected =>
+            {
+                torrentSelection = selected;
+                torrentFiles.Clear();
+                foreach (TorrentFileEntry file in selected.Metadata.Files)
+                {
+                    torrentFiles.Add(file);
+                }
+
+                torrentFileNameText.Text = selected.DisplayName;
+                torrentFileNameText.Foreground = GetThemeBrush("TextFillColorPrimaryBrush", Colors.Black);
+                RenderTorrentRows(torrentRowsPanel, torrentFiles, selectAllTorrentFilesCheckBox);
+                updateTorrentPanelVisibility();
+            };
+
+            openTorrentButton.Click += async (_, _) =>
+            {
+                TorrentSelection? selected = await PickTorrentFileAsync();
+                if (selected is null)
+                {
+                    return;
+                }
+
+                setTorrentSelection(selected);
+            };
+            clearTorrentButton.Click += (_, _) =>
+            {
+                torrentSelection = null;
+                torrentFiles.Clear();
+                torrentFileNameText.Text = Strings.Get("TorrentNoFileSelectedText");
+                torrentFileNameText.Foreground = GetThemeBrush("TextFillColorSecondaryBrush", Colors.Gray);
+                RenderTorrentRows(torrentRowsPanel, torrentFiles, selectAllTorrentFilesCheckBox);
+                updateTorrentPanelVisibility();
+            };
+
+            selectAllTorrentFilesCheckBox.Click += (_, _) =>
+            {
+                bool isSelected = selectAllTorrentFilesCheckBox.IsChecked == true;
+                foreach (TorrentFileEntry file in torrentFiles)
+                {
+                    file.IsSelected = isSelected;
+                }
+
+                RenderTorrentRows(torrentRowsPanel, torrentFiles, selectAllTorrentFilesCheckBox);
+            };
+
+            Grid torrentHeader = new()
+            {
+                Height = 36,
+                Padding = new Thickness(8, 0, 8, 0),
+                ColumnDefinitions =
+                {
+                    new ColumnDefinition { Width = new GridLength(40) },
+                    new ColumnDefinition { Width = new GridLength(54) },
+                    new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                    new ColumnDefinition { Width = new GridLength(96) }
+                },
+                Children =
+                {
+                    selectAllTorrentFilesCheckBox,
+                    CreateHeaderText(Strings.Get("TorrentFileIndexHeader")),
+                    CreateHeaderText(Strings.Get("TorrentFileNameHeader")),
+                    CreateHeaderText(Strings.Get("TorrentFileSizeHeader"))
+                }
+            };
+            Grid.SetColumn(torrentHeader.Children[1] as FrameworkElement, 1);
+            Grid.SetColumn(torrentHeader.Children[2] as FrameworkElement, 2);
+            Grid.SetColumn(torrentHeader.Children[3] as FrameworkElement, 3);
+
+            Border torrentFilesBorder = new()
+            {
+                BorderBrush = GetThemeBrush("ControlStrokeColorDefaultBrush", Colors.Gray),
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(6),
+                Visibility = Visibility.Collapsed,
+                Child = new StackPanel
+                {
+                    Children =
+                    {
+                        torrentHeader,
+                        new ScrollViewer
+                        {
+                            MaxHeight = 220,
+                            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                            Content = torrentRowsPanel
+                        }
+                    }
+                }
+            };
+
+            bool isTorrentMode = false;
+            Button linkTaskTypeButton = CreateTaskTypeButton(Strings.Get("LinkTaskTabHeader"));
+            Button torrentTaskTypeButton = CreateTaskTypeButton(Strings.Get("TorrentTaskTabHeader"));
+            Border linkTaskTypeIndicator = CreateTaskTypeIndicator();
+            Border torrentTaskTypeIndicator = CreateTaskTypeIndicator();
+            Action<bool> setTaskMode = _ => { };
+            linkTaskTypeButton.Click += (_, _) => setTaskMode(false);
+            torrentTaskTypeButton.Click += (_, _) => setTaskMode(true);
+
+            Grid taskTypeSelector = new()
+            {
+                ColumnDefinitions =
+                {
+                    new ColumnDefinition { Width = GridLength.Auto },
+                    new ColumnDefinition { Width = GridLength.Auto }
+                },
+                RowDefinitions =
+                {
+                    new RowDefinition { Height = GridLength.Auto },
+                    new RowDefinition { Height = new GridLength(3) }
+                },
+                Children =
+                {
+                    linkTaskTypeButton,
+                    torrentTaskTypeButton,
+                    linkTaskTypeIndicator,
+                    torrentTaskTypeIndicator
+                }
+            };
+            Grid.SetColumn(torrentTaskTypeButton, 1);
+            Grid.SetRow(linkTaskTypeIndicator, 1);
+            Grid.SetRow(torrentTaskTypeIndicator, 1);
+            Grid.SetColumn(torrentTaskTypeIndicator, 1);
+
+            StackPanel selectorHeader = new()
+            {
+                Spacing = 12,
+                Children =
+                {
+                    new TextBlock
+                    {
+                        Text = Strings.Get("NewDownloadDialogTitle"),
+                        FontSize = 24,
+                        FontWeight = Microsoft.UI.Text.FontWeights.SemiBold
+                    },
+                    taskTypeSelector
+                }
+            };
+
             TextBox fileNameTextBox = new()
             {
                 PlaceholderText = "Leave empty to infer from the URL"
@@ -173,18 +360,126 @@ namespace OmniDown
                 Spacing = 12,
                 Children =
                 {
+                    selectorHeader,
                     uriInputRow,
+                    torrentInputRow,
+                    torrentSummaryText,
+                    torrentFilesBorder,
                     fileNameTextBox,
                     directoryTextBox,
                     splitCountNumberBox
                 }
             };
 
+            updateTorrentPanelVisibility = () =>
+            {
+                bool hasTorrent = torrentSelection is not null;
+                bool isTorrentSelected = isTorrentMode;
+                torrentFilesBorder.Visibility = isTorrentSelected && hasTorrent ? Visibility.Visible : Visibility.Collapsed;
+                torrentTag.Visibility = hasTorrent ? Visibility.Visible : Visibility.Collapsed;
+                openTorrentButton.Visibility = hasTorrent ? Visibility.Collapsed : Visibility.Visible;
+                clearTorrentButton.Visibility = hasTorrent ? Visibility.Visible : Visibility.Collapsed;
+                torrentSummaryText.Text = hasTorrent
+                    ? Strings.Format("TorrentFileCountText", torrentFiles.Count)
+                    : Strings.Get("TorrentNoFileSelectedText");
+                torrentSummaryText.Visibility = isTorrentSelected && hasTorrent ? Visibility.Visible : Visibility.Collapsed;
+            };
+            setTaskMode = isTorrentSelected =>
+            {
+                isTorrentMode = isTorrentSelected;
+                uriInputRow.Visibility = isTorrentSelected ? Visibility.Collapsed : Visibility.Visible;
+                torrentInputRow.Visibility = isTorrentSelected ? Visibility.Visible : Visibility.Collapsed;
+                linkTaskTypeIndicator.Visibility = isTorrentSelected ? Visibility.Collapsed : Visibility.Visible;
+                torrentTaskTypeIndicator.Visibility = isTorrentSelected ? Visibility.Visible : Visibility.Collapsed;
+                linkTaskTypeButton.Foreground = GetThemeBrush(
+                    isTorrentSelected ? "TextFillColorSecondaryBrush" : "TextFillColorPrimaryBrush",
+                    isTorrentSelected ? Colors.Gray : Colors.Black);
+                torrentTaskTypeButton.Foreground = GetThemeBrush(
+                    isTorrentSelected ? "TextFillColorPrimaryBrush" : "TextFillColorSecondaryBrush",
+                    isTorrentSelected ? Colors.Black : Colors.Gray);
+                updateTorrentPanelVisibility();
+            };
+            setTaskMode(false);
+
+            Border dropOverlay = new()
+            {
+                Visibility = Visibility.Collapsed,
+                Background = new SolidColorBrush(Colors.Black)
+                {
+                    Opacity = 0.82
+                },
+                CornerRadius = new CornerRadius(8),
+                Child = new StackPanel
+                {
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Spacing = 10,
+                    Children =
+                    {
+                        new FontIcon
+                        {
+                            Glyph = "\uE8E5",
+                            FontSize = 28
+                        },
+                        new TextBlock
+                        {
+                            Text = Strings.Get("TorrentDropOverlayText"),
+                            FontSize = 16,
+                            HorizontalAlignment = HorizontalAlignment.Center,
+                            Foreground = new SolidColorBrush(Colors.White)
+                        }
+                    }
+                }
+            };
+
+            Grid dialogContent = new()
+            {
+                Width = 680,
+                MaxWidth = 760,
+                AllowDrop = true,
+                Children =
+                {
+                    content,
+                    dropOverlay
+                }
+            };
+            dialogContent.DragOver += (_, args) =>
+            {
+                if (args.DataView.Contains(StandardDataFormats.StorageItems))
+                {
+                    args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Copy;
+                    dropOverlay.Visibility = Visibility.Visible;
+                }
+            };
+            dialogContent.DragLeave += (_, _) =>
+            {
+                dropOverlay.Visibility = Visibility.Collapsed;
+            };
+            dialogContent.Drop += async (_, args) =>
+            {
+                dropOverlay.Visibility = Visibility.Collapsed;
+                if (!args.DataView.Contains(StandardDataFormats.StorageItems))
+                {
+                    return;
+                }
+
+                IReadOnlyList<IStorageItem> items = await args.DataView.GetStorageItemsAsync();
+                StorageFile? file = items
+                    .OfType<StorageFile>()
+                    .FirstOrDefault(item => item.FileType.Equals(".torrent", StringComparison.OrdinalIgnoreCase));
+                if (file is null)
+                {
+                    return;
+                }
+
+                setTaskMode(true);
+                setTorrentSelection(await LoadTorrentFileAsync(file));
+            };
+
             ContentDialog dialog = new()
             {
                 XamlRoot = Content.XamlRoot,
-                Title = Strings.Get("NewDownloadDialogTitle"),
-                Content = content,
+                Content = dialogContent,
                 PrimaryButtonText = Strings.Get("AddButtonText"),
                 CloseButtonText = Strings.Get("CancelButtonText"),
                 DefaultButton = ContentDialogButton.Primary
@@ -197,10 +492,26 @@ namespace OmniDown
                 return;
             }
 
-            List<string> sourceUris = GetDownloadSourceUris(uriTextBox.Text);
-            if (sourceUris.Count == 0)
+            bool isTorrentTask = isTorrentMode;
+            List<string> sourceUris = isTorrentTask ? [] : GetDownloadSourceUris(uriTextBox.Text);
+            if (!isTorrentTask && sourceUris.Count == 0)
             {
                 ShowMessage(Strings.Get("DownloadUrlRequiredMessage"), InfoBarSeverity.Warning);
+                return;
+            }
+
+            if (isTorrentTask && torrentSelection is null)
+            {
+                ShowMessage(Strings.Get("TorrentFileRequiredMessage"), InfoBarSeverity.Warning);
+                return;
+            }
+
+            List<int> selectedTorrentFileIndexes = isTorrentTask
+                ? torrentFiles.Where(file => file.IsSelected).Select(file => file.Index).ToList()
+                : [];
+            if (isTorrentTask && selectedTorrentFileIndexes.Count == 0)
+            {
+                ShowMessage(Strings.Get("TorrentFileSelectionRequiredMessage"), InfoBarSeverity.Warning);
                 return;
             }
 
@@ -219,13 +530,32 @@ namespace OmniDown
             try
             {
                 List<DownloadTask> addedTasks = [];
-                string requestedName = sourceUris.Count == 1 ? fileNameTextBox.Text : string.Empty;
-                foreach (string sourceUri in sourceUris)
+                if (isTorrentTask && torrentSelection is not null)
                 {
-                    DownloadTask task = await _downloadCoordinator.AddDownloadAsync(sourceUri, requestedName, saveDirectory, splitCount);
+                    IReadOnlyList<int> aria2Selection = selectedTorrentFileIndexes.Count == torrentFiles.Count
+                        ? []
+                        : selectedTorrentFileIndexes;
+                    DownloadTask task = await _downloadCoordinator.AddTorrentAsync(
+                        torrentSelection.Bytes,
+                        torrentSelection.Path,
+                        torrentSelection.Metadata,
+                        saveDirectory,
+                        splitCount,
+                        aria2Selection);
                     _observedTaskStatuses[task.Gid] = task.Status;
                     addedTasks.Add(task);
                     _notifications.ShowTaskAdded(task);
+                }
+                else
+                {
+                    string requestedName = sourceUris.Count == 1 ? fileNameTextBox.Text : string.Empty;
+                    foreach (string sourceUri in sourceUris)
+                    {
+                        DownloadTask task = await _downloadCoordinator.AddDownloadAsync(sourceUri, requestedName, saveDirectory, splitCount);
+                        _observedTaskStatuses[task.Gid] = task.Status;
+                        addedTasks.Add(task);
+                        _notifications.ShowTaskAdded(task);
+                    }
                 }
 
                 ShowMessage(
@@ -241,6 +571,303 @@ namespace OmniDown
             }
 
             UpdateDashboard();
+        }
+
+        private async Task<TorrentSelection?> PickTorrentFileAsync()
+        {
+            FileOpenPicker picker = new()
+            {
+                SuggestedStartLocation = PickerLocationId.Downloads
+            };
+            picker.FileTypeFilter.Add(".torrent");
+            InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
+
+            StorageFile? file = await picker.PickSingleFileAsync();
+            if (file is null)
+            {
+                return null;
+            }
+
+            return await LoadTorrentFileAsync(file);
+        }
+
+        private static async Task<TorrentSelection> LoadTorrentFileAsync(StorageFile file)
+        {
+            byte[] bytes = await File.ReadAllBytesAsync(file.Path);
+            TorrentMetadata metadata = TorrentMetadataReader.Read(bytes);
+            string displayName = string.IsNullOrWhiteSpace(metadata.Name)
+                ? file.Name
+                : metadata.Name;
+            return new TorrentSelection(file.Path, displayName, bytes, metadata);
+        }
+
+        private static Border CreateSelectedTorrentPanel(TextBlock nameText, Func<Task> removeAction)
+        {
+            Button removeButton = new()
+            {
+                Content = new FontIcon
+                {
+                    Glyph = "\uE711",
+                    FontSize = 12
+                },
+                Width = 32,
+                Height = 32,
+                MinWidth = 32,
+                Padding = new Thickness(0),
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            removeButton.Click += async (_, _) => await removeAction();
+
+            Grid row = new()
+            {
+                Padding = new Thickness(12, 8, 8, 8),
+                ColumnDefinitions =
+                {
+                    new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                    new ColumnDefinition { Width = GridLength.Auto },
+                    new ColumnDefinition { Width = GridLength.Auto }
+                },
+                Children =
+                {
+                    nameText,
+                    new Border
+                    {
+                        Background = GetThemeBrush("AccentFillColorDefaultBrush", Colors.DodgerBlue),
+                        CornerRadius = new CornerRadius(3),
+                        Padding = new Thickness(8, 3, 8, 3),
+                        Margin = new Thickness(8, 0, 8, 0),
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Child = new TextBlock
+                        {
+                            Text = "Torrent",
+                            FontSize = 12,
+                            Foreground = GetThemeBrush("TextOnAccentFillColorPrimaryBrush", Colors.White)
+                        }
+                    },
+                    removeButton
+                }
+            };
+            Grid.SetColumn((FrameworkElement)row.Children[1], 1);
+            Grid.SetColumn((FrameworkElement)row.Children[2], 2);
+
+            return new Border
+            {
+                Background = GetThemeBrush("CardBackgroundFillColorSecondaryBrush", Colors.Transparent),
+                CornerRadius = new CornerRadius(6),
+                Child = row
+            };
+        }
+
+        private static StackPanel CreateIconText(string glyph, string text)
+        {
+            return new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Spacing = 8,
+                Children =
+                {
+                    new FontIcon
+                    {
+                        Glyph = glyph,
+                        FontSize = 16,
+                        Width = 16,
+                        Height = 16
+                    },
+                    new TextBlock
+                    {
+                        Text = text,
+                        VerticalAlignment = VerticalAlignment.Center
+                    }
+                }
+            };
+        }
+
+        private static TextBlock CreateHeaderText(string text)
+        {
+            return new TextBlock
+            {
+                Text = text,
+                FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                VerticalAlignment = VerticalAlignment.Center,
+                TextTrimming = TextTrimming.CharacterEllipsis
+            };
+        }
+
+        private static Button CreateTaskTypeButton(string text)
+        {
+            return new Button
+            {
+                Content = text,
+                Background = new SolidColorBrush(Colors.Transparent),
+                BorderBrush = new SolidColorBrush(Colors.Transparent),
+                Padding = new Thickness(16, 8, 16, 8),
+                MinWidth = 96,
+                HorizontalAlignment = HorizontalAlignment.Left
+            };
+        }
+
+        private static Grid CreateTorrentInputRow(
+            TextBlock fileNameText,
+            Border torrentTag,
+            Button openButton,
+            Button clearButton)
+        {
+            Grid row = new()
+            {
+                Height = 48,
+                Padding = new Thickness(12, 0, 6, 0),
+                Background = GetThemeBrush("CardBackgroundFillColorSecondaryBrush", Colors.Transparent),
+                ColumnDefinitions =
+                {
+                    new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                    new ColumnDefinition { Width = GridLength.Auto },
+                    new ColumnDefinition { Width = GridLength.Auto },
+                    new ColumnDefinition { Width = GridLength.Auto }
+                },
+                Children =
+                {
+                    fileNameText,
+                    torrentTag,
+                    openButton,
+                    clearButton
+                }
+            };
+            Grid.SetColumn(torrentTag, 1);
+            Grid.SetColumn(openButton, 2);
+            Grid.SetColumn(clearButton, 3);
+            return row;
+        }
+
+        private static Border CreateTorrentTag()
+        {
+            return new Border
+            {
+                Background = GetThemeBrush("AccentFillColorDefaultBrush", Colors.DodgerBlue),
+                CornerRadius = new CornerRadius(3),
+                Padding = new Thickness(8, 3, 8, 3),
+                Margin = new Thickness(8, 0, 8, 0),
+                VerticalAlignment = VerticalAlignment.Center,
+                Child = new TextBlock
+                {
+                    Text = "Torrent",
+                    FontSize = 12,
+                    Foreground = GetThemeBrush("TextOnAccentFillColorPrimaryBrush", Colors.White)
+                }
+            };
+        }
+
+        private static Button CreateIconButton(string glyph, string tooltip)
+        {
+            Button button = new()
+            {
+                Content = new FontIcon
+                {
+                    Glyph = glyph,
+                    FontSize = 16,
+                    Width = 16,
+                    Height = 16
+                },
+                Width = 40,
+                Height = 40,
+                MinWidth = 40,
+                MinHeight = 40,
+                Padding = new Thickness(0),
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            ToolTipService.SetToolTip(button, tooltip);
+            return button;
+        }
+
+        private static Border CreateTaskTypeIndicator()
+        {
+            return new Border
+            {
+                Height = 3,
+                Margin = new Thickness(12, 0, 12, 0),
+                Background = GetThemeBrush("AccentFillColorDefaultBrush", Colors.DodgerBlue),
+                CornerRadius = new CornerRadius(2),
+                VerticalAlignment = VerticalAlignment.Bottom
+            };
+        }
+
+        private static Brush GetThemeBrush(string key, Color fallback)
+        {
+            return Application.Current.Resources.TryGetValue(key, out object value) && value is Brush brush
+                ? brush
+                : new SolidColorBrush(fallback);
+        }
+
+        private static void RenderTorrentRows(
+            StackPanel rowsPanel,
+            IEnumerable<TorrentFileEntry> files,
+            CheckBox selectAllCheckBox)
+        {
+            rowsPanel.Children.Clear();
+            List<TorrentFileEntry> fileList = files.ToList();
+            selectAllCheckBox.IsChecked = fileList.Count == 0
+                ? false
+                : fileList.All(file => file.IsSelected)
+                    ? true
+                    : fileList.Any(file => file.IsSelected)
+                        ? null
+                        : false;
+
+            foreach (TorrentFileEntry file in fileList)
+            {
+                CheckBox checkBox = new()
+                {
+                    IsChecked = file.IsSelected,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                checkBox.Click += (_, _) =>
+                {
+                    file.IsSelected = checkBox.IsChecked == true;
+                    RenderTorrentRows(rowsPanel, fileList, selectAllCheckBox);
+                };
+
+                Grid row = new()
+                {
+                    MinHeight = 38,
+                    Padding = new Thickness(8, 0, 8, 0),
+                    ColumnDefinitions =
+                    {
+                        new ColumnDefinition { Width = new GridLength(40) },
+                        new ColumnDefinition { Width = new GridLength(54) },
+                        new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                        new ColumnDefinition { Width = new GridLength(96) }
+                    },
+                    Children =
+                    {
+                        checkBox,
+                        new TextBlock
+                        {
+                            Text = file.Index.ToString(CultureInfo.InvariantCulture),
+                            VerticalAlignment = VerticalAlignment.Center
+                        },
+                        new TextBlock
+                        {
+                            Text = file.Path,
+                            TextTrimming = TextTrimming.CharacterEllipsis,
+                            VerticalAlignment = VerticalAlignment.Center
+                        },
+                        new TextBlock
+                        {
+                            Text = file.SizeText,
+                            HorizontalAlignment = HorizontalAlignment.Right,
+                            VerticalAlignment = VerticalAlignment.Center
+                        }
+                    }
+                };
+                Grid.SetColumn((FrameworkElement)row.Children[1], 1);
+                Grid.SetColumn((FrameworkElement)row.Children[2], 2);
+                Grid.SetColumn((FrameworkElement)row.Children[3], 3);
+                rowsPanel.Children.Add(new Border
+                {
+                    BorderBrush = GetThemeBrush("ControlStrokeColorDefaultBrush", Colors.Gray),
+                    BorderThickness = new Thickness(0, 1, 0, 0),
+                    Child = row
+                });
+            }
         }
 
         private static void UpdateUriTextBoxHeight(TextBox textBox)
@@ -359,6 +986,14 @@ namespace OmniDown
             _currentTaskFilter = tag;
             SettingsPage.Visibility = tag == "Settings" ? Visibility.Visible : Visibility.Collapsed;
             TasksPage.Visibility = tag == "Settings" ? Visibility.Collapsed : Visibility.Visible;
+            if (tag == "Settings")
+            {
+                TaskDetailsPane.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                UpdateTaskDetailsPaneVisibility();
+            }
 
             UpdateSearchPlaceholder();
             UpdateDownloadsHeader(tag);
@@ -566,6 +1201,141 @@ namespace OmniDown
             {
                 _isRefreshing = false;
             }
+        }
+
+        private void TaskDetailsButton_Click(object sender, RoutedEventArgs e)
+        {
+            _isTaskDetailsPaneOpen = !_isTaskDetailsPaneOpen;
+            UpdateTaskDetailsPaneVisibility();
+            UpdateTaskDetailsPane();
+        }
+
+        private void TaskDetailsCloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            _isTaskDetailsPaneOpen = false;
+            UpdateTaskDetailsPaneVisibility();
+        }
+
+        private void InitializeTaskDetailsSelectorBar()
+        {
+            _taskDetailsSelectorBar = new SelectorBar();
+            _taskDetailsSummaryItem = CreateTaskDetailsSelectorItem("概要", "Summary");
+            _taskDetailsSelectorBar.Items.Add(_taskDetailsSummaryItem);
+            _taskDetailsSelectorBar.Items.Add(CreateTaskDetailsSelectorItem("活动", "Activity"));
+            _taskDetailsSelectorBar.Items.Add(CreateTaskDetailsSelectorItem("文件", "Files"));
+            _taskDetailsSelectorBar.Items.Add(CreateTaskDetailsSelectorItem("选项", "Options"));
+            _taskDetailsSelectorBar.Items.Add(CreateTaskDetailsSelectorItem("节点", "Peers"));
+            _taskDetailsSelectorBar.Items.Add(CreateTaskDetailsSelectorItem("追踪器", "Trackers"));
+            _taskDetailsSelectorBar.SelectedItem = _taskDetailsSummaryItem;
+            _taskDetailsSelectorBar.SelectionChanged += TaskDetailsSelectorBar_SelectionChanged;
+            TaskDetailsSelectorHost.Children.Add(_taskDetailsSelectorBar);
+        }
+
+        private static SelectorBarItem CreateTaskDetailsSelectorItem(string text, string tag)
+        {
+            return new SelectorBarItem
+            {
+                Text = text,
+                Tag = tag
+            };
+        }
+
+        private void TaskDetailsSelectorBar_SelectionChanged(SelectorBar sender, SelectorBarSelectionChangedEventArgs args)
+        {
+            string tag = sender.SelectedItem?.Tag?.ToString() ?? "Summary";
+            ShowTaskDetailsSection(tag);
+        }
+
+        private void UpdateTaskDetailsPaneVisibility()
+        {
+            if (TaskDetailsPane is null)
+            {
+                return;
+            }
+
+            bool canShow = _isTaskDetailsPaneOpen && _currentTaskFilter != "Settings";
+            TaskDetailsPane.Visibility = canShow ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void UpdateTaskDetailsPane()
+        {
+            if (TaskDetailsPane is null)
+            {
+                return;
+            }
+
+            List<DownloadTask> selectedTasks = GetSelectedTasks();
+            if (selectedTasks.Count != 1)
+            {
+                TaskDetailsEmptyContent.Visibility = Visibility.Visible;
+                TaskDetailsSummaryContent.Visibility = Visibility.Collapsed;
+                TaskDetailsActivityContent.Visibility = Visibility.Collapsed;
+                TaskDetailsFilesContent.Visibility = Visibility.Collapsed;
+                TaskDetailsOptionsContent.Visibility = Visibility.Collapsed;
+                TaskDetailsPeersContent.Visibility = Visibility.Collapsed;
+                TaskDetailsTrackersContent.Visibility = Visibility.Collapsed;
+
+                TaskDetailsEmptyTitleText.Text = selectedTasks.Count == 0 ? "未选择任务" : $"已选择 {selectedTasks.Count} 个任务";
+                TaskDetailsEmptyMessageText.Text = selectedTasks.Count == 0
+                    ? "选择一个任务以查看概要、活动、文件、选项、节点和追踪器。"
+                    : "请选择单个任务以查看详细信息并继续编辑任务级选项。";
+                return;
+            }
+
+            DownloadTask task = selectedTasks[0];
+            TaskDetailsEmptyContent.Visibility = Visibility.Collapsed;
+
+            TaskDetailsNameText.Text = string.IsNullOrWhiteSpace(task.Name) ? "未命名任务" : task.Name;
+            TaskDetailsPathText.Text = string.IsNullOrWhiteSpace(ResolveTaskFilePath(task))
+                ? task.SaveDirectory
+                : ResolveTaskFilePath(task);
+            TaskDetailsGidText.Text = string.IsNullOrWhiteSpace(task.Gid) ? "-" : task.Gid;
+            TaskDetailsStatusText.Text = task.StatusText;
+            TaskDetailsSizeText.Text = task.SizeText;
+            TaskDetailsProgressText.Text = task.ProgressText;
+            TaskDetailsCreatedAtText.Text = task.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss");
+            TaskDetailsSourceText.Text = string.IsNullOrWhiteSpace(task.SourceUri) ? "-" : task.SourceUri;
+
+            TaskDetailsProgressBar.Value = Math.Clamp(task.Progress, 0, 100);
+            TaskDetailsCompletedText.Text = task.TotalLength > 0
+                ? $"{FormatBytesForDetails(task.CompletedLength)} / {FormatBytesForDetails(task.TotalLength)}"
+                : FormatBytesForDetails(task.CompletedLength);
+            TaskDetailsRemainingText.Text = task.RemainingTimeText;
+            TaskDetailsDownloadSpeedText.Text = task.DownloadSpeedText;
+            TaskDetailsUploadSpeedText.Text = task.UploadSpeedText;
+
+            string selectedTag = _taskDetailsSelectorBar?.SelectedItem?.Tag?.ToString() ?? "Summary";
+            ShowTaskDetailsSection(selectedTag);
+        }
+
+        private void ShowTaskDetailsSection(string tag)
+        {
+            if (TaskDetailsSummaryContent is null)
+            {
+                return;
+            }
+
+            bool hasSingleSelection = GetSelectedTasks().Count == 1;
+            TaskDetailsSummaryContent.Visibility = hasSingleSelection && tag == "Summary" ? Visibility.Visible : Visibility.Collapsed;
+            TaskDetailsActivityContent.Visibility = hasSingleSelection && tag == "Activity" ? Visibility.Visible : Visibility.Collapsed;
+            TaskDetailsFilesContent.Visibility = hasSingleSelection && tag == "Files" ? Visibility.Visible : Visibility.Collapsed;
+            TaskDetailsOptionsContent.Visibility = hasSingleSelection && tag == "Options" ? Visibility.Visible : Visibility.Collapsed;
+            TaskDetailsPeersContent.Visibility = hasSingleSelection && tag == "Peers" ? Visibility.Visible : Visibility.Collapsed;
+            TaskDetailsTrackersContent.Visibility = hasSingleSelection && tag == "Trackers" ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private static string FormatBytesForDetails(long bytes)
+        {
+            string[] units = ["B", "KB", "MB", "GB", "TB"];
+            double size = bytes;
+            int unitIndex = 0;
+            while (size >= 1024 && unitIndex < units.Length - 1)
+            {
+                size /= 1024;
+                unitIndex++;
+            }
+
+            return $"{size:0.#} {units[unitIndex]}";
         }
 
         private void UpdateDashboard()
@@ -959,6 +1729,7 @@ namespace OmniDown
 
             UpdateTaskSelectionGlyphVisibility(task);
             UpdateSelectionCommands();
+            UpdateTaskDetailsPane();
         }
 
         private void TasksListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -989,6 +1760,7 @@ namespace OmniDown
             }
 
             UpdateSelectionCommands();
+            UpdateTaskDetailsPane();
         }
 
         private void SelectAllTasksCheckBox_Checked(object sender, RoutedEventArgs e)

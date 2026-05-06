@@ -77,6 +77,8 @@
   <data name="TerminalToggleButtonLabel.Text" xml:space="preserve"><value>Terminal</value></data>
   <data name="TerminalTextBlock.Text" xml:space="preserve"><value>aria2 terminal output will appear here.</value></data>
   <data name="NewDownloadDialogTitle" xml:space="preserve"><value>New download</value></data>
+  <data name="LinkTaskTabHeader" xml:space="preserve"><value>Link task</value></data>
+  <data name="TorrentTaskTabHeader" xml:space="preserve"><value>Torrent task</value></data>
   <data name="NewDownloadUrlHeader" xml:space="preserve"><value>Download URL</value></data>
   <data name="NewDownloadUrlPlaceholder" xml:space="preserve"><value>One URL per line</value></data>
   <data name="NewDownloadTaskNameHeader" xml:space="preserve"><value>Task name</value></data>
@@ -84,10 +86,22 @@
   <data name="NewDownloadDirectoryHeader" xml:space="preserve"><value>Save directory</value></data>
   <data name="NewDownloadSplitCountHeader" xml:space="preserve"><value>Download split count</value></data>
   <data name="PasteButtonText" xml:space="preserve"><value>Paste</value></data>
+  <data name="OpenTorrentFileButtonText" xml:space="preserve"><value>Open torrent file</value></data>
+  <data name="ClearTorrentFileButtonText" xml:space="preserve"><value>Clear torrent file</value></data>
+  <data name="TorrentFilePlaceholder" xml:space="preserve"><value>Open a torrent file</value></data>
+  <data name="SelectTorrentFileButtonText" xml:space="preserve"><value>Drop a torrent file here, or click to choose</value></data>
+  <data name="TorrentDropOverlayText" xml:space="preserve"><value>Drop here to open the torrent file</value></data>
+  <data name="TorrentNoFileSelectedText" xml:space="preserve"><value>No torrent file selected.</value></data>
+  <data name="TorrentFileCountText" xml:space="preserve"><value>{0} file(s) in this torrent</value></data>
+  <data name="TorrentFileIndexHeader" xml:space="preserve"><value>#</value></data>
+  <data name="TorrentFileNameHeader" xml:space="preserve"><value>File name</value></data>
+  <data name="TorrentFileSizeHeader" xml:space="preserve"><value>Size</value></data>
   <data name="AddButtonText" xml:space="preserve"><value>Add</value></data>
   <data name="CancelButtonText" xml:space="preserve"><value>Cancel</value></data>
   <data name="DeleteButtonText" xml:space="preserve"><value>Delete</value></data>
   <data name="DownloadUrlRequiredMessage" xml:space="preserve"><value>A download URL is required.</value></data>
+  <data name="TorrentFileRequiredMessage" xml:space="preserve"><value>Please choose a torrent file.</value></data>
+  <data name="TorrentFileSelectionRequiredMessage" xml:space="preserve"><value>Select at least one file from the torrent.</value></data>
   <data name="TaskAddedMessage" xml:space="preserve"><value>Task added to aria2.</value></data>
   <data name="TasksAddedMessage" xml:space="preserve"><value>{0} tasks added to aria2.</value></data>
   <data name="AddTaskFailedMessage" xml:space="preserve"><value>Failed to add task through aria2 RPC: {0}</value></data>

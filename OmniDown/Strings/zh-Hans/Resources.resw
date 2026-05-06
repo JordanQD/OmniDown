@@ -77,6 +77,8 @@
   <data name="TerminalToggleButtonLabel.Text" xml:space="preserve"><value>终端</value></data>
   <data name="TerminalTextBlock.Text" xml:space="preserve"><value>aria2 终端输出会显示在这里。</value></data>
   <data name="NewDownloadDialogTitle" xml:space="preserve"><value>新建下载</value></data>
+  <data name="LinkTaskTabHeader" xml:space="preserve"><value>链接任务</value></data>
+  <data name="TorrentTaskTabHeader" xml:space="preserve"><value>种子任务</value></data>
   <data name="NewDownloadUrlHeader" xml:space="preserve"><value>下载 URL</value></data>
   <data name="NewDownloadUrlPlaceholder" xml:space="preserve"><value>每行一个 URL</value></data>
   <data name="NewDownloadTaskNameHeader" xml:space="preserve"><value>任务名称</value></data>
@@ -84,10 +86,22 @@
   <data name="NewDownloadDirectoryHeader" xml:space="preserve"><value>保存目录</value></data>
   <data name="NewDownloadSplitCountHeader" xml:space="preserve"><value>下载分段数</value></data>
   <data name="PasteButtonText" xml:space="preserve"><value>粘贴</value></data>
+  <data name="OpenTorrentFileButtonText" xml:space="preserve"><value>打开种子文件</value></data>
+  <data name="ClearTorrentFileButtonText" xml:space="preserve"><value>清除种子文件</value></data>
+  <data name="TorrentFilePlaceholder" xml:space="preserve"><value>打开种子文件</value></data>
+  <data name="SelectTorrentFileButtonText" xml:space="preserve"><value>将种子拖到此处，或点击选择</value></data>
+  <data name="TorrentDropOverlayText" xml:space="preserve"><value>拖动到此处打开种子文件</value></data>
+  <data name="TorrentNoFileSelectedText" xml:space="preserve"><value>尚未选择种子文件。</value></data>
+  <data name="TorrentFileCountText" xml:space="preserve"><value>该种子包含 {0} 个文件</value></data>
+  <data name="TorrentFileIndexHeader" xml:space="preserve"><value>序号</value></data>
+  <data name="TorrentFileNameHeader" xml:space="preserve"><value>文件名</value></data>
+  <data name="TorrentFileSizeHeader" xml:space="preserve"><value>大小</value></data>
   <data name="AddButtonText" xml:space="preserve"><value>添加</value></data>
   <data name="CancelButtonText" xml:space="preserve"><value>取消</value></data>
   <data name="DeleteButtonText" xml:space="preserve"><value>删除</value></data>
   <data name="DownloadUrlRequiredMessage" xml:space="preserve"><value>请输入下载 URL。</value></data>
+  <data name="TorrentFileRequiredMessage" xml:space="preserve"><value>请选择种子文件。</value></data>
+  <data name="TorrentFileSelectionRequiredMessage" xml:space="preserve"><value>请至少选择一个种子文件。</value></data>
   <data name="TaskAddedMessage" xml:space="preserve"><value>任务已添加到 aria2。</value></data>
   <data name="TasksAddedMessage" xml:space="preserve"><value>已添加 {0} 个任务到 aria2。</value></data>
   <data name="AddTaskFailedMessage" xml:space="preserve"><value>通过 aria2 RPC 添加任务失败：{0}</value></data>

@@ -15,6 +15,23 @@
     <Grid
         Loaded="RootGrid_Loaded"
         RowDefinitions="Auto,*">
+        <Grid.Resources>
+            <Style x:Key="TaskDetailsSectionTitleTextBlockStyle" TargetType="TextBlock">
+                <Setter Property="Margin" Value="0,18,0,8" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+            </Style>
+            <Style x:Key="TaskDetailsPropertyNameTextBlockStyle" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+            <Style x:Key="TaskDetailsPropertyValueTextBlockStyle" TargetType="TextBlock">
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                <Setter Property="IsTextSelectionEnabled" Value="True" />
+            </Style>
+        </Grid.Resources>
+
         <TitleBar
             x:Name="AppTitleBar"
             Grid.Row="0"
@@ -97,8 +114,12 @@
                 </NavigationViewItem>
             </NavigationView.FooterMenuItems>
 
-            <Grid RowDefinitions="*,Auto">
-                <Grid Padding="28,20,28,24">
+            <Grid
+                ColumnDefinitions="*,Auto"
+                RowDefinitions="*,Auto">
+                <Grid
+                    Grid.Column="0"
+                    Padding="28,20,28,24">
                     <Grid
                         x:Name="TasksPage"
                         RowDefinitions="Auto,Auto,Auto,*">
@@ -221,6 +242,15 @@
                                 Icon="Clear"
                                 x:Uid="ClearCompletedTasksButton"
                                 Label="Clear completed records" />
+                            <AppBarSeparator />
+                            <AppBarButton
+                                x:Name="TaskDetailsButton"
+                                Click="TaskDetailsButton_Click"
+                                Label="详细信息">
+                                <AppBarButton.Icon>
+                                    <FontIcon Glyph="&#xE946;" />
+                                </AppBarButton.Icon>
+                            </AppBarButton>
                         </CommandBar>
                     </Grid>
 
@@ -816,6 +846,285 @@
                         </Grid>
                     </Grid>
                 </Grid>
+
+                <Border
+                    x:Name="TaskDetailsPane"
+                    Grid.Column="1"
+                    Width="382"
+                    Margin="0,0,12,12"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Visibility="Collapsed">
+                    <Grid RowDefinitions="Auto,Auto,*">
+                        <Grid
+                            Padding="16,12"
+                            ColumnDefinitions="Auto,*,Auto"
+                            ColumnSpacing="10">
+                            <FontIcon
+                                Width="20"
+                                VerticalAlignment="Center"
+                                FontSize="15"
+                                Glyph="&#xE946;" />
+                            <TextBlock
+                                Grid.Column="1"
+                                VerticalAlignment="Center"
+                                FontWeight="SemiBold"
+                                Text="详细信息" />
+                            <Button
+                                Grid.Column="2"
+                                Width="32"
+                                Height="32"
+                                MinWidth="0"
+                                Padding="0"
+                                Click="TaskDetailsCloseButton_Click"
+                                ToolTipService.ToolTip="关闭详细信息">
+                                <FontIcon
+                                    FontSize="12"
+                                    Glyph="&#xE711;" />
+                            </Button>
+                        </Grid>
+
+                        <StackPanel
+                            x:Name="TaskDetailsSelectorHost"
+                            Grid.Row="1"
+                            Margin="8,8,8,0" />
+
+                        <ScrollViewer
+                            Grid.Row="2"
+                            Padding="18,12,18,18"
+                            HorizontalScrollBarVisibility="Disabled"
+                            VerticalScrollBarVisibility="Auto">
+                            <Grid>
+                                <StackPanel
+                                    x:Name="TaskDetailsEmptyContent"
+                                    MinHeight="420"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Center"
+                                    Spacing="14">
+                                    <FontIcon
+                                        HorizontalAlignment="Center"
+                                        FontSize="64"
+                                        Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                        Glyph="&#xE7C3;" />
+                                    <TextBlock
+                                        x:Name="TaskDetailsEmptyTitleText"
+                                        HorizontalAlignment="Center"
+                                        FontSize="18"
+                                        FontWeight="SemiBold"
+                                        Text="未选择任务" />
+                                    <Border
+                                        Padding="12"
+                                        Background="{ThemeResource ControlFillColorDefaultBrush}"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="6">
+                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                            <FontIcon
+                                                Width="18"
+                                                VerticalAlignment="Top"
+                                                FontSize="15"
+                                                Glyph="&#xE946;" />
+                                            <TextBlock
+                                                x:Name="TaskDetailsEmptyMessageText"
+                                                Grid.Column="1"
+                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                Text="选择一个任务以查看概要、活动、文件、选项、节点和追踪器。"
+                                                TextWrapping="WrapWholeWords" />
+                                        </Grid>
+                                    </Border>
+                                </StackPanel>
+
+                                <StackPanel
+                                    x:Name="TaskDetailsSummaryContent"
+                                    Spacing="0"
+                                    Visibility="Collapsed">
+                                    <TextBlock
+                                        x:Name="TaskDetailsNameText"
+                                        FontSize="20"
+                                        FontWeight="SemiBold"
+                                        TextTrimming="CharacterEllipsis" />
+                                    <TextBlock
+                                        x:Name="TaskDetailsPathText"
+                                        Margin="0,4,0,8"
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        TextTrimming="CharacterEllipsis" />
+                                    <TextBlock
+                                        Style="{StaticResource TaskDetailsSectionTitleTextBlockStyle}"
+                                        Text="概要" />
+                                    <Grid ColumnDefinitions="96,*" RowSpacing="8">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="GID" />
+                                        <TextBlock
+                                            x:Name="TaskDetailsGidText"
+                                            Grid.Column="1"
+                                            Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                        <TextBlock
+                                            Grid.Row="1"
+                                            Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}"
+                                            Text="状态" />
+                                        <TextBlock
+                                            x:Name="TaskDetailsStatusText"
+                                            Grid.Row="1"
+                                            Grid.Column="1"
+                                            Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                        <TextBlock
+                                            Grid.Row="2"
+                                            Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}"
+                                            Text="大小" />
+                                        <TextBlock
+                                            x:Name="TaskDetailsSizeText"
+                                            Grid.Row="2"
+                                            Grid.Column="1"
+                                            Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                        <TextBlock
+                                            Grid.Row="3"
+                                            Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}"
+                                            Text="进度" />
+                                        <TextBlock
+                                            x:Name="TaskDetailsProgressText"
+                                            Grid.Row="3"
+                                            Grid.Column="1"
+                                            Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                        <TextBlock
+                                            Grid.Row="4"
+                                            Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}"
+                                            Text="添加时间" />
+                                        <TextBlock
+                                            x:Name="TaskDetailsCreatedAtText"
+                                            Grid.Row="4"
+                                            Grid.Column="1"
+                                            Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                        <TextBlock
+                                            Grid.Row="5"
+                                            Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}"
+                                            Text="来源" />
+                                        <TextBlock
+                                            x:Name="TaskDetailsSourceText"
+                                            Grid.Row="5"
+                                            Grid.Column="1"
+                                            Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                    </Grid>
+                                </StackPanel>
+
+                                <StackPanel
+                                    x:Name="TaskDetailsActivityContent"
+                                    Visibility="Collapsed">
+                                    <TextBlock
+                                        Style="{StaticResource TaskDetailsSectionTitleTextBlockStyle}"
+                                        Text="活动" />
+                                    <ProgressBar
+                                        x:Name="TaskDetailsProgressBar"
+                                        Height="8"
+                                        Maximum="100" />
+                                    <Grid
+                                        Margin="0,14,0,0"
+                                        ColumnDefinitions="112,*"
+                                        RowSpacing="8">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="已完成" />
+                                        <TextBlock
+                                            x:Name="TaskDetailsCompletedText"
+                                            Grid.Column="1"
+                                            Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                        <TextBlock
+                                            Grid.Row="1"
+                                            Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}"
+                                            Text="剩余时间" />
+                                        <TextBlock
+                                            x:Name="TaskDetailsRemainingText"
+                                            Grid.Row="1"
+                                            Grid.Column="1"
+                                            Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                        <TextBlock
+                                            Grid.Row="2"
+                                            Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}"
+                                            Text="下载速度" />
+                                        <TextBlock
+                                            x:Name="TaskDetailsDownloadSpeedText"
+                                            Grid.Row="2"
+                                            Grid.Column="1"
+                                            Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                        <TextBlock
+                                            Grid.Row="3"
+                                            Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}"
+                                            Text="上传速度" />
+                                        <TextBlock
+                                            x:Name="TaskDetailsUploadSpeedText"
+                                            Grid.Row="3"
+                                            Grid.Column="1"
+                                            Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                    </Grid>
+                                </StackPanel>
+
+                                <StackPanel
+                                    x:Name="TaskDetailsFilesContent"
+                                    Spacing="10"
+                                    Visibility="Collapsed">
+                                    <TextBlock
+                                        Style="{StaticResource TaskDetailsSectionTitleTextBlockStyle}"
+                                        Text="文件" />
+                                    <TextBlock
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Text="文件列表框架已就位，后续可接入 aria2 的文件明细。"
+                                        TextWrapping="WrapWholeWords" />
+                                </StackPanel>
+
+                                <StackPanel
+                                    x:Name="TaskDetailsOptionsContent"
+                                    Spacing="10"
+                                    Visibility="Collapsed">
+                                    <TextBlock
+                                        Style="{StaticResource TaskDetailsSectionTitleTextBlockStyle}"
+                                        Text="选项" />
+                                    <TextBlock
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Text="任务选项框架已就位，可继续接入 User-Agent、Referer、Cookie、代理等设置。"
+                                        TextWrapping="WrapWholeWords" />
+                                </StackPanel>
+
+                                <StackPanel
+                                    x:Name="TaskDetailsPeersContent"
+                                    Spacing="10"
+                                    Visibility="Collapsed">
+                                    <TextBlock
+                                        Style="{StaticResource TaskDetailsSectionTitleTextBlockStyle}"
+                                        Text="节点" />
+                                    <TextBlock
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Text="BT 节点列表框架已就位，后续可接入 peer 地址、客户端、进度和速度。"
+                                        TextWrapping="WrapWholeWords" />
+                                </StackPanel>
+
+                                <StackPanel
+                                    x:Name="TaskDetailsTrackersContent"
+                                    Spacing="10"
+                                    Visibility="Collapsed">
+                                    <TextBlock
+                                        Style="{StaticResource TaskDetailsSectionTitleTextBlockStyle}"
+                                        Text="追踪器" />
+                                    <TextBlock
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Text="追踪器列表框架已就位，后续可接入 tier、URL、协议和状态。"
+                                        TextWrapping="WrapWholeWords" />
+                                </StackPanel>
+                            </Grid>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
 
                     <Grid
                         x:Name="SettingsPage"
@@ -1563,6 +1872,7 @@
                     Grid.Row="1"
                     RowDefinitions="*,Auto">
                     <Border
+                        Grid.ColumnSpan="2"
                         Grid.Row="1"
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"

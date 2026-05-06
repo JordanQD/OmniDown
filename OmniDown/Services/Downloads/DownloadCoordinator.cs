@@ -55,6 +55,40 @@ public sealed class DownloadCoordinator
         return task;
     }
 
+    public async Task<DownloadTask> AddTorrentAsync(
+        byte[] torrentBytes,
+        string torrentPath,
+        TorrentMetadata metadata,
+        string saveDirectory,
+        int splitCount,
+        IReadOnlyList<int> selectedFileIndexes,
+        CancellationToken cancellationToken = default)
+    {
+        string gid = await _rpcClient.AddTorrentAsync(torrentBytes, saveDirectory, splitCount, selectedFileIndexes, cancellationToken);
+        string name = string.IsNullOrWhiteSpace(metadata.Name)
+            ? Path.GetFileNameWithoutExtension(torrentPath)
+            : metadata.Name;
+
+        DownloadTask task = new()
+        {
+            Gid = gid,
+            Name = name,
+            SourceUri = torrentPath,
+            SaveDirectory = saveDirectory,
+            LocalFilePath = string.IsNullOrWhiteSpace(name) ? string.Empty : Path.Combine(saveDirectory, name),
+            Status = "Waiting",
+            IsPeerTransfer = true,
+            TotalLength = metadata.Files
+                .Where(file => selectedFileIndexes.Count == 0 || selectedFileIndexes.Contains(file.Index))
+                .Sum(file => file.Length),
+            Progress = 0
+        };
+
+        _tasks.Insert(0, task);
+        SaveTaskCache();
+        return task;
+    }
+
     public async Task<DownloadSnapshot> RefreshAsync(CancellationToken cancellationToken = default)
     {
         List<Aria2TaskStatus> remoteTasks = [];
