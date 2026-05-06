@@ -72,6 +72,8 @@ namespace OmniDown
             _statusMessageTimer.Interval = TimeSpan.FromSeconds(3);
             _statusMessageTimer.Tick += StatusMessageTimer_Tick;
 
+            SettingsSectionListView.SelectedIndex = 0;
+            ShowSettingsSection("General");
             DownloadDirectoryTextBox.Text = AppPaths.DefaultDownloadDirectory;
 
             LoadSpeedLimitSettings();
@@ -231,6 +233,36 @@ namespace OmniDown
             ApplySettingsFilter();
         }
 
+        private void SettingsSectionListView_SelectionChanged(object sender, SelectionChangedEventArgs args)
+        {
+            if (SettingsSectionListView.SelectedItem is not ListViewItem item)
+            {
+                return;
+            }
+
+            string tag = item.Tag?.ToString() ?? "General";
+            ShowSettingsSection(tag);
+            ApplySettingsFilter();
+        }
+
+        private void ShowSettingsSection(string tag)
+        {
+            if (GeneralSettingsContent is null
+                || DownloadSettingsContent is null
+                || BitTorrentSettingsContent is null
+                || NetworkSettingsContent is null
+                || AdvancedSettingsContent is null)
+            {
+                return;
+            }
+
+            GeneralSettingsContent.Visibility = tag == "General" ? Visibility.Visible : Visibility.Collapsed;
+            DownloadSettingsContent.Visibility = tag == "Download" ? Visibility.Visible : Visibility.Collapsed;
+            BitTorrentSettingsContent.Visibility = tag == "BitTorrent" ? Visibility.Visible : Visibility.Collapsed;
+            NetworkSettingsContent.Visibility = tag == "Network" ? Visibility.Visible : Visibility.Collapsed;
+            AdvancedSettingsContent.Visibility = tag == "Advanced" ? Visibility.Visible : Visibility.Collapsed;
+        }
+
         private void AppTitleBar_PaneToggleRequested(TitleBar sender, object args)
         {
             RootNavigation.IsPaneOpen = !RootNavigation.IsPaneOpen;
@@ -325,7 +357,7 @@ namespace OmniDown
                 rpcPort,
                 DownloadDirectoryTextBox.Text.Trim(),
                 _rpcSecret,
-                UseSystemProxyCheckBox.IsChecked == true));
+                UseSystemProxyCheckBox.IsOn));
 
             if (!result.Started)
             {
@@ -933,6 +965,26 @@ namespace OmniDown
             UpdateDebugStatus();
         }
 
+        private void SettingToggleSwitch_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (sender is not ToggleSwitch toggleSwitch ||
+                toggleSwitch.Parent is not StackPanel panel)
+            {
+                return;
+            }
+
+            TextBlock? stateText = panel.Children.OfType<TextBlock>().FirstOrDefault();
+            if (stateText is not null)
+            {
+                stateText.Text = toggleSwitch.IsOn ? "开" : "关";
+            }
+
+            if (ReferenceEquals(toggleSwitch, UseSystemProxyCheckBox))
+            {
+                UseSystemProxyCheckBox_Changed(sender, e);
+            }
+        }
+
         private async void ApplySpeedLimitButton_Click(object sender, RoutedEventArgs e)
         {
             _isDownloadSpeedLimitEnabled = DownloadLimitToggleSwitch.IsOn;
@@ -1437,19 +1489,32 @@ namespace OmniDown
             }
 
             string query = GetSearchQuery();
-            SetSettingVisibility(AriaPathSettingLabel, AriaPathTextBox, query, "aria2c", "path", Strings.Get("AriaPathLabel.Text"), Strings.Get("AriaPathTextBox.PlaceholderText"));
-            SetSettingVisibility(RpcPortSettingLabel, RpcPortNumberBox, query, "rpc", "port", Strings.Get("RpcPortLabel.Text"));
-            SetSettingVisibility(DefaultDirectorySettingLabel, DownloadDirectoryTextBox, query, "default", "directory", "download", Strings.Get("DefaultDirectoryLabel.Text"));
-            SetSettingVisibility(ProxySettingLabel, UseSystemProxyCheckBox, query, "proxy", "system proxy", Strings.Get("ProxyLabel.Text"), Strings.Get("UseSystemProxyCheckBox.Content"));
-            SetSettingVisibility(ProcessStatusSettingLabel, ProcessStatusSettingControl, query, "process", "status", "aria2", Strings.Get("ProcessStatusLabel.Text"));
+            SetSettingVisibility(StartupSettingCard, query, "startup", "launch", "engine", "aria2", "启动", "引擎");
+            SetSettingVisibility(ThemeSettingCard, query, "theme", "appearance", "system", "dark", "light", "主题", "外观");
+            SetSettingVisibility(NotificationsSettingCard, query, "notification", "complete", "failed", "通知");
+
+            SetSettingVisibility(DefaultDirectorySettingCard, query, "default", "directory", "download", "folder", Strings.Get("DefaultDirectoryLabel.Text"), "目录", "保存");
+            SetSettingVisibility(SplitCountSettingCard, query, "split", "connection", "thread", "分片", "连接数");
+            SetSettingVisibility(SpeedLimitSettingCard, query, "speed", "limit", "upload", "download", "速度", "限速");
+
+            SetSettingVisibility(BtEnableSettingCard, query, "bittorrent", "torrent", "magnet", "bt", "磁力", "种子");
+            SetSettingVisibility(BtPortSettingCard, query, "bittorrent", "port", "listen", "bt", "端口");
+            SetSettingVisibility(BtSeedRatioSettingCard, query, "bittorrent", "seed", "ratio", "bt", "做种", "分享率");
+
+            SetSettingVisibility(UseSystemProxySettingCard, query, "proxy", "system proxy", Strings.Get("ProxyLabel.Text"), "Use Windows system proxy when aria2 starts", "代理");
+            SetSettingVisibility(CustomProxySettingCard, query, "proxy", "http", "https", "socks", "custom", "代理");
+            SetSettingVisibility(RetrySettingCard, query, "retry", "network", "connection", "重试", "网络");
+
+            SetSettingVisibility(AriaPathSettingCard, query, "aria2c", "path", Strings.Get("AriaPathLabel.Text"), Strings.Get("AriaPathTextBox.PlaceholderText"), "路径");
+            SetSettingVisibility(RpcPortSettingCard, query, "rpc", "port", Strings.Get("RpcPortLabel.Text"), "端口");
+            SetSettingVisibility(ProcessStatusSettingCard, query, "process", "status", "aria2", Strings.Get("ProcessStatusLabel.Text"), "状态");
+            SetSettingVisibility(TerminalSettingCard, query, "terminal", "log", "debug", "aria2", "终端", "日志");
         }
 
-        private static void SetSettingVisibility(FrameworkElement label, FrameworkElement control, string query, params string[] searchableText)
+        private static void SetSettingVisibility(FrameworkElement element, string query, params string[] searchableText)
         {
             bool isVisible = string.IsNullOrWhiteSpace(query) || searchableText.Any(text => SearchContains(text, query));
-            Visibility visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
-            label.Visibility = visibility;
-            control.Visibility = visibility;
+            element.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private void UpdateSearchPlaceholder()
