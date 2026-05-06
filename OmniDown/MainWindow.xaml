@@ -110,11 +110,6 @@
                                 FontWeight="SemiBold"
                                 x:Uid="DownloadsTitleText"
                                 Text="Downloads" />
-                            <TextBlock
-                                x:Name="DownloadsSubtitleText"
-                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                x:Uid="DownloadsSubtitleText"
-                                Text="Local aria2 sidecar control with JSON-RPC task sync." />
                         </StackPanel>
 
                         <CommandBar
@@ -233,9 +228,12 @@
                         x:Name="StatsPanel"
                         Grid.Row="1"
                         Margin="0,20,0,14"
-                        ColumnDefinitions="*,*,*,*,Auto">
-                        <StackPanel Spacing="4">
+                        ColumnDefinitions="*,*,*,*,*,Auto">
+                        <StackPanel
+                            x:Name="TotalMetricPanel"
+                            Spacing="4">
                             <TextBlock
+                                x:Name="TotalMetricLabelText"
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                 x:Uid="TotalMetricLabel"
                                 Text="Total" />
@@ -246,9 +244,11 @@
                                 Text="0" />
                         </StackPanel>
                         <StackPanel
+                            x:Name="ActiveMetricPanel"
                             Grid.Column="1"
                             Spacing="4">
                             <TextBlock
+                                x:Name="ActiveMetricLabelText"
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                 x:Uid="ActiveMetricLabel"
                                 Text="Downloading" />
@@ -259,9 +259,25 @@
                                 Text="0" />
                         </StackPanel>
                         <StackPanel
+                            x:Name="PausedMetricPanel"
                             Grid.Column="2"
                             Spacing="4">
                             <TextBlock
+                                x:Name="PausedMetricLabelText"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="Paused" />
+                            <TextBlock
+                                x:Name="PausedTasksText"
+                                FontSize="24"
+                                FontWeight="SemiBold"
+                                Text="0" />
+                        </StackPanel>
+                        <StackPanel
+                            x:Name="CompletedMetricPanel"
+                            Grid.Column="3"
+                            Spacing="4">
+                            <TextBlock
+                                x:Name="CompletedMetricLabelText"
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                 x:Uid="DownloadSpeedMetricLabel"
                                 Text="Completed" />
@@ -272,9 +288,11 @@
                                 Text="0" />
                         </StackPanel>
                         <StackPanel
-                            Grid.Column="3"
+                            x:Name="IssueMetricPanel"
+                            Grid.Column="4"
                             Spacing="4">
                             <TextBlock
+                                x:Name="IssueMetricLabelText"
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                 x:Uid="Aria2MetricLabel"
                                 Text="Issues" />
@@ -286,7 +304,7 @@
                         </StackPanel>
                         <DropDownButton
                             x:Name="SpeedLimitButton"
-                            Grid.Column="4"
+                            Grid.Column="5"
                             MinWidth="292"
                             Margin="-14,0,0,0"
                             Padding="14,0,14,6"
@@ -511,6 +529,7 @@
                     </Grid>
 
                     <Border
+                        x:Name="TasksListHeaderPanel"
                         Grid.Row="2"
                         Margin="0,0,0,4"
                         Background="{ThemeResource LayerFillColorDefaultBrush}"
@@ -809,10 +828,6 @@
                                 FontWeight="SemiBold"
                                 x:Uid="SettingsTitleText"
                                 Text="Settings" />
-                            <TextBlock
-                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                x:Uid="SettingsSubtitleText"
-                                Text="Manage the local aria2 process and default download behavior." />
                         </StackPanel>
 
                         <Grid

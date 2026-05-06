@@ -95,9 +95,52 @@ namespace OmniDown
             TextBox uriTextBox = new()
             {
                 Header = "Download URL",
-                PlaceholderText = "https://example.com/file.zip"
+                PlaceholderText = "https://example.com/file.zip",
+                AcceptsReturn = true,
+                TextWrapping = TextWrapping.Wrap,
+                Height = 64,
+                MaxHeight = 220
             };
             uriTextBox.Header = Strings.Get("NewDownloadUrlHeader");
+            uriTextBox.PlaceholderText = Strings.Get("NewDownloadUrlPlaceholder");
+            ScrollViewer.SetVerticalScrollBarVisibility(uriTextBox, ScrollBarVisibility.Auto);
+            uriTextBox.TextChanged += (_, _) => UpdateUriTextBoxHeight(uriTextBox);
+            uriTextBox.SizeChanged += (_, _) => UpdateUriTextBoxHeight(uriTextBox);
+
+            Button pasteUriButton = new()
+            {
+                Content = new FontIcon
+                {
+                    Glyph = "\uE77F",
+                    FontSize = 16,
+                    Width = 16,
+                    Height = 16
+                },
+                Width = 40,
+                Height = 40,
+                MinWidth = 40,
+                MinHeight = 40,
+                Padding = new Thickness(0),
+                VerticalAlignment = VerticalAlignment.Bottom,
+                Margin = new Thickness(8, 0, 0, 0)
+            };
+            ToolTipService.SetToolTip(pasteUriButton, Strings.Get("PasteButtonText"));
+            pasteUriButton.Click += async (_, _) => await PasteClipboardTextAsync(uriTextBox);
+
+            Grid uriInputRow = new()
+            {
+                ColumnDefinitions =
+                {
+                    new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                    new ColumnDefinition { Width = GridLength.Auto }
+                },
+                Children =
+                {
+                    uriTextBox,
+                    pasteUriButton
+                }
+            };
+            Grid.SetColumn(pasteUriButton, 1);
 
             TextBox fileNameTextBox = new()
             {
@@ -125,10 +168,12 @@ namespace OmniDown
 
             StackPanel content = new()
             {
+                Width = 680,
+                MaxWidth = 760,
                 Spacing = 12,
                 Children =
                 {
-                    uriTextBox,
+                    uriInputRow,
                     fileNameTextBox,
                     directoryTextBox,
                     splitCountNumberBox
@@ -144,6 +189,7 @@ namespace OmniDown
                 CloseButtonText = Strings.Get("CancelButtonText"),
                 DefaultButton = ContentDialogButton.Primary
             };
+            dialog.Resources["ContentDialogMaxWidth"] = 820d;
 
             ContentDialogResult result = await dialog.ShowAsync();
             if (result != ContentDialogResult.Primary)
@@ -151,8 +197,8 @@ namespace OmniDown
                 return;
             }
 
-            string sourceUri = uriTextBox.Text.Trim();
-            if (string.IsNullOrWhiteSpace(sourceUri))
+            List<string> sourceUris = GetDownloadSourceUris(uriTextBox.Text);
+            if (sourceUris.Count == 0)
             {
                 ShowMessage(Strings.Get("DownloadUrlRequiredMessage"), InfoBarSeverity.Warning);
                 return;
@@ -172,10 +218,21 @@ namespace OmniDown
 
             try
             {
-                DownloadTask task = await _downloadCoordinator.AddDownloadAsync(sourceUri, fileNameTextBox.Text, saveDirectory, splitCount);
-                _observedTaskStatuses[task.Gid] = task.Status;
-                ShowMessage(Strings.Get("TaskAddedMessage"), InfoBarSeverity.Success);
-                _notifications.ShowTaskAdded(task);
+                List<DownloadTask> addedTasks = [];
+                string requestedName = sourceUris.Count == 1 ? fileNameTextBox.Text : string.Empty;
+                foreach (string sourceUri in sourceUris)
+                {
+                    DownloadTask task = await _downloadCoordinator.AddDownloadAsync(sourceUri, requestedName, saveDirectory, splitCount);
+                    _observedTaskStatuses[task.Gid] = task.Status;
+                    addedTasks.Add(task);
+                    _notifications.ShowTaskAdded(task);
+                }
+
+                ShowMessage(
+                    addedTasks.Count == 1
+                        ? Strings.Get("TaskAddedMessage")
+                        : Strings.Format("TasksAddedMessage", addedTasks.Count),
+                    InfoBarSeverity.Success);
                 await RefreshDownloadsAsync();
             }
             catch (Exception ex)
@@ -184,6 +241,83 @@ namespace OmniDown
             }
 
             UpdateDashboard();
+        }
+
+        private static void UpdateUriTextBoxHeight(TextBox textBox)
+        {
+            const double singleLineHeight = 64;
+            const double lineHeight = 22;
+            const double maxHeight = 220;
+            const double horizontalPadding = 28;
+            const double averageCharacterWidth = 7.4;
+
+            double textWidth = textBox.ActualWidth > 0
+                ? Math.Max(160, textBox.ActualWidth - horizontalPadding)
+                : 560;
+            int charactersPerLine = Math.Max(20, (int)Math.Floor(textWidth / averageCharacterWidth));
+            int visualLineCount = 0;
+
+            string normalizedText = (textBox.Text ?? string.Empty).Replace("\r\n", "\n").Replace('\r', '\n');
+            foreach (string line in normalizedText.Split('\n'))
+            {
+                visualLineCount += Math.Max(1, (int)Math.Ceiling(Math.Max(1, line.Length) / (double)charactersPerLine));
+            }
+
+            double desiredHeight = singleLineHeight + (Math.Max(1, visualLineCount) - 1) * lineHeight;
+            textBox.Height = Math.Clamp(desiredHeight, singleLineHeight, maxHeight);
+        }
+
+        private static List<string> GetDownloadSourceUris(string text)
+        {
+            return text
+                .Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(line => line.Trim())
+                .Where(line => !string.IsNullOrWhiteSpace(line))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+
+        private static async Task PasteClipboardTextAsync(TextBox textBox)
+        {
+            try
+            {
+                DataPackageView content = Clipboard.GetContent();
+                if (!content.Contains(StandardDataFormats.Text))
+                {
+                    return;
+                }
+
+                string clipboardText = (await content.GetTextAsync()).Trim();
+                if (string.IsNullOrWhiteSpace(clipboardText))
+                {
+                    return;
+                }
+
+                string currentText = textBox.Text ?? string.Empty;
+                int selectionStart = Math.Clamp(textBox.SelectionStart, 0, currentText.Length);
+                int selectionLength = Math.Clamp(textBox.SelectionLength, 0, currentText.Length - selectionStart);
+                string prefix = currentText[..selectionStart];
+                string suffix = currentText[(selectionStart + selectionLength)..];
+
+                if (!string.IsNullOrWhiteSpace(prefix) && !EndsWithLineBreak(prefix))
+                {
+                    clipboardText = Environment.NewLine + clipboardText;
+                }
+
+                textBox.Text = prefix + clipboardText + suffix;
+                textBox.SelectionStart = (prefix + clipboardText).Length;
+                textBox.SelectionLength = 0;
+                textBox.Focus(FocusState.Programmatic);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Paste download URL failed: {ex}");
+            }
+        }
+
+        private static bool EndsWithLineBreak(string text)
+        {
+            return text.EndsWith('\r') || text.EndsWith('\n');
         }
 
         private static int GetDownloadSplitCount(NumberBox numberBox)
@@ -230,6 +364,7 @@ namespace OmniDown
             UpdateDownloadsHeader(tag);
             UpdateStatsVisibility(tag);
             ApplyTaskFilter(tag);
+            UpdateDashboard();
             ApplySettingsFilter();
         }
 
@@ -435,8 +570,16 @@ namespace OmniDown
 
         private void UpdateDashboard()
         {
-            TotalTasksText.Text = Tasks.Count.ToString();
-            ActiveTasksText.Text = Tasks.Count(IsDownloadingTask).ToString();
+            bool isTransferPage = _currentTaskFilter == "Downloading";
+            TotalMetricLabelText.Text = isTransferPage ? Strings.Get("DownloadingPageTitle") : Strings.Get("TotalMetricLabel.Text");
+            ActiveMetricLabelText.Text = Strings.Get("ActiveMetricLabel.Text");
+            PausedMetricLabelText.Text = Strings.Get("PausedMetricLabel");
+            CompletedMetricLabelText.Text = Strings.Get("DownloadSpeedMetricLabel.Text");
+            IssueMetricLabelText.Text = Strings.Get("Aria2MetricLabel.Text");
+
+            TotalTasksText.Text = (isTransferPage ? Tasks.Count(IsDownloadingTask) : Tasks.Count).ToString();
+            ActiveTasksText.Text = Tasks.Count(IsActiveTransferTask).ToString();
+            PausedTasksText.Text = Tasks.Count(IsPausedTask).ToString();
             CompletedTasksText.Text = Tasks.Count(IsCompletedTask).ToString();
             IssueTasksText.Text = Tasks.Count(IsIssueTask).ToString();
         }
@@ -1412,6 +1555,16 @@ namespace OmniDown
                 || task.Status.Contains("paused", StringComparison.OrdinalIgnoreCase);
         }
 
+        private static bool IsActiveTransferTask(DownloadTask task)
+        {
+            return IsDownloadingTask(task) && !IsPausedTask(task);
+        }
+
+        private static bool IsPausedTask(DownloadTask task)
+        {
+            return task.Status.Contains("paused", StringComparison.OrdinalIgnoreCase);
+        }
+
         private static bool IsCompletedTask(DownloadTask task)
         {
             return IsCompletedTaskStatus(task.Status);
@@ -1531,7 +1684,7 @@ namespace OmniDown
 
         private void UpdateDownloadsHeader(string tag)
         {
-            if (DownloadsTitleText is null || DownloadsSubtitleText is null || tag == "Settings")
+            if (DownloadsTitleText is null || tag == "Settings")
             {
                 return;
             }
@@ -1545,7 +1698,6 @@ namespace OmniDown
             };
 
             DownloadsTitleText.Text = Strings.Get($"{resourceKey}Title");
-            DownloadsSubtitleText.Text = Strings.Get($"{resourceKey}Subtitle");
         }
 
         private void UpdateStatsVisibility(string tag)
@@ -1555,7 +1707,12 @@ namespace OmniDown
                 return;
             }
 
-            StatsPanel.Visibility = tag == "Home" ? Visibility.Visible : Visibility.Collapsed;
+            StatsPanel.Visibility = tag is "Home" or "Downloading" ? Visibility.Visible : Visibility.Collapsed;
+            CompletedMetricPanel.Visibility = tag == "Home" ? Visibility.Visible : Visibility.Collapsed;
+            IssueMetricPanel.Visibility = tag == "Home" ? Visibility.Visible : Visibility.Collapsed;
+            TasksListHeaderPanel.Margin = tag is "Home" or "Downloading"
+                ? new Thickness(0, 0, 0, 4)
+                : new Thickness(0, 20, 0, 4);
         }
 
         private IEnumerable<DownloadTask> SortTasks(IEnumerable<DownloadTask> tasks)

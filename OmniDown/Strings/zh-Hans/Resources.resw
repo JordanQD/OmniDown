@@ -43,6 +43,7 @@
   <data name="StopAriaButton.Label" xml:space="preserve"><value>停止</value></data>
   <data name="TotalMetricLabel.Text" xml:space="preserve"><value>总数</value></data>
   <data name="ActiveMetricLabel.Text" xml:space="preserve"><value>进行中</value></data>
+  <data name="PausedMetricLabel" xml:space="preserve"><value>已暂停</value></data>
   <data name="DownloadSpeedMetricLabel.Text" xml:space="preserve"><value>已完成</value></data>
   <data name="Aria2MetricLabel.Text" xml:space="preserve"><value>异常</value></data>
   <data name="NameColumnHeader.Text" xml:space="preserve"><value>名称</value></data>
@@ -77,15 +78,18 @@
   <data name="TerminalTextBlock.Text" xml:space="preserve"><value>aria2 终端输出会显示在这里。</value></data>
   <data name="NewDownloadDialogTitle" xml:space="preserve"><value>新建下载</value></data>
   <data name="NewDownloadUrlHeader" xml:space="preserve"><value>下载 URL</value></data>
+  <data name="NewDownloadUrlPlaceholder" xml:space="preserve"><value>每行一个 URL</value></data>
   <data name="NewDownloadTaskNameHeader" xml:space="preserve"><value>任务名称</value></data>
   <data name="NewDownloadTaskNamePlaceholder" xml:space="preserve"><value>留空则从 URL 推断</value></data>
   <data name="NewDownloadDirectoryHeader" xml:space="preserve"><value>保存目录</value></data>
   <data name="NewDownloadSplitCountHeader" xml:space="preserve"><value>下载分段数</value></data>
+  <data name="PasteButtonText" xml:space="preserve"><value>粘贴</value></data>
   <data name="AddButtonText" xml:space="preserve"><value>添加</value></data>
   <data name="CancelButtonText" xml:space="preserve"><value>取消</value></data>
   <data name="DeleteButtonText" xml:space="preserve"><value>删除</value></data>
   <data name="DownloadUrlRequiredMessage" xml:space="preserve"><value>请输入下载 URL。</value></data>
   <data name="TaskAddedMessage" xml:space="preserve"><value>任务已添加到 aria2。</value></data>
+  <data name="TasksAddedMessage" xml:space="preserve"><value>已添加 {0} 个任务到 aria2。</value></data>
   <data name="AddTaskFailedMessage" xml:space="preserve"><value>通过 aria2 RPC 添加任务失败：{0}</value></data>
   <data name="TaskAddedNotificationTitle" xml:space="preserve"><value>任务添加成功</value></data>
   <data name="TaskAddedNotificationBody" xml:space="preserve"><value>{0} 已加入下载队列。</value></data>
