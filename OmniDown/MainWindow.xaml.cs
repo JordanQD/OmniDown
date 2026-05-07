@@ -10,6 +10,7 @@ using OmniDown.Services.Engine;
 using OmniDown.Services.Localization;
 using OmniDown.Services.Notifications;
 using OmniDown.Services.Rpc;
+using OmniDown.Services.Shell;
 using OmniDown.Services.Storage;
 using System;
 using System.Collections.Generic;
@@ -42,6 +43,7 @@ namespace OmniDown
         private readonly Aria2RpcClient _aria2RpcClient = new();
         private readonly DownloadCoordinator _downloadCoordinator;
         private readonly SystemNotificationService _notifications;
+        private readonly TaskbarProgressService _taskbarProgress;
         private readonly DispatcherTimer _refreshTimer = new();
         private readonly DispatcherTimer _statusMessageTimer = new();
         private readonly string _rpcSecret = Convert.ToHexString(RandomNumberGenerator.GetBytes(16));
@@ -73,6 +75,7 @@ namespace OmniDown
             NotificationHistoryListView.ItemsSource = _statusMessages;
             InitializeTaskDetailsSelectorBar();
             SetWindowIcon();
+            _taskbarProgress = new TaskbarProgressService(WindowNative.GetWindowHandle(this));
             ExtendsContentIntoTitleBar = true;
             SetTitleBar(AppTitleBar);
             AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
@@ -970,6 +973,7 @@ namespace OmniDown
             await SaveAriaSessionIfRunningAsync();
             _aria2EngineHost.Stop();
             UpdateGlobalSpeeds(0, 0);
+            _taskbarProgress.Clear();
             UpdateGlobalSpeedLimitText();
             UpdateAriaStatus();
             ShowMessage(Strings.Get("AriaStoppedMessage"), InfoBarSeverity.Informational);
@@ -1085,6 +1089,7 @@ namespace OmniDown
         private async void MainWindow_Closed(object sender, WindowEventArgs args)
         {
             _refreshTimer.Stop();
+            _taskbarProgress.Clear();
             SaveSpeedLimitSettings();
             await SaveAriaSessionIfRunningAsync();
             _notifications.Unregister();
@@ -1177,6 +1182,7 @@ namespace OmniDown
                 if (!_aria2EngineHost.IsRunning)
                 {
                     UpdateGlobalSpeeds(0, 0);
+                    _taskbarProgress.Clear();
                 }
 
                 return;
@@ -1190,6 +1196,7 @@ namespace OmniDown
                 ApplyTaskFilter(_currentTaskFilter);
                 UpdateDashboard();
                 UpdateGlobalSpeeds(snapshot.DownloadSpeed, snapshot.UploadSpeed);
+                UpdateTaskbarProgressFromTasks();
                 UpdateAriaStatus();
             }
             catch (Exception ex)
@@ -1377,6 +1384,32 @@ namespace OmniDown
             UpdateGlobalSpeeds(
                 Tasks.Sum(task => task.DownloadSpeed),
                 Tasks.Sum(task => task.UploadSpeed));
+        }
+
+        private void UpdateTaskbarProgressFromTasks()
+        {
+            DownloadTask[] activeTasks = Tasks
+                .Where(task => task.Status.Contains("download", StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+
+            if (activeTasks.Length == 0)
+            {
+                _taskbarProgress.Clear();
+                return;
+            }
+
+            long totalLength = activeTasks
+                .Where(task => task.TotalLength > 0)
+                .Sum(task => task.TotalLength);
+            long completedLength = activeTasks
+                .Where(task => task.CompletedLength > 0)
+                .Sum(task => task.CompletedLength);
+
+            double progress = totalLength > 0
+                ? Math.Clamp(completedLength / (double)totalLength, 0, 1)
+                : 0;
+
+            _taskbarProgress.SetProgress(progress);
         }
 
         private void UpdateGlobalSpeedLimitText()
