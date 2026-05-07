@@ -1254,6 +1254,7 @@ namespace OmniDown
             }
 
             bool canShow = _isTaskDetailsPaneOpen && _currentTaskFilter != "Settings";
+            TaskDetailsHostColumn.Width = canShow ? new GridLength(360) : new GridLength(0);
             TaskDetailsPane.Visibility = canShow ? Visibility.Visible : Visibility.Collapsed;
         }
 
@@ -1291,12 +1292,16 @@ namespace OmniDown
                 : ResolveTaskFilePath(task);
             TaskDetailsGidText.Text = string.IsNullOrWhiteSpace(task.Gid) ? "-" : task.Gid;
             TaskDetailsStatusText.Text = task.StatusText;
+            TaskDetailsStatusText.Foreground = task.StatusBrush;
+            TaskDetailsHeroIcon.Glyph = task.IsPeerTransfer ? "\uE968" : "\uE7C3";
+            TaskDetailsHeroIcon.Foreground = task.StatusBrush;
             TaskDetailsSizeText.Text = task.SizeText;
             TaskDetailsProgressText.Text = task.ProgressText;
             TaskDetailsCreatedAtText.Text = task.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss");
             TaskDetailsSourceText.Text = string.IsNullOrWhiteSpace(task.SourceUri) ? "-" : task.SourceUri;
 
             TaskDetailsProgressBar.Value = Math.Clamp(task.Progress, 0, 100);
+            TaskDetailsProgressBar.Foreground = task.ProgressBrush;
             TaskDetailsCompletedText.Text = task.TotalLength > 0
                 ? $"{FormatBytesForDetails(task.CompletedLength)} / {FormatBytesForDetails(task.TotalLength)}"
                 : FormatBytesForDetails(task.CompletedLength);
@@ -1365,6 +1370,13 @@ namespace OmniDown
             {
                 GlobalUploadSpeedText.Text = FormatSpeed(uploadSpeed);
             }
+        }
+
+        private void UpdateGlobalSpeedsFromTasks()
+        {
+            UpdateGlobalSpeeds(
+                Tasks.Sum(task => task.DownloadSpeed),
+                Tasks.Sum(task => task.UploadSpeed));
         }
 
         private void UpdateGlobalSpeedLimitText()
@@ -2136,6 +2148,9 @@ namespace OmniDown
             try
             {
                 await operation(selectedTasks);
+                ApplyTaskFilter(_currentTaskFilter);
+                UpdateDashboard();
+                UpdateGlobalSpeedsFromTasks();
                 await RefreshDownloadsAsync();
                 ApplyTaskFilter(_currentTaskFilter);
                 UpdateSelectionCommands();
@@ -2262,6 +2277,10 @@ namespace OmniDown
             try
             {
                 await operation([task]);
+                ApplyTaskFilter(_currentTaskFilter);
+                UpdateDashboard();
+                UpdateGlobalSpeedsFromTasks();
+                UpdateTaskDetailsPane();
                 await RefreshDownloadsAsync();
                 ApplyTaskFilter(_currentTaskFilter);
                 UpdateSelectionCommands();

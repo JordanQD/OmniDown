@@ -108,8 +108,8 @@ public sealed class DownloadCoordinator
         Aria2GlobalStat stat = await _rpcClient.GetGlobalStatAsync(cancellationToken);
         return new DownloadSnapshot(
             ActiveCount: ParseLong(stat.NumActive),
-            DownloadSpeed: ParseLong(stat.DownloadSpeed),
-            UploadSpeed: ParseLong(stat.UploadSpeed));
+            DownloadSpeed: _tasks.Sum(task => task.DownloadSpeed),
+            UploadSpeed: _tasks.Sum(task => task.UploadSpeed));
     }
 
     public async Task PauseAsync(IEnumerable<DownloadTask> tasks, CancellationToken cancellationToken = default)
@@ -118,6 +118,8 @@ public sealed class DownloadCoordinator
         {
             await _rpcClient.PauseAsync(task.Gid, cancellationToken);
             task.Status = "Paused";
+            task.DownloadSpeed = 0;
+            task.UploadSpeed = 0;
         }
     }
 
