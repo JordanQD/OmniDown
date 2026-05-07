@@ -73,6 +73,7 @@
             IsPaneToggleButtonVisible="False"
             IsSettingsVisible="False"
             PaneDisplayMode="Left"
+            ItemInvoked="RootNavigation_ItemInvoked"
             SelectionChanged="RootNavigation_SelectionChanged">
             <NavigationView.MenuItems>
                 <NavigationViewItem
@@ -112,7 +113,9 @@
             </NavigationView.MenuItems>
             <NavigationView.FooterMenuItems>
                 <NavigationViewItem
+                    x:Name="SettingsNavItem"
                     Content="Settings"
+                    Tapped="SettingsNavItem_Tapped"
                     x:Uid="SettingsNavItem"
                     Tag="Settings">
                     <NavigationViewItem.Icon>
@@ -133,6 +136,7 @@
                             Width="0" />
                     </Grid.ColumnDefinitions>
                     <Grid
+                        x:Name="TasksHeaderPanel"
                         Grid.ColumnSpan="2"
                         Padding="0,0,12,0"
                         ColumnDefinitions="*,Auto">
@@ -874,8 +878,12 @@
 
                     </Grid>
 
+                    </Grid>
+
                     <Grid
                         x:Name="SettingsPage"
+                        Grid.Row="0"
+                        Grid.RowSpan="2"
                         Visibility="Collapsed"
                         RowDefinitions="Auto,*"
                         RowSpacing="20">
@@ -954,7 +962,7 @@
                                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1"
-                                            CornerRadius="8">
+                                            CornerRadius="8,8,0,0">
                                             <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
                                                 <FontIcon
                                                     Width="24"
@@ -987,6 +995,51 @@
                                                         OffContent=""
                                                         OnContent=""
                                                         IsOn="True"
+                                                        Toggled="SettingToggleSwitch_Toggled" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+
+                                        <Border
+                                            x:Name="CloseBehaviorSettingCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="0">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE7E8;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="关闭时最小化到系统托盘" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="关闭窗口后继续在后台运行，点击托盘图标可重新显示 OmniDown。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <StackPanel
+                                                    Grid.Column="2"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+                                                    <TextBlock
+                                                        VerticalAlignment="Center"
+                                                        Text="关" />
+                                                    <ToggleSwitch
+                                                        x:Name="CloseToTrayToggleSwitch"
+                                                        Width="48"
+                                                        MinWidth="0"
+                                                        Padding="0"
+                                                        OffContent=""
+                                                        OnContent=""
                                                         Toggled="SettingToggleSwitch_Toggled" />
                                                 </StackPanel>
                                             </Grid>
@@ -1614,7 +1667,6 @@
                             </ScrollViewer>
                         </Grid>
                     </Grid>
-                </Grid>
 
                 <Border
                     x:Name="TaskDetailsPane"

@@ -19,6 +19,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -44,6 +45,7 @@ namespace OmniDown
         private readonly DownloadCoordinator _downloadCoordinator;
         private readonly SystemNotificationService _notifications;
         private readonly TaskbarProgressService _taskbarProgress;
+        private TrayIconService? _trayIcon;
         private readonly DispatcherTimer _refreshTimer = new();
         private readonly DispatcherTimer _statusMessageTimer = new();
         private readonly string _rpcSecret = Convert.ToHexString(RandomNumberGenerator.GetBytes(16));
@@ -65,6 +67,12 @@ namespace OmniDown
         private long _uploadLimitBytesPerSecond;
         private readonly Dictionary<string, string> _observedTaskStatuses = new(StringComparer.OrdinalIgnoreCase);
         private readonly string _speedLimitSettingsPath = Path.Combine(AppPaths.LocalDataDirectory, "speed-limits.json");
+        private readonly string _closeBehaviorSettingsPath = Path.Combine(AppPaths.LocalDataDirectory, "close-behavior.json");
+        private readonly nint _windowHandle;
+        private CloseBehaviorSettings _closeBehaviorSettings = CloseBehaviorSettings.Default;
+        private bool _isExitRequested;
+        private bool _isClosePromptOpen;
+        private bool _isLoadingCloseBehaviorSettings;
 
         public ObservableCollection<DownloadTask> Tasks { get; } = new();
 
@@ -74,11 +82,13 @@ namespace OmniDown
             TasksListView.ItemsSource = _visibleTasks;
             NotificationHistoryListView.ItemsSource = _statusMessages;
             InitializeTaskDetailsSelectorBar();
+            _windowHandle = WindowNative.GetWindowHandle(this);
             SetWindowIcon();
-            _taskbarProgress = new TaskbarProgressService(WindowNative.GetWindowHandle(this));
+            _taskbarProgress = new TaskbarProgressService(_windowHandle);
             ExtendsContentIntoTitleBar = true;
             SetTitleBar(AppTitleBar);
             AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
+            AppWindow.Closing += MainWindow_Closing;
             _downloadCoordinator = new DownloadCoordinator(_aria2RpcClient, Tasks);
             _notifications = ((App)Application.Current).Notifications;
             RecordObservedTaskStatuses();
@@ -93,6 +103,7 @@ namespace OmniDown
             DownloadDirectoryTextBox.Text = AppPaths.DefaultDownloadDirectory;
 
             LoadSpeedLimitSettings();
+            LoadCloseBehaviorSettings();
             UpdateSearchPlaceholder();
             UpdateDownloadsHeader("Home");
             UpdateStatsVisibility("Home");
@@ -979,32 +990,89 @@ namespace OmniDown
             ShowMessage(Strings.Get("AriaStoppedMessage"), InfoBarSeverity.Informational);
         }
 
+        private void TrayIcon_ShowRequested(object? sender, EventArgs e)
+        {
+            DispatcherQueue.TryEnqueue(ShowFromTray);
+        }
+
+        private void TrayIcon_ExitRequested(object? sender, EventArgs e)
+        {
+            DispatcherQueue.TryEnqueue(RequestExit);
+        }
+
+        private void UpdateTrayIconLabels()
+        {
+            _trayIcon?.UpdateLabels(
+                Strings.Get("TrayTooltipText"),
+                Strings.Get("TrayShowMenuItemText"),
+                Strings.Get("TrayExitMenuItemText"));
+        }
+
         private void RootNavigation_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
-            if (args.SelectedItem is not NavigationViewItem item)
+            string tag = GetNavigationTag(args);
+            NavigateTo(tag);
+        }
+
+        private void RootNavigation_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
+        {
+            string tag = args.InvokedItemContainer?.Tag?.ToString() ?? string.Empty;
+            NavigateTo(tag);
+        }
+
+        private void SettingsNavItem_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            NavigateTo("Settings");
+            e.Handled = true;
+        }
+
+        private void NavigateTo(string tag)
+        {
+            if (string.IsNullOrWhiteSpace(tag))
             {
                 return;
             }
 
-            string tag = item.Tag?.ToString() ?? "Home";
             _currentTaskFilter = tag;
-            SettingsPage.Visibility = tag == "Settings" ? Visibility.Visible : Visibility.Collapsed;
-            TasksPage.Visibility = tag == "Settings" ? Visibility.Collapsed : Visibility.Visible;
-            if (tag == "Settings")
+            bool isSettings = tag == "Settings";
+            TasksHeaderPanel.Visibility = isSettings ? Visibility.Collapsed : Visibility.Visible;
+            SettingsPage.Visibility = isSettings ? Visibility.Visible : Visibility.Collapsed;
+            TasksPage.Visibility = isSettings ? Visibility.Collapsed : Visibility.Visible;
+            if (isSettings)
             {
+                RootNavigation.SelectedItem = SettingsNavItem;
                 TaskDetailsPane.Visibility = Visibility.Collapsed;
-            }
-            else
-            {
-                UpdateTaskDetailsPaneVisibility();
+                ClearTitleSearchBox();
+                UpdateSearchPlaceholder();
+                ShowSettingsPage();
+                return;
             }
 
+            UpdateTaskDetailsPaneVisibility();
             UpdateSearchPlaceholder();
             UpdateDownloadsHeader(tag);
             UpdateStatsVisibility(tag);
             ApplyTaskFilter(tag);
             UpdateDashboard();
             ApplySettingsFilter();
+        }
+
+        private static string GetNavigationTag(NavigationViewSelectionChangedEventArgs args)
+        {
+            if (args.SelectedItemContainer?.Tag?.ToString() is string containerTag &&
+                !string.IsNullOrWhiteSpace(containerTag))
+            {
+                return containerTag;
+            }
+
+            if (args.SelectedItem is NavigationViewItem item &&
+                item.Tag?.ToString() is string itemTag &&
+                !string.IsNullOrWhiteSpace(itemTag))
+            {
+                return itemTag;
+            }
+
+            return string.Empty;
         }
 
         private void SettingsSectionListView_SelectionChanged(object sender, SelectionChangedEventArgs args)
@@ -1017,6 +1085,20 @@ namespace OmniDown
             string tag = item.Tag?.ToString() ?? "General";
             ShowSettingsSection(tag);
             ApplySettingsFilter();
+        }
+
+        private void ShowSettingsPage()
+        {
+            try
+            {
+                ShowSettingsSection(GetSelectedSettingsSectionTag());
+                ApplySettingsFilter();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Show settings page failed: {ex}");
+                ShowSettingsSection("General");
+            }
         }
 
         private void ShowSettingsSection(string tag)
@@ -1050,9 +1132,38 @@ namespace OmniDown
             }
 
             _hasStartedInitialLoad = true;
+            EnsureTrayIconInitialized();
             SetTaskListLoading(true);
             await WaitForNextRenderAsync();
             await StartAriaOnLaunchAsync();
+        }
+
+        private void EnsureTrayIconInitialized()
+        {
+            if (_trayIcon is not null)
+            {
+                return;
+            }
+
+            _trayIcon = new TrayIconService(_windowHandle, ResolveAssetPath("Assets", "OmniDown.ico"));
+            UpdateTrayIconLabels();
+            _trayIcon.ShowRequested += TrayIcon_ShowRequested;
+            _trayIcon.ExitRequested += TrayIcon_ExitRequested;
+        }
+
+        private string GetSelectedSettingsSectionTag()
+        {
+            return SettingsSectionListView?.SelectedItem is ListViewItem item
+                ? item.Tag?.ToString() ?? "General"
+                : "General";
+        }
+
+        private void ClearTitleSearchBox()
+        {
+            if (TitleSearchBox is not null && !string.IsNullOrEmpty(TitleSearchBox.Text))
+            {
+                TitleSearchBox.Text = string.Empty;
+            }
         }
 
         private async System.Threading.Tasks.Task StartAriaOnLaunchAsync()
@@ -1091,10 +1202,48 @@ namespace OmniDown
             _refreshTimer.Stop();
             _taskbarProgress.Clear();
             SaveSpeedLimitSettings();
+            SaveCloseBehaviorSettings();
             await SaveAriaSessionIfRunningAsync();
             _notifications.Unregister();
+            _trayIcon?.Dispose();
             _aria2RpcClient.Dispose();
             _aria2EngineHost.Dispose();
+        }
+
+        private async void MainWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
+        {
+            if (_isExitRequested)
+            {
+                return;
+            }
+
+            args.Cancel = true;
+
+            bool? minimizeToTray = _closeBehaviorSettings.MinimizeToTrayOnClose;
+            if (minimizeToTray is null)
+            {
+                minimizeToTray = await AskCloseBehaviorAsync();
+                if (minimizeToTray is null)
+                {
+                    return;
+                }
+
+                _closeBehaviorSettings = _closeBehaviorSettings with
+                {
+                    MinimizeToTrayOnClose = minimizeToTray
+                };
+                ApplyCloseBehaviorSettingsToUi();
+                SaveCloseBehaviorSettings();
+            }
+
+            if (minimizeToTray.Value)
+            {
+                HideToTray();
+            }
+            else
+            {
+                RequestExit();
+            }
         }
 
         private void ApplyTaskFilter(string tag)
@@ -1384,6 +1533,60 @@ namespace OmniDown
             UpdateGlobalSpeeds(
                 Tasks.Sum(task => task.DownloadSpeed),
                 Tasks.Sum(task => task.UploadSpeed));
+        }
+
+        private void HideToTray()
+        {
+            _taskbarProgress.Clear();
+            ShowWindow(_windowHandle, ShowWindowCommand.Hide);
+        }
+
+        private void ShowFromTray()
+        {
+            ShowWindow(_windowHandle, ShowWindowCommand.Show);
+            ShowWindow(_windowHandle, ShowWindowCommand.Restore);
+            SetForegroundWindow(_windowHandle);
+        }
+
+        private void RequestExit()
+        {
+            _isExitRequested = true;
+            Close();
+        }
+
+        private async Task<bool?> AskCloseBehaviorAsync()
+        {
+            if (_isClosePromptOpen)
+            {
+                return null;
+            }
+
+            _isClosePromptOpen = true;
+            try
+            {
+                ContentDialog dialog = new()
+                {
+                    XamlRoot = Content.XamlRoot,
+                    Title = Strings.Get("CloseBehaviorDialogTitle"),
+                    Content = Strings.Get("CloseBehaviorDialogContent"),
+                    PrimaryButtonText = Strings.Get("CloseBehaviorMinimizeButtonText"),
+                    SecondaryButtonText = Strings.Get("CloseBehaviorExitButtonText"),
+                    CloseButtonText = Strings.Get("CancelButtonText"),
+                    DefaultButton = ContentDialogButton.Primary
+                };
+
+                ContentDialogResult result = await dialog.ShowAsync();
+                return result switch
+                {
+                    ContentDialogResult.Primary => true,
+                    ContentDialogResult.Secondary => false,
+                    _ => null
+                };
+            }
+            finally
+            {
+                _isClosePromptOpen = false;
+            }
         }
 
         private void UpdateTaskbarProgressFromTasks()
@@ -1936,12 +2139,26 @@ namespace OmniDown
             TextBlock? stateText = panel.Children.OfType<TextBlock>().FirstOrDefault();
             if (stateText is not null)
             {
-                stateText.Text = toggleSwitch.IsOn ? "开" : "关";
+                SetToggleStateText(stateText, toggleSwitch.IsOn);
             }
 
             if (ReferenceEquals(toggleSwitch, UseSystemProxyCheckBox))
             {
                 UseSystemProxyCheckBox_Changed(sender, e);
+            }
+
+            if (ReferenceEquals(toggleSwitch, CloseToTrayToggleSwitch))
+            {
+                if (_isLoadingCloseBehaviorSettings)
+                {
+                    return;
+                }
+
+                _closeBehaviorSettings = _closeBehaviorSettings with
+                {
+                    MinimizeToTrayOnClose = toggleSwitch.IsOn
+                };
+                SaveCloseBehaviorSettings();
             }
         }
 
@@ -2067,6 +2284,40 @@ namespace OmniDown
             SetDownloadSpeedLimitInputsEnabled(settings.DownloadEnabled);
         }
 
+        private void LoadCloseBehaviorSettings()
+        {
+            _closeBehaviorSettings = ReadCloseBehaviorSettings();
+            _isLoadingCloseBehaviorSettings = true;
+            try
+            {
+                ApplyCloseBehaviorSettingsToUi();
+            }
+            finally
+            {
+                _isLoadingCloseBehaviorSettings = false;
+            }
+        }
+
+        private void ApplyCloseBehaviorSettingsToUi()
+        {
+            if (CloseToTrayToggleSwitch is null)
+            {
+                return;
+            }
+
+            CloseToTrayToggleSwitch.IsOn = _closeBehaviorSettings.MinimizeToTrayOnClose == true;
+            if (CloseToTrayToggleSwitch.Parent is StackPanel panel &&
+                panel.Children.OfType<TextBlock>().FirstOrDefault() is TextBlock stateText)
+            {
+                SetToggleStateText(stateText, CloseToTrayToggleSwitch.IsOn);
+            }
+        }
+
+        private static void SetToggleStateText(TextBlock stateText, bool isOn)
+        {
+            stateText.Text = isOn ? "开" : "关";
+        }
+
         private SpeedLimitSettings ReadSpeedLimitSettings()
         {
             if (!File.Exists(_speedLimitSettingsPath))
@@ -2106,6 +2357,40 @@ namespace OmniDown
             catch
             {
                 // Settings persistence is best-effort; aria2 can still run with default limits.
+            }
+        }
+
+        private CloseBehaviorSettings ReadCloseBehaviorSettings()
+        {
+            if (!File.Exists(_closeBehaviorSettingsPath))
+            {
+                return CloseBehaviorSettings.Default;
+            }
+
+            try
+            {
+                string json = File.ReadAllText(_closeBehaviorSettingsPath);
+                return JsonSerializer.Deserialize<CloseBehaviorSettings>(json) ?? CloseBehaviorSettings.Default;
+            }
+            catch
+            {
+                return CloseBehaviorSettings.Default;
+            }
+        }
+
+        private void SaveCloseBehaviorSettings()
+        {
+            try
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(_closeBehaviorSettingsPath)!);
+                File.WriteAllText(_closeBehaviorSettingsPath, JsonSerializer.Serialize(_closeBehaviorSettings, new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                }));
+            }
+            catch
+            {
+                // Close behavior persistence is best-effort; the next close can ask again.
             }
         }
 
@@ -2467,6 +2752,7 @@ namespace OmniDown
 
             string query = GetSearchQuery();
             SetSettingVisibility(StartupSettingCard, query, "startup", "launch", "engine", "aria2", "启动", "引擎");
+            SetSettingVisibility(CloseBehaviorSettingCard, query, "close", "tray", "background", "exit", "关闭", "托盘", "后台", "退出");
             SetSettingVisibility(ThemeSettingCard, query, "theme", "appearance", "system", "dark", "light", "主题", "外观");
             SetSettingVisibility(NotificationsSettingCard, query, "notification", "complete", "failed", "通知");
 
@@ -2488,8 +2774,13 @@ namespace OmniDown
             SetSettingVisibility(TerminalSettingCard, query, "terminal", "log", "debug", "aria2", "终端", "日志");
         }
 
-        private static void SetSettingVisibility(FrameworkElement element, string query, params string[] searchableText)
+        private static void SetSettingVisibility(FrameworkElement? element, string query, params string[] searchableText)
         {
+            if (element is null)
+            {
+                return;
+            }
+
             bool isVisible = string.IsNullOrWhiteSpace(query) || searchableText.Any(text => SearchContains(text, query));
             element.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
         }
@@ -2766,6 +3057,24 @@ namespace OmniDown
             return File.Exists(candidate) ? candidate : null;
         }
 
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindow(nint hWnd, ShowWindowCommand command);
+
+        [DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(nint hWnd);
+
+    }
+
+    internal enum ShowWindowCommand
+    {
+        Hide = 0,
+        Show = 5,
+        Restore = 9
+    }
+
+    internal sealed record CloseBehaviorSettings(bool? MinimizeToTrayOnClose)
+    {
+        public static CloseBehaviorSettings Default { get; } = new(MinimizeToTrayOnClose: null);
     }
 
     internal sealed record SpeedLimitSettings(

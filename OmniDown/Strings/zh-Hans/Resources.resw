@@ -65,6 +65,13 @@
   <data name="SettingsAriaStatusText.Text" xml:space="preserve"><value>已停止</value></data>
   <data name="SettingsStartButton.Content" xml:space="preserve"><value>启动</value></data>
   <data name="SettingsStopButton.Content" xml:space="preserve"><value>停止</value></data>
+  <data name="CloseBehaviorDialogTitle" xml:space="preserve"><value>关闭 OmniDown？</value></data>
+  <data name="CloseBehaviorDialogContent" xml:space="preserve"><value>选择关闭窗口时的行为。之后可以在设置中修改。</value></data>
+  <data name="CloseBehaviorMinimizeButtonText" xml:space="preserve"><value>最小化到托盘</value></data>
+  <data name="CloseBehaviorExitButtonText" xml:space="preserve"><value>退出应用</value></data>
+  <data name="TrayTooltipText" xml:space="preserve"><value>OmniDown</value></data>
+  <data name="TrayShowMenuItemText" xml:space="preserve"><value>显示 OmniDown</value></data>
+  <data name="TrayExitMenuItemText" xml:space="preserve"><value>退出</value></data>
   <data name="DebugEngineText.Text" xml:space="preserve"><value>aria2 已停止</value></data>
   <data name="TerminalSummaryText.Text" xml:space="preserve"><value>aria2 终端输出</value></data>
   <data name="NotificationHistoryButtonLabel.Text" xml:space="preserve"><value>通知</value></data>

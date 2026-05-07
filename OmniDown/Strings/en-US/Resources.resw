@@ -65,6 +65,13 @@
   <data name="SettingsAriaStatusText.Text" xml:space="preserve"><value>Stopped</value></data>
   <data name="SettingsStartButton.Content" xml:space="preserve"><value>Start</value></data>
   <data name="SettingsStopButton.Content" xml:space="preserve"><value>Stop</value></data>
+  <data name="CloseBehaviorDialogTitle" xml:space="preserve"><value>Close OmniDown?</value></data>
+  <data name="CloseBehaviorDialogContent" xml:space="preserve"><value>Choose what should happen when you close the window. You can change this later in Settings.</value></data>
+  <data name="CloseBehaviorMinimizeButtonText" xml:space="preserve"><value>Minimize to tray</value></data>
+  <data name="CloseBehaviorExitButtonText" xml:space="preserve"><value>Exit app</value></data>
+  <data name="TrayTooltipText" xml:space="preserve"><value>OmniDown</value></data>
+  <data name="TrayShowMenuItemText" xml:space="preserve"><value>Show OmniDown</value></data>
+  <data name="TrayExitMenuItemText" xml:space="preserve"><value>Exit</value></data>
   <data name="DebugEngineText.Text" xml:space="preserve"><value>aria2 stopped</value></data>
   <data name="TerminalSummaryText.Text" xml:space="preserve"><value>aria2 terminal output</value></data>
   <data name="NotificationHistoryButtonLabel.Text" xml:space="preserve"><value>Notifications</value></data>
