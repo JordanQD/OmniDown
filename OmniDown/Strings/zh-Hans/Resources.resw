@@ -30,6 +30,8 @@
   <data name="NewDownloadButton.Label" xml:space="preserve"><value>新建</value></data>
   <data name="SortTasksButtonLabel.Text" xml:space="preserve"><value>排序</value></data>
   <data name="SortTasksButton.Label" xml:space="preserve"><value>排序</value></data>
+  <data name="TaskDetailsButton.Label" xml:space="preserve"><value>详细信息</value></data>
+  <data name="ToolbarShortcutTooltipFormat" xml:space="preserve"><value>{0} ({1})</value></data>
   <data name="SortByCreatedAtMenuItem.Text" xml:space="preserve"><value>添加时间</value></data>
   <data name="SortByNameMenuItem.Text" xml:space="preserve"><value>项目名称</value></data>
   <data name="SortBySizeMenuItem.Text" xml:space="preserve"><value>项目大小</value></data>

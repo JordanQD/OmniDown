@@ -1,6 +1,7 @@
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
@@ -121,6 +122,7 @@ namespace OmniDown
             UpdateDebugStatus();
             ShowTaskDetailsSection("Summary");
             UpdateTaskDetailsPane();
+            ApplyToolbarTooltips();
         }
 
         private async void NewDownloadButton_Click(object sender, RoutedEventArgs e)
@@ -1247,6 +1249,35 @@ namespace OmniDown
         private void AppTitleBar_PaneToggleRequested(TitleBar sender, object args)
         {
             RootNavigation.IsPaneOpen = !RootNavigation.IsPaneOpen;
+        }
+
+        private void ApplyToolbarTooltips()
+        {
+            SetToolbarText(NewDownloadButton, Strings.Get("NewDownloadButton.Label"), "Ctrl+N");
+            SetToolbarText(ResumeTasksButton, Strings.Get("ResumeTasksButton.Label"));
+            SetToolbarText(PauseTasksButton, Strings.Get("PauseTasksButton.Label"));
+            SetToolbarText(RecoverTasksButton, Strings.Get("RecoverTasksButton.Label"));
+            SetToolbarText(OpenSelectedTaskFileButton, Strings.Get("OpenSelectedTaskFileButton.Label"));
+            SetToolbarText(OpenSelectedTaskFolderButton, Strings.Get("OpenSelectedTaskFolderButton.Label"));
+            SetToolbarText(CopySelectedTaskLinksButton, Strings.Get("CopySelectedTaskLinksButton.Label"));
+            SetToolbarText(DeleteTasksButton, Strings.Get("DeleteTasksButton.Label"));
+            SetToolbarText(ClearCompletedTasksButton, Strings.Get("ClearCompletedTasksButton.Label"));
+            SetToolbarText(SortTasksButton, Strings.Get("SortTasksButton.Label"));
+            SetToolbarText(TaskDetailsButton, Strings.Get("TaskDetailsButton.Label"));
+        }
+
+        private static void SetToolbarText(FrameworkElement element, string text, string? shortcut = null)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return;
+            }
+
+            string tooltip = string.IsNullOrWhiteSpace(shortcut)
+                ? text
+                : Strings.Format("ToolbarShortcutTooltipFormat", text, shortcut);
+            ToolTipService.SetToolTip(element, tooltip);
+            AutomationProperties.SetName(element, text);
         }
 
         private async void RootGrid_Loaded(object sender, RoutedEventArgs e)
