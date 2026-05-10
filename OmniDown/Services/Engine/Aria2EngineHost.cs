@@ -53,7 +53,7 @@ public sealed class Aria2EngineHost : IDisposable
         Directory.CreateDirectory(options.DownloadDirectory);
         string appDataDirectory = AppPaths.LocalDataDirectory;
         Directory.CreateDirectory(appDataDirectory);
-        RemoveCachedCompletedTasksFromSession(appDataDirectory);
+        RemoveStaleTasksFromSession(appDataDirectory);
         await CleanupRpcPortAsync(options.RpcPort);
 
         var startInfo = new ProcessStartInfo
@@ -402,7 +402,7 @@ public sealed class Aria2EngineHost : IDisposable
         }
     }
 
-    private static void RemoveCachedCompletedTasksFromSession(string appDataDirectory)
+    private static void RemoveStaleTasksFromSession(string appDataDirectory)
     {
         string sessionPath = GetSessionPath(appDataDirectory);
         if (!File.Exists(sessionPath))
@@ -410,8 +410,8 @@ public sealed class Aria2EngineHost : IDisposable
             return;
         }
 
-        HashSet<string> completedGids = ReadCachedCompletedGids(appDataDirectory);
-        if (completedGids.Count == 0)
+        CachedTaskState cachedTaskState = ReadCachedTaskState(appDataDirectory);
+        if (!cachedTaskState.HasCache)
         {
             return;
         }
@@ -426,14 +426,14 @@ public sealed class Aria2EngineHost : IDisposable
             {
                 if (currentEntry.Count > 0 && !IsSessionOptionLine(line))
                 {
-                    AddSessionEntryIfNotCompleted(filteredLines, currentEntry, completedGids);
+                    AddSessionEntryIfTracked(filteredLines, currentEntry, cachedTaskState);
                     currentEntry.Clear();
                 }
 
                 currentEntry.Add(line);
             }
 
-            AddSessionEntryIfNotCompleted(filteredLines, currentEntry, completedGids);
+            AddSessionEntryIfTracked(filteredLines, currentEntry, cachedTaskState);
 
             if (filteredLines.Count != lines.Length)
             {
@@ -446,29 +446,35 @@ public sealed class Aria2EngineHost : IDisposable
         }
     }
 
-    private static HashSet<string> ReadCachedCompletedGids(string appDataDirectory)
+    private static CachedTaskState ReadCachedTaskState(string appDataDirectory)
     {
         string cachePath = Path.Combine(appDataDirectory, "tasks.json");
-        HashSet<string> completedGids = new(StringComparer.OrdinalIgnoreCase);
         if (!File.Exists(cachePath))
         {
-            return completedGids;
+            return new CachedTaskState(false, [], []);
         }
 
+        HashSet<string> knownGids = new(StringComparer.OrdinalIgnoreCase);
+        HashSet<string> completedGids = new(StringComparer.OrdinalIgnoreCase);
         try
         {
             using JsonDocument document = JsonDocument.Parse(File.ReadAllText(cachePath));
             if (document.RootElement.ValueKind is not JsonValueKind.Array)
             {
-                return completedGids;
+                return new CachedTaskState(false, knownGids, completedGids);
             }
 
             foreach (JsonElement task in document.RootElement.EnumerateArray())
             {
                 string gid = TryGetString(task, "Gid");
+                if (string.IsNullOrWhiteSpace(gid))
+                {
+                    continue;
+                }
+
+                knownGids.Add(gid);
                 string status = TryGetString(task, "Status");
-                if (!string.IsNullOrWhiteSpace(gid) &&
-                    status.Contains("complete", StringComparison.OrdinalIgnoreCase))
+                if (status.Contains("complete", StringComparison.OrdinalIgnoreCase))
                 {
                     completedGids.Add(gid);
                 }
@@ -477,29 +483,37 @@ public sealed class Aria2EngineHost : IDisposable
         catch
         {
             // A corrupt UI cache should not block aria2 startup.
+            return new CachedTaskState(false, knownGids, completedGids);
         }
 
-        return completedGids;
+        return new CachedTaskState(true, knownGids, completedGids);
     }
 
-    private static void AddSessionEntryIfNotCompleted(
+    private static void AddSessionEntryIfTracked(
         List<string> filteredLines,
         List<string> entryLines,
-        HashSet<string> completedGids)
+        CachedTaskState cachedTaskState)
     {
         if (entryLines.Count == 0)
         {
             return;
         }
 
+        string gid = string.Empty;
         foreach (string line in entryLines)
         {
             string trimmed = line.Trim();
-            if (trimmed.StartsWith("gid=", StringComparison.OrdinalIgnoreCase) &&
-                completedGids.Contains(trimmed["gid=".Length..]))
+            if (trimmed.StartsWith("gid=", StringComparison.OrdinalIgnoreCase))
             {
-                return;
+                gid = trimmed["gid=".Length..];
+                break;
             }
+        }
+
+        if (!string.IsNullOrWhiteSpace(gid) &&
+            (!cachedTaskState.KnownGids.Contains(gid) || cachedTaskState.CompletedGids.Contains(gid)))
+        {
+            return;
         }
 
         filteredLines.AddRange(entryLines);
@@ -522,5 +536,10 @@ public sealed class Aria2EngineHost : IDisposable
     {
         return Path.Combine(appDataDirectory, "download.session");
     }
+
+    private sealed record CachedTaskState(
+        bool HasCache,
+        HashSet<string> KnownGids,
+        HashSet<string> CompletedGids);
 
 }

@@ -167,6 +167,7 @@ public sealed class DownloadCoordinator
         }
 
         SaveTaskCache();
+        await SaveAria2SessionAsync(cancellationToken);
     }
 
     public async Task DeleteAsync(IEnumerable<DownloadTask> tasks, bool deleteFiles = false, CancellationToken cancellationToken = default)
@@ -184,6 +185,7 @@ public sealed class DownloadCoordinator
         }
 
         SaveTaskCache();
+        await SaveAria2SessionAsync(cancellationToken);
     }
 
     private async Task RemoveTaskFromAria2Async(DownloadTask task, CancellationToken cancellationToken)
@@ -244,6 +246,7 @@ public sealed class DownloadCoordinator
         }
 
         SaveTaskCache();
+        await SaveAria2SessionAsync(cancellationToken);
         return completedTasks.Length;
     }
 
@@ -319,13 +322,13 @@ public sealed class DownloadCoordinator
         task.IsPeerTransfer = IsPeerTransfer(remoteTask);
         task.Progress = task.TotalLength <= 0 ? task.Progress : Math.Clamp(task.CompletedLength * 100d / task.TotalLength, 0, 100);
 
-        if (string.IsNullOrWhiteSpace(task.Name))
+        string resolvedRemoteName = ResolveRemoteName(remoteTask);
+        if (!string.IsNullOrWhiteSpace(resolvedRemoteName) &&
+            (string.IsNullOrWhiteSpace(task.Name) ||
+                task.Name.Equals(task.Gid, StringComparison.OrdinalIgnoreCase) ||
+                IsPlaceholderTaskName(task.Name)))
         {
-            string remoteName = ResolveRemoteName(remoteTask);
-            if (!string.IsNullOrWhiteSpace(remoteName))
-            {
-                task.Name = remoteName;
-            }
+            task.Name = resolvedRemoteName;
         }
 
         if (string.IsNullOrWhiteSpace(task.SourceUri))
@@ -344,7 +347,9 @@ public sealed class DownloadCoordinator
             task.LocalFilePath = remotePath;
             string remoteName = Path.GetFileName(remotePath);
             if (!string.IsNullOrWhiteSpace(remoteName) &&
-                (string.IsNullOrWhiteSpace(task.Name) || task.Name.Equals(task.Gid, StringComparison.OrdinalIgnoreCase)))
+                (string.IsNullOrWhiteSpace(task.Name) ||
+                    task.Name.Equals(task.Gid, StringComparison.OrdinalIgnoreCase) ||
+                    IsPlaceholderTaskName(task.Name)))
             {
                 task.Name = remoteName;
             }
@@ -365,6 +370,21 @@ public sealed class DownloadCoordinator
             return requestedName.Trim();
         }
 
+        if (sourceUri.StartsWith("magnet:", StringComparison.OrdinalIgnoreCase))
+        {
+            string magnetName = ResolveMagnetDisplayName(sourceUri);
+            if (!string.IsNullOrWhiteSpace(magnetName))
+            {
+                return magnetName;
+            }
+
+            string infoHash = ResolveMagnetInfoHash(sourceUri);
+            if (!string.IsNullOrWhiteSpace(infoHash))
+            {
+                return $"Magnet {infoHash[..Math.Min(infoHash.Length, 12)]}";
+            }
+        }
+
         if (Uri.TryCreate(sourceUri, UriKind.Absolute, out Uri? uri))
         {
             string fileName = Path.GetFileName(uri.LocalPath);
@@ -379,14 +399,103 @@ public sealed class DownloadCoordinator
 
     private static string ResolveRemoteName(Aria2TaskStatus task)
     {
-        string path = task.Files.FirstOrDefault(file => !string.IsNullOrWhiteSpace(file.Path))?.Path ?? string.Empty;
+        string torrentName = ResolveBitTorrentName(task);
+        if (!string.IsNullOrWhiteSpace(torrentName))
+        {
+            return torrentName;
+        }
+
+        string path = task.Files
+            .FirstOrDefault(file => !string.IsNullOrWhiteSpace(file.Path) && !IsMetadataPath(file.Path))
+            ?.Path ?? string.Empty;
         string fileName = Path.GetFileName(path);
         return string.IsNullOrWhiteSpace(fileName) ? string.Empty : fileName;
     }
 
+    private static string ResolveBitTorrentName(Aria2TaskStatus task)
+    {
+        if (!task.BitTorrent.HasValue ||
+            task.BitTorrent.Value.ValueKind is not JsonValueKind.Object ||
+            !task.BitTorrent.Value.TryGetProperty("info", out JsonElement info) ||
+            info.ValueKind is not JsonValueKind.Object ||
+            !info.TryGetProperty("name", out JsonElement name) ||
+            name.ValueKind is not JsonValueKind.String)
+        {
+            return string.Empty;
+        }
+
+        return name.GetString()?.Trim() ?? string.Empty;
+    }
+
+    private static string ResolveMagnetDisplayName(string sourceUri)
+    {
+        int queryStart = sourceUri.IndexOf('?');
+        if (queryStart < 0 || queryStart == sourceUri.Length - 1)
+        {
+            return string.Empty;
+        }
+
+        foreach (string part in sourceUri[(queryStart + 1)..].Split('&', StringSplitOptions.RemoveEmptyEntries))
+        {
+            int separator = part.IndexOf('=');
+            string key = separator >= 0 ? part[..separator] : part;
+            if (!key.Equals("dn", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            string value = separator >= 0 ? part[(separator + 1)..] : string.Empty;
+            return DecodeQueryValue(value).Trim();
+        }
+
+        return string.Empty;
+    }
+
+    private static string ResolveMagnetInfoHash(string sourceUri)
+    {
+        int queryStart = sourceUri.IndexOf('?');
+        if (queryStart < 0 || queryStart == sourceUri.Length - 1)
+        {
+            return string.Empty;
+        }
+
+        foreach (string part in sourceUri[(queryStart + 1)..].Split('&', StringSplitOptions.RemoveEmptyEntries))
+        {
+            int separator = part.IndexOf('=');
+            string key = separator >= 0 ? part[..separator] : part;
+            if (!key.Equals("xt", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            string value = separator >= 0 ? DecodeQueryValue(part[(separator + 1)..]) : string.Empty;
+            const string prefix = "urn:btih:";
+            if (value.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return value[prefix.Length..].Trim();
+            }
+        }
+
+        return string.Empty;
+    }
+
+    private static string DecodeQueryValue(string value)
+    {
+        try
+        {
+            return Uri.UnescapeDataString(value.Replace('+', ' '));
+        }
+        catch
+        {
+            return value;
+        }
+    }
+
     private static string ResolveRemotePath(Aria2TaskStatus task)
     {
-        return task.Files.FirstOrDefault(file => !string.IsNullOrWhiteSpace(file.Path))?.Path ?? string.Empty;
+        return task.Files
+            .FirstOrDefault(file => !string.IsNullOrWhiteSpace(file.Path) && !IsMetadataPath(file.Path))
+            ?.Path ?? string.Empty;
     }
 
     private static string ResolveRemoteUri(Aria2TaskStatus task)
@@ -395,6 +504,18 @@ public sealed class DownloadCoordinator
             .SelectMany(file => file.Uris)
             .Select(uri => uri.Uri)
             .FirstOrDefault(uri => !string.IsNullOrWhiteSpace(uri)) ?? string.Empty;
+    }
+
+    private static bool IsPlaceholderTaskName(string name)
+    {
+        return name.Equals("New download", StringComparison.OrdinalIgnoreCase) ||
+            name.StartsWith("Magnet ", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsMetadataPath(string path)
+    {
+        string fileName = Path.GetFileName(path);
+        return fileName.StartsWith("[METADATA]", StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool IsPeerTransfer(Aria2TaskStatus task)
@@ -592,6 +713,18 @@ public sealed class DownloadCoordinator
         catch
         {
             // The completed result may already be gone; cached task metadata remains the UI source of truth.
+        }
+    }
+
+    private async Task SaveAria2SessionAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _rpcClient.SaveSessionAsync(cancellationToken);
+        }
+        catch
+        {
+            // Session persistence is best-effort; startup cleanup will still reconcile stale entries.
         }
     }
 

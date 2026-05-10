@@ -25,8 +25,10 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Graphics;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using Windows.System;
 using Windows.UI;
 using WinRT.Interop;
 
@@ -73,6 +75,7 @@ namespace OmniDown
         private bool _isExitRequested;
         private bool _isClosePromptOpen;
         private bool _isLoadingCloseBehaviorSettings;
+        private bool _isNewDownloadDialogOpen;
 
         public ObservableCollection<DownloadTask> Tasks { get; } = new();
 
@@ -84,6 +87,7 @@ namespace OmniDown
             InitializeTaskDetailsSelectorBar();
             _windowHandle = WindowNative.GetWindowHandle(this);
             SetWindowIcon();
+            ConfigureDefaultWindowSize();
             _taskbarProgress = new TaskbarProgressService(_windowHandle);
             ExtendsContentIntoTitleBar = true;
             SetTitleBar(AppTitleBar);
@@ -121,6 +125,25 @@ namespace OmniDown
 
         private async void NewDownloadButton_Click(object sender, RoutedEventArgs e)
         {
+            await ShowNewDownloadDialogAsync();
+        }
+
+        private void NewDownloadKeyboardAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+        {
+            args.Handled = true;
+            _ = ShowNewDownloadDialogAsync();
+        }
+
+        private async Task ShowNewDownloadDialogAsync()
+        {
+            if (_isNewDownloadDialogOpen)
+            {
+                return;
+            }
+
+            _isNewDownloadDialogOpen = true;
+            try
+            {
             TextBox uriTextBox = new()
             {
                 Header = "Download URL",
@@ -135,6 +158,17 @@ namespace OmniDown
             ScrollViewer.SetVerticalScrollBarVisibility(uriTextBox, ScrollBarVisibility.Auto);
             uriTextBox.TextChanged += (_, _) => UpdateUriTextBoxHeight(uriTextBox);
             uriTextBox.SizeChanged += (_, _) => UpdateUriTextBoxHeight(uriTextBox);
+            KeyboardAccelerator pasteUriAccelerator = new()
+            {
+                Key = VirtualKey.V,
+                Modifiers = VirtualKeyModifiers.Control
+            };
+            pasteUriAccelerator.Invoked += async (_, args) =>
+            {
+                args.Handled = true;
+                await PasteClipboardTextAsync(uriTextBox);
+            };
+            uriTextBox.KeyboardAccelerators.Add(pasteUriAccelerator);
 
             Button pasteUriButton = new()
             {
@@ -414,6 +448,13 @@ namespace OmniDown
                 updateTorrentPanelVisibility();
             };
             setTaskMode(false);
+            string? clipboardDownloadText = await GetClipboardDownloadTextAsync();
+            if (clipboardDownloadText is not null)
+            {
+                uriTextBox.Text = clipboardDownloadText;
+                uriTextBox.SelectionStart = uriTextBox.Text.Length;
+                uriTextBox.SelectionLength = 0;
+            }
 
             Border dropOverlay = new()
             {
@@ -446,15 +487,40 @@ namespace OmniDown
                 }
             };
 
+            bool submitRequestedByEnter = false;
+            ContentDialog? dialog = null;
             Grid dialogContent = new()
             {
                 Width = 680,
                 MaxWidth = 760,
                 AllowDrop = true,
+                IsTabStop = true,
                 Children =
                 {
                     content,
                     dropOverlay
+                }
+            };
+            dialogContent.AddHandler(
+                UIElement.KeyDownEvent,
+                new KeyEventHandler((_, args) =>
+                {
+                    if (args.Key != VirtualKey.Enter)
+                    {
+                        return;
+                    }
+
+                    submitRequestedByEnter = true;
+                    args.Handled = true;
+                    dialog?.Hide();
+                }),
+                true);
+            dialogContent.Tapped += (_, args) =>
+            {
+                if (args.OriginalSource is DependencyObject source &&
+                    FindAncestor<Control>(source) is null)
+                {
+                    _ = dialogContent.Focus(FocusState.Programmatic);
                 }
             };
             dialogContent.DragOver += (_, args) =>
@@ -490,7 +556,7 @@ namespace OmniDown
                 setTorrentSelection(await LoadTorrentFileAsync(file));
             };
 
-            ContentDialog dialog = new()
+            dialog = new ContentDialog
             {
                 XamlRoot = Content.XamlRoot,
                 Content = dialogContent,
@@ -498,10 +564,14 @@ namespace OmniDown
                 CloseButtonText = Strings.Get("CancelButtonText"),
                 DefaultButton = ContentDialogButton.Primary
             };
+            dialog.Opened += (_, _) =>
+            {
+                _ = uriTextBox.Focus(FocusState.Programmatic);
+            };
             dialog.Resources["ContentDialogMaxWidth"] = 820d;
 
             ContentDialogResult result = await dialog.ShowAsync();
-            if (result != ContentDialogResult.Primary)
+            if (result != ContentDialogResult.Primary && !submitRequestedByEnter)
             {
                 return;
             }
@@ -585,6 +655,11 @@ namespace OmniDown
             }
 
             UpdateDashboard();
+            }
+            finally
+            {
+                _isNewDownloadDialogOpen = false;
+            }
         }
 
         private async Task<TorrentSelection?> PickTorrentFileAsync()
@@ -918,6 +993,31 @@ namespace OmniDown
                 .ToList();
         }
 
+        private static async Task<string?> GetClipboardDownloadTextAsync()
+        {
+            try
+            {
+                DataPackageView content = Clipboard.GetContent();
+                if (!content.Contains(StandardDataFormats.Text))
+                {
+                    return null;
+                }
+
+                string clipboardText = await content.GetTextAsync();
+                List<string> sourceUris = GetDownloadSourceUris(clipboardText)
+                    .Where(IsLikelyDownloadSourceUri)
+                    .ToList();
+                return sourceUris.Count == 0
+                    ? null
+                    : EnsureTrailingLineBreak(string.Join(Environment.NewLine, sourceUris));
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Read clipboard download URL failed: {ex}");
+                return null;
+            }
+        }
+
         private static async Task PasteClipboardTextAsync(TextBox textBox)
         {
             try
@@ -928,7 +1028,7 @@ namespace OmniDown
                     return;
                 }
 
-                string clipboardText = (await content.GetTextAsync()).Trim();
+                string clipboardText = EnsureTrailingLineBreak((await content.GetTextAsync()).Trim());
                 if (string.IsNullOrWhiteSpace(clipboardText))
                 {
                     return;
@@ -954,6 +1054,31 @@ namespace OmniDown
             {
                 Debug.WriteLine($"Paste download URL failed: {ex}");
             }
+        }
+
+        private static bool IsLikelyDownloadSourceUri(string text)
+        {
+            if (text.StartsWith("magnet:", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            if (!Uri.TryCreate(text, UriKind.Absolute, out Uri? uri))
+            {
+                return false;
+            }
+
+            return uri.Scheme.Equals(Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase) ||
+                uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase) ||
+                uri.Scheme.Equals(Uri.UriSchemeFtp, StringComparison.OrdinalIgnoreCase) ||
+                uri.Scheme.Equals("sftp", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static string EnsureTrailingLineBreak(string text)
+        {
+            return string.IsNullOrEmpty(text) || EndsWithLineBreak(text)
+                ? text
+                : text + Environment.NewLine;
         }
 
         private static bool EndsWithLineBreak(string text)
@@ -1264,6 +1389,7 @@ namespace OmniDown
             SyncVisibleTasks(SortTasks(filteredTasks).ToList());
             RestoreSelection(selectedGids);
             UpdateSelectionCommands();
+            UpdateTaskDetailsPane();
         }
 
         private async void RefreshTimer_Tick(object? sender, object e)
@@ -1788,23 +1914,49 @@ namespace OmniDown
 
         private async void ResumeTasksButton_Click(object sender, RoutedEventArgs e)
         {
-            await RunSelectedTaskOperationAsync(
+            await RunTaskOperationSetAsync(
+                GetSelectedTasks().Where(IsPausedTask).ToArray(),
                 tasks => _downloadCoordinator.ResumeAsync(tasks),
                 Strings.Get("TasksResumedMessage"));
         }
 
         private async void PauseTasksButton_Click(object sender, RoutedEventArgs e)
         {
-            await RunSelectedTaskOperationAsync(
+            await RunTaskOperationSetAsync(
+                GetSelectedTasks().Where(IsActiveTransferTask).ToArray(),
                 tasks => _downloadCoordinator.PauseAsync(tasks),
                 Strings.Get("TasksPausedMessage"));
         }
 
         private async void RecoverTasksButton_Click(object sender, RoutedEventArgs e)
         {
-            await RunSelectedTaskOperationAsync(
+            await RunTaskOperationSetAsync(
+                GetSelectedTasks().Where(IsRecoverableTask).ToArray(),
                 tasks => _downloadCoordinator.RecoverAsync(tasks, GetDefaultRecoverySplitCount()),
                 Strings.Get("TasksRecoveredMessage"));
+        }
+
+        private void OpenSelectedTaskFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            DownloadTask? task = GetSingleSelectedTask();
+            if (task is not null)
+            {
+                OpenTaskFile(task);
+            }
+        }
+
+        private void OpenSelectedTaskFolderButton_Click(object sender, RoutedEventArgs e)
+        {
+            DownloadTask? task = GetSingleSelectedTask();
+            if (task is not null)
+            {
+                OpenTaskFolder(task);
+            }
+        }
+
+        private void CopySelectedTaskLinksButton_Click(object sender, RoutedEventArgs e)
+        {
+            CopyTaskLinks(GetSelectedTasks());
         }
 
         private async void DeleteTasksButton_Click(object sender, RoutedEventArgs e)
@@ -1882,6 +2034,11 @@ namespace OmniDown
                 return;
             }
 
+            OpenTaskFile(task);
+        }
+
+        private void OpenTaskFile(DownloadTask task)
+        {
             string filePath = ResolveTaskFilePath(task);
             if (!File.Exists(filePath))
             {
@@ -1899,9 +2056,12 @@ namespace OmniDown
                 return;
             }
 
-            string folderPath = !string.IsNullOrWhiteSpace(task.SaveDirectory) && Directory.Exists(task.SaveDirectory)
-                ? task.SaveDirectory
-                : Path.GetDirectoryName(ResolveTaskFilePath(task)) ?? string.Empty;
+            OpenTaskFolder(task);
+        }
+
+        private void OpenTaskFolder(DownloadTask task)
+        {
+            string folderPath = ResolveTaskFolderPath(task);
 
             if (!Directory.Exists(folderPath))
             {
@@ -1921,8 +2081,25 @@ namespace OmniDown
                 return;
             }
 
+            CopyTaskLinks([task]);
+        }
+
+        private void CopyTaskLinks(IReadOnlyList<DownloadTask> tasks)
+        {
+            string[] links = tasks
+                .Select(task => task.SourceUri)
+                .Where(link => !string.IsNullOrWhiteSpace(link))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+
+            if (links.Length == 0)
+            {
+                ShowMessage(Strings.Get("TaskLinkNotFoundMessage"), InfoBarSeverity.Warning);
+                return;
+            }
+
             DataPackage package = new();
-            package.SetText(task.SourceUri);
+            package.SetText(string.Join(Environment.NewLine, links));
             Clipboard.SetContent(package);
             ShowMessage(Strings.Get("TaskLinkCopiedMessage"), InfoBarSeverity.Success);
         }
@@ -2009,6 +2186,236 @@ namespace OmniDown
 
             UpdateSelectionCommands();
             UpdateTaskDetailsPane();
+        }
+
+        private void TasksListView_PointerPressed(object sender, PointerRoutedEventArgs e)
+        {
+            if (sender is not ListView listView ||
+                FindAncestor<ListViewItem>(e.OriginalSource as DependencyObject) is not null ||
+                !e.GetCurrentPoint(listView).Properties.IsLeftButtonPressed)
+            {
+                return;
+            }
+
+            TasksListView.SelectedItems.Clear();
+            foreach (DownloadTask task in _visibleTasks)
+            {
+                task.IsSelected = false;
+                UpdateTaskSelectionGlyphVisibility(task);
+            }
+
+            UpdateSelectionCommands();
+            UpdateTaskDetailsPane();
+        }
+
+        private void TasksListView_RightTapped(object sender, RightTappedRoutedEventArgs e)
+        {
+            if (sender is not ListView listView)
+            {
+                return;
+            }
+
+            DownloadTask? rightTappedTask = null;
+            if (FindAncestor<ListViewItem>(e.OriginalSource as DependencyObject) is ListViewItem itemContainer)
+            {
+                rightTappedTask = itemContainer.Content as DownloadTask ?? itemContainer.DataContext as DownloadTask;
+            }
+
+            if (rightTappedTask is null)
+            {
+                TasksListView.SelectedItems.Clear();
+                UpdateSelectionCommands();
+                UpdateTaskDetailsPane();
+                return;
+            }
+
+            if (!TasksListView.SelectedItems.Contains(rightTappedTask))
+            {
+                _isUpdatingTaskSelection = true;
+                try
+                {
+                    TasksListView.SelectedItems.Clear();
+                    foreach (DownloadTask task in _visibleTasks)
+                    {
+                        task.IsSelected = ReferenceEquals(task, rightTappedTask);
+                        if (task.IsSelected)
+                        {
+                            TasksListView.SelectedItems.Add(task);
+                        }
+
+                        UpdateTaskSelectionGlyphVisibility(task);
+                    }
+                }
+                finally
+                {
+                    _isUpdatingTaskSelection = false;
+                }
+
+                UpdateSelectionCommands();
+                UpdateTaskDetailsPane();
+            }
+
+            MenuFlyout flyout = CreateTaskContextMenu(GetSelectedTasks());
+            if (flyout.Items.Count > 0)
+            {
+                flyout.ShowAt(listView, e.GetPosition(listView));
+                e.Handled = true;
+            }
+        }
+
+        private MenuFlyout CreateTaskContextMenu(IReadOnlyList<DownloadTask> selectedTasks)
+        {
+            MenuFlyout flyout = new();
+            if (selectedTasks.Count == 0)
+            {
+                return flyout;
+            }
+
+            DownloadTask[] activeTasks = selectedTasks.Where(IsActiveTransferTask).ToArray();
+            DownloadTask[] pausedTasks = selectedTasks.Where(IsPausedTask).ToArray();
+            DownloadTask[] recoverableTasks = selectedTasks.Where(IsRecoverableTask).ToArray();
+
+            if (activeTasks.Length > 0)
+            {
+                flyout.Items.Add(CreateTaskContextMenuItem(
+                    Strings.Get("PauseTasksButton.Label"),
+                    "\uE769",
+                    async () => await RunTaskOperationSetAsync(
+                        activeTasks,
+                        tasks => _downloadCoordinator.PauseAsync(tasks),
+                        Strings.Get("TasksPausedMessage"))));
+            }
+
+            if (pausedTasks.Length > 0)
+            {
+                flyout.Items.Add(CreateTaskContextMenuItem(
+                    Strings.Get("ResumeTasksButton.Label"),
+                    "\uE768",
+                    async () => await RunTaskOperationSetAsync(
+                        pausedTasks,
+                        tasks => _downloadCoordinator.ResumeAsync(tasks),
+                        Strings.Get("TasksResumedMessage"))));
+            }
+
+            if (recoverableTasks.Length > 0)
+            {
+                flyout.Items.Add(CreateTaskContextMenuItem(
+                    Strings.Get("RecoverTasksButton.Label"),
+                    "\uE72C",
+                    async () => await RunTaskOperationSetAsync(
+                        recoverableTasks,
+                        tasks => _downloadCoordinator.RecoverAsync(tasks, GetDefaultRecoverySplitCount()),
+                        Strings.Get("TasksRecoveredMessage"))));
+            }
+
+            bool hasTransferAction = flyout.Items.Count > 0;
+            if (selectedTasks.Count == 1)
+            {
+                DownloadTask task = selectedTasks[0];
+                if (CanOpenTaskFile(task))
+                {
+                    AddTaskContextSeparatorIfNeeded(flyout, hasTransferAction);
+                    flyout.Items.Add(CreateTaskContextMenuItem(
+                        Strings.Get("TaskOpenFileActionText"),
+                        "\uE8A7",
+                        () => OpenTaskFile(task)));
+                }
+
+                if (CanOpenTaskFolder(task))
+                {
+                    AddTaskContextSeparatorIfNeeded(flyout, hasTransferAction || CanOpenTaskFile(task));
+                    flyout.Items.Add(CreateTaskContextMenuItem(
+                        Strings.Get("TaskOpenFolderActionText"),
+                        "\uE8B7",
+                        () => OpenTaskFolder(task)));
+                }
+            }
+
+            if (selectedTasks.Any(task => !string.IsNullOrWhiteSpace(task.SourceUri)))
+            {
+                AddTaskContextSeparatorIfNeeded(flyout, flyout.Items.Count > 0);
+                flyout.Items.Add(CreateTaskContextMenuItem(
+                    Strings.Get("TaskCopyLinkActionText"),
+                    "\uE71B",
+                    () => CopyTaskLinks(selectedTasks)));
+            }
+
+            AddTaskContextSeparatorIfNeeded(flyout, flyout.Items.Count > 0);
+            flyout.Items.Add(CreateTaskContextMenuItem(
+                Strings.Get("TaskDeleteEntryActionText"),
+                "\uE711",
+                async () =>
+                {
+                    bool? deleteFiles = await ConfirmDeleteAsync();
+                    if (deleteFiles is null)
+                    {
+                        return;
+                    }
+
+                    await RunTaskOperationSetAsync(
+                        selectedTasks,
+                        tasks => _downloadCoordinator.DeleteAsync(tasks, deleteFiles.Value),
+                        Strings.Get("TasksDeletedMessage"));
+                }));
+
+            return flyout;
+        }
+
+        private static MenuFlyoutItem CreateTaskContextMenuItem(string text, string glyph, Action action)
+        {
+            MenuFlyoutItem item = new()
+            {
+                Text = text,
+                Icon = new FontIcon { Glyph = glyph }
+            };
+            item.Click += (_, _) => action();
+            return item;
+        }
+
+        private static void AddTaskContextSeparatorIfNeeded(MenuFlyout flyout, bool shouldAdd)
+        {
+            if (shouldAdd && flyout.Items.LastOrDefault() is not MenuFlyoutSeparator)
+            {
+                flyout.Items.Add(new MenuFlyoutSeparator());
+            }
+        }
+
+        private async System.Threading.Tasks.Task RunTaskOperationSetAsync(
+            IReadOnlyList<DownloadTask> tasks,
+            Func<IReadOnlyList<DownloadTask>, System.Threading.Tasks.Task> operation,
+            string successMessage)
+        {
+            DownloadTask[] taskSet = tasks
+                .Where(task => !string.IsNullOrWhiteSpace(task.Gid))
+                .ToArray();
+            if (taskSet.Length == 0)
+            {
+                return;
+            }
+
+            Aria2EngineStartResult startResult = await EnsureAria2StartedAsync();
+            if (!startResult.Started)
+            {
+                ShowMessage(startResult.Message, InfoBarSeverity.Error);
+                return;
+            }
+
+            try
+            {
+                await operation(taskSet);
+                ApplyTaskFilter(_currentTaskFilter);
+                UpdateDashboard();
+                UpdateGlobalSpeedsFromTasks();
+                UpdateTaskDetailsPane();
+                await RefreshDownloadsAsync();
+                ApplyTaskFilter(_currentTaskFilter);
+                UpdateSelectionCommands();
+                ShowMessage(successMessage, InfoBarSeverity.Success);
+            }
+            catch (Exception ex)
+            {
+                ShowMessage(Strings.Format("TaskOperationFailedMessage", ex.Message), InfoBarSeverity.Error);
+            }
         }
 
         private void SelectAllTasksCheckBox_Checked(object sender, RoutedEventArgs e)
@@ -2629,6 +3036,13 @@ namespace OmniDown
                 : Path.Combine(task.SaveDirectory, task.Name);
         }
 
+        private static string ResolveTaskFolderPath(DownloadTask task)
+        {
+            return !string.IsNullOrWhiteSpace(task.SaveDirectory) && Directory.Exists(task.SaveDirectory)
+                ? task.SaveDirectory
+                : Path.GetDirectoryName(ResolveTaskFilePath(task)) ?? string.Empty;
+        }
+
         private static void OpenShellTarget(string path)
         {
             Process.Start(new ProcessStartInfo
@@ -2646,15 +3060,36 @@ namespace OmniDown
                 .ToList();
         }
 
+        private DownloadTask? GetSingleSelectedTask()
+        {
+            List<DownloadTask> selectedTasks = GetSelectedTasks();
+            return selectedTasks.Count == 1 ? selectedTasks[0] : null;
+        }
+
         private void UpdateSelectionCommands()
         {
             List<DownloadTask> selectedTasks = GetSelectedTasks();
             bool hasSelection = selectedTasks.Count > 0;
-            ResumeTasksButton.IsEnabled = hasSelection;
-            PauseTasksButton.IsEnabled = hasSelection;
+            DownloadTask? singleSelectedTask = selectedTasks.Count == 1 ? selectedTasks[0] : null;
+
+            ResumeTasksButton.IsEnabled = selectedTasks.Any(IsPausedTask);
+            PauseTasksButton.IsEnabled = selectedTasks.Any(IsActiveTransferTask);
             RecoverTasksButton.IsEnabled = selectedTasks.Any(IsRecoverableTask);
             DeleteTasksButton.IsEnabled = hasSelection;
+            OpenSelectedTaskFileButton.IsEnabled = singleSelectedTask is not null && CanOpenTaskFile(singleSelectedTask);
+            OpenSelectedTaskFolderButton.IsEnabled = singleSelectedTask is not null && CanOpenTaskFolder(singleSelectedTask);
+            CopySelectedTaskLinksButton.IsEnabled = selectedTasks.Any(task => !string.IsNullOrWhiteSpace(task.SourceUri));
             UpdateSelectAllCheckBox();
+        }
+
+        private static bool CanOpenTaskFile(DownloadTask task)
+        {
+            return IsCompletedTask(task) && File.Exists(ResolveTaskFilePath(task));
+        }
+
+        private static bool CanOpenTaskFolder(DownloadTask task)
+        {
+            return Directory.Exists(ResolveTaskFolderPath(task));
         }
 
         private static bool IsDownloadingTask(DownloadTask task)
@@ -3036,6 +3471,27 @@ namespace OmniDown
             {
                 appWindow.SetIcon(iconPath);
             }
+        }
+
+        private void ConfigureDefaultWindowSize()
+        {
+            const int defaultWidth = 2000;
+            const int defaultHeight = 1000;
+            const int minWidth = 2000;
+            const int minHeight = 1000;
+
+            AppWindow.Resize(new SizeInt32(defaultWidth, defaultHeight));
+            if (AppWindow.Presenter is OverlappedPresenter presenter)
+            {
+                presenter.PreferredMinimumWidth = minWidth;
+                presenter.PreferredMinimumHeight = minHeight;
+            }
+
+            DisplayArea displayArea = DisplayArea.GetFromWindowId(AppWindow.Id, DisplayAreaFallback.Primary);
+            RectInt32 workArea = displayArea.WorkArea;
+            int x = workArea.X + Math.Max(0, (workArea.Width - defaultWidth) / 2);
+            int y = workArea.Y + Math.Max(0, (workArea.Height - defaultHeight) / 2);
+            AppWindow.Move(new PointInt32(x, y));
         }
 
         private static string? ResolveAssetPath(params string[] pathSegments)

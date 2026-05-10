@@ -149,6 +149,7 @@ public sealed class DownloadTask : INotifyPropertyChanged
         {
             if (SetProperty(ref _completedLength, value))
             {
+                OnPropertyChanged(nameof(TransferredSizeText));
                 OnPropertyChanged(nameof(RemainingTimeText));
             }
         }
@@ -162,12 +163,17 @@ public sealed class DownloadTask : INotifyPropertyChanged
             if (SetProperty(ref _totalLength, value))
             {
                 OnPropertyChanged(nameof(SizeText));
+                OnPropertyChanged(nameof(TransferredSizeText));
                 OnPropertyChanged(nameof(RemainingTimeText));
             }
         }
     }
 
     public string SizeText => TotalLength <= 0 ? "-" : FormatBytes(TotalLength);
+
+    public string TransferredSizeText => TotalLength <= 0
+        ? $"{FormatBytes(CompletedLength)} / -"
+        : $"{FormatBytes(CompletedLength)} / {FormatBytes(TotalLength)}";
 
     public DateTimeOffset CreatedAt
     {
@@ -178,8 +184,32 @@ public sealed class DownloadTask : INotifyPropertyChanged
     public bool IsSelected
     {
         get => _isSelected;
-        set => SetProperty(ref _isSelected, value);
+        set
+        {
+            if (SetProperty(ref _isSelected, value))
+            {
+                OnPropertyChanged(nameof(TaskItemBackground));
+                OnPropertyChanged(nameof(TaskItemBorderBrush));
+                OnPropertyChanged(nameof(SelectionIndicatorOpacity));
+                OnPropertyChanged(nameof(SelectionCheckboxOpacity));
+                OnPropertyChanged(nameof(TaskIconOpacity));
+            }
+        }
     }
+
+    public Brush TaskItemBackground => IsSelected
+        ? GetResourceBrush("ControlFillColorDefaultBrush", DefaultProgressBrush)
+        : new SolidColorBrush(Colors.Transparent);
+
+    public Brush TaskItemBorderBrush => IsSelected
+        ? GetResourceBrush("CardStrokeColorDefaultBrush", DefaultProgressBrush)
+        : new SolidColorBrush(Colors.Transparent);
+
+    public double SelectionIndicatorOpacity => IsSelected ? 1 : 0;
+
+    public double SelectionCheckboxOpacity => IsSelected ? 1 : 0;
+
+    public double TaskIconOpacity => IsSelected ? 0 : 1;
 
     public long DownloadSpeed
     {
@@ -311,7 +341,7 @@ public sealed class DownloadTask : INotifyPropertyChanged
     {
         if (Status.Contains("complete", StringComparison.OrdinalIgnoreCase))
         {
-            return "0s";
+            return $"0 {Strings.Get("RemainingTimeSecondsUnit")}";
         }
 
         if (!Status.Contains("download", StringComparison.OrdinalIgnoreCase) ||
@@ -327,20 +357,20 @@ public sealed class DownloadTask : INotifyPropertyChanged
         TimeSpan remaining = TimeSpan.FromSeconds(Math.Max(remainingSeconds, 0));
         if (remaining.TotalDays >= 1)
         {
-            return $"{(int)remaining.TotalDays}d {remaining.Hours}h";
+            return $"{(int)remaining.TotalDays} {Strings.Get("RemainingTimeDaysUnit")} {remaining.Hours} {Strings.Get("RemainingTimeHoursUnit")}";
         }
 
         if (remaining.TotalHours >= 1)
         {
-            return $"{(int)remaining.TotalHours}h {remaining.Minutes}m";
+            return $"{(int)remaining.TotalHours} {Strings.Get("RemainingTimeHoursUnit")} {remaining.Minutes} {Strings.Get("RemainingTimeMinutesUnit")}";
         }
 
         if (remaining.TotalMinutes >= 1)
         {
-            return $"{(int)remaining.TotalMinutes}m {remaining.Seconds}s";
+            return $"{(int)remaining.TotalMinutes} {Strings.Get("RemainingTimeMinutesUnit")} {remaining.Seconds} {Strings.Get("RemainingTimeSecondsUnit")}";
         }
 
-        return $"{remaining.Seconds}s";
+        return $"{remaining.Seconds} {Strings.Get("RemainingTimeSecondsUnit")}";
     }
 
     private static Brush GetResourceBrush(string key, Brush fallback)

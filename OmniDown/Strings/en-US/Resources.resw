@@ -29,6 +29,7 @@
   <data name="IssuesPageSubtitle" xml:space="preserve"><value>Failed, removed, or attention-needed tasks.</value></data>
   <data name="NewDownloadButton.Label" xml:space="preserve"><value>New</value></data>
   <data name="SortTasksButtonLabel.Text" xml:space="preserve"><value>Sort</value></data>
+  <data name="SortTasksButton.Label" xml:space="preserve"><value>Sort</value></data>
   <data name="SortByCreatedAtMenuItem.Text" xml:space="preserve"><value>Added time</value></data>
   <data name="SortByNameMenuItem.Text" xml:space="preserve"><value>Name</value></data>
   <data name="SortBySizeMenuItem.Text" xml:space="preserve"><value>Size</value></data>
@@ -168,4 +169,12 @@
   <data name="ApplySpeedLimitButton.Content" xml:space="preserve"><value>Apply</value></data>
   <data name="SpeedLimitAppliedMessage" xml:space="preserve"><value>Speed limits applied.</value></data>
   <data name="SpeedLimitApplyFailedMessage" xml:space="preserve"><value>Failed to apply speed limits: {0}</value></data>
+  <data name="SizeColumnHeader.Text" xml:space="preserve"><value>Size</value></data>
+  <data name="OpenSelectedTaskFileButton.Label" xml:space="preserve"><value>Open file</value></data>
+  <data name="OpenSelectedTaskFolderButton.Label" xml:space="preserve"><value>Open folder</value></data>
+  <data name="CopySelectedTaskLinksButton.Label" xml:space="preserve"><value>Copy link</value></data>
+  <data name="RemainingTimeDaysUnit" xml:space="preserve"><value>d</value></data>
+  <data name="RemainingTimeHoursUnit" xml:space="preserve"><value>h</value></data>
+  <data name="RemainingTimeMinutesUnit" xml:space="preserve"><value>min</value></data>
+  <data name="RemainingTimeSecondsUnit" xml:space="preserve"><value>s</value></data>
 </root>

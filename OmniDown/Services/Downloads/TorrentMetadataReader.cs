@@ -2,6 +2,7 @@ using OmniDown.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace OmniDown.Services.Downloads;
@@ -102,13 +103,47 @@ public static class TorrentMetadataReader
     {
         try
         {
-            return Encoding.UTF8.GetString(bytes);
+            return new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true).GetString(bytes);
         }
         catch (DecoderFallbackException)
         {
-            return Encoding.Latin1.GetString(bytes);
+            string gb18030 = DecodeWindowsCodePage(bytes, 54936);
+            if (!string.IsNullOrWhiteSpace(gb18030))
+            {
+                return gb18030;
+            }
+
+            string gbk = DecodeWindowsCodePage(bytes, 936);
+            return string.IsNullOrWhiteSpace(gbk) ? Encoding.Latin1.GetString(bytes) : gbk;
         }
     }
+
+    private static string DecodeWindowsCodePage(byte[] bytes, uint codePage)
+    {
+        if (!OperatingSystem.IsWindows() || bytes.Length == 0)
+        {
+            return string.Empty;
+        }
+
+        int length = MultiByteToWideChar(codePage, 0x8, bytes, bytes.Length, null, 0);
+        if (length <= 0)
+        {
+            return string.Empty;
+        }
+
+        char[] chars = new char[length];
+        int written = MultiByteToWideChar(codePage, 0x8, bytes, bytes.Length, chars, chars.Length);
+        return written <= 0 ? string.Empty : new string(chars, 0, written);
+    }
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern int MultiByteToWideChar(
+        uint codePage,
+        uint flags,
+        byte[] multiByteStr,
+        int multiByteCount,
+        [Out] char[]? wideCharStr,
+        int wideCharCount);
 
     private sealed class BencodeReader(byte[] bytes)
     {

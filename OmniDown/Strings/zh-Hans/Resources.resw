@@ -29,6 +29,7 @@
   <data name="IssuesPageSubtitle" xml:space="preserve"><value>失败、移除或需要处理的任务。</value></data>
   <data name="NewDownloadButton.Label" xml:space="preserve"><value>新建</value></data>
   <data name="SortTasksButtonLabel.Text" xml:space="preserve"><value>排序</value></data>
+  <data name="SortTasksButton.Label" xml:space="preserve"><value>排序</value></data>
   <data name="SortByCreatedAtMenuItem.Text" xml:space="preserve"><value>添加时间</value></data>
   <data name="SortByNameMenuItem.Text" xml:space="preserve"><value>项目名称</value></data>
   <data name="SortBySizeMenuItem.Text" xml:space="preserve"><value>项目大小</value></data>
@@ -168,4 +169,12 @@
   <data name="ApplySpeedLimitButton.Content" xml:space="preserve"><value>应用</value></data>
   <data name="SpeedLimitAppliedMessage" xml:space="preserve"><value>限速设置已应用。</value></data>
   <data name="SpeedLimitApplyFailedMessage" xml:space="preserve"><value>应用限速失败：{0}</value></data>
+  <data name="SizeColumnHeader.Text" xml:space="preserve"><value>大小</value></data>
+  <data name="OpenSelectedTaskFileButton.Label" xml:space="preserve"><value>打开文件</value></data>
+  <data name="OpenSelectedTaskFolderButton.Label" xml:space="preserve"><value>打开文件夹</value></data>
+  <data name="CopySelectedTaskLinksButton.Label" xml:space="preserve"><value>复制链接</value></data>
+  <data name="RemainingTimeDaysUnit" xml:space="preserve"><value>天</value></data>
+  <data name="RemainingTimeHoursUnit" xml:space="preserve"><value>时</value></data>
+  <data name="RemainingTimeMinutesUnit" xml:space="preserve"><value>分</value></data>
+  <data name="RemainingTimeSecondsUnit" xml:space="preserve"><value>秒</value></data>
 </root>
