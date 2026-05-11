@@ -92,6 +92,7 @@ namespace OmniDown
         {
             _settingsPageViewModel = new SettingsPageViewModel(_settingsStore);
             InitializeComponent();
+            HookSettingsPageEvents();
             TasksListView.ItemsSource = _visibleTasks;
             NotificationHistoryListView.ItemsSource = _statusMessages;
             _windowHandle = WindowNative.GetWindowHandle(this);

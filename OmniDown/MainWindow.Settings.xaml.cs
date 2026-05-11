@@ -42,6 +42,77 @@ namespace OmniDown
 {
     public sealed partial class MainWindow
     {
+        private ListView SettingsSectionListView => SettingsPage.SettingsSectionListViewControl;
+        private StackPanel GeneralSettingsContent => SettingsPage.GeneralSettingsContentControl;
+        private StackPanel DownloadSettingsContent => SettingsPage.DownloadSettingsContentControl;
+        private StackPanel BitTorrentSettingsContent => SettingsPage.BitTorrentSettingsContentControl;
+        private StackPanel NetworkSettingsContent => SettingsPage.NetworkSettingsContentControl;
+        private StackPanel AdvancedSettingsContent => SettingsPage.AdvancedSettingsContentControl;
+        private StackPanel AboutSettingsContent => SettingsPage.AboutSettingsContentControl;
+        private Border StartupSettingCard => SettingsPage.StartupSettingCardControl;
+        private Border RestoreWindowSettingCard => SettingsPage.RestoreWindowSettingCardControl;
+        private Border ResumeOnLaunchSettingCard => SettingsPage.ResumeOnLaunchSettingCardControl;
+        private Border ExitCleanupSettingCard => SettingsPage.ExitCleanupSettingCardControl;
+        private Border PauseActiveOnExitSettingCard => SettingsPage.PauseActiveOnExitSettingCardControl;
+        private Border CloseBehaviorSettingCard => SettingsPage.CloseBehaviorSettingCardControl;
+        private Border TaskbarProgressSettingCard => SettingsPage.TaskbarProgressSettingCardControl;
+        private Border ThemeSettingCard => SettingsPage.ThemeSettingCardControl;
+        private Border NotificationsSettingCard => SettingsPage.NotificationsSettingCardControl;
+        private Border DownloadStartNotificationSettingCard => SettingsPage.DownloadStartNotificationSettingCardControl;
+        private Border DownloadCompleteNotificationSettingCard => SettingsPage.DownloadCompleteNotificationSettingCardControl;
+        private Border AutoShutdownSettingCard => SettingsPage.AutoShutdownSettingCardControl;
+        private Border PreventSleepSettingCard => SettingsPage.PreventSleepSettingCardControl;
+        private Border DefaultDirectorySettingCard => SettingsPage.DefaultDirectorySettingCardControl;
+        private Border SplitCountSettingCard => SettingsPage.SplitCountSettingCardControl;
+        private Border SpeedLimitSettingCard => SettingsPage.SpeedLimitSettingCardControl;
+        private Border BtEnableSettingCard => SettingsPage.BtEnableSettingCardControl;
+        private Border BtPortSettingCard => SettingsPage.BtPortSettingCardControl;
+        private Border BtSeedRatioSettingCard => SettingsPage.BtSeedRatioSettingCardControl;
+        private Border UseSystemProxySettingCard => SettingsPage.UseSystemProxySettingCardControl;
+        private Border CustomProxySettingCard => SettingsPage.CustomProxySettingCardControl;
+        private Border RetrySettingCard => SettingsPage.RetrySettingCardControl;
+        private Border AriaPathSettingCard => SettingsPage.AriaPathSettingCardControl;
+        private Border RpcPortSettingCard => SettingsPage.RpcPortSettingCardControl;
+        private Border ProcessStatusSettingCard => SettingsPage.ProcessStatusSettingCardControl;
+        private Border TerminalSettingCard => SettingsPage.TerminalSettingCardControl;
+        private Border AboutAppCard => SettingsPage.AboutAppCardControl;
+        private Border AboutCloneCard => SettingsPage.AboutCloneCardControl;
+        private Border AboutIssueCard => SettingsPage.AboutIssueCardControl;
+        private Border AboutReferencesCard => SettingsPage.AboutReferencesCardControl;
+        private Border AboutLicenseCard => SettingsPage.AboutLicenseCardControl;
+        private ToggleSwitch AutoStartToggleSwitch => SettingsPage.AutoStartToggleSwitchControl;
+        private ToggleSwitch RestoreWindowPlacementToggleSwitch => SettingsPage.RestoreWindowPlacementToggleSwitchControl;
+        private ToggleSwitch ResumeDownloadsOnLaunchToggleSwitch => SettingsPage.ResumeDownloadsOnLaunchToggleSwitchControl;
+        private ToggleSwitch AutoClearCompletedOnExitToggleSwitch => SettingsPage.AutoClearCompletedOnExitToggleSwitchControl;
+        private ToggleSwitch PauseActiveOnExitToggleSwitch => SettingsPage.PauseActiveOnExitToggleSwitchControl;
+        private ToggleSwitch CloseToTrayToggleSwitch => SettingsPage.CloseToTrayToggleSwitchControl;
+        private ToggleSwitch ShowTaskbarProgressToggleSwitch => SettingsPage.ShowTaskbarProgressToggleSwitchControl;
+        private ComboBox ThemeComboBox => SettingsPage.ThemeComboBoxControl;
+        private ToggleSwitch SystemNotificationsToggleSwitch => SettingsPage.SystemNotificationsToggleSwitchControl;
+        private ToggleSwitch DownloadStartNotificationsToggleSwitch => SettingsPage.DownloadStartNotificationsToggleSwitchControl;
+        private ToggleSwitch DownloadCompleteNotificationsToggleSwitch => SettingsPage.DownloadCompleteNotificationsToggleSwitchControl;
+        private ToggleSwitch AutoShutdownWhenCompleteToggleSwitch => SettingsPage.AutoShutdownWhenCompleteToggleSwitchControl;
+        private ToggleSwitch PreventSleepWhileDownloadingToggleSwitch => SettingsPage.PreventSleepWhileDownloadingToggleSwitchControl;
+        private TextBox DownloadDirectoryTextBox => SettingsPage.DownloadDirectoryTextBoxControl;
+        private ToggleSwitch UseSystemProxyCheckBox => SettingsPage.UseSystemProxyCheckBoxControl;
+        private TextBox AriaPathTextBox => SettingsPage.AriaPathTextBoxControl;
+        private NumberBox RpcPortNumberBox => SettingsPage.RpcPortNumberBoxControl;
+        private TextBlock SettingsAriaStatusText => SettingsPage.SettingsAriaStatusTextControl;
+        private StackPanel ProcessStatusSettingControl => SettingsPage.ProcessStatusSettingControlControl;
+        private TextBlock AboutVersionText => SettingsPage.AboutVersionTextControl;
+        private TextBlock AboutCloneCommandText => SettingsPage.AboutCloneCommandTextControl;
+
+        private void HookSettingsPageEvents()
+        {
+            SettingsPage.SectionSelectionChanged += SettingsSectionListView_SelectionChanged;
+            SettingsPage.SettingToggleSwitchToggled += SettingToggleSwitch_Toggled;
+            SettingsPage.ThemeSelectionChanged += ThemeComboBox_SelectionChanged;
+            SettingsPage.StartAriaRequested += StartAriaButton_Click;
+            SettingsPage.StopAriaRequested += StopAriaButton_Click;
+            SettingsPage.CopyCloneCommandRequested += CopyCloneCommandButton_Click;
+            SettingsPage.OpenAboutLinkRequested += OpenAboutLinkButton_Click;
+        }
+
         private void UseSystemProxyCheckBox_Changed(object sender, RoutedEventArgs e)
         {
             UpdateDebugStatus();
