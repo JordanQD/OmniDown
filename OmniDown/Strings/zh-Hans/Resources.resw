@@ -179,4 +179,14 @@
   <data name="RemainingTimeHoursUnit" xml:space="preserve"><value>时</value></data>
   <data name="RemainingTimeMinutesUnit" xml:space="preserve"><value>分</value></data>
   <data name="RemainingTimeSecondsUnit" xml:space="preserve"><value>秒</value></data>
+  <data name="AboutAppDescriptionText.Text" xml:space="preserve"><value>由 aria2 驱动的 WinUI 下载管理器。</value></data>
+  <data name="AboutSettingsNavText.Text" xml:space="preserve"><value>关于</value></data>
+  <data name="AboutSettingsHeaderText.Text" xml:space="preserve"><value>关于</value></data>
+  <data name="AboutCloneTitleText.Text" xml:space="preserve"><value>克隆此仓库</value></data>
+  <data name="AboutIssueTitleText.Text" xml:space="preserve"><value>提交问题或功能建议</value></data>
+  <data name="AboutReferencesTitleText.Text" xml:space="preserve"><value>依赖与参考</value></data>
+  <data name="AboutWarrantyText.Text" xml:space="preserve"><value>本软件按原样提供，不附带任何形式的担保。第三方组件由其各自所有者按对应许可证授权。</value></data>
+  <data name="AboutLicenseLink.Content" xml:space="preserve"><value>OmniDown 许可证</value></data>
+  <data name="AboutThirdPartyLink.Content" xml:space="preserve"><value>第三方声明</value></data>
+  <data name="CloneCommandCopiedMessage" xml:space="preserve"><value>已复制克隆命令。</value></data>
 </root>

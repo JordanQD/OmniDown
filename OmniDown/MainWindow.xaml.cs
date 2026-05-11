@@ -43,6 +43,7 @@ namespace OmniDown
             byte[] Bytes,
             TorrentMetadata Metadata);
 
+        private const string CloneCommand = "git clone https://github.com/JordanQD/OmniDown.git";
         private readonly Aria2EngineHost _aria2EngineHost = new();
         private readonly Aria2RpcClient _aria2RpcClient = new();
         private readonly DownloadCoordinator _downloadCoordinator;
@@ -105,6 +106,7 @@ namespace OmniDown
 
             SettingsSectionListView.SelectedIndex = 0;
             ShowSettingsSection("General");
+            InitializeAboutSection();
             DownloadDirectoryTextBox.Text = AppPaths.DefaultDownloadDirectory;
 
             LoadSpeedLimitSettings();
@@ -1234,7 +1236,8 @@ namespace OmniDown
                 || DownloadSettingsContent is null
                 || BitTorrentSettingsContent is null
                 || NetworkSettingsContent is null
-                || AdvancedSettingsContent is null)
+                || AdvancedSettingsContent is null
+                || AboutSettingsContent is null)
             {
                 return;
             }
@@ -1244,6 +1247,52 @@ namespace OmniDown
             BitTorrentSettingsContent.Visibility = tag == "BitTorrent" ? Visibility.Visible : Visibility.Collapsed;
             NetworkSettingsContent.Visibility = tag == "Network" ? Visibility.Visible : Visibility.Collapsed;
             AdvancedSettingsContent.Visibility = tag == "Advanced" ? Visibility.Visible : Visibility.Collapsed;
+            AboutSettingsContent.Visibility = tag == "About" ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void InitializeAboutSection()
+        {
+            AboutVersionText.Text = GetAppVersionText();
+            AboutCloneCommandText.Text = CloneCommand;
+        }
+
+        private static string GetAppVersionText()
+        {
+            try
+            {
+                Windows.ApplicationModel.PackageVersion version = Windows.ApplicationModel.Package.Current.Id.Version;
+                return $"{version.Major}.{version.Minor}.{version.Build}";
+            }
+            catch
+            {
+                Version? assemblyVersion = typeof(MainWindow).Assembly.GetName().Version;
+                return assemblyVersion is null
+                    ? "1.0.0"
+                    : $"{assemblyVersion.Major}.{assemblyVersion.Minor}.{assemblyVersion.Build}";
+            }
+        }
+
+        private void CopyCloneCommandButton_Click(object sender, RoutedEventArgs e)
+        {
+            DataPackage package = new()
+            {
+                RequestedOperation = DataPackageOperation.Copy
+            };
+            package.SetText(CloneCommand);
+            Clipboard.SetContent(package);
+            ShowMessage(Strings.Get("CloneCommandCopiedMessage"), InfoBarSeverity.Success);
+        }
+
+        private async void OpenAboutLinkButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not FrameworkElement element
+                || element.Tag?.ToString() is not string url
+                || !Uri.TryCreate(url, UriKind.Absolute, out Uri? uri))
+            {
+                return;
+            }
+
+            await Launcher.LaunchUriAsync(uri);
         }
 
         private void AppTitleBar_PaneToggleRequested(TitleBar sender, object args)
@@ -3238,6 +3287,12 @@ namespace OmniDown
             SetSettingVisibility(RpcPortSettingCard, query, "rpc", "port", Strings.Get("RpcPortLabel.Text"), "端口");
             SetSettingVisibility(ProcessStatusSettingCard, query, "process", "status", "aria2", Strings.Get("ProcessStatusLabel.Text"), "状态");
             SetSettingVisibility(TerminalSettingCard, query, "terminal", "log", "debug", "aria2", "终端", "日志");
+
+            SetSettingVisibility(AboutAppCard, query, "about", "version", "omnidown", "关于", "版本");
+            SetSettingVisibility(AboutCloneCard, query, "clone", "repository", "github", "克隆", "仓库");
+            SetSettingVisibility(AboutIssueCard, query, "bug", "issue", "feature", "github", "问题", "建议");
+            SetSettingVisibility(AboutReferencesCard, query, "dependencies", "references", "license", "files", "motrix", "aria2", "unigetui", "winui", "依赖", "参考", "许可证");
+            SetSettingVisibility(AboutLicenseCard, query, "license", "third-party", "notice", "warranty", "mit", "gpl", "许可证", "第三方", "声明");
         }
 
         private static void SetSettingVisibility(FrameworkElement? element, string query, params string[] searchableText)

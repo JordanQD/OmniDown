@@ -292,14 +292,14 @@
                                         Spacing="8"
                                         VerticalAlignment="Center">
                                         <FontIcon
-                                            FontSize="16"
+                                            FontSize="18"
                                             Glyph="&#xE8CB;" />
                                         <TextBlock
-                                            FontSize="14"
+                                            FontSize="15"
                                             x:Uid="SortTasksButtonLabel"
                                             Text="Sort" />
                                         <FontIcon
-                                            FontSize="11"
+                                            FontSize="12"
                                             Glyph="&#xE76C;" />
                                     </StackPanel>
                                 </AppBarButton.Content>
@@ -998,6 +998,14 @@
                                     <StackPanel Orientation="Horizontal" Spacing="12">
                                         <FontIcon Glyph="&#xE713;" />
                                         <TextBlock Text="高级" />
+                                    </StackPanel>
+                                </ListViewItem>
+                                <ListViewItem Tag="About">
+                                    <StackPanel Orientation="Horizontal" Spacing="12">
+                                        <FontIcon Glyph="&#xE946;" />
+                                        <TextBlock
+                                            Text="About"
+                                            x:Uid="AboutSettingsNavText" />
                                     </StackPanel>
                                 </ListViewItem>
                             </ListView>
@@ -1723,6 +1731,194 @@
                                                         Toggled="SettingToggleSwitch_Toggled" />
                                                 </StackPanel>
                                             </Grid>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <StackPanel
+                                        x:Name="AboutSettingsContent"
+                                        Spacing="0"
+                                        Visibility="Collapsed">
+                                        <TextBlock
+                                            Margin="4,0,4,8"
+                                            FontWeight="SemiBold"
+                                            Text="About"
+                                            x:Uid="AboutSettingsHeaderText" />
+                                        <Border
+                                            x:Name="AboutAppCard"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="8,8,0,0">
+                                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                                                <Image
+                                                    Width="32"
+                                                    Height="32"
+                                                    VerticalAlignment="Center"
+                                                    Source="/Assets/Square44x44Logo.targetsize-256_altform-unplated.png" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="2">
+                                                    <TextBlock
+                                                        FontSize="18"
+                                                        FontWeight="SemiBold"
+                                                        Text="OmniDown" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="A WinUI download manager powered by aria2."
+                                                        TextWrapping="WrapWholeWords"
+                                                        x:Uid="AboutAppDescriptionText" />
+                                                </StackPanel>
+                                                <TextBlock
+                                                    x:Name="AboutVersionText"
+                                                    Grid.Column="2"
+                                                    VerticalAlignment="Center"
+                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                    Text="1.0.0" />
+                                            </Grid>
+                                        </Border>
+
+                                        <Border
+                                            x:Name="AboutCloneCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1">
+                                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE943;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="To clone this repository"
+                                                        x:Uid="AboutCloneTitleText" />
+                                                    <TextBlock
+                                                        x:Name="AboutCloneCommandText"
+                                                        FontFamily="Cascadia Mono, Consolas"
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="git clone https://github.com/JordanQD/OmniDown.git"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <Button
+                                                    Grid.Column="2"
+                                                    Width="40"
+                                                    Height="40"
+                                                    MinWidth="40"
+                                                    Padding="0"
+                                                    Click="CopyCloneCommandButton_Click"
+                                                    ToolTipService.ToolTip="Copy">
+                                                    <FontIcon Glyph="&#xE8C8;" />
+                                                </Button>
+                                            </Grid>
+                                        </Border>
+
+                                        <Border
+                                            x:Name="AboutIssueCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1">
+                                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE7BA;" />
+                                                <TextBlock
+                                                    Grid.Column="1"
+                                                    VerticalAlignment="Center"
+                                                    FontWeight="SemiBold"
+                                                    Text="File a bug or request a feature"
+                                                    x:Uid="AboutIssueTitleText" />
+                                                <Button
+                                                    Grid.Column="2"
+                                                    Width="40"
+                                                    Height="40"
+                                                    MinWidth="40"
+                                                    Padding="0"
+                                                    Click="OpenAboutLinkButton_Click"
+                                                    Tag="https://github.com/JordanQD/OmniDown/issues"
+                                                    ToolTipService.ToolTip="Open">
+                                                    <FontIcon Glyph="&#xE8A7;" />
+                                                </Button>
+                                            </Grid>
+                                        </Border>
+
+                                        <Border
+                                            x:Name="AboutReferencesCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="0,0,8,8">
+                                            <StackPanel Spacing="12">
+                                                <TextBlock
+                                                    FontWeight="SemiBold"
+                                                    Text="Dependencies &amp; references"
+                                                    x:Uid="AboutReferencesTitleText" />
+                                                <ItemsControl>
+                                                    <HyperlinkButton
+                                                        Click="OpenAboutLinkButton_Click"
+                                                        Content="Files"
+                                                        Tag="https://github.com/files-community/Files" />
+                                                    <HyperlinkButton
+                                                        Click="OpenAboutLinkButton_Click"
+                                                        Content="Motrix Next"
+                                                        Tag="https://github.com/AnInsomniacy/motrix-next" />
+                                                    <HyperlinkButton
+                                                        Click="OpenAboutLinkButton_Click"
+                                                        Content="aria2"
+                                                        Tag="https://github.com/aria2/aria2" />
+                                                    <HyperlinkButton
+                                                        Click="OpenAboutLinkButton_Click"
+                                                        Content="UniGetUI"
+                                                        Tag="https://github.com/Devolutions/UniGetUI" />
+                                                    <HyperlinkButton
+                                                        Click="OpenAboutLinkButton_Click"
+                                                        Content="WinUI Gallery"
+                                                        Tag="https://github.com/microsoft/WinUI-Gallery" />
+                                                    <HyperlinkButton
+                                                        Click="OpenAboutLinkButton_Click"
+                                                        Content="Windows App SDK"
+                                                        Tag="https://github.com/microsoft/WindowsAppSDK" />
+                                                    <HyperlinkButton
+                                                        Click="OpenAboutLinkButton_Click"
+                                                        Content="WinUI 3"
+                                                        Tag="https://github.com/microsoft/microsoft-ui-xaml" />
+                                                </ItemsControl>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <Border
+                                            x:Name="AboutLicenseCard"
+                                            Margin="0,18,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="8">
+                                            <StackPanel Spacing="12">
+                                                <TextBlock
+                                                    Text="THIS SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND. THIRD-PARTY COMPONENTS ARE LICENSED BY THEIR RESPECTIVE OWNERS."
+                                                    TextWrapping="WrapWholeWords"
+                                                    x:Uid="AboutWarrantyText" />
+                                                <HyperlinkButton
+                                                    Click="OpenAboutLinkButton_Click"
+                                                    Content="OmniDown license"
+                                                    Tag="https://github.com/JordanQD/OmniDown/blob/main/LICENSE"
+                                                    x:Uid="AboutLicenseLink" />
+                                                <HyperlinkButton
+                                                    Click="OpenAboutLinkButton_Click"
+                                                    Content="Third-party notices"
+                                                    Tag="https://github.com/JordanQD/OmniDown/blob/main/THIRD_PARTY_NOTICES.md"
+                                                    x:Uid="AboutThirdPartyLink" />
+                                            </StackPanel>
                                         </Border>
                                     </StackPanel>
                                 </Grid>

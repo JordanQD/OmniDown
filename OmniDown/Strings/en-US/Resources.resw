@@ -179,4 +179,14 @@
   <data name="RemainingTimeHoursUnit" xml:space="preserve"><value>h</value></data>
   <data name="RemainingTimeMinutesUnit" xml:space="preserve"><value>min</value></data>
   <data name="RemainingTimeSecondsUnit" xml:space="preserve"><value>s</value></data>
+  <data name="AboutAppDescriptionText.Text" xml:space="preserve"><value>A WinUI download manager powered by aria2.</value></data>
+  <data name="AboutSettingsNavText.Text" xml:space="preserve"><value>About</value></data>
+  <data name="AboutSettingsHeaderText.Text" xml:space="preserve"><value>About</value></data>
+  <data name="AboutCloneTitleText.Text" xml:space="preserve"><value>To clone this repository</value></data>
+  <data name="AboutIssueTitleText.Text" xml:space="preserve"><value>File a bug or request a feature</value></data>
+  <data name="AboutReferencesTitleText.Text" xml:space="preserve"><value>Dependencies &amp; references</value></data>
+  <data name="AboutWarrantyText.Text" xml:space="preserve"><value>THIS SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND. THIRD-PARTY COMPONENTS ARE LICENSED BY THEIR RESPECTIVE OWNERS.</value></data>
+  <data name="AboutLicenseLink.Content" xml:space="preserve"><value>OmniDown license</value></data>
+  <data name="AboutThirdPartyLink.Content" xml:space="preserve"><value>Third-party notices</value></data>
+  <data name="CloneCommandCopiedMessage" xml:space="preserve"><value>Clone command copied.</value></data>
 </root>
