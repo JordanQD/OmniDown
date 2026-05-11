@@ -590,11 +590,11 @@
                             <DropDownButton.Flyout>
                                 <Flyout Placement="BottomEdgeAlignedRight">
                                     <StackPanel
-                                        Width="260"
+                                        Width="280"
                                         Spacing="12">
                                         <StackPanel Spacing="8">
                                             <Grid
-                                                Width="260"
+                                                Width="280"
                                                 ColumnDefinitions="*,92"
                                                 ColumnSpacing="8">
                                                 <TextBlock
@@ -612,14 +612,15 @@
                                                     OnContent=""
                                                     Toggled="UploadLimitToggleSwitch_Toggled" />
                                             </Grid>
-                                            <Grid ColumnDefinitions="*,92" ColumnSpacing="8">
+                                            <Grid ColumnDefinitions="168,*" ColumnSpacing="8">
                                                 <NumberBox
                                                     x:Name="UploadLimitNumberBox"
                                                     IsEnabled="False"
+                                                    Height="32"
                                                     Minimum="1"
                                                     SmallChange="128"
                                                     LargeChange="1024"
-                                                    SpinButtonPlacementMode="Compact"
+                                                    SpinButtonPlacementMode="Inline"
                                                     Value="1024" />
                                                 <ComboBox
                                                     x:Name="UploadLimitUnitComboBox"
@@ -634,7 +635,7 @@
                                         </StackPanel>
                                         <StackPanel Spacing="8">
                                             <Grid
-                                                Width="260"
+                                                Width="280"
                                                 ColumnDefinitions="*,92"
                                                 ColumnSpacing="8">
                                                 <TextBlock
@@ -652,14 +653,15 @@
                                                     OnContent=""
                                                     Toggled="DownloadLimitToggleSwitch_Toggled" />
                                             </Grid>
-                                            <Grid ColumnDefinitions="*,92" ColumnSpacing="8">
+                                            <Grid ColumnDefinitions="168,*" ColumnSpacing="8">
                                                 <NumberBox
                                                     x:Name="DownloadLimitNumberBox"
                                                     IsEnabled="False"
+                                                    Height="32"
                                                     Minimum="1"
                                                     SmallChange="128"
                                                     LargeChange="1024"
-                                                    SpinButtonPlacementMode="Compact"
+                                                    SpinButtonPlacementMode="Inline"
                                                     Value="1024" />
                                                 <ComboBox
                                                     x:Name="DownloadLimitUnitComboBox"

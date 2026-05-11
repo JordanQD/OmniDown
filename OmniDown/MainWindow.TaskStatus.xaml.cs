@@ -71,14 +71,22 @@ namespace OmniDown
         private async System.Threading.Tasks.Task<Aria2EngineStartResult> EnsureAria2StartedAsync()
         {
             int rpcPort = double.IsNaN(RpcPortNumberBox.Value) ? 6800 : (int)RpcPortNumberBox.Value;
+            DownloadSettings downloadSettings = _settingsPageViewModel.DownloadSettings;
             _aria2RpcClient.Configure(rpcPort, _rpcSecret);
 
             Aria2EngineStartResult result = await _aria2EngineHost.StartAsync(new Aria2EngineOptions(
                 string.IsNullOrWhiteSpace(AriaPathTextBox.Text) ? null : AriaPathTextBox.Text.Trim(),
                 rpcPort,
-                DownloadDirectoryTextBox.Text.Trim(),
+                downloadSettings.DownloadDirectory,
                 _rpcSecret,
-                UseSystemProxyCheckBox.IsOn));
+                UseSystemProxyCheckBox.IsOn,
+                downloadSettings.MaxConcurrentDownloads,
+                downloadSettings.SplitCount,
+                downloadSettings.MaxConnectionPerServer,
+                downloadSettings.ContinueDownloads,
+                downloadSettings.RemoteTime,
+                downloadSettings.MaxTries,
+                downloadSettings.RetryWaitSeconds));
 
             if (!result.Started)
             {

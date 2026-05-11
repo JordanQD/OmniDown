@@ -81,6 +81,7 @@ namespace OmniDown
         private bool _isClosePromptOpen;
         private bool _isLoadingCloseBehaviorSettings;
         private bool _isLoadingGeneralSettings;
+        private bool _isLoadingDownloadSettings;
         private bool _isNewDownloadDialogOpen;
         private bool _hasTriggeredAutoShutdown;
         private bool _hasSeenActiveDownloadsForAutoShutdown;
@@ -106,6 +107,7 @@ namespace OmniDown
             AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
             AppWindow.Closing += MainWindow_Closing;
             _downloadCoordinator = new DownloadCoordinator(_aria2RpcClient, Tasks);
+            _downloadCoordinator.DeleteTorrentAfterComplete = _settingsPageViewModel.DownloadSettings.DeleteTorrentAfterComplete;
             _notifications = ((App)Application.Current).Notifications;
             RecordObservedTaskStatuses();
             Closed += MainWindow_Closed;
@@ -117,8 +119,8 @@ namespace OmniDown
             SettingsSectionListView.SelectedIndex = 0;
             ShowSettingsSection("General");
             InitializeAboutSection();
-            DownloadDirectoryTextBox.Text = AppPaths.DefaultDownloadDirectory;
 
+            LoadDownloadSettings();
             LoadSpeedLimitSettings();
             LoadCloseBehaviorSettings();
             UpdateSearchPlaceholder();

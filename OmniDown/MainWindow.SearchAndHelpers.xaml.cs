@@ -430,8 +430,15 @@ namespace OmniDown
             SetSettingVisibility(PreventSleepSettingCard, query, "sleep", "power", "download", "休眠", "睡眠", "下载");
 
             SetSettingVisibility(DefaultDirectorySettingCard, query, "default", "directory", "download", "folder", Strings.Get("DefaultDirectoryLabel.Text"), "目录", "保存");
-            SetSettingVisibility(SplitCountSettingCard, query, "split", "connection", "thread", "分片", "连接数");
-            SetSettingVisibility(SpeedLimitSettingCard, query, "speed", "limit", "upload", "download", "速度", "限速");
+            SetSettingVisibility(MaxConcurrentDownloadsSettingCard, query, "concurrent", "download", "task", "同时", "下载", "任务");
+            SetSettingVisibility(SplitCountSettingCard, query, "split", "segment", "connection", "thread", "分片", "连接数");
+            SetSettingVisibility(MaxConnectionPerServerSettingCard, query, "connection", "server", "thread", "服务器", "连接数");
+            SetSettingVisibility(ContinueDownloadSettingCard, query, "continue", "resume", "download", "断点", "续传");
+            SetSettingVisibility(RemoteTimeSettingCard, query, "remote", "time", "timestamp", "server", "时间戳", "服务器");
+            SetSettingVisibility(MaxTriesSettingCard, query, "retry", "tries", "network", "重试");
+            SetSettingVisibility(RetryWaitSettingCard, query, "retry", "wait", "seconds", "等待", "重试");
+            SetSettingVisibility(DownloadCleanupSettingCard, query, "cleanup", "stale", "record", "清理", "记录");
+            SetSettingVisibility(TorrentCleanupSettingCard, query, "torrent", "cleanup", "delete", "种子", "清理", "删除");
 
             SetSettingVisibility(BtEnableSettingCard, query, "bittorrent", "torrent", "magnet", "bt", "磁力", "种子");
             SetSettingVisibility(BtPortSettingCard, query, "bittorrent", "port", "listen", "bt", "端口");

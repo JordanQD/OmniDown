@@ -14,6 +14,8 @@ internal sealed class SettingsPageViewModel
 
     public GeneralSettings GeneralSettings { get; private set; } = GeneralSettings.Default;
 
+    public DownloadSettings DownloadSettings { get; private set; } = DownloadSettings.Default;
+
     public CloseBehaviorSettings CloseBehaviorSettings { get; private set; } = CloseBehaviorSettings.Default;
 
     public SpeedLimitSettings SpeedLimitSettings { get; private set; } = SpeedLimitSettings.Default;
@@ -26,6 +28,17 @@ internal sealed class SettingsPageViewModel
     public void SaveGeneralSettings()
     {
         _settingsStore.SaveGeneralSettings(GeneralSettings);
+    }
+
+    public void LoadDownloadSettings()
+    {
+        DownloadSettings = _settingsStore.ReadDownloadSettings();
+    }
+
+    public void SaveDownloadSettings(DownloadSettings settings)
+    {
+        DownloadSettings = settings;
+        _settingsStore.SaveDownloadSettings(settings);
     }
 
     public void LoadCloseBehaviorSettings()

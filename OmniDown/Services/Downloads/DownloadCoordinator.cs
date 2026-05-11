@@ -19,6 +19,8 @@ public sealed class DownloadCoordinator
     private readonly ObservableCollection<DownloadTask> _tasks;
     private readonly string _taskCachePath;
 
+    public bool DeleteTorrentAfterComplete { get; set; }
+
     public DownloadCoordinator(Aria2RpcClient rpcClient, ObservableCollection<DownloadTask> tasks)
     {
         _rpcClient = rpcClient;
@@ -358,6 +360,10 @@ public sealed class DownloadCoordinator
         if (normalizedStatus.Contains("complete", StringComparison.OrdinalIgnoreCase))
         {
             DeleteControlFiles(task, remoteTask);
+            if (DeleteTorrentAfterComplete)
+            {
+                TryDeleteTorrentSourceFile(task.SourceUri);
+            }
         }
 
         SaveTaskCache();
@@ -624,6 +630,24 @@ public sealed class DownloadCoordinator
         catch
         {
             // aria2 may still briefly hold the control file; the next refresh will retry.
+        }
+    }
+
+    private static void TryDeleteTorrentSourceFile(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path) ||
+            !path.EndsWith(".torrent", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        try
+        {
+            DeleteFileIfExists(path);
+        }
+        catch
+        {
+            // A source torrent might be outside accessible storage or still open.
         }
     }
 

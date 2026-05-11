@@ -311,7 +311,7 @@ internal static class NewDownloadDialogHelpers
             return 1;
         }
 
-        return Math.Clamp((int)Math.Round(numberBox.Value), 1, 128);
+        return Math.Clamp((int)Math.Round(numberBox.Value), 1, 256);
     }
 
     private static bool IsLikelyDownloadSourceUri(string text)

@@ -667,7 +667,7 @@
                                         <TextBlock
                                             Margin="4,0,4,8"
                                             FontWeight="SemiBold"
-                                            Text="下载位置" />
+                                            Text="下载" />
                                         <Border
                                             x:Name="DefaultDirectorySettingCard"
                                             Padding="16"
@@ -675,7 +675,7 @@
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1"
                                             CornerRadius="8,8,0,0">
-                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                            <Grid ColumnDefinitions="Auto,*,360" ColumnSpacing="14">
                                                 <FontIcon
                                                     Width="24"
                                                     VerticalAlignment="Center"
@@ -689,14 +689,73 @@
                                                         Text="Default directory" />
                                                     <TextBlock
                                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                        Text="新建任务默认保存到这个文件夹。"
+                                                        Text="新建任务的默认保存位置。"
                                                         TextWrapping="WrapWholeWords" />
                                                 </StackPanel>
-                                                <TextBox
-                                                    x:Name="DownloadDirectoryTextBox"
+                                                <Grid
                                                     Grid.Column="2"
-                                                    Width="220"
-                                                    HorizontalAlignment="Right" />
+                                                    Width="360"
+                                                    Height="32"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    ColumnDefinitions="*,Auto"
+                                                    ColumnSpacing="8">
+                                                    <TextBox
+                                                        x:Name="DownloadDirectoryTextBox"
+                                                        Height="32"
+                                                        VerticalAlignment="Center"
+                                                        PlaceholderText="下载文件夹"
+                                                        TextChanged="DownloadSettingTextBox_TextChanged" />
+                                                    <Button
+                                                        Grid.Column="1"
+                                                        Width="40"
+                                                        Height="32"
+                                                        MinWidth="40"
+                                                        Padding="0"
+                                                        VerticalAlignment="Center"
+                                                        Click="BrowseDownloadDirectoryButton_Click"
+                                                        ToolTipService.ToolTip="选择文件夹">
+                                                        <FontIcon Glyph="&#xE8B7;" />
+                                                    </Button>
+                                                </Grid>
+                                            </Grid>
+                                        </Border>
+
+                                        <Border
+                                            x:Name="MaxConcurrentDownloadsSettingCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE8EF;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="最大同时下载数" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="同时运行的任务上限。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <NumberBox
+                                                    x:Name="MaxConcurrentDownloadsNumberBox"
+                                                    Grid.Column="2"
+                                                    Width="168"
+                                                    Height="32"
+                                                    HorizontalAlignment="Right"
+                                                    Minimum="1"
+                                                    Maximum="10"
+                                                    SmallChange="1"
+                                                    SpinButtonPlacementMode="Inline"
+                                                    Value="5"
+                                                    ValueChanged="DownloadSettingNumberBox_ValueChanged" />
                                             </Grid>
                                         </Border>
 
@@ -707,7 +766,7 @@
                                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1"
-                                            CornerRadius="0,0,8,8">
+                                            CornerRadius="0">
                                             <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
                                                 <FontIcon
                                                     Width="24"
@@ -718,55 +777,321 @@
                                                     Spacing="3">
                                                     <TextBlock
                                                         FontWeight="SemiBold"
-                                                        Text="默认连接数" />
+                                                        Text="默认分片数" />
                                                     <TextBlock
                                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                        Text="添加普通链接时使用的建议分片数量。"
+                                                        Text="单个任务的并行分片数。"
                                                         TextWrapping="WrapWholeWords" />
                                                 </StackPanel>
                                                 <NumberBox
+                                                    x:Name="SplitCountNumberBox"
                                                     Grid.Column="2"
-                                                    Width="120"
+                                                    Width="168"
+                                                    Height="32"
                                                     HorizontalAlignment="Right"
                                                     Minimum="1"
-                                                    Maximum="128"
+                                                    Maximum="256"
                                                     SmallChange="1"
-                                                    SpinButtonPlacementMode="Compact"
-                                                    Value="16" />
+                                                    SpinButtonPlacementMode="Inline"
+                                                    Value="64"
+                                                    ValueChanged="DownloadSettingNumberBox_ValueChanged" />
+                                            </Grid>
+                                        </Border>
+
+                                        <Border
+                                            x:Name="MaxConnectionPerServerSettingCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="0,0,8,8">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE839;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="单服务器最大连接数" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="同一服务器的连接上限，范围 1-16。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <NumberBox
+                                                    x:Name="MaxConnectionPerServerNumberBox"
+                                                    Grid.Column="2"
+                                                    Width="168"
+                                                    Height="32"
+                                                    HorizontalAlignment="Right"
+                                                    Minimum="1"
+                                                    Maximum="16"
+                                                    SmallChange="1"
+                                                    SpinButtonPlacementMode="Inline"
+                                                    Value="16"
+                                                    ValueChanged="DownloadSettingNumberBox_ValueChanged" />
                                             </Grid>
                                         </Border>
 
                                         <TextBlock
                                             Margin="4,32,4,8"
                                             FontWeight="SemiBold"
-                                            Text="速度限制" />
+                                            Text="文件与重试" />
                                         <Border
-                                            x:Name="SpeedLimitSettingCard"
+                                            x:Name="ContinueDownloadSettingCard"
                                             Padding="16"
                                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1"
-                                            CornerRadius="8">
+                                            CornerRadius="8,8,0,0">
                                             <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
                                                 <FontIcon
                                                     Width="24"
                                                     VerticalAlignment="Center"
-                                                    Glyph="&#xE9D9;" />
+                                                    Glyph="&#xE768;" />
                                                 <StackPanel
                                                     Grid.Column="1"
                                                     Spacing="3">
                                                     <TextBlock
                                                         FontWeight="SemiBold"
-                                                        Text="全局速度限制" />
+                                                        Text="断点续传" />
                                                     <TextBlock
                                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                        Text="当前可在主界面实时调整，这里保留为默认策略入口。"
+                                                        Text="继续未完成的可恢复任务。"
                                                         TextWrapping="WrapWholeWords" />
                                                 </StackPanel>
-                                                <Button
+                                                <StackPanel
                                                     Grid.Column="2"
                                                     HorizontalAlignment="Right"
-                                                    Content="管理" />
+                                                    VerticalAlignment="Center"
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+                                                    <TextBlock
+                                                        VerticalAlignment="Center"
+                                                        Text="开" />
+                                                    <ToggleSwitch
+                                                        x:Name="ContinueDownloadToggleSwitch"
+                                                        Width="48"
+                                                        MinWidth="0"
+                                                        Padding="0"
+                                                        OffContent=""
+                                                        OnContent=""
+                                                        IsOn="True"
+                                                        Toggled="DownloadSettingToggleSwitch_Toggled" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+
+                                        <Border
+                                            x:Name="RemoteTimeSettingCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE823;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="文件时间戳" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="保存完成时间或服务器时间。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <ComboBox
+                                                    x:Name="RemoteTimeComboBox"
+                                                    Grid.Column="2"
+                                                    Width="180"
+                                                    HorizontalAlignment="Right"
+                                                    SelectionChanged="DownloadSettingComboBox_SelectionChanged">
+                                                    <ComboBoxItem
+                                                        Content="下载完成时间"
+                                                        Tag="Download" />
+                                                    <ComboBoxItem
+                                                        Content="服务器时间"
+                                                        Tag="Server" />
+                                                </ComboBox>
+                                            </Grid>
+                                        </Border>
+
+                                        <Border
+                                            x:Name="MaxTriesSettingCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE8BB;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="最大重试次数" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="0 表示不限次数。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <NumberBox
+                                                    x:Name="MaxTriesNumberBox"
+                                                    Grid.Column="2"
+                                                    Width="168"
+                                                    Height="32"
+                                                    HorizontalAlignment="Right"
+                                                    Minimum="0"
+                                                    Maximum="60"
+                                                    SmallChange="1"
+                                                    SpinButtonPlacementMode="Inline"
+                                                    Value="0"
+                                                    ValueChanged="DownloadSettingNumberBox_ValueChanged" />
+                                            </Grid>
+                                        </Border>
+
+                                        <Border
+                                            x:Name="RetryWaitSettingCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="0,0,8,8">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE916;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="重试等待时间" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="失败后再次尝试的间隔。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <NumberBox
+                                                    x:Name="RetryWaitNumberBox"
+                                                    Grid.Column="2"
+                                                    Width="168"
+                                                    Height="32"
+                                                    HorizontalAlignment="Right"
+                                                    Minimum="0"
+                                                    Maximum="600"
+                                                    SmallChange="1"
+                                                    SpinButtonPlacementMode="Inline"
+                                                    Value="10"
+                                                    ValueChanged="DownloadSettingNumberBox_ValueChanged" />
+                                            </Grid>
+                                        </Border>
+
+                                        <TextBlock
+                                            Margin="4,32,4,8"
+                                            FontWeight="SemiBold"
+                                            Text="自动清理" />
+                                        <Border
+                                            x:Name="DownloadCleanupSettingCard"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="8,8,0,0">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE74D;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="自动移除陈旧记录" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="清理已脱离 aria2 会话的记录。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <StackPanel
+                                                    Grid.Column="2"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+                                                    <TextBlock
+                                                        VerticalAlignment="Center"
+                                                        Text="关" />
+                                                    <ToggleSwitch
+                                                        x:Name="AutoDeleteStaleRecordsToggleSwitch"
+                                                        Width="48"
+                                                        MinWidth="0"
+                                                        Padding="0"
+                                                        OffContent=""
+                                                        OnContent=""
+                                                        Toggled="DownloadSettingToggleSwitch_Toggled" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+
+                                        <Border
+                                            x:Name="TorrentCleanupSettingCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="0,0,8,8">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE9AC;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="完成后删除 .torrent 源文件" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="仅删除本地种子源文件。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <StackPanel
+                                                    Grid.Column="2"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+                                                    <TextBlock
+                                                        VerticalAlignment="Center"
+                                                        Text="关" />
+                                                    <ToggleSwitch
+                                                        x:Name="DeleteTorrentAfterCompleteToggleSwitch"
+                                                        Width="48"
+                                                        MinWidth="0"
+                                                        Padding="0"
+                                                        OffContent=""
+                                                        OnContent=""
+                                                        Toggled="DownloadSettingToggleSwitch_Toggled" />
+                                                </StackPanel>
                                             </Grid>
                                         </Border>
                                     </StackPanel>
@@ -850,6 +1175,8 @@
                                                     Grid.Column="2"
                                                     Width="160"
                                                     HorizontalAlignment="Right"
+                                                    Header="监听端口"
+                                                    PlaceholderText="6881-6999"
                                                     Text="6881-6999" />
                                             </Grid>
                                         </Border>
@@ -880,11 +1207,13 @@
                                                 </StackPanel>
                                                 <NumberBox
                                                     Grid.Column="2"
-                                                    Width="120"
+                                                    Width="168"
+                                                    Height="32"
                                                     HorizontalAlignment="Right"
                                                     Minimum="0"
                                                     Maximum="10"
                                                     SmallChange="0.1"
+                                                    SpinButtonPlacementMode="Inline"
                                                     Value="1.0" />
                                             </Grid>
                                         </Border>
@@ -972,6 +1301,7 @@
                                                     Grid.Column="2"
                                                     Width="220"
                                                     HorizontalAlignment="Right"
+                                                    Header="代理地址"
                                                     PlaceholderText="http://127.0.0.1:7890" />
                                             </Grid>
                                         </Border>
@@ -1062,6 +1392,7 @@
                                                     Grid.Column="2"
                                                     Width="220"
                                                     HorizontalAlignment="Right"
+                                                    Header="aria2c path"
                                                     x:Uid="AriaPathTextBox"
                                                     PlaceholderText="Leave empty to resolve aria2c.exe from PATH" />
                                             </Grid>
@@ -1094,10 +1425,12 @@
                                                 <NumberBox
                                                     x:Name="RpcPortNumberBox"
                                                     Grid.Column="2"
-                                                    Width="120"
+                                                    Width="168"
+                                                    Height="32"
                                                     HorizontalAlignment="Right"
                                                     Minimum="1"
                                                     Maximum="65535"
+                                                    SpinButtonPlacementMode="Inline"
                                                     Value="6800" />
                                             </Grid>
                                         </Border>

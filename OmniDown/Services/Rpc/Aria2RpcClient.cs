@@ -47,7 +47,7 @@ public sealed class Aria2RpcClient : IDisposable
         Dictionary<string, string> options = new()
         {
             ["dir"] = directory,
-            ["split"] = Math.Clamp(splitCount, 1, 128).ToString(CultureInfo.InvariantCulture)
+            ["split"] = Math.Clamp(splitCount, 1, 256).ToString(CultureInfo.InvariantCulture)
         };
 
         if (!string.IsNullOrWhiteSpace(outputFileName))
@@ -68,7 +68,7 @@ public sealed class Aria2RpcClient : IDisposable
         Dictionary<string, string> options = new()
         {
             ["dir"] = directory,
-            ["split"] = Math.Clamp(splitCount, 1, 128).ToString(CultureInfo.InvariantCulture)
+            ["split"] = Math.Clamp(splitCount, 1, 256).ToString(CultureInfo.InvariantCulture)
         };
 
         if (selectedFileIndexes.Count > 0)

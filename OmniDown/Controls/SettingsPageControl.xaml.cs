@@ -31,8 +31,15 @@ public sealed partial class SettingsPageControl : UserControl
     internal Border AutoShutdownSettingCardControl => AutoShutdownSettingCard;
     internal Border PreventSleepSettingCardControl => PreventSleepSettingCard;
     internal Border DefaultDirectorySettingCardControl => DefaultDirectorySettingCard;
+    internal Border MaxConcurrentDownloadsSettingCardControl => MaxConcurrentDownloadsSettingCard;
     internal Border SplitCountSettingCardControl => SplitCountSettingCard;
-    internal Border SpeedLimitSettingCardControl => SpeedLimitSettingCard;
+    internal Border MaxConnectionPerServerSettingCardControl => MaxConnectionPerServerSettingCard;
+    internal Border ContinueDownloadSettingCardControl => ContinueDownloadSettingCard;
+    internal Border RemoteTimeSettingCardControl => RemoteTimeSettingCard;
+    internal Border MaxTriesSettingCardControl => MaxTriesSettingCard;
+    internal Border RetryWaitSettingCardControl => RetryWaitSettingCard;
+    internal Border DownloadCleanupSettingCardControl => DownloadCleanupSettingCard;
+    internal Border TorrentCleanupSettingCardControl => TorrentCleanupSettingCard;
     internal Border BtEnableSettingCardControl => BtEnableSettingCard;
     internal Border BtPortSettingCardControl => BtPortSettingCard;
     internal Border BtSeedRatioSettingCardControl => BtSeedRatioSettingCard;
@@ -62,6 +69,15 @@ public sealed partial class SettingsPageControl : UserControl
     internal ToggleSwitch AutoShutdownWhenCompleteToggleSwitchControl => AutoShutdownWhenCompleteToggleSwitch;
     internal ToggleSwitch PreventSleepWhileDownloadingToggleSwitchControl => PreventSleepWhileDownloadingToggleSwitch;
     internal TextBox DownloadDirectoryTextBoxControl => DownloadDirectoryTextBox;
+    internal NumberBox MaxConcurrentDownloadsNumberBoxControl => MaxConcurrentDownloadsNumberBox;
+    internal NumberBox SplitCountNumberBoxControl => SplitCountNumberBox;
+    internal NumberBox MaxConnectionPerServerNumberBoxControl => MaxConnectionPerServerNumberBox;
+    internal ToggleSwitch ContinueDownloadToggleSwitchControl => ContinueDownloadToggleSwitch;
+    internal ComboBox RemoteTimeComboBoxControl => RemoteTimeComboBox;
+    internal NumberBox MaxTriesNumberBoxControl => MaxTriesNumberBox;
+    internal NumberBox RetryWaitNumberBoxControl => RetryWaitNumberBox;
+    internal ToggleSwitch AutoDeleteStaleRecordsToggleSwitchControl => AutoDeleteStaleRecordsToggleSwitch;
+    internal ToggleSwitch DeleteTorrentAfterCompleteToggleSwitchControl => DeleteTorrentAfterCompleteToggleSwitch;
     internal ToggleSwitch UseSystemProxyCheckBoxControl => UseSystemProxyCheckBox;
     internal TextBox AriaPathTextBoxControl => AriaPathTextBox;
     internal NumberBox RpcPortNumberBoxControl => RpcPortNumberBox;
@@ -73,6 +89,8 @@ public sealed partial class SettingsPageControl : UserControl
     internal event SelectionChangedEventHandler? SectionSelectionChanged;
     internal event RoutedEventHandler? SettingToggleSwitchToggled;
     internal event SelectionChangedEventHandler? ThemeSelectionChanged;
+    internal event RoutedEventHandler? BrowseDownloadDirectoryRequested;
+    internal event RoutedEventHandler? DownloadSettingChanged;
     internal event RoutedEventHandler? StartAriaRequested;
     internal event RoutedEventHandler? StopAriaRequested;
     internal event RoutedEventHandler? CopyCloneCommandRequested;
@@ -91,6 +109,32 @@ public sealed partial class SettingsPageControl : UserControl
     private void ThemeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs args)
     {
         ThemeSelectionChanged?.Invoke(sender, args);
+    }
+
+    private void BrowseDownloadDirectoryButton_Click(object sender, RoutedEventArgs args)
+    {
+        BrowseDownloadDirectoryRequested?.Invoke(sender, args);
+    }
+
+    private void DownloadSettingTextBox_TextChanged(object sender, TextChangedEventArgs args)
+    {
+        DownloadSettingChanged?.Invoke(sender, new RoutedEventArgs());
+    }
+
+    private void DownloadSettingNumberBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
+    {
+        DownloadSettingChanged?.Invoke(sender, new RoutedEventArgs());
+    }
+
+    private void DownloadSettingToggleSwitch_Toggled(object sender, RoutedEventArgs args)
+    {
+        SettingToggleSwitch_Toggled(sender, args);
+        DownloadSettingChanged?.Invoke(sender, args);
+    }
+
+    private void DownloadSettingComboBox_SelectionChanged(object sender, SelectionChangedEventArgs args)
+    {
+        DownloadSettingChanged?.Invoke(sender, new RoutedEventArgs());
     }
 
     private void StartAriaButton_Click(object sender, RoutedEventArgs args)

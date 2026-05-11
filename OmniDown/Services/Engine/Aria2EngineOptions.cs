@@ -5,7 +5,14 @@ public sealed record Aria2EngineOptions(
     int RpcPort,
     string DownloadDirectory,
     string RpcSecret,
-    bool UseSystemProxy);
+    bool UseSystemProxy,
+    int MaxConcurrentDownloads,
+    int SplitCount,
+    int MaxConnectionPerServer,
+    bool ContinueDownloads,
+    bool RemoteTime,
+    int MaxTries,
+    int RetryWaitSeconds);
 
 public sealed record Aria2EngineStartResult(
     bool Started,

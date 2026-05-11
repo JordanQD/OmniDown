@@ -63,8 +63,15 @@ namespace OmniDown
         private Border AutoShutdownSettingCard => SettingsPage.AutoShutdownSettingCardControl;
         private Border PreventSleepSettingCard => SettingsPage.PreventSleepSettingCardControl;
         private Border DefaultDirectorySettingCard => SettingsPage.DefaultDirectorySettingCardControl;
+        private Border MaxConcurrentDownloadsSettingCard => SettingsPage.MaxConcurrentDownloadsSettingCardControl;
         private Border SplitCountSettingCard => SettingsPage.SplitCountSettingCardControl;
-        private Border SpeedLimitSettingCard => SettingsPage.SpeedLimitSettingCardControl;
+        private Border MaxConnectionPerServerSettingCard => SettingsPage.MaxConnectionPerServerSettingCardControl;
+        private Border ContinueDownloadSettingCard => SettingsPage.ContinueDownloadSettingCardControl;
+        private Border RemoteTimeSettingCard => SettingsPage.RemoteTimeSettingCardControl;
+        private Border MaxTriesSettingCard => SettingsPage.MaxTriesSettingCardControl;
+        private Border RetryWaitSettingCard => SettingsPage.RetryWaitSettingCardControl;
+        private Border DownloadCleanupSettingCard => SettingsPage.DownloadCleanupSettingCardControl;
+        private Border TorrentCleanupSettingCard => SettingsPage.TorrentCleanupSettingCardControl;
         private Border BtEnableSettingCard => SettingsPage.BtEnableSettingCardControl;
         private Border BtPortSettingCard => SettingsPage.BtPortSettingCardControl;
         private Border BtSeedRatioSettingCard => SettingsPage.BtSeedRatioSettingCardControl;
@@ -94,6 +101,15 @@ namespace OmniDown
         private ToggleSwitch AutoShutdownWhenCompleteToggleSwitch => SettingsPage.AutoShutdownWhenCompleteToggleSwitchControl;
         private ToggleSwitch PreventSleepWhileDownloadingToggleSwitch => SettingsPage.PreventSleepWhileDownloadingToggleSwitchControl;
         private TextBox DownloadDirectoryTextBox => SettingsPage.DownloadDirectoryTextBoxControl;
+        private NumberBox MaxConcurrentDownloadsNumberBox => SettingsPage.MaxConcurrentDownloadsNumberBoxControl;
+        private NumberBox SplitCountNumberBox => SettingsPage.SplitCountNumberBoxControl;
+        private NumberBox MaxConnectionPerServerNumberBox => SettingsPage.MaxConnectionPerServerNumberBoxControl;
+        private ToggleSwitch ContinueDownloadToggleSwitch => SettingsPage.ContinueDownloadToggleSwitchControl;
+        private ComboBox RemoteTimeComboBox => SettingsPage.RemoteTimeComboBoxControl;
+        private NumberBox MaxTriesNumberBox => SettingsPage.MaxTriesNumberBoxControl;
+        private NumberBox RetryWaitNumberBox => SettingsPage.RetryWaitNumberBoxControl;
+        private ToggleSwitch AutoDeleteStaleRecordsToggleSwitch => SettingsPage.AutoDeleteStaleRecordsToggleSwitchControl;
+        private ToggleSwitch DeleteTorrentAfterCompleteToggleSwitch => SettingsPage.DeleteTorrentAfterCompleteToggleSwitchControl;
         private ToggleSwitch UseSystemProxyCheckBox => SettingsPage.UseSystemProxyCheckBoxControl;
         private TextBox AriaPathTextBox => SettingsPage.AriaPathTextBoxControl;
         private NumberBox RpcPortNumberBox => SettingsPage.RpcPortNumberBoxControl;
@@ -107,6 +123,8 @@ namespace OmniDown
             SettingsPage.SectionSelectionChanged += SettingsSectionListView_SelectionChanged;
             SettingsPage.SettingToggleSwitchToggled += SettingToggleSwitch_Toggled;
             SettingsPage.ThemeSelectionChanged += ThemeComboBox_SelectionChanged;
+            SettingsPage.BrowseDownloadDirectoryRequested += BrowseDownloadDirectoryButton_Click;
+            SettingsPage.DownloadSettingChanged += DownloadSetting_Changed;
             SettingsPage.StartAriaRequested += StartAriaButton_Click;
             SettingsPage.StopAriaRequested += StopAriaButton_Click;
             SettingsPage.CopyCloneCommandRequested += CopyCloneCommandButton_Click;
@@ -116,6 +134,35 @@ namespace OmniDown
         private void UseSystemProxyCheckBox_Changed(object sender, RoutedEventArgs e)
         {
             UpdateDebugStatus();
+        }
+
+        private async void BrowseDownloadDirectoryButton_Click(object sender, RoutedEventArgs e)
+        {
+            FolderPicker picker = new()
+            {
+                SuggestedStartLocation = PickerLocationId.Downloads
+            };
+            picker.FileTypeFilter.Add("*");
+            InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
+
+            StorageFolder? folder = await picker.PickSingleFolderAsync();
+            if (folder is null)
+            {
+                return;
+            }
+
+            DownloadDirectoryTextBox.Text = folder.Path;
+            SaveDownloadSettings();
+        }
+
+        private void DownloadSetting_Changed(object sender, RoutedEventArgs e)
+        {
+            if (_isLoadingDownloadSettings)
+            {
+                return;
+            }
+
+            SaveDownloadSettings();
         }
 
         private void SettingToggleSwitch_Toggled(object sender, RoutedEventArgs e)
@@ -163,14 +210,12 @@ namespace OmniDown
 
         private async void ApplySpeedLimitButton_Click(object sender, RoutedEventArgs e)
         {
-            _isDownloadSpeedLimitEnabled = DownloadLimitToggleSwitch.IsOn;
-            _isUploadSpeedLimitEnabled = UploadLimitToggleSwitch.IsOn;
-            _downloadLimitBytesPerSecond = _isDownloadSpeedLimitEnabled
-                ? GetSpeedLimitBytesPerSecond(DownloadLimitNumberBox, GetSelectedSpeedLimitUnit(DownloadLimitUnitComboBox))
-                : 0;
-            _uploadLimitBytesPerSecond = _isUploadSpeedLimitEnabled
-                ? GetSpeedLimitBytesPerSecond(UploadLimitNumberBox, GetSelectedSpeedLimitUnit(UploadLimitUnitComboBox))
-                : 0;
+            await ApplySpeedLimitAsync(true);
+        }
+
+        private async Task ApplySpeedLimitAsync(bool hideFlyout)
+        {
+            UpdateSpeedLimitStateFromToolbar();
 
             Aria2EngineStartResult startResult = await EnsureAria2StartedAsync();
             if (!startResult.Started)
@@ -184,7 +229,11 @@ namespace OmniDown
                 await ApplyConfiguredSpeedLimitsAsync();
                 SaveSpeedLimitSettings();
                 UpdateGlobalSpeedLimitText();
-                SpeedLimitButton.Flyout?.Hide();
+                if (hideFlyout)
+                {
+                    SpeedLimitButton.Flyout?.Hide();
+                }
+
                 ShowMessage(Strings.Get("SpeedLimitAppliedMessage"), InfoBarSeverity.Success);
             }
             catch (Exception ex)
@@ -483,6 +532,40 @@ namespace OmniDown
             }
         }
 
+        private void LoadDownloadSettings()
+        {
+            _settingsPageViewModel.LoadDownloadSettings();
+            _isLoadingDownloadSettings = true;
+            try
+            {
+                ApplyDownloadSettingsToUi();
+            }
+            finally
+            {
+                _isLoadingDownloadSettings = false;
+            }
+        }
+
+        private void ApplyDownloadSettingsToUi()
+        {
+            DownloadSettings settings = NormalizeDownloadSettings(_settingsPageViewModel.DownloadSettings);
+            if (settings != _settingsPageViewModel.DownloadSettings)
+            {
+                _settingsPageViewModel.SaveDownloadSettings(settings);
+            }
+
+            DownloadDirectoryTextBox.Text = settings.DownloadDirectory;
+            MaxConcurrentDownloadsNumberBox.Value = settings.MaxConcurrentDownloads;
+            SplitCountNumberBox.Value = settings.SplitCount;
+            MaxConnectionPerServerNumberBox.Value = settings.MaxConnectionPerServer;
+            MaxTriesNumberBox.Value = settings.MaxTries;
+            RetryWaitNumberBox.Value = settings.RetryWaitSeconds;
+            SetToggleSwitch(ContinueDownloadToggleSwitch, settings.ContinueDownloads);
+            SetToggleSwitch(AutoDeleteStaleRecordsToggleSwitch, settings.AutoDeleteStaleRecords);
+            SetToggleSwitch(DeleteTorrentAfterCompleteToggleSwitch, settings.DeleteTorrentAfterComplete);
+            RemoteTimeComboBox.SelectedIndex = settings.RemoteTime ? 1 : 0;
+        }
+
         private async Task SetAutoStartEnabledAsync(bool isEnabled)
         {
             AutoStartUpdateResult result = await _autoStartService.SetEnabledAsync(isEnabled);
@@ -511,6 +594,40 @@ namespace OmniDown
             _settingsPageViewModel.SaveSpeedLimitSettings(settings);
         }
 
+        private void UpdateSpeedLimitStateFromToolbar()
+        {
+            _isDownloadSpeedLimitEnabled = DownloadLimitToggleSwitch?.IsOn == true;
+            _isUploadSpeedLimitEnabled = UploadLimitToggleSwitch?.IsOn == true;
+            _downloadLimitBytesPerSecond = _isDownloadSpeedLimitEnabled
+                ? GetSpeedLimitBytesPerSecond(DownloadLimitNumberBox, GetSelectedSpeedLimitUnit(DownloadLimitUnitComboBox))
+                : 0;
+            _uploadLimitBytesPerSecond = _isUploadSpeedLimitEnabled
+                ? GetSpeedLimitBytesPerSecond(UploadLimitNumberBox, GetSelectedSpeedLimitUnit(UploadLimitUnitComboBox))
+                : 0;
+        }
+
+        private void SaveDownloadSettings()
+        {
+            DownloadSettings settings = NormalizeDownloadSettings(new DownloadSettings(
+                string.IsNullOrWhiteSpace(DownloadDirectoryTextBox.Text) ? AppPaths.DefaultDownloadDirectory : DownloadDirectoryTextBox.Text.Trim(),
+                GetValidIntNumberBoxValue(MaxConcurrentDownloadsNumberBox, 1, 10, 5),
+                GetValidIntNumberBoxValue(SplitCountNumberBox, 1, 256, 64),
+                GetValidIntNumberBoxValue(MaxConnectionPerServerNumberBox, 1, 16, 16),
+                ContinueDownloadToggleSwitch?.IsOn == true,
+                RemoteTimeComboBox?.SelectedItem is ComboBoxItem item &&
+                    item.Tag?.ToString()?.Equals("Server", StringComparison.OrdinalIgnoreCase) == true,
+                GetValidIntNumberBoxValue(MaxTriesNumberBox, 0, 60, 0),
+                GetValidIntNumberBoxValue(RetryWaitNumberBox, 0, 600, 10),
+                AutoDeleteStaleRecordsToggleSwitch?.IsOn == true,
+                DeleteTorrentAfterCompleteToggleSwitch?.IsOn == true));
+
+            _settingsPageViewModel.SaveDownloadSettings(settings);
+            if (_downloadCoordinator is not null)
+            {
+                _downloadCoordinator.DeleteTorrentAfterComplete = settings.DeleteTorrentAfterComplete;
+            }
+        }
+
         private void SaveCloseBehaviorSettings()
         {
             _settingsPageViewModel.SaveCloseBehaviorSettings();
@@ -521,6 +638,33 @@ namespace OmniDown
             return numberBox is null || double.IsNaN(numberBox.Value) || numberBox.Value < 1
                 ? 1
                 : numberBox.Value;
+        }
+
+        private static int GetValidIntNumberBoxValue(NumberBox numberBox, int minimum, int maximum, int fallback)
+        {
+            if (numberBox is null || double.IsNaN(numberBox.Value))
+            {
+                return fallback;
+            }
+
+            return Math.Clamp((int)Math.Round(numberBox.Value), minimum, maximum);
+        }
+
+        private static DownloadSettings NormalizeDownloadSettings(DownloadSettings settings)
+        {
+            string directory = string.IsNullOrWhiteSpace(settings.DownloadDirectory)
+                ? AppPaths.DefaultDownloadDirectory
+                : settings.DownloadDirectory.Trim();
+
+            return settings with
+            {
+                DownloadDirectory = directory,
+                MaxConcurrentDownloads = Math.Clamp(settings.MaxConcurrentDownloads, 1, 10),
+                SplitCount = Math.Clamp(settings.SplitCount, 1, 256),
+                MaxConnectionPerServer = Math.Clamp(settings.MaxConnectionPerServer, 1, 16),
+                MaxTries = Math.Clamp(settings.MaxTries, 0, 60),
+                RetryWaitSeconds = Math.Clamp(settings.RetryWaitSeconds, 0, 600)
+            };
         }
 
         private static void SetSpeedLimitUnit(ComboBox comboBox, string unit)

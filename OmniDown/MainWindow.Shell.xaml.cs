@@ -381,7 +381,6 @@ namespace OmniDown
             SaveWindowPlacementSettings();
             _taskbarProgress.Clear();
             await PrepareDownloadsForShutdownAsync();
-            SaveSpeedLimitSettings();
             SaveCloseBehaviorSettings();
             SaveGeneralSettings();
             await SaveAriaSessionIfRunningAsync();

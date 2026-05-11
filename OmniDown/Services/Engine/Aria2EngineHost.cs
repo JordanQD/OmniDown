@@ -238,9 +238,13 @@ public sealed class Aria2EngineHost : IDisposable
         [
             $"--rpc-listen-port={options.RpcPort}",
             $"--rpc-secret={options.RpcSecret}",
-            "--continue=true",
-            "--max-concurrent-downloads=5",
-            "--split=64",
+            $"--continue={FormatAriaBool(options.ContinueDownloads)}",
+            $"--max-concurrent-downloads={Math.Clamp(options.MaxConcurrentDownloads, 1, 10)}",
+            $"--split={Math.Clamp(options.SplitCount, 1, 256)}",
+            $"--max-connection-per-server={Math.Clamp(options.MaxConnectionPerServer, 1, 16)}",
+            $"--remote-time={FormatAriaBool(options.RemoteTime)}",
+            $"--max-tries={Math.Clamp(options.MaxTries, 0, 60)}",
+            $"--retry-wait={Math.Clamp(options.RetryWaitSeconds, 0, 600)}",
             $"--dir={options.DownloadDirectory}",
             $"--save-session={sessionPath}",
             "--force-save=true",
@@ -285,6 +289,11 @@ public sealed class Aria2EngineHost : IDisposable
         }
 
         return arguments;
+    }
+
+    private static string FormatAriaBool(bool value)
+    {
+        return value ? "true" : "false";
     }
 
     private static string? ResolveBundledConfigPath(string resolvedExecutablePath)

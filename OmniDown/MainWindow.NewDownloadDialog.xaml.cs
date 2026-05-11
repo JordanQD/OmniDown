@@ -307,19 +307,21 @@ namespace OmniDown
 
             TextBox directoryTextBox = new()
             {
-                Text = DownloadDirectoryTextBox.Text
+                Text = _settingsPageViewModel.DownloadSettings.DownloadDirectory
             };
             directoryTextBox.Header = Strings.Get("NewDownloadDirectoryHeader");
 
             NumberBox splitCountNumberBox = new()
             {
                 Header = Strings.Get("NewDownloadSplitCountHeader"),
-                Value = 16,
+                Value = _settingsPageViewModel.DownloadSettings.SplitCount,
                 Minimum = 1,
-                Maximum = 128,
+                Maximum = 256,
                 SmallChange = 1,
                 LargeChange = 8,
-                SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Compact
+                Height = 32,
+                Width = 168,
+                SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Inline
             };
 
             StackPanel content = new()
@@ -528,7 +530,7 @@ namespace OmniDown
             }
 
             string saveDirectory = string.IsNullOrWhiteSpace(directoryTextBox.Text)
-                ? DownloadDirectoryTextBox.Text
+                ? _settingsPageViewModel.DownloadSettings.DownloadDirectory
                 : directoryTextBox.Text.Trim();
             int splitCount = GetDownloadSplitCount(splitCountNumberBox);
 
