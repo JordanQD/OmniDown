@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.Win32;
 using OmniDown.Models;
 using OmniDown.Services.Downloads;
 using OmniDown.Services.Engine;
@@ -25,6 +26,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Windows.ApplicationModel;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Graphics;
 using Windows.Storage;
@@ -72,12 +74,18 @@ namespace OmniDown
         private readonly Dictionary<string, string> _observedTaskStatuses = new(StringComparer.OrdinalIgnoreCase);
         private readonly string _speedLimitSettingsPath = Path.Combine(AppPaths.LocalDataDirectory, "speed-limits.json");
         private readonly string _closeBehaviorSettingsPath = Path.Combine(AppPaths.LocalDataDirectory, "close-behavior.json");
+        private readonly string _generalSettingsPath = Path.Combine(AppPaths.LocalDataDirectory, "general-settings.json");
         private readonly nint _windowHandle;
         private CloseBehaviorSettings _closeBehaviorSettings = CloseBehaviorSettings.Default;
+        private GeneralSettings _generalSettings = GeneralSettings.Default;
         private bool _isExitRequested;
         private bool _isClosePromptOpen;
         private bool _isLoadingCloseBehaviorSettings;
+        private bool _isLoadingGeneralSettings;
         private bool _isNewDownloadDialogOpen;
+        private bool _hasTriggeredAutoShutdown;
+        private bool _hasSeenActiveDownloadsForAutoShutdown;
+        private bool _isShutdownPrepared;
 
         public ObservableCollection<DownloadTask> Tasks { get; } = new();
 
@@ -89,7 +97,9 @@ namespace OmniDown
             InitializeTaskDetailsSelectorBar();
             _windowHandle = WindowNative.GetWindowHandle(this);
             SetWindowIcon();
-            ConfigureDefaultWindowSize();
+            LoadGeneralSettings();
+            _ = SyncAutoStartToggleAsync();
+            ApplyWindowPlacementOrDefault();
             _taskbarProgress = new TaskbarProgressService(_windowHandle);
             ExtendsContentIntoTitleBar = true;
             SetTitleBar(AppTitleBar);
@@ -632,7 +642,7 @@ namespace OmniDown
                         aria2Selection);
                     _observedTaskStatuses[task.Gid] = task.Status;
                     addedTasks.Add(task);
-                    _notifications.ShowTaskAdded(task);
+                    ShowTaskAddedNotification(task);
                 }
                 else
                 {
@@ -642,7 +652,7 @@ namespace OmniDown
                         DownloadTask task = await _downloadCoordinator.AddDownloadAsync(sourceUri, requestedName, saveDirectory, splitCount);
                         _observedTaskStatuses[task.Gid] = task.Status;
                         addedTasks.Add(task);
-                        _notifications.ShowTaskAdded(task);
+                        ShowTaskAddedNotification(task);
                     }
                 }
 
@@ -1381,10 +1391,40 @@ namespace OmniDown
                 {
                     ShowMessage(result.Message, InfoBarSeverity.Warning);
                 }
+                else
+                {
+                    await ResumeDownloadsOnLaunchAsync();
+                }
             }
             finally
             {
                 SetTaskListLoading(false);
+            }
+        }
+
+        private async Task ResumeDownloadsOnLaunchAsync()
+        {
+            if (!_generalSettings.ResumeDownloadsOnLaunch || !_aria2EngineHost.IsRunning)
+            {
+                return;
+            }
+
+            DownloadTask[] pausedTasks = Tasks
+                .Where(task => IsPausedTask(task) && IsDownloadingTask(task))
+                .ToArray();
+            if (pausedTasks.Length == 0)
+            {
+                return;
+            }
+
+            try
+            {
+                await _downloadCoordinator.ResumeAsync(pausedTasks);
+                await RefreshDownloadsAsync();
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"恢复下载任务失败：{ex.Message}", InfoBarSeverity.Warning);
             }
         }
 
@@ -1405,9 +1445,13 @@ namespace OmniDown
         private async void MainWindow_Closed(object sender, WindowEventArgs args)
         {
             _refreshTimer.Stop();
+            ReleaseSystemSleepOverride();
+            SaveWindowPlacementSettings();
             _taskbarProgress.Clear();
+            await PrepareDownloadsForShutdownAsync();
             SaveSpeedLimitSettings();
             SaveCloseBehaviorSettings();
+            SaveGeneralSettings();
             await SaveAriaSessionIfRunningAsync();
             _notifications.Unregister();
             _trayIcon?.Dispose();
@@ -1552,6 +1596,8 @@ namespace OmniDown
                 UpdateDashboard();
                 UpdateGlobalSpeeds(snapshot.DownloadSpeed, snapshot.UploadSpeed);
                 UpdateTaskbarProgressFromTasks();
+                UpdateSystemSleepOverride();
+                TryAutoShutdownWhenDownloadsComplete();
                 UpdateAriaStatus();
             }
             catch (Exception ex)
@@ -1760,6 +1806,42 @@ namespace OmniDown
             Close();
         }
 
+        private async Task PrepareDownloadsForShutdownAsync()
+        {
+            if (_isShutdownPrepared || !_aria2EngineHost.IsRunning)
+            {
+                return;
+            }
+
+            _isShutdownPrepared = true;
+            try
+            {
+                await RefreshDownloadsAsync();
+
+                if (_generalSettings.PauseActiveOnExit)
+                {
+                    DownloadTask[] activeTasks = Tasks.Where(IsActiveTransferTask).ToArray();
+                    if (activeTasks.Length > 0)
+                    {
+                        await _downloadCoordinator.PauseAsync(activeTasks);
+                    }
+                }
+
+                if (_generalSettings.AutoClearCompletedOnExit)
+                {
+                    await _downloadCoordinator.ClearCompletedAsync(deleteFiles: false);
+                }
+
+                ApplyTaskFilter(_currentTaskFilter);
+                UpdateDashboard();
+                UpdateSelectionCommands();
+            }
+            catch
+            {
+                // Exit rules are best-effort; shutdown should not be blocked by a stale RPC connection.
+            }
+        }
+
         private async Task<bool?> AskCloseBehaviorAsync()
         {
             if (_isClosePromptOpen)
@@ -1797,6 +1879,12 @@ namespace OmniDown
 
         private void UpdateTaskbarProgressFromTasks()
         {
+            if (!_generalSettings.ShowTaskbarProgress)
+            {
+                _taskbarProgress.Clear();
+                return;
+            }
+
             DownloadTask[] activeTasks = Tasks
                 .Where(task => task.Status.Contains("download", StringComparison.OrdinalIgnoreCase))
                 .ToArray();
@@ -1819,6 +1907,63 @@ namespace OmniDown
                 : 0;
 
             _taskbarProgress.SetProgress(progress);
+        }
+
+        private void TryAutoShutdownWhenDownloadsComplete()
+        {
+            if (!_generalSettings.AutoShutdownWhenComplete || _hasTriggeredAutoShutdown)
+            {
+                return;
+            }
+
+            bool hasCompletedTask = Tasks.Any(IsCompletedTask);
+            bool hasRunningTask = Tasks.Any(IsActiveTransferTask) || Tasks.Any(task => task.Status.Contains("waiting", StringComparison.OrdinalIgnoreCase));
+            if (hasRunningTask)
+            {
+                _hasSeenActiveDownloadsForAutoShutdown = true;
+                return;
+            }
+
+            if (!hasCompletedTask || !_hasSeenActiveDownloadsForAutoShutdown)
+            {
+                return;
+            }
+
+            _hasTriggeredAutoShutdown = true;
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "shutdown.exe",
+                    ArgumentList = { "/s", "/t", "0" },
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                });
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"自动关机失败：{ex.Message}", InfoBarSeverity.Warning);
+            }
+        }
+
+        private void UpdateSystemSleepOverride()
+        {
+            bool shouldStayAwake = _generalSettings.PreventSleepWhileDownloading &&
+                Tasks.Any(task => task.Status.Contains("download", StringComparison.OrdinalIgnoreCase));
+
+            if (shouldStayAwake)
+            {
+                SetThreadExecutionState(ExecutionState.Continuous | ExecutionState.SystemRequired);
+            }
+            else
+            {
+                ReleaseSystemSleepOverride();
+            }
+        }
+
+        private static void ReleaseSystemSleepOverride()
+        {
+            SetThreadExecutionState(ExecutionState.Continuous);
         }
 
         private void UpdateGlobalSpeedLimitText()
@@ -1945,11 +2090,11 @@ namespace OmniDown
                 {
                     if (!IsCompletedTaskStatus(previousStatus) && IsCompletedTask(task))
                     {
-                        _notifications.ShowDownloadCompleted(task);
+                        ShowDownloadCompletedNotification(task);
                     }
                     else if (!IsErrorTaskStatus(previousStatus) && IsErrorTaskStatus(task.Status))
                     {
-                        _notifications.ShowDownloadFailed(task);
+                        ShowDownloadFailedNotification(task);
                     }
                 }
 
@@ -1959,6 +2104,30 @@ namespace OmniDown
             foreach (string staleGid in _observedTaskStatuses.Keys.Except(currentGids, StringComparer.OrdinalIgnoreCase).ToArray())
             {
                 _observedTaskStatuses.Remove(staleGid);
+            }
+        }
+
+        private void ShowTaskAddedNotification(DownloadTask task)
+        {
+            if (_generalSettings.SystemNotificationsEnabled && _generalSettings.DownloadStartNotificationsEnabled)
+            {
+                _notifications.ShowTaskAdded(task);
+            }
+        }
+
+        private void ShowDownloadCompletedNotification(DownloadTask task)
+        {
+            if (_generalSettings.SystemNotificationsEnabled && _generalSettings.DownloadCompleteNotificationsEnabled)
+            {
+                _notifications.ShowDownloadCompleted(task);
+            }
+        }
+
+        private void ShowDownloadFailedNotification(DownloadTask task)
+        {
+            if (_generalSettings.SystemNotificationsEnabled && _generalSettings.DownloadCompleteNotificationsEnabled)
+            {
+                _notifications.ShowDownloadFailed(task);
             }
         }
 
@@ -2647,6 +2816,18 @@ namespace OmniDown
                 };
                 SaveCloseBehaviorSettings();
             }
+
+            if (_isLoadingGeneralSettings)
+            {
+                return;
+            }
+
+            if (IsGeneralSettingsToggle(toggleSwitch))
+            {
+                UpdateGeneralSettingsFromUi();
+                SaveGeneralSettings();
+                ApplyGeneralSettingsSideEffects(toggleSwitch);
+            }
         }
 
         private async void ApplySpeedLimitButton_Click(object sender, RoutedEventArgs e)
@@ -2785,6 +2966,104 @@ namespace OmniDown
             }
         }
 
+        private void LoadGeneralSettings()
+        {
+            _generalSettings = ReadGeneralSettings();
+            _isLoadingGeneralSettings = true;
+            try
+            {
+                ApplyGeneralSettingsToUi();
+                ApplyThemeSetting(_generalSettings.Theme);
+            }
+            finally
+            {
+                _isLoadingGeneralSettings = false;
+            }
+        }
+
+        private void ApplyGeneralSettingsToUi()
+        {
+            SetToggleSwitch(AutoStartToggleSwitch, IsAutoStartEnabled());
+            SetToggleSwitch(RestoreWindowPlacementToggleSwitch, _generalSettings.RestoreWindowPlacement);
+            SetToggleSwitch(ResumeDownloadsOnLaunchToggleSwitch, _generalSettings.ResumeDownloadsOnLaunch);
+            SetToggleSwitch(AutoClearCompletedOnExitToggleSwitch, _generalSettings.AutoClearCompletedOnExit);
+            SetToggleSwitch(PauseActiveOnExitToggleSwitch, _generalSettings.PauseActiveOnExit);
+            SetToggleSwitch(ShowTaskbarProgressToggleSwitch, _generalSettings.ShowTaskbarProgress);
+            SetToggleSwitch(SystemNotificationsToggleSwitch, _generalSettings.SystemNotificationsEnabled);
+            SetToggleSwitch(DownloadStartNotificationsToggleSwitch, _generalSettings.DownloadStartNotificationsEnabled);
+            SetToggleSwitch(DownloadCompleteNotificationsToggleSwitch, _generalSettings.DownloadCompleteNotificationsEnabled);
+            SetToggleSwitch(AutoShutdownWhenCompleteToggleSwitch, _generalSettings.AutoShutdownWhenComplete);
+            SetToggleSwitch(PreventSleepWhileDownloadingToggleSwitch, _generalSettings.PreventSleepWhileDownloading);
+            SetThemeComboBoxSelection(_generalSettings.Theme);
+        }
+
+        private void UpdateGeneralSettingsFromUi()
+        {
+            _generalSettings = _generalSettings with
+            {
+                RestoreWindowPlacement = RestoreWindowPlacementToggleSwitch?.IsOn == true,
+                ResumeDownloadsOnLaunch = ResumeDownloadsOnLaunchToggleSwitch?.IsOn == true,
+                AutoClearCompletedOnExit = AutoClearCompletedOnExitToggleSwitch?.IsOn == true,
+                PauseActiveOnExit = PauseActiveOnExitToggleSwitch?.IsOn == true,
+                ShowTaskbarProgress = ShowTaskbarProgressToggleSwitch?.IsOn == true,
+                SystemNotificationsEnabled = SystemNotificationsToggleSwitch?.IsOn == true,
+                DownloadStartNotificationsEnabled = DownloadStartNotificationsToggleSwitch?.IsOn == true,
+                DownloadCompleteNotificationsEnabled = DownloadCompleteNotificationsToggleSwitch?.IsOn == true,
+                AutoShutdownWhenComplete = AutoShutdownWhenCompleteToggleSwitch?.IsOn == true,
+                PreventSleepWhileDownloading = PreventSleepWhileDownloadingToggleSwitch?.IsOn == true,
+                Theme = GetSelectedTheme()
+            };
+        }
+
+        private void ApplyGeneralSettingsSideEffects(ToggleSwitch changedToggleSwitch)
+        {
+            if (ReferenceEquals(changedToggleSwitch, AutoStartToggleSwitch))
+            {
+                _ = SetAutoStartEnabledAsync(AutoStartToggleSwitch.IsOn);
+            }
+
+            if (ReferenceEquals(changedToggleSwitch, ShowTaskbarProgressToggleSwitch))
+            {
+                UpdateTaskbarProgressFromTasks();
+            }
+
+            if (ReferenceEquals(changedToggleSwitch, PreventSleepWhileDownloadingToggleSwitch))
+            {
+                UpdateSystemSleepOverride();
+            }
+        }
+
+        private static bool IsGeneralSettingsToggle(ToggleSwitch toggleSwitch)
+        {
+            return toggleSwitch.Name is
+                "AutoStartToggleSwitch" or
+                "RestoreWindowPlacementToggleSwitch" or
+                "ResumeDownloadsOnLaunchToggleSwitch" or
+                "AutoClearCompletedOnExitToggleSwitch" or
+                "PauseActiveOnExitToggleSwitch" or
+                "ShowTaskbarProgressToggleSwitch" or
+                "SystemNotificationsToggleSwitch" or
+                "DownloadStartNotificationsToggleSwitch" or
+                "DownloadCompleteNotificationsToggleSwitch" or
+                "AutoShutdownWhenCompleteToggleSwitch" or
+                "PreventSleepWhileDownloadingToggleSwitch";
+        }
+
+        private static void SetToggleSwitch(ToggleSwitch? toggleSwitch, bool isOn)
+        {
+            if (toggleSwitch is null)
+            {
+                return;
+            }
+
+            toggleSwitch.IsOn = isOn;
+            if (toggleSwitch.Parent is StackPanel panel &&
+                panel.Children.OfType<TextBlock>().FirstOrDefault() is TextBlock stateText)
+            {
+                SetToggleStateText(stateText, isOn);
+            }
+        }
+
         private void ApplyCloseBehaviorSettingsToUi()
         {
             if (CloseToTrayToggleSwitch is null)
@@ -2803,6 +3082,201 @@ namespace OmniDown
         private static void SetToggleStateText(TextBlock stateText, bool isOn)
         {
             stateText.Text = isOn ? "开" : "关";
+        }
+
+        private void ThemeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_isLoadingGeneralSettings)
+            {
+                return;
+            }
+
+            UpdateGeneralSettingsFromUi();
+            ApplyThemeSetting(_generalSettings.Theme);
+            SaveGeneralSettings();
+        }
+
+        private string GetSelectedTheme()
+        {
+            return ThemeComboBox?.SelectedItem is ComboBoxItem item &&
+                item.Tag?.ToString() is string theme &&
+                !string.IsNullOrWhiteSpace(theme)
+                ? theme
+                : "Default";
+        }
+
+        private void SetThemeComboBoxSelection(string theme)
+        {
+            if (ThemeComboBox is null)
+            {
+                return;
+            }
+
+            for (int index = 0; index < ThemeComboBox.Items.Count; index++)
+            {
+                if (ThemeComboBox.Items[index] is ComboBoxItem item &&
+                    item.Tag?.ToString()?.Equals(theme, StringComparison.OrdinalIgnoreCase) == true)
+                {
+                    ThemeComboBox.SelectedIndex = index;
+                    return;
+                }
+            }
+
+            ThemeComboBox.SelectedIndex = 0;
+        }
+
+        private void ApplyThemeSetting(string theme)
+        {
+            if (Content is not FrameworkElement root)
+            {
+                return;
+            }
+
+            root.RequestedTheme = theme.ToLowerInvariant() switch
+            {
+                "light" => ElementTheme.Light,
+                "dark" => ElementTheme.Dark,
+                _ => ElementTheme.Default
+            };
+        }
+
+        private static bool IsAutoStartEnabled()
+        {
+            StartupTask? startupTask = TryGetStartupTask();
+            if (startupTask is not null)
+            {
+                return startupTask.State is StartupTaskState.Enabled;
+            }
+
+            try
+            {
+                using RegistryKey? runKey = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", writable: false);
+                return runKey?.GetValue("OmniDown") is string value &&
+                    value.Contains(GetExecutablePath(), StringComparison.OrdinalIgnoreCase);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private async Task SyncAutoStartToggleAsync()
+        {
+            try
+            {
+                StartupTask? startupTask = TryGetStartupTask();
+                bool isEnabled = startupTask is not null
+                    ? startupTask.State is StartupTaskState.Enabled
+                    : IsAutoStartEnabled();
+                SetToggleSwitch(AutoStartToggleSwitch, isEnabled);
+            }
+            catch
+            {
+                SetToggleSwitch(AutoStartToggleSwitch, IsAutoStartEnabled());
+            }
+        }
+
+        private async Task SetAutoStartEnabledAsync(bool isEnabled)
+        {
+            StartupTask? startupTask = TryGetStartupTask();
+            if (startupTask is not null)
+            {
+                if (isEnabled)
+                {
+                    StartupTaskState state = await startupTask.RequestEnableAsync();
+                    SetToggleSwitch(AutoStartToggleSwitch, state is StartupTaskState.Enabled);
+                    if (state is not StartupTaskState.Enabled)
+                    {
+                        ShowMessage("自动启动未启用，请在 Windows 启动应用设置中允许 OmniDown。", InfoBarSeverity.Warning);
+                    }
+                }
+                else
+                {
+                    startupTask.Disable();
+                    SetToggleSwitch(AutoStartToggleSwitch, false);
+                }
+
+                return;
+            }
+
+            SetRegistryAutoStartEnabled(isEnabled);
+            SetToggleSwitch(AutoStartToggleSwitch, IsAutoStartEnabled());
+        }
+
+        private static StartupTask? TryGetStartupTask()
+        {
+            try
+            {
+                return StartupTask.GetAsync("OmniDownStartupTask").AsTask().GetAwaiter().GetResult();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static void SetRegistryAutoStartEnabled(bool isEnabled)
+        {
+            try
+            {
+                using RegistryKey? runKey = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", writable: true);
+                if (runKey is null)
+                {
+                    return;
+                }
+
+                if (isEnabled)
+                {
+                    runKey.SetValue("OmniDown", $"\"{GetExecutablePath()}\"");
+                }
+                else
+                {
+                    runKey.DeleteValue("OmniDown", throwOnMissingValue: false);
+                }
+            }
+            catch
+            {
+                // Autostart availability depends on deployment context and registry access.
+            }
+        }
+
+        private static string GetExecutablePath()
+        {
+            return Environment.ProcessPath ?? Process.GetCurrentProcess().MainModule?.FileName ?? string.Empty;
+        }
+
+        private GeneralSettings ReadGeneralSettings()
+        {
+            if (!File.Exists(_generalSettingsPath))
+            {
+                return GeneralSettings.Default;
+            }
+
+            try
+            {
+                string json = File.ReadAllText(_generalSettingsPath);
+                return JsonSerializer.Deserialize<GeneralSettings>(json) ?? GeneralSettings.Default;
+            }
+            catch
+            {
+                return GeneralSettings.Default;
+            }
+        }
+
+        private void SaveGeneralSettings()
+        {
+            try
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(_generalSettingsPath)!);
+                File.WriteAllText(_generalSettingsPath, JsonSerializer.Serialize(_generalSettings, new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                }));
+            }
+            catch
+            {
+                // General setting persistence is best-effort; defaults remain usable.
+            }
         }
 
         private SpeedLimitSettings ReadSpeedLimitSettings()
@@ -3267,9 +3741,18 @@ namespace OmniDown
 
             string query = GetSearchQuery();
             SetSettingVisibility(StartupSettingCard, query, "startup", "launch", "engine", "aria2", "启动", "引擎");
+            SetSettingVisibility(RestoreWindowSettingCard, query, "restore", "window", "position", "size", "启动", "窗口", "位置", "大小");
+            SetSettingVisibility(ResumeOnLaunchSettingCard, query, "resume", "restore", "download", "launch", "恢复", "下载", "启动");
+            SetSettingVisibility(ExitCleanupSettingCard, query, "clear", "completed", "exit", "cleanup", "清理", "完成", "退出");
+            SetSettingVisibility(PauseActiveOnExitSettingCard, query, "pause", "active", "downloading", "exit", "暂停", "下载", "退出");
             SetSettingVisibility(CloseBehaviorSettingCard, query, "close", "tray", "background", "exit", "关闭", "托盘", "后台", "退出");
+            SetSettingVisibility(TaskbarProgressSettingCard, query, "taskbar", "progress", "download", "任务栏", "进度");
             SetSettingVisibility(ThemeSettingCard, query, "theme", "appearance", "system", "dark", "light", "主题", "外观");
             SetSettingVisibility(NotificationsSettingCard, query, "notification", "complete", "failed", "通知");
+            SetSettingVisibility(DownloadStartNotificationSettingCard, query, "notification", "start", "download", "开始", "通知");
+            SetSettingVisibility(DownloadCompleteNotificationSettingCard, query, "notification", "complete", "failed", "download", "完成", "失败", "通知");
+            SetSettingVisibility(AutoShutdownSettingCard, query, "shutdown", "complete", "download", "关机", "完成");
+            SetSettingVisibility(PreventSleepSettingCard, query, "sleep", "power", "download", "休眠", "睡眠", "下载");
 
             SetSettingVisibility(DefaultDirectorySettingCard, query, "default", "directory", "download", "folder", Strings.Get("DefaultDirectoryLabel.Text"), "目录", "保存");
             SetSettingVisibility(SplitCountSettingCard, query, "split", "connection", "thread", "分片", "连接数");
@@ -3580,6 +4063,45 @@ namespace OmniDown
             AppWindow.Move(new PointInt32(x, y));
         }
 
+        private void ApplyWindowPlacementOrDefault()
+        {
+            ConfigureDefaultWindowSize();
+            if (!_generalSettings.RestoreWindowPlacement ||
+                _generalSettings.WindowWidth <= 0 ||
+                _generalSettings.WindowHeight <= 0)
+            {
+                return;
+            }
+
+            DisplayArea displayArea = DisplayArea.GetFromWindowId(AppWindow.Id, DisplayAreaFallback.Primary);
+            RectInt32 workArea = displayArea.WorkArea;
+            int width = Math.Clamp(_generalSettings.WindowWidth, 800, Math.Max(workArea.Width, 800));
+            int height = Math.Clamp(_generalSettings.WindowHeight, 600, Math.Max(workArea.Height, 600));
+            int x = Math.Clamp(_generalSettings.WindowX, workArea.X, Math.Max(workArea.X, workArea.X + workArea.Width - width));
+            int y = Math.Clamp(_generalSettings.WindowY, workArea.Y, Math.Max(workArea.Y, workArea.Y + workArea.Height - height));
+
+            AppWindow.Resize(new SizeInt32(width, height));
+            AppWindow.Move(new PointInt32(x, y));
+        }
+
+        private void SaveWindowPlacementSettings()
+        {
+            if (!_generalSettings.RestoreWindowPlacement)
+            {
+                return;
+            }
+
+            SizeInt32 size = AppWindow.Size;
+            PointInt32 position = AppWindow.Position;
+            _generalSettings = _generalSettings with
+            {
+                WindowX = position.X,
+                WindowY = position.Y,
+                WindowWidth = size.Width,
+                WindowHeight = size.Height
+            };
+        }
+
         private static string? ResolveAssetPath(params string[] pathSegments)
         {
             string basePath = AppContext.BaseDirectory;
@@ -3605,6 +4127,9 @@ namespace OmniDown
         [DllImport("user32.dll")]
         private static extern bool SetForegroundWindow(nint hWnd);
 
+        [DllImport("kernel32.dll")]
+        private static extern ExecutionState SetThreadExecutionState(ExecutionState esFlags);
+
     }
 
     internal enum ShowWindowCommand
@@ -3612,6 +4137,13 @@ namespace OmniDown
         Hide = 0,
         Show = 5,
         Restore = 9
+    }
+
+    [Flags]
+    internal enum ExecutionState : uint
+    {
+        SystemRequired = 0x00000001,
+        Continuous = 0x80000000
     }
 
     internal sealed record CloseBehaviorSettings(bool? MinimizeToTrayOnClose)
@@ -3634,6 +4166,41 @@ namespace OmniDown
             UploadEnabled: false,
             UploadValue: 1024,
             UploadUnit: "KB/s");
+    }
+
+    internal sealed record GeneralSettings(
+        bool RestoreWindowPlacement,
+        bool ResumeDownloadsOnLaunch,
+        bool AutoClearCompletedOnExit,
+        bool PauseActiveOnExit,
+        bool ShowTaskbarProgress,
+        bool SystemNotificationsEnabled,
+        bool DownloadStartNotificationsEnabled,
+        bool DownloadCompleteNotificationsEnabled,
+        bool AutoShutdownWhenComplete,
+        bool PreventSleepWhileDownloading,
+        string Theme,
+        int WindowX,
+        int WindowY,
+        int WindowWidth,
+        int WindowHeight)
+    {
+        public static GeneralSettings Default { get; } = new(
+            RestoreWindowPlacement: false,
+            ResumeDownloadsOnLaunch: false,
+            AutoClearCompletedOnExit: false,
+            PauseActiveOnExit: true,
+            ShowTaskbarProgress: true,
+            SystemNotificationsEnabled: true,
+            DownloadStartNotificationsEnabled: false,
+            DownloadCompleteNotificationsEnabled: true,
+            AutoShutdownWhenComplete: false,
+            PreventSleepWhileDownloading: false,
+            Theme: "Default",
+            WindowX: 0,
+            WindowY: 0,
+            WindowWidth: 0,
+            WindowHeight: 0);
     }
 
     internal sealed record AppStatusMessage(

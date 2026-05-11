@@ -1025,7 +1025,7 @@
                                         <TextBlock
                                             Margin="4,0,4,8"
                                             FontWeight="SemiBold"
-                                            Text="应用" />
+                                            Text="启动" />
                                         <Border
                                             x:Name="StartupSettingCard"
                                             Padding="16"
@@ -1037,16 +1037,16 @@
                                                 <FontIcon
                                                     Width="24"
                                                     VerticalAlignment="Center"
-                                                    Glyph="&#xE768;" />
+                                                    Glyph="&#xE7C3;" />
                                                 <StackPanel
                                                     Grid.Column="1"
                                                     Spacing="3">
                                                     <TextBlock
                                                         FontWeight="SemiBold"
-                                                        Text="启动 OmniDown 时准备下载引擎" />
+                                                        Text="登录时自动启动" />
                                                     <TextBlock
                                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                        Text="打开应用后自动启动本地 aria2，恢复上一次的下载会话。"
+                                                        Text="开机登录后打开 OmniDown。"
                                                         TextWrapping="WrapWholeWords" />
                                                 </StackPanel>
                                                 <StackPanel
@@ -1059,6 +1059,187 @@
                                                         VerticalAlignment="Center"
                                                         Text="开" />
                                                     <ToggleSwitch
+                                                        x:Name="AutoStartToggleSwitch"
+                                                        Width="48"
+                                                        MinWidth="0"
+                                                        Padding="0"
+                                                        OffContent=""
+                                                        OnContent=""
+                                                        Toggled="SettingToggleSwitch_Toggled" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+
+                                        <Border
+                                            x:Name="RestoreWindowSettingCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="0">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE740;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="恢复窗口位置" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="记住上次大小和位置。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <StackPanel
+                                                    Grid.Column="2"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+                                                    <TextBlock
+                                                        VerticalAlignment="Center"
+                                                        Text="关" />
+                                                    <ToggleSwitch
+                                                        x:Name="RestoreWindowPlacementToggleSwitch"
+                                                        Width="48"
+                                                        MinWidth="0"
+                                                        Padding="0"
+                                                        OffContent=""
+                                                        OnContent=""
+                                                        Toggled="SettingToggleSwitch_Toggled" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+
+                                        <Border
+                                            x:Name="ResumeOnLaunchSettingCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="0">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE768;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="启动时恢复下载任务" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="继续上次暂停的未完成任务。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <StackPanel
+                                                    Grid.Column="2"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+                                                    <TextBlock
+                                                        VerticalAlignment="Center"
+                                                        Text="关" />
+                                                    <ToggleSwitch
+                                                        x:Name="ResumeDownloadsOnLaunchToggleSwitch"
+                                                        Width="48"
+                                                        MinWidth="0"
+                                                        Padding="0"
+                                                        OffContent=""
+                                                        OnContent=""
+                                                        Toggled="SettingToggleSwitch_Toggled" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+
+                                        <Border
+                                            x:Name="ExitCleanupSettingCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="0">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE74D;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="退出时清理已完成" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="仅清除记录，不删除文件。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <StackPanel
+                                                    Grid.Column="2"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+                                                    <TextBlock
+                                                        VerticalAlignment="Center"
+                                                        Text="关" />
+                                                    <ToggleSwitch
+                                                        x:Name="AutoClearCompletedOnExitToggleSwitch"
+                                                        Width="48"
+                                                        MinWidth="0"
+                                                        Padding="0"
+                                                        OffContent=""
+                                                        OnContent=""
+                                                        Toggled="SettingToggleSwitch_Toggled" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+
+                                        <Border
+                                            x:Name="PauseActiveOnExitSettingCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="0">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE769;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="退出时暂停下载" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="退出前暂停正在传输的任务。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <StackPanel
+                                                    Grid.Column="2"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+                                                    <TextBlock
+                                                        VerticalAlignment="Center"
+                                                        Text="开" />
+                                                    <ToggleSwitch
+                                                        x:Name="PauseActiveOnExitToggleSwitch"
                                                         Width="48"
                                                         MinWidth="0"
                                                         Padding="0"
@@ -1088,10 +1269,10 @@
                                                     Spacing="3">
                                                     <TextBlock
                                                         FontWeight="SemiBold"
-                                                        Text="关闭时最小化到系统托盘" />
+                                                        Text="关闭到托盘" />
                                                     <TextBlock
                                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                        Text="关闭窗口后继续在后台运行，点击托盘图标可重新显示 OmniDown。"
+                                                        Text="关闭窗口后继续后台运行。"
                                                         TextWrapping="WrapWholeWords" />
                                                 </StackPanel>
                                                 <StackPanel
@@ -1116,13 +1297,62 @@
                                         </Border>
 
                                         <Border
-                                            x:Name="ThemeSettingCard"
+                                            x:Name="TaskbarProgressSettingCard"
                                             Margin="0,-1,0,0"
                                             Padding="16"
                                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1"
                                             CornerRadius="0,0,8,8">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE9D9;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="任务栏进度" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="显示整体下载进度。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <StackPanel
+                                                    Grid.Column="2"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+                                                    <TextBlock
+                                                        VerticalAlignment="Center"
+                                                        Text="开" />
+                                                    <ToggleSwitch
+                                                        x:Name="ShowTaskbarProgressToggleSwitch"
+                                                        Width="48"
+                                                        MinWidth="0"
+                                                        Padding="0"
+                                                        OffContent=""
+                                                        OnContent=""
+                                                        IsOn="True"
+                                                        Toggled="SettingToggleSwitch_Toggled" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+
+                                        <TextBlock
+                                            Margin="4,32,4,8"
+                                            FontWeight="SemiBold"
+                                            Text="外观" />
+                                        <Border
+                                            x:Name="ThemeSettingCard"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="8">
                                             <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
                                                 <FontIcon
                                                     Width="24"
@@ -1136,17 +1366,18 @@
                                                         Text="外观主题" />
                                                     <TextBlock
                                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                        Text="跟随 Windows 主题，也可以在以后扩展为浅色或深色固定模式。"
+                                                        Text="跟随 Windows 主题，或固定为浅色/深色。"
                                                         TextWrapping="WrapWholeWords" />
                                                 </StackPanel>
                                                 <ComboBox
+                                                    x:Name="ThemeComboBox"
                                                     Grid.Column="2"
                                                     Width="160"
                                                     HorizontalAlignment="Right"
-                                                    SelectedIndex="0">
-                                                    <ComboBoxItem Content="跟随系统" />
-                                                    <ComboBoxItem Content="浅色" />
-                                                    <ComboBoxItem Content="深色" />
+                                                    SelectionChanged="ThemeComboBox_SelectionChanged">
+                                                    <ComboBoxItem Content="跟随系统" Tag="Default" />
+                                                    <ComboBoxItem Content="浅色" Tag="Light" />
+                                                    <ComboBoxItem Content="深色" Tag="Dark" />
                                                 </ComboBox>
                                             </Grid>
                                         </Border>
@@ -1161,7 +1392,7 @@
                                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1"
-                                            CornerRadius="8">
+                                            CornerRadius="8,8,0,0">
                                             <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
                                                 <FontIcon
                                                     Width="24"
@@ -1172,10 +1403,10 @@
                                                     Spacing="3">
                                                     <TextBlock
                                                         FontWeight="SemiBold"
-                                                        Text="下载事件通知" />
+                                                        Text="启用系统通知" />
                                                     <TextBlock
                                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                        Text="任务添加、完成和失败时显示系统通知。"
+                                                        Text="允许 OmniDown 通过 Windows 通知显示下载事件。"
                                                         TextWrapping="WrapWholeWords" />
                                                 </StackPanel>
                                                 <StackPanel
@@ -1188,12 +1419,194 @@
                                                         VerticalAlignment="Center"
                                                         Text="开" />
                                                     <ToggleSwitch
+                                                        x:Name="SystemNotificationsToggleSwitch"
                                                         Width="48"
                                                         MinWidth="0"
                                                         Padding="0"
                                                         OffContent=""
                                                         OnContent=""
                                                         IsOn="True"
+                                                        Toggled="SettingToggleSwitch_Toggled" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                        <Border
+                                            x:Name="DownloadStartNotificationSettingCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="0">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE768;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="下载开始时通知" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="添加任务并开始交给 aria2 处理时显示通知。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <StackPanel
+                                                    Grid.Column="2"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+                                                    <TextBlock
+                                                        VerticalAlignment="Center"
+                                                        Text="关" />
+                                                    <ToggleSwitch
+                                                        x:Name="DownloadStartNotificationsToggleSwitch"
+                                                        Width="48"
+                                                        MinWidth="0"
+                                                        Padding="0"
+                                                        OffContent=""
+                                                        OnContent=""
+                                                        Toggled="SettingToggleSwitch_Toggled" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                        <Border
+                                            x:Name="DownloadCompleteNotificationSettingCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="0,0,8,8">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE930;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="下载完成时通知" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="任务完成或失败时显示通知。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <StackPanel
+                                                    Grid.Column="2"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+                                                    <TextBlock
+                                                        VerticalAlignment="Center"
+                                                        Text="开" />
+                                                    <ToggleSwitch
+                                                        x:Name="DownloadCompleteNotificationsToggleSwitch"
+                                                        Width="48"
+                                                        MinWidth="0"
+                                                        Padding="0"
+                                                        OffContent=""
+                                                        OnContent=""
+                                                        IsOn="True"
+                                                        Toggled="SettingToggleSwitch_Toggled" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+
+                                        <TextBlock
+                                            Margin="4,32,4,8"
+                                            FontWeight="SemiBold"
+                                            Text="下载" />
+                                        <Border
+                                            x:Name="AutoShutdownSettingCard"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="8,8,0,0">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE7E8;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="所有下载完成后自动关机" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="当前传输全部完成后执行 Windows 关机。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <StackPanel
+                                                    Grid.Column="2"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+                                                    <TextBlock
+                                                        VerticalAlignment="Center"
+                                                        Text="关" />
+                                                    <ToggleSwitch
+                                                        x:Name="AutoShutdownWhenCompleteToggleSwitch"
+                                                        Width="48"
+                                                        MinWidth="0"
+                                                        Padding="0"
+                                                        OffContent=""
+                                                        OnContent=""
+                                                        Toggled="SettingToggleSwitch_Toggled" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                        <Border
+                                            x:Name="PreventSleepSettingCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="0,0,8,8">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE708;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="下载时阻止系统休眠" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="有任务正在下载时保持系统唤醒，下载结束后自动恢复。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <StackPanel
+                                                    Grid.Column="2"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+                                                    <TextBlock
+                                                        VerticalAlignment="Center"
+                                                        Text="关" />
+                                                    <ToggleSwitch
+                                                        x:Name="PreventSleepWhileDownloadingToggleSwitch"
+                                                        Width="48"
+                                                        MinWidth="0"
+                                                        Padding="0"
+                                                        OffContent=""
+                                                        OnContent=""
                                                         Toggled="SettingToggleSwitch_Toggled" />
                                                 </StackPanel>
                                             </Grid>
