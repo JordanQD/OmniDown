@@ -49,29 +49,47 @@ internal static class NewDownloadDialogHelpers
         Button openButton,
         Button clearButton)
     {
-        Grid row = new()
+        Grid displayContent = new()
         {
-            Height = 48,
+            Height = 32,
             Padding = new Thickness(12, 0, 6, 0),
-            Background = GetThemeBrush("CardBackgroundFillColorSecondaryBrush", Colors.Transparent),
             ColumnDefinitions =
             {
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-                new ColumnDefinition { Width = GridLength.Auto },
-                new ColumnDefinition { Width = GridLength.Auto },
                 new ColumnDefinition { Width = GridLength.Auto }
             },
             Children =
             {
                 fileNameText,
-                torrentTag,
+                torrentTag
+            }
+        };
+        Grid.SetColumn(torrentTag, 1);
+        Border displayBorder = new()
+        {
+            Background = GetThemeBrush("CardBackgroundFillColorSecondaryBrush", Colors.Transparent),
+            CornerRadius = new CornerRadius(6),
+            Child = displayContent
+        };
+
+        Grid row = new()
+        {
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition { Width = GridLength.Auto }
+            },
+            Children =
+            {
+                displayBorder,
                 openButton,
                 clearButton
             }
         };
-        Grid.SetColumn(torrentTag, 1);
-        Grid.SetColumn(openButton, 2);
-        Grid.SetColumn(clearButton, 3);
+        Grid.SetColumn(openButton, 1);
+        Grid.SetColumn(clearButton, 1);
+        openButton.Margin = new Thickness(8, 0, 0, 0);
+        clearButton.Margin = new Thickness(8, 0, 0, 0);
         return row;
     }
 
@@ -105,9 +123,9 @@ internal static class NewDownloadDialogHelpers
                 Height = 16
             },
             Width = 40,
-            Height = 40,
+            Height = 32,
             MinWidth = 40,
-            MinHeight = 40,
+            MinHeight = 32,
             Padding = new Thickness(0),
             VerticalAlignment = VerticalAlignment.Center
         };
@@ -190,7 +208,7 @@ internal static class NewDownloadDialogHelpers
                     new TextBlock
                     {
                         Text = file.SizeText,
-                        HorizontalAlignment = HorizontalAlignment.Right,
+                        HorizontalAlignment = HorizontalAlignment.Left,
                         VerticalAlignment = VerticalAlignment.Center
                     }
                 }
@@ -209,7 +227,7 @@ internal static class NewDownloadDialogHelpers
 
     public static void UpdateUriTextBoxHeight(TextBox textBox)
     {
-        const double singleLineHeight = 64;
+        const double singleLineHeight = 32;
         const double lineHeight = 22;
         const double maxHeight = 220;
         const double horizontalPadding = 28;

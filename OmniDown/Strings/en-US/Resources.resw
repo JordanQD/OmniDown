@@ -95,6 +95,8 @@
   <data name="NewDownloadTaskNamePlaceholder" xml:space="preserve"><value>Leave empty to infer from the URL</value></data>
   <data name="NewDownloadDirectoryHeader" xml:space="preserve"><value>Save directory</value></data>
   <data name="NewDownloadSplitCountHeader" xml:space="preserve"><value>Download split count</value></data>
+  <data name="NewDownloadTorrentFileHeader" xml:space="preserve"><value>Torrent file</value></data>
+  <data name="BrowseDownloadDirectoryButtonText" xml:space="preserve"><value>Choose folder</value></data>
   <data name="PasteButtonText" xml:space="preserve"><value>Paste</value></data>
   <data name="OpenTorrentFileButtonText" xml:space="preserve"><value>Open torrent file</value></data>
   <data name="ClearTorrentFileButtonText" xml:space="preserve"><value>Clear torrent file</value></data>

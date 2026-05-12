@@ -95,6 +95,8 @@
   <data name="NewDownloadTaskNamePlaceholder" xml:space="preserve"><value>留空则从 URL 推断</value></data>
   <data name="NewDownloadDirectoryHeader" xml:space="preserve"><value>保存目录</value></data>
   <data name="NewDownloadSplitCountHeader" xml:space="preserve"><value>下载分段数</value></data>
+  <data name="NewDownloadTorrentFileHeader" xml:space="preserve"><value>种子文件</value></data>
+  <data name="BrowseDownloadDirectoryButtonText" xml:space="preserve"><value>选择文件夹</value></data>
   <data name="PasteButtonText" xml:space="preserve"><value>粘贴</value></data>
   <data name="OpenTorrentFileButtonText" xml:space="preserve"><value>打开种子文件</value></data>
   <data name="ClearTorrentFileButtonText" xml:space="preserve"><value>清除种子文件</value></data>

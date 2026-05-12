@@ -67,14 +67,12 @@ namespace OmniDown
             {
             TextBox uriTextBox = new()
             {
-                Header = "Download URL",
                 PlaceholderText = "https://example.com/file.zip",
                 AcceptsReturn = true,
                 TextWrapping = TextWrapping.Wrap,
-                Height = 64,
+                Height = 32,
                 MaxHeight = 220
             };
-            uriTextBox.Header = Strings.Get("NewDownloadUrlHeader");
             uriTextBox.PlaceholderText = Strings.Get("NewDownloadUrlPlaceholder");
             ScrollViewer.SetVerticalScrollBarVisibility(uriTextBox, ScrollBarVisibility.Auto);
             uriTextBox.TextChanged += (_, _) => UpdateUriTextBoxHeight(uriTextBox);
@@ -101,9 +99,9 @@ namespace OmniDown
                     Height = 16
                 },
                 Width = 40,
-                Height = 40,
+                Height = 32,
                 MinWidth = 40,
-                MinHeight = 40,
+                MinHeight = 32,
                 Padding = new Thickness(0),
                 VerticalAlignment = VerticalAlignment.Bottom,
                 Margin = new Thickness(8, 0, 0, 0)
@@ -111,7 +109,7 @@ namespace OmniDown
             ToolTipService.SetToolTip(pasteUriButton, Strings.Get("PasteButtonText"));
             pasteUriButton.Click += async (_, _) => await PasteClipboardTextAsync(uriTextBox);
 
-            Grid uriInputRow = new()
+            Grid uriInputControls = new()
             {
                 ColumnDefinitions =
                 {
@@ -125,6 +123,19 @@ namespace OmniDown
                 }
             };
             Grid.SetColumn(pasteUriButton, 1);
+
+            StackPanel uriInputRow = new()
+            {
+                Spacing = 4,
+                Children =
+                {
+                    new TextBlock
+                    {
+                        Text = Strings.Get("NewDownloadUrlHeader")
+                    },
+                    uriInputControls
+                }
+            };
 
             TorrentSelection? torrentSelection = null;
             ObservableCollection<TorrentFileEntry> torrentFiles = [];
@@ -143,7 +154,19 @@ namespace OmniDown
             Button clearTorrentButton = CreateIconButton("\uE711", Strings.Get("ClearTorrentFileButtonText"));
             Button openTorrentButton = CreateIconButton("\uE8E5", Strings.Get("OpenTorrentFileButtonText"));
             Grid torrentInputRow = CreateTorrentInputRow(torrentFileNameText, torrentTag, openTorrentButton, clearTorrentButton);
-            torrentInputRow.Visibility = Visibility.Collapsed;
+            StackPanel torrentInputSection = new()
+            {
+                Spacing = 4,
+                Visibility = Visibility.Collapsed,
+                Children =
+                {
+                    new TextBlock
+                    {
+                        Text = Strings.Get("NewDownloadTorrentFileHeader")
+                    },
+                    torrentInputRow
+                }
+            };
             torrentTag.Visibility = Visibility.Collapsed;
             clearTorrentButton.Visibility = Visibility.Collapsed;
 
@@ -227,6 +250,10 @@ namespace OmniDown
             Grid.SetColumn(torrentHeader.Children[1] as FrameworkElement, 1);
             Grid.SetColumn(torrentHeader.Children[2] as FrameworkElement, 2);
             Grid.SetColumn(torrentHeader.Children[3] as FrameworkElement, 3);
+            if (torrentHeader.Children[3] is FrameworkElement sizeHeader)
+            {
+                sizeHeader.HorizontalAlignment = HorizontalAlignment.Left;
+            }
 
             Border torrentFilesBorder = new()
             {
@@ -311,6 +338,55 @@ namespace OmniDown
             };
             directoryTextBox.Header = Strings.Get("NewDownloadDirectoryHeader");
 
+            Button browseDirectoryButton = new()
+            {
+                Content = new FontIcon
+                {
+                    Glyph = "\uE8B7",
+                    FontSize = 16,
+                    Width = 16,
+                    Height = 16
+                },
+                Width = 40,
+                Height = 32,
+                MinWidth = 40,
+                MinHeight = 32,
+                Padding = new Thickness(0),
+                VerticalAlignment = VerticalAlignment.Bottom,
+                Margin = new Thickness(8, 0, 0, 0)
+            };
+            ToolTipService.SetToolTip(browseDirectoryButton, Strings.Get("BrowseDownloadDirectoryButtonText"));
+            browseDirectoryButton.Click += async (_, _) =>
+            {
+                FolderPicker picker = new()
+                {
+                    SuggestedStartLocation = PickerLocationId.Downloads
+                };
+                picker.FileTypeFilter.Add("*");
+                InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
+
+                StorageFolder? folder = await picker.PickSingleFolderAsync();
+                if (folder is not null)
+                {
+                    directoryTextBox.Text = folder.Path;
+                }
+            };
+
+            Grid directoryInputRow = new()
+            {
+                ColumnDefinitions =
+                {
+                    new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                    new ColumnDefinition { Width = GridLength.Auto }
+                },
+                Children =
+                {
+                    directoryTextBox,
+                    browseDirectoryButton
+                }
+            };
+            Grid.SetColumn(browseDirectoryButton, 1);
+
             NumberBox splitCountNumberBox = new()
             {
                 Header = Strings.Get("NewDownloadSplitCountHeader"),
@@ -319,25 +395,24 @@ namespace OmniDown
                 Maximum = 256,
                 SmallChange = 1,
                 LargeChange = 8,
-                Height = 32,
-                Width = 168,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
                 SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Inline
             };
 
-            StackPanel content = new()
+            StackPanel formContent = new()
             {
-                Width = 680,
-                MaxWidth = 760,
+                Width = 664,
+                MaxWidth = 744,
+                HorizontalAlignment = HorizontalAlignment.Left,
                 Spacing = 12,
                 Children =
                 {
-                    selectorHeader,
                     uriInputRow,
-                    torrentInputRow,
+                    torrentInputSection,
                     torrentSummaryText,
                     torrentFilesBorder,
                     fileNameTextBox,
-                    directoryTextBox,
+                    directoryInputRow,
                     splitCountNumberBox
                 }
             };
@@ -359,7 +434,7 @@ namespace OmniDown
             {
                 isTorrentMode = isTorrentSelected;
                 uriInputRow.Visibility = isTorrentSelected ? Visibility.Collapsed : Visibility.Visible;
-                torrentInputRow.Visibility = isTorrentSelected ? Visibility.Visible : Visibility.Collapsed;
+                torrentInputSection.Visibility = isTorrentSelected ? Visibility.Visible : Visibility.Collapsed;
                 linkTaskTypeIndicator.Visibility = isTorrentSelected ? Visibility.Collapsed : Visibility.Visible;
                 torrentTaskTypeIndicator.Visibility = isTorrentSelected ? Visibility.Visible : Visibility.Collapsed;
                 linkTaskTypeButton.Foreground = GetThemeBrush(
@@ -410,6 +485,34 @@ namespace OmniDown
                 }
             };
 
+            ScrollViewer contentScrollViewer = new()
+            {
+                Width = 680,
+                MaxHeight = 480,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
+                Content = formContent
+            };
+
+            Grid dialogBody = new()
+            {
+                Width = 680,
+                MaxWidth = 760,
+                MaxHeight = 560,
+                RowSpacing = 12,
+                RowDefinitions =
+                {
+                    new RowDefinition { Height = GridLength.Auto },
+                    new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }
+                },
+                Children =
+                {
+                    selectorHeader,
+                    contentScrollViewer
+                }
+            };
+            Grid.SetRow(contentScrollViewer, 1);
+
             bool submitRequestedByEnter = false;
             ContentDialog? dialog = null;
             Grid dialogContent = new()
@@ -420,7 +523,7 @@ namespace OmniDown
                 IsTabStop = true,
                 Children =
                 {
-                    content,
+                    dialogBody,
                     dropOverlay
                 }
             };
