@@ -1,4 +1,5 @@
 ﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Data;
@@ -12,6 +13,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading;
+using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
@@ -27,7 +30,15 @@ namespace OmniDown
     /// </summary>
     public partial class App : Application
     {
+        private const string SingleInstanceMutexName = @"Local\OmniDown.SingleInstance";
+        private const string ActivationEventName = @"Local\OmniDown.ActivateExistingInstance";
+
         private Window? _window;
+        private DispatcherQueue? _dispatcherQueue;
+        private Mutex? _singleInstanceMutex;
+        private EventWaitHandle? _activationEvent;
+        private CancellationTokenSource? _activationListenerCancellation;
+        private Task? _activationListenerTask;
 
         public SystemNotificationService Notifications { get; } = new();
 
@@ -46,9 +57,97 @@ namespace OmniDown
         /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
+            if (!TryAcquireSingleInstance())
+            {
+                SignalExistingInstance();
+                Exit();
+                return;
+            }
+
+            _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+            StartActivationListener();
             _window = new MainWindow();
+            _window.Closed += MainWindow_Closed;
             Notifications.Register();
             _window.Activate();
+        }
+
+        private bool TryAcquireSingleInstance()
+        {
+            _singleInstanceMutex = new Mutex(true, SingleInstanceMutexName, out bool createdNew);
+            if (!createdNew)
+            {
+                _singleInstanceMutex.Dispose();
+                _singleInstanceMutex = null;
+                return false;
+            }
+
+            _activationEvent = new EventWaitHandle(false, EventResetMode.AutoReset, ActivationEventName);
+            return true;
+        }
+
+        private static void SignalExistingInstance()
+        {
+            try
+            {
+                using EventWaitHandle activationEvent = EventWaitHandle.OpenExisting(ActivationEventName);
+                activationEvent.Set();
+            }
+            catch (WaitHandleCannotBeOpenedException)
+            {
+            }
+        }
+
+        private void StartActivationListener()
+        {
+            if (_activationEvent is null)
+            {
+                return;
+            }
+
+            _activationListenerCancellation = new CancellationTokenSource();
+            CancellationToken token = _activationListenerCancellation.Token;
+            _activationListenerTask = Task.Run(() =>
+            {
+                WaitHandle[] waitHandles = [_activationEvent, token.WaitHandle];
+                while (!token.IsCancellationRequested)
+                {
+                    int signaledIndex = WaitHandle.WaitAny(waitHandles);
+                    if (signaledIndex == 0)
+                    {
+                        _dispatcherQueue?.TryEnqueue(ActivateExistingWindow);
+                    }
+                }
+            }, token);
+        }
+
+        private void ActivateExistingWindow()
+        {
+            if (_window is MainWindow mainWindow)
+            {
+                mainWindow.ShowAndActivate();
+                return;
+            }
+
+            _window?.Activate();
+        }
+
+        private void MainWindow_Closed(object sender, WindowEventArgs args)
+        {
+            StopActivationListener();
+        }
+
+        private void StopActivationListener()
+        {
+            _activationListenerCancellation?.Cancel();
+            _activationListenerCancellation?.Dispose();
+            _activationListenerCancellation = null;
+            _activationListenerTask = null;
+            _activationEvent?.Dispose();
+            _activationEvent = null;
+            _singleInstanceMutex?.ReleaseMutex();
+            _singleInstanceMutex?.Dispose();
+            _singleInstanceMutex = null;
         }
     }
 }

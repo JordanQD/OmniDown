@@ -66,6 +66,83 @@ namespace OmniDown
             DispatcherQueue.TryEnqueue(ShowFromTray);
         }
 
+        public void ShowAndActivate()
+        {
+            WindowVisibilityService.ShowAndActivate(_windowHandle);
+        }
+
+        private void Notifications_NotificationInvoked(object? sender, TaskNotificationInvokedEventArgs args)
+        {
+            DispatcherQueue.TryEnqueue(() => HandleNotificationInvoked(args));
+        }
+
+        private void HandleNotificationInvoked(TaskNotificationInvokedEventArgs args)
+        {
+            ShowAndActivate();
+            switch (args.Action)
+            {
+                case SystemNotificationService.ActionTaskAdded:
+                case SystemNotificationService.ActionDownloadFailed:
+                    NavigateToHome();
+                    break;
+                case SystemNotificationService.ActionDownloadCompleted:
+                    HandleDownloadCompletedNotificationInvoked(args);
+                    break;
+            }
+        }
+
+        private void HandleDownloadCompletedNotificationInvoked(TaskNotificationInvokedEventArgs args)
+        {
+            switch (_settingsPageViewModel.GeneralSettings.DownloadCompleteNotificationAction)
+            {
+                case "OpenFile":
+                    OpenNotificationFile(args.FilePath);
+                    break;
+                case "OpenFolder":
+                    OpenNotificationFolder(args.FolderPath, args.FilePath);
+                    break;
+                default:
+                    NavigateToHome();
+                    break;
+            }
+        }
+
+        private void NavigateToHome()
+        {
+            RootNavigation.SelectedItem = TasksNavItem;
+            NavigateTo("Home");
+        }
+
+        private void OpenNotificationFile(string? filePath)
+        {
+            if (!string.IsNullOrWhiteSpace(filePath) && File.Exists(filePath))
+            {
+                OpenShellTarget(filePath);
+                return;
+            }
+
+            NavigateToHome();
+            ShowMessage(Strings.Get("TaskFileNotFoundMessage"), InfoBarSeverity.Warning);
+        }
+
+        private void OpenNotificationFolder(string? folderPath, string? filePath)
+        {
+            string? resolvedFolderPath = !string.IsNullOrWhiteSpace(folderPath)
+                ? folderPath
+                : string.IsNullOrWhiteSpace(filePath)
+                    ? null
+                    : Path.GetDirectoryName(filePath);
+
+            if (!string.IsNullOrWhiteSpace(resolvedFolderPath) && Directory.Exists(resolvedFolderPath))
+            {
+                OpenShellTarget(resolvedFolderPath);
+                return;
+            }
+
+            NavigateToHome();
+            ShowMessage(Strings.Get("TaskFolderNotFoundMessage"), InfoBarSeverity.Warning);
+        }
+
         private void TrayIcon_ExitRequested(object? sender, EventArgs e)
         {
             DispatcherQueue.TryEnqueue(RequestExit);
@@ -385,6 +462,7 @@ namespace OmniDown
             SaveGeneralSettings();
             await SaveAriaSessionIfRunningAsync();
             _notifications.Unregister();
+            _notifications.NotificationInvoked -= Notifications_NotificationInvoked;
             _trayIcon?.Dispose();
             _aria2RpcClient.Dispose();
             _aria2EngineHost.Dispose();

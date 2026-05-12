@@ -28,6 +28,7 @@ public sealed partial class SettingsPageControl : UserControl
     internal Border NotificationsSettingCardControl => NotificationsSettingCard;
     internal Border DownloadStartNotificationSettingCardControl => DownloadStartNotificationSettingCard;
     internal Border DownloadCompleteNotificationSettingCardControl => DownloadCompleteNotificationSettingCard;
+    internal Border DownloadCompleteNotificationActionSettingCardControl => DownloadCompleteNotificationActionSettingCard;
     internal Border AutoShutdownSettingCardControl => AutoShutdownSettingCard;
     internal Border PreventSleepSettingCardControl => PreventSleepSettingCard;
     internal Border DefaultDirectorySettingCardControl => DefaultDirectorySettingCard;
@@ -56,29 +57,52 @@ public sealed partial class SettingsPageControl : UserControl
     internal Border AboutReferencesCardControl => AboutReferencesCard;
     internal Border AboutLicenseCardControl => AboutLicenseCard;
     internal ToggleSwitch AutoStartToggleSwitchControl => AutoStartToggleSwitch;
+    internal TextBlock AutoStartStateTextControl => AutoStartStateText;
     internal ToggleSwitch RestoreWindowPlacementToggleSwitchControl => RestoreWindowPlacementToggleSwitch;
+    internal TextBlock RestoreWindowPlacementStateTextControl => RestoreWindowPlacementStateText;
     internal ToggleSwitch ResumeDownloadsOnLaunchToggleSwitchControl => ResumeDownloadsOnLaunchToggleSwitch;
+    internal TextBlock ResumeDownloadsOnLaunchStateTextControl => ResumeDownloadsOnLaunchStateText;
     internal ToggleSwitch AutoClearCompletedOnExitToggleSwitchControl => AutoClearCompletedOnExitToggleSwitch;
+    internal TextBlock AutoClearCompletedOnExitStateTextControl => AutoClearCompletedOnExitStateText;
     internal ToggleSwitch PauseActiveOnExitToggleSwitchControl => PauseActiveOnExitToggleSwitch;
+    internal TextBlock PauseActiveOnExitStateTextControl => PauseActiveOnExitStateText;
     internal ToggleSwitch CloseToTrayToggleSwitchControl => CloseToTrayToggleSwitch;
+    internal TextBlock CloseToTrayStateTextControl => CloseToTrayStateText;
     internal ToggleSwitch ShowTaskbarProgressToggleSwitchControl => ShowTaskbarProgressToggleSwitch;
+    internal TextBlock ShowTaskbarProgressStateTextControl => ShowTaskbarProgressStateText;
     internal ComboBox ThemeComboBoxControl => ThemeComboBox;
     internal ToggleSwitch SystemNotificationsToggleSwitchControl => SystemNotificationsToggleSwitch;
+    internal TextBlock SystemNotificationsStateTextControl => SystemNotificationsStateText;
     internal ToggleSwitch DownloadStartNotificationsToggleSwitchControl => DownloadStartNotificationsToggleSwitch;
+    internal TextBlock DownloadStartNotificationsStateTextControl => DownloadStartNotificationsStateText;
     internal ToggleSwitch DownloadCompleteNotificationsToggleSwitchControl => DownloadCompleteNotificationsToggleSwitch;
+    internal TextBlock DownloadCompleteNotificationsStateTextControl => DownloadCompleteNotificationsStateText;
+    internal ComboBox DownloadCompleteNotificationActionComboBoxControl => DownloadCompleteNotificationActionComboBox;
     internal ToggleSwitch AutoShutdownWhenCompleteToggleSwitchControl => AutoShutdownWhenCompleteToggleSwitch;
+    internal TextBlock AutoShutdownWhenCompleteStateTextControl => AutoShutdownWhenCompleteStateText;
     internal ToggleSwitch PreventSleepWhileDownloadingToggleSwitchControl => PreventSleepWhileDownloadingToggleSwitch;
+    internal TextBlock PreventSleepWhileDownloadingStateTextControl => PreventSleepWhileDownloadingStateText;
     internal TextBox DownloadDirectoryTextBoxControl => DownloadDirectoryTextBox;
     internal NumberBox MaxConcurrentDownloadsNumberBoxControl => MaxConcurrentDownloadsNumberBox;
     internal NumberBox SplitCountNumberBoxControl => SplitCountNumberBox;
     internal NumberBox MaxConnectionPerServerNumberBoxControl => MaxConnectionPerServerNumberBox;
     internal ToggleSwitch ContinueDownloadToggleSwitchControl => ContinueDownloadToggleSwitch;
+    internal TextBlock ContinueDownloadStateTextControl => ContinueDownloadStateText;
     internal ComboBox RemoteTimeComboBoxControl => RemoteTimeComboBox;
     internal NumberBox MaxTriesNumberBoxControl => MaxTriesNumberBox;
     internal NumberBox RetryWaitNumberBoxControl => RetryWaitNumberBox;
     internal ToggleSwitch AutoDeleteStaleRecordsToggleSwitchControl => AutoDeleteStaleRecordsToggleSwitch;
+    internal TextBlock AutoDeleteStaleRecordsStateTextControl => AutoDeleteStaleRecordsStateText;
     internal ToggleSwitch DeleteTorrentAfterCompleteToggleSwitchControl => DeleteTorrentAfterCompleteToggleSwitch;
+    internal TextBlock DeleteTorrentAfterCompleteStateTextControl => DeleteTorrentAfterCompleteStateText;
+    internal ToggleSwitch BtEnableToggleSwitchControl => BtEnableToggleSwitch;
+    internal TextBlock BtEnableStateTextControl => BtEnableStateText;
     internal ToggleSwitch UseSystemProxyCheckBoxControl => UseSystemProxyCheckBox;
+    internal TextBlock UseSystemProxyStateTextControl => UseSystemProxyStateText;
+    internal ToggleSwitch CustomProxyToggleSwitchControl => CustomProxyToggleSwitch;
+    internal TextBlock CustomProxyStateTextControl => CustomProxyStateText;
+    internal ToggleSwitch TerminalOutputToggleSwitchControl => TerminalOutputToggleSwitch;
+    internal TextBlock TerminalOutputStateTextControl => TerminalOutputStateText;
     internal TextBox AriaPathTextBoxControl => AriaPathTextBox;
     internal NumberBox RpcPortNumberBoxControl => RpcPortNumberBox;
     internal TextBlock SettingsAriaStatusTextControl => SettingsAriaStatusText;
@@ -89,6 +113,7 @@ public sealed partial class SettingsPageControl : UserControl
     internal event SelectionChangedEventHandler? SectionSelectionChanged;
     internal event RoutedEventHandler? SettingToggleSwitchToggled;
     internal event SelectionChangedEventHandler? ThemeSelectionChanged;
+    internal event SelectionChangedEventHandler? NotificationActionSelectionChanged;
     internal event RoutedEventHandler? BrowseDownloadDirectoryRequested;
     internal event RoutedEventHandler? DownloadSettingChanged;
     internal event RoutedEventHandler? StartAriaRequested;
@@ -109,6 +134,11 @@ public sealed partial class SettingsPageControl : UserControl
     private void ThemeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs args)
     {
         ThemeSelectionChanged?.Invoke(sender, args);
+    }
+
+    private void NotificationActionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs args)
+    {
+        NotificationActionSelectionChanged?.Invoke(sender, args);
     }
 
     private void BrowseDownloadDirectoryButton_Click(object sender, RoutedEventArgs args)

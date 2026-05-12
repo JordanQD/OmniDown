@@ -22,11 +22,12 @@ internal sealed class SettingsPageViewModel
 
     public void LoadGeneralSettings()
     {
-        GeneralSettings = _settingsStore.ReadGeneralSettings();
+        GeneralSettings = NormalizeGeneralSettings(_settingsStore.ReadGeneralSettings());
     }
 
     public void SaveGeneralSettings()
     {
+        GeneralSettings = NormalizeGeneralSettings(GeneralSettings);
         _settingsStore.SaveGeneralSettings(GeneralSettings);
     }
 
@@ -90,6 +91,7 @@ internal sealed class SettingsPageViewModel
         bool systemNotificationsEnabled,
         bool downloadStartNotificationsEnabled,
         bool downloadCompleteNotificationsEnabled,
+        string downloadCompleteNotificationAction,
         bool autoShutdownWhenComplete,
         bool preventSleepWhileDownloading,
         string theme)
@@ -104,9 +106,27 @@ internal sealed class SettingsPageViewModel
             SystemNotificationsEnabled = systemNotificationsEnabled,
             DownloadStartNotificationsEnabled = downloadStartNotificationsEnabled,
             DownloadCompleteNotificationsEnabled = downloadCompleteNotificationsEnabled,
+            DownloadCompleteNotificationAction = downloadCompleteNotificationAction,
             AutoShutdownWhenComplete = autoShutdownWhenComplete,
             PreventSleepWhileDownloading = preventSleepWhileDownloading,
             Theme = theme
+        };
+    }
+
+    private static GeneralSettings NormalizeGeneralSettings(GeneralSettings settings)
+    {
+        string notificationAction = settings.DownloadCompleteNotificationAction;
+        if (notificationAction is not ("Home" or "OpenFile" or "OpenFolder"))
+        {
+            notificationAction = GeneralSettings.Default.DownloadCompleteNotificationAction;
+        }
+
+        return settings with
+        {
+            DownloadCompleteNotificationAction = notificationAction,
+            Theme = string.IsNullOrWhiteSpace(settings.Theme)
+                ? GeneralSettings.Default.Theme
+                : settings.Theme
         };
     }
 }

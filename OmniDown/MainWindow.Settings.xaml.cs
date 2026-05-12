@@ -60,6 +60,7 @@ namespace OmniDown
         private Border NotificationsSettingCard => SettingsPage.NotificationsSettingCardControl;
         private Border DownloadStartNotificationSettingCard => SettingsPage.DownloadStartNotificationSettingCardControl;
         private Border DownloadCompleteNotificationSettingCard => SettingsPage.DownloadCompleteNotificationSettingCardControl;
+        private Border DownloadCompleteNotificationActionSettingCard => SettingsPage.DownloadCompleteNotificationActionSettingCardControl;
         private Border AutoShutdownSettingCard => SettingsPage.AutoShutdownSettingCardControl;
         private Border PreventSleepSettingCard => SettingsPage.PreventSleepSettingCardControl;
         private Border DefaultDirectorySettingCard => SettingsPage.DefaultDirectorySettingCardControl;
@@ -88,29 +89,52 @@ namespace OmniDown
         private Border AboutReferencesCard => SettingsPage.AboutReferencesCardControl;
         private Border AboutLicenseCard => SettingsPage.AboutLicenseCardControl;
         private ToggleSwitch AutoStartToggleSwitch => SettingsPage.AutoStartToggleSwitchControl;
+        private TextBlock AutoStartStateText => SettingsPage.AutoStartStateTextControl;
         private ToggleSwitch RestoreWindowPlacementToggleSwitch => SettingsPage.RestoreWindowPlacementToggleSwitchControl;
+        private TextBlock RestoreWindowPlacementStateText => SettingsPage.RestoreWindowPlacementStateTextControl;
         private ToggleSwitch ResumeDownloadsOnLaunchToggleSwitch => SettingsPage.ResumeDownloadsOnLaunchToggleSwitchControl;
+        private TextBlock ResumeDownloadsOnLaunchStateText => SettingsPage.ResumeDownloadsOnLaunchStateTextControl;
         private ToggleSwitch AutoClearCompletedOnExitToggleSwitch => SettingsPage.AutoClearCompletedOnExitToggleSwitchControl;
+        private TextBlock AutoClearCompletedOnExitStateText => SettingsPage.AutoClearCompletedOnExitStateTextControl;
         private ToggleSwitch PauseActiveOnExitToggleSwitch => SettingsPage.PauseActiveOnExitToggleSwitchControl;
+        private TextBlock PauseActiveOnExitStateText => SettingsPage.PauseActiveOnExitStateTextControl;
         private ToggleSwitch CloseToTrayToggleSwitch => SettingsPage.CloseToTrayToggleSwitchControl;
+        private TextBlock CloseToTrayStateText => SettingsPage.CloseToTrayStateTextControl;
         private ToggleSwitch ShowTaskbarProgressToggleSwitch => SettingsPage.ShowTaskbarProgressToggleSwitchControl;
+        private TextBlock ShowTaskbarProgressStateText => SettingsPage.ShowTaskbarProgressStateTextControl;
         private ComboBox ThemeComboBox => SettingsPage.ThemeComboBoxControl;
         private ToggleSwitch SystemNotificationsToggleSwitch => SettingsPage.SystemNotificationsToggleSwitchControl;
+        private TextBlock SystemNotificationsStateText => SettingsPage.SystemNotificationsStateTextControl;
         private ToggleSwitch DownloadStartNotificationsToggleSwitch => SettingsPage.DownloadStartNotificationsToggleSwitchControl;
+        private TextBlock DownloadStartNotificationsStateText => SettingsPage.DownloadStartNotificationsStateTextControl;
         private ToggleSwitch DownloadCompleteNotificationsToggleSwitch => SettingsPage.DownloadCompleteNotificationsToggleSwitchControl;
+        private TextBlock DownloadCompleteNotificationsStateText => SettingsPage.DownloadCompleteNotificationsStateTextControl;
+        private ComboBox DownloadCompleteNotificationActionComboBox => SettingsPage.DownloadCompleteNotificationActionComboBoxControl;
         private ToggleSwitch AutoShutdownWhenCompleteToggleSwitch => SettingsPage.AutoShutdownWhenCompleteToggleSwitchControl;
+        private TextBlock AutoShutdownWhenCompleteStateText => SettingsPage.AutoShutdownWhenCompleteStateTextControl;
         private ToggleSwitch PreventSleepWhileDownloadingToggleSwitch => SettingsPage.PreventSleepWhileDownloadingToggleSwitchControl;
+        private TextBlock PreventSleepWhileDownloadingStateText => SettingsPage.PreventSleepWhileDownloadingStateTextControl;
         private TextBox DownloadDirectoryTextBox => SettingsPage.DownloadDirectoryTextBoxControl;
         private NumberBox MaxConcurrentDownloadsNumberBox => SettingsPage.MaxConcurrentDownloadsNumberBoxControl;
         private NumberBox SplitCountNumberBox => SettingsPage.SplitCountNumberBoxControl;
         private NumberBox MaxConnectionPerServerNumberBox => SettingsPage.MaxConnectionPerServerNumberBoxControl;
         private ToggleSwitch ContinueDownloadToggleSwitch => SettingsPage.ContinueDownloadToggleSwitchControl;
+        private TextBlock ContinueDownloadStateText => SettingsPage.ContinueDownloadStateTextControl;
         private ComboBox RemoteTimeComboBox => SettingsPage.RemoteTimeComboBoxControl;
         private NumberBox MaxTriesNumberBox => SettingsPage.MaxTriesNumberBoxControl;
         private NumberBox RetryWaitNumberBox => SettingsPage.RetryWaitNumberBoxControl;
         private ToggleSwitch AutoDeleteStaleRecordsToggleSwitch => SettingsPage.AutoDeleteStaleRecordsToggleSwitchControl;
+        private TextBlock AutoDeleteStaleRecordsStateText => SettingsPage.AutoDeleteStaleRecordsStateTextControl;
         private ToggleSwitch DeleteTorrentAfterCompleteToggleSwitch => SettingsPage.DeleteTorrentAfterCompleteToggleSwitchControl;
+        private TextBlock DeleteTorrentAfterCompleteStateText => SettingsPage.DeleteTorrentAfterCompleteStateTextControl;
+        private ToggleSwitch BtEnableToggleSwitch => SettingsPage.BtEnableToggleSwitchControl;
+        private TextBlock BtEnableStateText => SettingsPage.BtEnableStateTextControl;
         private ToggleSwitch UseSystemProxyCheckBox => SettingsPage.UseSystemProxyCheckBoxControl;
+        private TextBlock UseSystemProxyStateText => SettingsPage.UseSystemProxyStateTextControl;
+        private ToggleSwitch CustomProxyToggleSwitch => SettingsPage.CustomProxyToggleSwitchControl;
+        private TextBlock CustomProxyStateText => SettingsPage.CustomProxyStateTextControl;
+        private ToggleSwitch TerminalOutputToggleSwitch => SettingsPage.TerminalOutputToggleSwitchControl;
+        private TextBlock TerminalOutputStateText => SettingsPage.TerminalOutputStateTextControl;
         private TextBox AriaPathTextBox => SettingsPage.AriaPathTextBoxControl;
         private NumberBox RpcPortNumberBox => SettingsPage.RpcPortNumberBoxControl;
         private TextBlock SettingsAriaStatusText => SettingsPage.SettingsAriaStatusTextControl;
@@ -123,6 +147,7 @@ namespace OmniDown
             SettingsPage.SectionSelectionChanged += SettingsSectionListView_SelectionChanged;
             SettingsPage.SettingToggleSwitchToggled += SettingToggleSwitch_Toggled;
             SettingsPage.ThemeSelectionChanged += ThemeComboBox_SelectionChanged;
+            SettingsPage.NotificationActionSelectionChanged += NotificationActionComboBox_SelectionChanged;
             SettingsPage.BrowseDownloadDirectoryRequested += BrowseDownloadDirectoryButton_Click;
             SettingsPage.DownloadSettingChanged += DownloadSetting_Changed;
             SettingsPage.StartAriaRequested += StartAriaButton_Click;
@@ -167,17 +192,12 @@ namespace OmniDown
 
         private void SettingToggleSwitch_Toggled(object sender, RoutedEventArgs e)
         {
-            if (sender is not ToggleSwitch toggleSwitch ||
-                toggleSwitch.Parent is not StackPanel panel)
+            if (sender is not ToggleSwitch toggleSwitch)
             {
                 return;
             }
 
-            TextBlock? stateText = panel.Children.OfType<TextBlock>().FirstOrDefault();
-            if (stateText is not null)
-            {
-                SetToggleStateText(stateText, toggleSwitch.IsOn);
-            }
+            UpdateToggleStateText(toggleSwitch);
 
             if (ReferenceEquals(toggleSwitch, UseSystemProxyCheckBox))
             {
@@ -374,6 +394,7 @@ namespace OmniDown
             SetToggleSwitch(SystemNotificationsToggleSwitch, settings.SystemNotificationsEnabled);
             SetToggleSwitch(DownloadStartNotificationsToggleSwitch, settings.DownloadStartNotificationsEnabled);
             SetToggleSwitch(DownloadCompleteNotificationsToggleSwitch, settings.DownloadCompleteNotificationsEnabled);
+            SetDownloadCompleteNotificationActionSelection(settings.DownloadCompleteNotificationAction);
             SetToggleSwitch(AutoShutdownWhenCompleteToggleSwitch, settings.AutoShutdownWhenComplete);
             SetToggleSwitch(PreventSleepWhileDownloadingToggleSwitch, settings.PreventSleepWhileDownloading);
             SetThemeComboBoxSelection(settings.Theme);
@@ -390,6 +411,7 @@ namespace OmniDown
                 SystemNotificationsToggleSwitch?.IsOn == true,
                 DownloadStartNotificationsToggleSwitch?.IsOn == true,
                 DownloadCompleteNotificationsToggleSwitch?.IsOn == true,
+                GetSelectedDownloadCompleteNotificationAction(),
                 AutoShutdownWhenCompleteToggleSwitch?.IsOn == true,
                 PreventSleepWhileDownloadingToggleSwitch?.IsOn == true,
                 GetSelectedTheme());
@@ -429,7 +451,7 @@ namespace OmniDown
                 "PreventSleepWhileDownloadingToggleSwitch";
         }
 
-        private static void SetToggleSwitch(ToggleSwitch? toggleSwitch, bool isOn)
+        private void SetToggleSwitch(ToggleSwitch? toggleSwitch, bool isOn)
         {
             if (toggleSwitch is null)
             {
@@ -437,11 +459,7 @@ namespace OmniDown
             }
 
             toggleSwitch.IsOn = isOn;
-            if (toggleSwitch.Parent is StackPanel panel &&
-                panel.Children.OfType<TextBlock>().FirstOrDefault() is TextBlock stateText)
-            {
-                SetToggleStateText(stateText, isOn);
-            }
+            UpdateToggleStateText(toggleSwitch);
         }
 
         private void ApplyCloseBehaviorSettingsToUi()
@@ -452,16 +470,51 @@ namespace OmniDown
             }
 
             CloseToTrayToggleSwitch.IsOn = _settingsPageViewModel.CloseBehaviorSettings.MinimizeToTrayOnClose == true;
-            if (CloseToTrayToggleSwitch.Parent is StackPanel panel &&
-                panel.Children.OfType<TextBlock>().FirstOrDefault() is TextBlock stateText)
+            UpdateToggleStateText(CloseToTrayToggleSwitch);
+        }
+
+        private void UpdateToggleStateText(ToggleSwitch? toggleSwitch)
+        {
+            if (toggleSwitch is null)
             {
-                SetToggleStateText(stateText, CloseToTrayToggleSwitch.IsOn);
+                return;
+            }
+
+            TextBlock? stateText = GetToggleStateText(toggleSwitch);
+            if (stateText is not null)
+            {
+                SetToggleStateText(stateText, toggleSwitch.IsOn);
             }
         }
 
         private static void SetToggleStateText(TextBlock stateText, bool isOn)
         {
             stateText.Text = isOn ? "开" : "关";
+        }
+
+        private TextBlock? GetToggleStateText(ToggleSwitch toggleSwitch)
+        {
+            if (ReferenceEquals(toggleSwitch, AutoStartToggleSwitch)) return AutoStartStateText;
+            if (ReferenceEquals(toggleSwitch, RestoreWindowPlacementToggleSwitch)) return RestoreWindowPlacementStateText;
+            if (ReferenceEquals(toggleSwitch, ResumeDownloadsOnLaunchToggleSwitch)) return ResumeDownloadsOnLaunchStateText;
+            if (ReferenceEquals(toggleSwitch, AutoClearCompletedOnExitToggleSwitch)) return AutoClearCompletedOnExitStateText;
+            if (ReferenceEquals(toggleSwitch, PauseActiveOnExitToggleSwitch)) return PauseActiveOnExitStateText;
+            if (ReferenceEquals(toggleSwitch, CloseToTrayToggleSwitch)) return CloseToTrayStateText;
+            if (ReferenceEquals(toggleSwitch, ShowTaskbarProgressToggleSwitch)) return ShowTaskbarProgressStateText;
+            if (ReferenceEquals(toggleSwitch, SystemNotificationsToggleSwitch)) return SystemNotificationsStateText;
+            if (ReferenceEquals(toggleSwitch, DownloadStartNotificationsToggleSwitch)) return DownloadStartNotificationsStateText;
+            if (ReferenceEquals(toggleSwitch, DownloadCompleteNotificationsToggleSwitch)) return DownloadCompleteNotificationsStateText;
+            if (ReferenceEquals(toggleSwitch, AutoShutdownWhenCompleteToggleSwitch)) return AutoShutdownWhenCompleteStateText;
+            if (ReferenceEquals(toggleSwitch, PreventSleepWhileDownloadingToggleSwitch)) return PreventSleepWhileDownloadingStateText;
+            if (ReferenceEquals(toggleSwitch, ContinueDownloadToggleSwitch)) return ContinueDownloadStateText;
+            if (ReferenceEquals(toggleSwitch, AutoDeleteStaleRecordsToggleSwitch)) return AutoDeleteStaleRecordsStateText;
+            if (ReferenceEquals(toggleSwitch, DeleteTorrentAfterCompleteToggleSwitch)) return DeleteTorrentAfterCompleteStateText;
+            if (ReferenceEquals(toggleSwitch, BtEnableToggleSwitch)) return BtEnableStateText;
+            if (ReferenceEquals(toggleSwitch, UseSystemProxyCheckBox)) return UseSystemProxyStateText;
+            if (ReferenceEquals(toggleSwitch, CustomProxyToggleSwitch)) return CustomProxyStateText;
+            if (ReferenceEquals(toggleSwitch, TerminalOutputToggleSwitch)) return TerminalOutputStateText;
+
+            return null;
         }
 
         private void ThemeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -473,6 +526,17 @@ namespace OmniDown
 
             UpdateGeneralSettingsFromUi();
             ApplyThemeSetting(_settingsPageViewModel.GeneralSettings.Theme);
+            SaveGeneralSettings();
+        }
+
+        private void NotificationActionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_isLoadingGeneralSettings)
+            {
+                return;
+            }
+
+            UpdateGeneralSettingsFromUi();
             SaveGeneralSettings();
         }
 
@@ -503,6 +567,35 @@ namespace OmniDown
             }
 
             ThemeComboBox.SelectedIndex = 0;
+        }
+
+        private string GetSelectedDownloadCompleteNotificationAction()
+        {
+            return DownloadCompleteNotificationActionComboBox?.SelectedItem is ComboBoxItem item &&
+                item.Tag?.ToString() is string action &&
+                !string.IsNullOrWhiteSpace(action)
+                ? action
+                : "Home";
+        }
+
+        private void SetDownloadCompleteNotificationActionSelection(string action)
+        {
+            if (DownloadCompleteNotificationActionComboBox is null)
+            {
+                return;
+            }
+
+            for (int index = 0; index < DownloadCompleteNotificationActionComboBox.Items.Count; index++)
+            {
+                if (DownloadCompleteNotificationActionComboBox.Items[index] is ComboBoxItem item &&
+                    item.Tag?.ToString()?.Equals(action, StringComparison.OrdinalIgnoreCase) == true)
+                {
+                    DownloadCompleteNotificationActionComboBox.SelectedIndex = index;
+                    return;
+                }
+            }
+
+            DownloadCompleteNotificationActionComboBox.SelectedIndex = 0;
         }
 
         private void ApplyThemeSetting(string theme)

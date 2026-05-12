@@ -426,6 +426,7 @@ namespace OmniDown
             SetSettingVisibility(NotificationsSettingCard, query, "notification", "complete", "failed", "通知");
             SetSettingVisibility(DownloadStartNotificationSettingCard, query, "notification", "start", "download", "开始", "通知");
             SetSettingVisibility(DownloadCompleteNotificationSettingCard, query, "notification", "complete", "failed", "download", "完成", "失败", "通知");
+            SetSettingVisibility(DownloadCompleteNotificationActionSettingCard, query, "notification", "complete", "click", "action", "file", "folder", "通知", "点击", "动作", "文件", "文件夹");
             SetSettingVisibility(AutoShutdownSettingCard, query, "shutdown", "complete", "download", "关机", "完成");
             SetSettingVisibility(PreventSleepSettingCard, query, "sleep", "power", "download", "休眠", "睡眠", "下载");
 

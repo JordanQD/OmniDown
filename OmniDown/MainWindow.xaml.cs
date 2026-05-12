@@ -109,6 +109,7 @@ namespace OmniDown
             _downloadCoordinator = new DownloadCoordinator(_aria2RpcClient, Tasks);
             _downloadCoordinator.DeleteTorrentAfterComplete = _settingsPageViewModel.DownloadSettings.DeleteTorrentAfterComplete;
             _notifications = ((App)Application.Current).Notifications;
+            _notifications.NotificationInvoked += Notifications_NotificationInvoked;
             RecordObservedTaskStatuses();
             Closed += MainWindow_Closed;
             _refreshTimer.Interval = TimeSpan.FromSeconds(2);

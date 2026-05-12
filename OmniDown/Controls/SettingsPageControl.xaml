@@ -103,6 +103,7 @@
                                                     Orientation="Horizontal"
                                                     Spacing="8">
                                                     <TextBlock
+                                                        x:Name="AutoStartStateText"
                                                         VerticalAlignment="Center"
                                                         Text="开" />
                                                     <ToggleSwitch
@@ -148,6 +149,7 @@
                                                     Orientation="Horizontal"
                                                     Spacing="8">
                                                     <TextBlock
+                                                        x:Name="RestoreWindowPlacementStateText"
                                                         VerticalAlignment="Center"
                                                         Text="关" />
                                                     <ToggleSwitch
@@ -193,6 +195,7 @@
                                                     Orientation="Horizontal"
                                                     Spacing="8">
                                                     <TextBlock
+                                                        x:Name="ResumeDownloadsOnLaunchStateText"
                                                         VerticalAlignment="Center"
                                                         Text="关" />
                                                     <ToggleSwitch
@@ -238,6 +241,7 @@
                                                     Orientation="Horizontal"
                                                     Spacing="8">
                                                     <TextBlock
+                                                        x:Name="AutoClearCompletedOnExitStateText"
                                                         VerticalAlignment="Center"
                                                         Text="关" />
                                                     <ToggleSwitch
@@ -283,6 +287,7 @@
                                                     Orientation="Horizontal"
                                                     Spacing="8">
                                                     <TextBlock
+                                                        x:Name="PauseActiveOnExitStateText"
                                                         VerticalAlignment="Center"
                                                         Text="开" />
                                                     <ToggleSwitch
@@ -329,6 +334,7 @@
                                                     Orientation="Horizontal"
                                                     Spacing="8">
                                                     <TextBlock
+                                                        x:Name="CloseToTrayStateText"
                                                         VerticalAlignment="Center"
                                                         Text="关" />
                                                     <ToggleSwitch
@@ -374,6 +380,7 @@
                                                     Orientation="Horizontal"
                                                     Spacing="8">
                                                     <TextBlock
+                                                        x:Name="ShowTaskbarProgressStateText"
                                                         VerticalAlignment="Center"
                                                         Text="开" />
                                                     <ToggleSwitch
@@ -463,6 +470,7 @@
                                                     Orientation="Horizontal"
                                                     Spacing="8">
                                                     <TextBlock
+                                                        x:Name="SystemNotificationsStateText"
                                                         VerticalAlignment="Center"
                                                         Text="开" />
                                                     <ToggleSwitch
@@ -508,6 +516,7 @@
                                                     Orientation="Horizontal"
                                                     Spacing="8">
                                                     <TextBlock
+                                                        x:Name="DownloadStartNotificationsStateText"
                                                         VerticalAlignment="Center"
                                                         Text="关" />
                                                     <ToggleSwitch
@@ -528,7 +537,7 @@
                                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1"
-                                            CornerRadius="0,0,8,8">
+                                            CornerRadius="0">
                                             <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
                                                 <FontIcon
                                                     Width="24"
@@ -552,6 +561,7 @@
                                                     Orientation="Horizontal"
                                                     Spacing="8">
                                                     <TextBlock
+                                                        x:Name="DownloadCompleteNotificationsStateText"
                                                         VerticalAlignment="Center"
                                                         Text="开" />
                                                     <ToggleSwitch
@@ -564,6 +574,43 @@
                                                         IsOn="True"
                                                         Toggled="SettingToggleSwitch_Toggled" />
                                                 </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                        <Border
+                                            x:Name="DownloadCompleteNotificationActionSettingCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="0,0,8,8">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE8A7;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="点击下载成功通知" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="选择点击任务下载成功通知后的动作。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <ComboBox
+                                                    x:Name="DownloadCompleteNotificationActionComboBox"
+                                                    Grid.Column="2"
+                                                    MinWidth="180"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    SelectionChanged="NotificationActionComboBox_SelectionChanged">
+                                                    <ComboBoxItem Content="跳转到首页" Tag="Home" />
+                                                    <ComboBoxItem Content="打开文件" Tag="OpenFile" />
+                                                    <ComboBoxItem Content="打开文件夹" Tag="OpenFolder" />
+                                                </ComboBox>
                                             </Grid>
                                         </Border>
 
@@ -601,6 +648,7 @@
                                                     Orientation="Horizontal"
                                                     Spacing="8">
                                                     <TextBlock
+                                                        x:Name="AutoShutdownWhenCompleteStateText"
                                                         VerticalAlignment="Center"
                                                         Text="关" />
                                                     <ToggleSwitch
@@ -645,6 +693,7 @@
                                                     Orientation="Horizontal"
                                                     Spacing="8">
                                                     <TextBlock
+                                                        x:Name="PreventSleepWhileDownloadingStateText"
                                                         VerticalAlignment="Center"
                                                         Text="关" />
                                                     <ToggleSwitch
@@ -871,6 +920,7 @@
                                                     Orientation="Horizontal"
                                                     Spacing="8">
                                                     <TextBlock
+                                                        x:Name="ContinueDownloadStateText"
                                                         VerticalAlignment="Center"
                                                         Text="开" />
                                                     <ToggleSwitch
@@ -1036,6 +1086,7 @@
                                                     Orientation="Horizontal"
                                                     Spacing="8">
                                                     <TextBlock
+                                                        x:Name="AutoDeleteStaleRecordsStateText"
                                                         VerticalAlignment="Center"
                                                         Text="关" />
                                                     <ToggleSwitch
@@ -1081,6 +1132,7 @@
                                                     Orientation="Horizontal"
                                                     Spacing="8">
                                                     <TextBlock
+                                                        x:Name="DeleteTorrentAfterCompleteStateText"
                                                         VerticalAlignment="Center"
                                                         Text="关" />
                                                     <ToggleSwitch
@@ -1134,9 +1186,11 @@
                                                     Orientation="Horizontal"
                                                     Spacing="8">
                                                     <TextBlock
+                                                        x:Name="BtEnableStateText"
                                                         VerticalAlignment="Center"
                                                         Text="开" />
                                                     <ToggleSwitch
+                                                        x:Name="BtEnableToggleSwitch"
                                                         Width="48"
                                                         MinWidth="0"
                                                         Padding="0"
@@ -1258,6 +1312,7 @@
                                                     Orientation="Horizontal"
                                                     Spacing="8">
                                                     <TextBlock
+                                                        x:Name="UseSystemProxyStateText"
                                                         VerticalAlignment="Center"
                                                         Text="开" />
                                                     <ToggleSwitch
@@ -1340,9 +1395,11 @@
                                                     Orientation="Horizontal"
                                                     Spacing="8">
                                                     <TextBlock
+                                                        x:Name="CustomProxyStateText"
                                                         VerticalAlignment="Center"
                                                         Text="开" />
                                                     <ToggleSwitch
+                                                        x:Name="CustomProxyToggleSwitch"
                                                         Width="48"
                                                         MinWidth="0"
                                                         Padding="0"
@@ -1513,9 +1570,11 @@
                                                     Orientation="Horizontal"
                                                     Spacing="8">
                                                     <TextBlock
+                                                        x:Name="TerminalOutputStateText"
                                                         VerticalAlignment="Center"
                                                         Text="关" />
                                                     <ToggleSwitch
+                                                        x:Name="TerminalOutputToggleSwitch"
                                                         Width="48"
                                                         MinWidth="0"
                                                         Padding="0"
