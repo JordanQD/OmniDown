@@ -82,6 +82,7 @@ namespace OmniDown
         private bool _isLoadingCloseBehaviorSettings;
         private bool _isLoadingGeneralSettings;
         private bool _isLoadingDownloadSettings;
+        private bool _isLoadingBitTorrentSettings;
         private bool _isNewDownloadDialogOpen;
         private bool _hasTriggeredAutoShutdown;
         private bool _hasSeenActiveDownloadsForAutoShutdown;
@@ -122,6 +123,8 @@ namespace OmniDown
             InitializeAboutSection();
 
             LoadDownloadSettings();
+            LoadBitTorrentSettings();
+            _ = AutoSyncBitTorrentTrackersIfNeededAsync();
             LoadSpeedLimitSettings();
             LoadCloseBehaviorSettings();
             UpdateSearchPlaceholder();

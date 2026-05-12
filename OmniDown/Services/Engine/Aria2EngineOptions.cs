@@ -1,5 +1,7 @@
 namespace OmniDown.Services.Engine;
 
+using OmniDown.Models.Settings;
+
 public sealed record Aria2EngineOptions(
     string? ExecutablePath,
     int RpcPort,
@@ -12,7 +14,8 @@ public sealed record Aria2EngineOptions(
     bool ContinueDownloads,
     bool RemoteTime,
     int MaxTries,
-    int RetryWaitSeconds);
+    int RetryWaitSeconds,
+    BitTorrentSettings BitTorrentSettings);
 
 public sealed record Aria2EngineStartResult(
     bool Started,

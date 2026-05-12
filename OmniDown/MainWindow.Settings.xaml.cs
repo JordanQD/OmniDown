@@ -24,6 +24,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -73,9 +74,14 @@ namespace OmniDown
         private Border RetryWaitSettingCard => SettingsPage.RetryWaitSettingCardControl;
         private Border DownloadCleanupSettingCard => SettingsPage.DownloadCleanupSettingCardControl;
         private Border TorrentCleanupSettingCard => SettingsPage.TorrentCleanupSettingCardControl;
-        private Border BtEnableSettingCard => SettingsPage.BtEnableSettingCardControl;
-        private Border BtPortSettingCard => SettingsPage.BtPortSettingCardControl;
-        private Border BtSeedRatioSettingCard => SettingsPage.BtSeedRatioSettingCardControl;
+        private Border BtAutoDownloadSettingCard => SettingsPage.BtAutoDownloadSettingCardControl;
+        private Border BtForceEncryptionSettingCard => SettingsPage.BtForceEncryptionSettingCardControl;
+        private Border BtKeepSeedingSettingCard => SettingsPage.BtKeepSeedingSettingCardControl;
+        private Border BtMaxPeersSettingCard => SettingsPage.BtMaxPeersSettingCardControl;
+        private Border BtTrackerSourceSettingCard => SettingsPage.BtTrackerSourceSettingCardControl;
+        private Border BtTrackerCustomSourceSettingCard => SettingsPage.BtTrackerCustomSourceSettingCardControl;
+        private Border BtTrackerListSettingCard => SettingsPage.BtTrackerListSettingCardControl;
+        private Border BtAutoSyncTrackerSettingCard => SettingsPage.BtAutoSyncTrackerSettingCardControl;
         private Border UseSystemProxySettingCard => SettingsPage.UseSystemProxySettingCardControl;
         private Border CustomProxySettingCard => SettingsPage.CustomProxySettingCardControl;
         private Border RetrySettingCard => SettingsPage.RetrySettingCardControl;
@@ -127,8 +133,38 @@ namespace OmniDown
         private TextBlock AutoDeleteStaleRecordsStateText => SettingsPage.AutoDeleteStaleRecordsStateTextControl;
         private ToggleSwitch DeleteTorrentAfterCompleteToggleSwitch => SettingsPage.DeleteTorrentAfterCompleteToggleSwitchControl;
         private TextBlock DeleteTorrentAfterCompleteStateText => SettingsPage.DeleteTorrentAfterCompleteStateTextControl;
-        private ToggleSwitch BtEnableToggleSwitch => SettingsPage.BtEnableToggleSwitchControl;
-        private TextBlock BtEnableStateText => SettingsPage.BtEnableStateTextControl;
+        private ToggleSwitch BtAutoDownloadToggleSwitch => SettingsPage.BtAutoDownloadToggleSwitchControl;
+        private TextBlock BtAutoDownloadStateText => SettingsPage.BtAutoDownloadStateTextControl;
+        private ToggleSwitch BtForceEncryptionToggleSwitch => SettingsPage.BtForceEncryptionToggleSwitchControl;
+        private TextBlock BtForceEncryptionStateText => SettingsPage.BtForceEncryptionStateTextControl;
+        private ComboBox BtSeedingModeComboBox => SettingsPage.BtSeedingModeComboBoxControl;
+        private NumberBox BtSeedRatioNumberBox => SettingsPage.BtSeedRatioNumberBoxControl;
+        private NumberBox BtSeedTimeNumberBox => SettingsPage.BtSeedTimeNumberBoxControl;
+        private NumberBox BtMaxPeersNumberBox => SettingsPage.BtMaxPeersNumberBoxControl;
+        private Button BtTrackerSourceDropDownButton => SettingsPage.BtTrackerSourceDropDownButtonControl;
+        private TextBlock BtTrackerSourceSummaryText => SettingsPage.BtTrackerSourceSummaryTextControl;
+        private CheckBox BtTrackerNgosangBestCheckBox => SettingsPage.BtTrackerNgosangBestCheckBoxControl;
+        private CheckBox BtTrackerNgosangBestIpCheckBox => SettingsPage.BtTrackerNgosangBestIpCheckBoxControl;
+        private CheckBox BtTrackerNgosangAllCheckBox => SettingsPage.BtTrackerNgosangAllCheckBoxControl;
+        private CheckBox BtTrackerNgosangAllIpCheckBox => SettingsPage.BtTrackerNgosangAllIpCheckBoxControl;
+        private CheckBox BtTrackerNgosangCdnBestCheckBox => SettingsPage.BtTrackerNgosangCdnBestCheckBoxControl;
+        private CheckBox BtTrackerNgosangCdnBestIpCheckBox => SettingsPage.BtTrackerNgosangCdnBestIpCheckBoxControl;
+        private CheckBox BtTrackerNgosangCdnAllCheckBox => SettingsPage.BtTrackerNgosangCdnAllCheckBoxControl;
+        private CheckBox BtTrackerNgosangCdnAllIpCheckBox => SettingsPage.BtTrackerNgosangCdnAllIpCheckBoxControl;
+        private CheckBox BtTrackerXiu2BestCheckBox => SettingsPage.BtTrackerXiu2BestCheckBoxControl;
+        private CheckBox BtTrackerXiu2AllCheckBox => SettingsPage.BtTrackerXiu2AllCheckBoxControl;
+        private CheckBox BtTrackerXiu2HttpCheckBox => SettingsPage.BtTrackerXiu2HttpCheckBoxControl;
+        private CheckBox BtTrackerXiu2CdnBestCheckBox => SettingsPage.BtTrackerXiu2CdnBestCheckBoxControl;
+        private CheckBox BtTrackerXiu2CdnAllCheckBox => SettingsPage.BtTrackerXiu2CdnAllCheckBoxControl;
+        private CheckBox BtTrackerXiu2CdnHttpCheckBox => SettingsPage.BtTrackerXiu2CdnHttpCheckBoxControl;
+        private TextBox BtCustomTrackerSourceTextBox => SettingsPage.BtCustomTrackerSourceTextBoxControl;
+        private ListView BtCustomTrackerSourceListView => SettingsPage.BtCustomTrackerSourceListViewControl;
+        private TextBox BtTrackerSourceTextBox => SettingsPage.BtTrackerSourceTextBoxControl;
+        private Button BtSyncTrackerButton => SettingsPage.BtSyncTrackerButtonControl;
+        private TextBox BtTrackerListTextBox => SettingsPage.BtTrackerListTextBoxControl;
+        private ToggleSwitch BtAutoSyncTrackerToggleSwitch => SettingsPage.BtAutoSyncTrackerToggleSwitchControl;
+        private TextBlock BtAutoSyncTrackerStateText => SettingsPage.BtAutoSyncTrackerStateTextControl;
+        private TextBlock BtLastTrackerSyncText => SettingsPage.BtLastTrackerSyncTextControl;
         private ToggleSwitch UseSystemProxyCheckBox => SettingsPage.UseSystemProxyCheckBoxControl;
         private TextBlock UseSystemProxyStateText => SettingsPage.UseSystemProxyStateTextControl;
         private ToggleSwitch CustomProxyToggleSwitch => SettingsPage.CustomProxyToggleSwitchControl;
@@ -150,6 +186,9 @@ namespace OmniDown
             SettingsPage.NotificationActionSelectionChanged += NotificationActionComboBox_SelectionChanged;
             SettingsPage.BrowseDownloadDirectoryRequested += BrowseDownloadDirectoryButton_Click;
             SettingsPage.DownloadSettingChanged += DownloadSetting_Changed;
+            SettingsPage.BitTorrentSettingChanged += BitTorrentSetting_Changed;
+            SettingsPage.AddBtCustomTrackerRequested += AddBtCustomTrackerButton_Click;
+            SettingsPage.SyncBtTrackerRequested += SyncBtTrackerButton_Click;
             SettingsPage.StartAriaRequested += StartAriaButton_Click;
             SettingsPage.StopAriaRequested += StopAriaButton_Click;
             SettingsPage.CopyCloneCommandRequested += CopyCloneCommandButton_Click;
@@ -188,6 +227,28 @@ namespace OmniDown
             }
 
             SaveDownloadSettings();
+        }
+
+        private void BitTorrentSetting_Changed(object sender, RoutedEventArgs e)
+        {
+            if (_isLoadingBitTorrentSettings)
+            {
+                return;
+            }
+
+            UpdateBitTorrentDependentUi();
+            UpdateTrackerSourceSummary();
+            SaveBitTorrentSettings();
+        }
+
+        private void AddBtCustomTrackerButton_Click(object sender, RoutedEventArgs e)
+        {
+            AddCustomTrackerSource();
+        }
+
+        private async void SyncBtTrackerButton_Click(object sender, RoutedEventArgs e)
+        {
+            await SyncBitTorrentTrackersAsync();
         }
 
         private void SettingToggleSwitch_Toggled(object sender, RoutedEventArgs e)
@@ -509,7 +570,9 @@ namespace OmniDown
             if (ReferenceEquals(toggleSwitch, ContinueDownloadToggleSwitch)) return ContinueDownloadStateText;
             if (ReferenceEquals(toggleSwitch, AutoDeleteStaleRecordsToggleSwitch)) return AutoDeleteStaleRecordsStateText;
             if (ReferenceEquals(toggleSwitch, DeleteTorrentAfterCompleteToggleSwitch)) return DeleteTorrentAfterCompleteStateText;
-            if (ReferenceEquals(toggleSwitch, BtEnableToggleSwitch)) return BtEnableStateText;
+            if (ReferenceEquals(toggleSwitch, BtAutoDownloadToggleSwitch)) return BtAutoDownloadStateText;
+            if (ReferenceEquals(toggleSwitch, BtForceEncryptionToggleSwitch)) return BtForceEncryptionStateText;
+            if (ReferenceEquals(toggleSwitch, BtAutoSyncTrackerToggleSwitch)) return BtAutoSyncTrackerStateText;
             if (ReferenceEquals(toggleSwitch, UseSystemProxyCheckBox)) return UseSystemProxyStateText;
             if (ReferenceEquals(toggleSwitch, CustomProxyToggleSwitch)) return CustomProxyStateText;
             if (ReferenceEquals(toggleSwitch, TerminalOutputToggleSwitch)) return TerminalOutputStateText;
@@ -625,6 +688,478 @@ namespace OmniDown
             }
         }
 
+        private void LoadBitTorrentSettings()
+        {
+            _settingsPageViewModel.LoadBitTorrentSettings();
+            _isLoadingBitTorrentSettings = true;
+            try
+            {
+                ApplyBitTorrentSettingsToUi();
+            }
+            finally
+            {
+                _isLoadingBitTorrentSettings = false;
+            }
+        }
+
+        private void ApplyBitTorrentSettingsToUi()
+        {
+            BitTorrentSettings settings = NormalizeBitTorrentSettings(_settingsPageViewModel.BitTorrentSettings);
+            if (settings != _settingsPageViewModel.BitTorrentSettings)
+            {
+                _settingsPageViewModel.SaveBitTorrentSettings(settings);
+            }
+
+            SetToggleSwitch(BtAutoDownloadToggleSwitch, settings.AutoDownloadContent);
+            SetToggleSwitch(BtForceEncryptionToggleSwitch, settings.ForceEncryption);
+            SetSeedingModeSelection(settings.KeepSeeding);
+            SetToggleSwitch(BtAutoSyncTrackerToggleSwitch, settings.AutoSyncTracker);
+            BtSeedRatioNumberBox.Value = settings.SeedRatio;
+            BtSeedTimeNumberBox.Value = settings.SeedTimeMinutes;
+            BtMaxPeersNumberBox.Value = settings.MaxPeers;
+            ApplyTrackerSourceSelectionToUi(settings);
+            BtTrackerListTextBox.Text = settings.TrackerList;
+            UpdateBitTorrentDependentUi();
+            UpdateTrackerSyncTimeText(settings.LastSyncTrackerTime);
+        }
+
+        private void SaveBitTorrentSettings()
+        {
+            string[] selectedSources = GetSelectedTrackerSourceUrls();
+            BitTorrentSettings settings = NormalizeBitTorrentSettings(new BitTorrentSettings(
+                true,
+                BtAutoDownloadToggleSwitch?.IsOn == true,
+                BtForceEncryptionToggleSwitch?.IsOn == true,
+                IsKeepSeedingSelected(),
+                GetValidDoubleNumberBoxValue(BtSeedRatioNumberBox, 0, 100, 1.0),
+                GetValidIntNumberBoxValue(BtSeedTimeNumberBox, 0, 525600, 60),
+                GetValidIntNumberBoxValue(BtMaxPeersNumberBox, 1, 1000, 128),
+                BitTorrentSettings.Default.ListenPort,
+                selectedSources.FirstOrDefault() ?? BitTorrentSettings.DefaultTrackerSourceUrl,
+                selectedSources,
+                GetCustomTrackerUrls(),
+                NormalizeTrackerList(BtTrackerListTextBox.Text),
+                BtAutoSyncTrackerToggleSwitch?.IsOn == true,
+                _settingsPageViewModel.BitTorrentSettings.LastSyncTrackerTime));
+
+            _settingsPageViewModel.SaveBitTorrentSettings(settings);
+            UpdateTrackerSyncTimeText(settings.LastSyncTrackerTime);
+        }
+
+        private async Task SyncBitTorrentTrackersAsync()
+        {
+            string[] sourceUrls = GetSelectedTrackerSourceUrls();
+            if (sourceUrls.Length == 0)
+            {
+                ShowMessage("请至少选择一个 Tracker 来源。", InfoBarSeverity.Warning);
+                return;
+            }
+
+            BtSyncTrackerButton.IsEnabled = false;
+            try
+            {
+                using HttpClient client = new()
+                {
+                    Timeout = TimeSpan.FromSeconds(20)
+                };
+                List<string> trackerBlocks = [];
+                List<string> failedSources = [];
+                foreach (string sourceUrl in sourceUrls)
+                {
+                    try
+                    {
+                        trackerBlocks.Add(await client.GetStringAsync(sourceUrl));
+                    }
+                    catch
+                    {
+                        failedSources.Add(sourceUrl);
+                    }
+                }
+
+                string trackers = NormalizeTrackerList(string.Join(Environment.NewLine, trackerBlocks));
+                if (string.IsNullOrWhiteSpace(trackers))
+                {
+                    ShowMessage("Tracker 源没有返回可用地址。", InfoBarSeverity.Warning);
+                    return;
+                }
+
+                BtTrackerListTextBox.Text = trackers;
+                BitTorrentSettings settings = NormalizeBitTorrentSettings(new BitTorrentSettings(
+                    true,
+                    BtAutoDownloadToggleSwitch?.IsOn == true,
+                    BtForceEncryptionToggleSwitch?.IsOn == true,
+                    IsKeepSeedingSelected(),
+                    GetValidDoubleNumberBoxValue(BtSeedRatioNumberBox, 0, 100, 1.0),
+                    GetValidIntNumberBoxValue(BtSeedTimeNumberBox, 0, 525600, 60),
+                    GetValidIntNumberBoxValue(BtMaxPeersNumberBox, 1, 1000, 128),
+                    BitTorrentSettings.Default.ListenPort,
+                    sourceUrls[0],
+                    sourceUrls,
+                    GetCustomTrackerUrls(),
+                    trackers,
+                    BtAutoSyncTrackerToggleSwitch?.IsOn == true,
+                    DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()));
+                _settingsPageViewModel.SaveBitTorrentSettings(settings);
+                UpdateTrackerSyncTimeText(settings.LastSyncTrackerTime);
+                ShowMessage(failedSources.Count == 0 ? "Tracker 已同步。" : $"Tracker 已部分同步，{failedSources.Count} 个来源失败。", failedSources.Count == 0 ? InfoBarSeverity.Success : InfoBarSeverity.Warning);
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Tracker 同步失败：{ex.Message}", InfoBarSeverity.Error);
+            }
+            finally
+            {
+                BtSyncTrackerButton.IsEnabled = true;
+            }
+        }
+
+        private async Task AutoSyncBitTorrentTrackersIfNeededAsync()
+        {
+            BitTorrentSettings current = _settingsPageViewModel.BitTorrentSettings;
+            if (!current.AutoSyncTracker)
+            {
+                return;
+            }
+
+            long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            long oneDay = (long)TimeSpan.FromDays(1).TotalMilliseconds;
+            string[] sourceUrls = NormalizeTrackerSourceUrls(current.SelectedTrackerSourceUrls, current.TrackerSourceUrl, current.CustomTrackerUrls);
+            if (now - current.LastSyncTrackerTime < oneDay || sourceUrls.Length == 0)
+            {
+                return;
+            }
+
+            try
+            {
+                using HttpClient client = new()
+                {
+                    Timeout = TimeSpan.FromSeconds(20)
+                };
+                List<string> trackerBlocks = [];
+                foreach (string sourceUrl in sourceUrls)
+                {
+                    try
+                    {
+                        trackerBlocks.Add(await client.GetStringAsync(sourceUrl));
+                    }
+                    catch
+                    {
+                    }
+                }
+
+                string trackers = NormalizeTrackerList(string.Join(Environment.NewLine, trackerBlocks));
+                if (string.IsNullOrWhiteSpace(trackers))
+                {
+                    return;
+                }
+
+                BitTorrentSettings updated = current with
+                {
+                    TrackerList = trackers,
+                    LastSyncTrackerTime = now
+                };
+                _settingsPageViewModel.SaveBitTorrentSettings(updated);
+                BtTrackerListTextBox.Text = trackers;
+                UpdateTrackerSyncTimeText(now);
+            }
+            catch
+            {
+                // Auto-sync is best-effort; manual sync still reports failures.
+            }
+        }
+
+        private void AddCustomTrackerSource()
+        {
+            string url = BtCustomTrackerSourceTextBox.Text.Trim();
+            if (!IsValidHttpUrl(url))
+            {
+                ShowMessage("请输入有效的 HTTP/HTTPS Tracker 源地址。", InfoBarSeverity.Warning);
+                return;
+            }
+
+            string[] customUrls = GetCustomTrackerUrls();
+            if (customUrls.Contains(url, StringComparer.OrdinalIgnoreCase))
+            {
+                BtCustomTrackerSourceTextBox.Text = string.Empty;
+                return;
+            }
+
+            BtCustomTrackerSourceListView.Items.Add(url);
+            BtCustomTrackerSourceListView.SelectedItems.Add(url);
+            BtCustomTrackerSourceTextBox.Text = string.Empty;
+            UpdateTrackerSourceSummary();
+            SaveBitTorrentSettings();
+        }
+
+        private void ApplyTrackerSourceSelectionToUi(BitTorrentSettings settings)
+        {
+            string[] selectedSources = NormalizeTrackerSourceUrls(settings.SelectedTrackerSourceUrls, settings.TrackerSourceUrl, settings.CustomTrackerUrls);
+            foreach ((_, string url, CheckBox checkBox) in GetBuiltInTrackerSourceCheckBoxes())
+            {
+                SetCheckBox(checkBox, selectedSources.Contains(url, StringComparer.OrdinalIgnoreCase));
+            }
+
+            BtCustomTrackerSourceListView.Items.Clear();
+            foreach (string url in GetNormalizedUrls(settings.CustomTrackerUrls))
+            {
+                BtCustomTrackerSourceListView.Items.Add(url);
+                if (selectedSources.Contains(url, StringComparer.OrdinalIgnoreCase))
+                {
+                    BtCustomTrackerSourceListView.SelectedItems.Add(url);
+                }
+            }
+
+            BtTrackerSourceTextBox.Text = selectedSources.FirstOrDefault() ?? BitTorrentSettings.DefaultTrackerSourceUrl;
+            UpdateTrackerSourceSummary();
+        }
+
+        private string[] GetSelectedTrackerSourceUrls()
+        {
+            List<string> urls = [];
+            foreach ((_, string url, CheckBox checkBox) in GetBuiltInTrackerSourceCheckBoxes())
+            {
+                if (checkBox?.IsChecked == true)
+                {
+                    urls.Add(url);
+                }
+            }
+
+            foreach (object item in BtCustomTrackerSourceListView.SelectedItems)
+            {
+                if (item?.ToString() is string url && IsValidHttpUrl(url))
+                {
+                    urls.Add(url);
+                }
+            }
+
+            return GetNormalizedUrls(urls);
+        }
+
+        private (string Label, string Url, CheckBox CheckBox)[] GetBuiltInTrackerSourceCheckBoxes()
+        {
+            return
+            [
+                ("trackers_best.txt", GetTrackerSourceUrl(BtTrackerNgosangBestCheckBox), BtTrackerNgosangBestCheckBox),
+                ("trackers_best_ip.txt", GetTrackerSourceUrl(BtTrackerNgosangBestIpCheckBox), BtTrackerNgosangBestIpCheckBox),
+                ("trackers_all.txt", GetTrackerSourceUrl(BtTrackerNgosangAllCheckBox), BtTrackerNgosangAllCheckBox),
+                ("trackers_all_ip.txt", GetTrackerSourceUrl(BtTrackerNgosangAllIpCheckBox), BtTrackerNgosangAllIpCheckBox),
+                ("trackers_best.txt CDN", GetTrackerSourceUrl(BtTrackerNgosangCdnBestCheckBox), BtTrackerNgosangCdnBestCheckBox),
+                ("trackers_best_ip.txt CDN", GetTrackerSourceUrl(BtTrackerNgosangCdnBestIpCheckBox), BtTrackerNgosangCdnBestIpCheckBox),
+                ("trackers_all.txt CDN", GetTrackerSourceUrl(BtTrackerNgosangCdnAllCheckBox), BtTrackerNgosangCdnAllCheckBox),
+                ("trackers_all_ip.txt CDN", GetTrackerSourceUrl(BtTrackerNgosangCdnAllIpCheckBox), BtTrackerNgosangCdnAllIpCheckBox),
+                ("best.txt", GetTrackerSourceUrl(BtTrackerXiu2BestCheckBox), BtTrackerXiu2BestCheckBox),
+                ("all.txt", GetTrackerSourceUrl(BtTrackerXiu2AllCheckBox), BtTrackerXiu2AllCheckBox),
+                ("http.txt", GetTrackerSourceUrl(BtTrackerXiu2HttpCheckBox), BtTrackerXiu2HttpCheckBox),
+                ("best.txt CDN", GetTrackerSourceUrl(BtTrackerXiu2CdnBestCheckBox), BtTrackerXiu2CdnBestCheckBox),
+                ("all.txt CDN", GetTrackerSourceUrl(BtTrackerXiu2CdnAllCheckBox), BtTrackerXiu2CdnAllCheckBox),
+                ("http.txt CDN", GetTrackerSourceUrl(BtTrackerXiu2CdnHttpCheckBox), BtTrackerXiu2CdnHttpCheckBox)
+            ];
+        }
+
+        private static string GetTrackerSourceUrl(CheckBox checkBox)
+        {
+            return checkBox?.Tag?.ToString() ?? string.Empty;
+        }
+
+        private void UpdateTrackerSourceSummary()
+        {
+            if (BtTrackerSourceSummaryText is null)
+            {
+                return;
+            }
+
+            List<string> selectedLabels = [];
+            foreach ((string label, _, CheckBox checkBox) in GetBuiltInTrackerSourceCheckBoxes())
+            {
+                if (checkBox?.IsChecked == true)
+                {
+                    selectedLabels.Add(label);
+                }
+            }
+
+            foreach (object item in BtCustomTrackerSourceListView.SelectedItems)
+            {
+                if (item?.ToString() is string url && IsValidHttpUrl(url))
+                {
+                    selectedLabels.Add(new Uri(url).Host);
+                }
+            }
+
+            BtTrackerSourceSummaryText.Text = selectedLabels.Count switch
+            {
+                0 => "选择 Tracker 来源",
+                1 => selectedLabels[0],
+                <= 3 => string.Join(", ", selectedLabels),
+                _ => $"已选择 {selectedLabels.Count} 个来源"
+            };
+        }
+
+        private string[] GetCustomTrackerUrls()
+        {
+            List<string> urls = [];
+            foreach (object item in BtCustomTrackerSourceListView.Items)
+            {
+                if (item?.ToString() is string url && IsValidHttpUrl(url))
+                {
+                    urls.Add(url);
+                }
+            }
+
+            return GetNormalizedUrls(urls);
+        }
+
+        private static string[] NormalizeTrackerSourceUrls(string[]? selectedUrls, string? legacyUrl, string[]? customUrls)
+        {
+            string[] normalized = GetNormalizedUrls(selectedUrls);
+            if (normalized.Length > 0)
+            {
+                return normalized;
+            }
+
+            return IsValidHttpUrl(legacyUrl ?? string.Empty)
+                ? [legacyUrl!.Trim()]
+                : [BitTorrentSettings.DefaultTrackerSourceUrl];
+        }
+
+        private static string[] GetNormalizedUrls(IEnumerable<string>? urls)
+        {
+            if (urls is null)
+            {
+                return [];
+            }
+
+            return urls
+                .Select(url => url.Trim())
+                .Where(IsValidHttpUrl)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+        }
+
+        private static void SetCheckBox(CheckBox checkBox, bool isChecked)
+        {
+            if (checkBox is not null)
+            {
+                checkBox.IsChecked = isChecked;
+            }
+        }
+
+        private bool IsKeepSeedingSelected()
+        {
+            return BtSeedingModeComboBox?.SelectedItem is ComboBoxItem item &&
+                item.Tag?.ToString()?.Equals("Always", StringComparison.OrdinalIgnoreCase) == true;
+        }
+
+        private void SetSeedingModeSelection(bool keepSeeding)
+        {
+            if (BtSeedingModeComboBox is null)
+            {
+                return;
+            }
+
+            string mode = keepSeeding ? "Always" : "Limited";
+            for (int index = 0; index < BtSeedingModeComboBox.Items.Count; index++)
+            {
+                if (BtSeedingModeComboBox.Items[index] is ComboBoxItem item &&
+                    item.Tag?.ToString()?.Equals(mode, StringComparison.OrdinalIgnoreCase) == true)
+                {
+                    BtSeedingModeComboBox.SelectedIndex = index;
+                    return;
+                }
+            }
+
+            BtSeedingModeComboBox.SelectedIndex = 0;
+        }
+
+        private void UpdateBitTorrentDependentUi()
+        {
+            const bool isEnabled = true;
+            bool keepSeeding = IsKeepSeedingSelected();
+
+            BtAutoDownloadToggleSwitch.IsEnabled = isEnabled;
+            BtForceEncryptionToggleSwitch.IsEnabled = isEnabled;
+            BtSeedingModeComboBox.IsEnabled = isEnabled;
+            BtSeedRatioNumberBox.IsEnabled = isEnabled && !keepSeeding;
+            BtSeedTimeNumberBox.IsEnabled = isEnabled && !keepSeeding;
+            BtMaxPeersNumberBox.IsEnabled = isEnabled;
+            BtTrackerSourceDropDownButton.IsEnabled = isEnabled;
+            foreach ((_, _, CheckBox checkBox) in GetBuiltInTrackerSourceCheckBoxes())
+            {
+                checkBox.IsEnabled = isEnabled;
+            }
+
+            BtCustomTrackerSourceTextBox.IsEnabled = isEnabled;
+            BtCustomTrackerSourceListView.IsEnabled = isEnabled;
+            BtTrackerSourceTextBox.IsEnabled = isEnabled;
+            BtSyncTrackerButton.IsEnabled = isEnabled;
+            BtTrackerListTextBox.IsEnabled = isEnabled;
+            BtAutoSyncTrackerToggleSwitch.IsEnabled = isEnabled;
+        }
+
+        private void UpdateTrackerSyncTimeText(long lastSyncTime)
+        {
+            if (BtLastTrackerSyncText is null)
+            {
+                return;
+            }
+
+            BtLastTrackerSyncText.Text = lastSyncTime <= 0
+                ? "尚未同步 Tracker。"
+                : $"上次同步：{DateTimeOffset.FromUnixTimeMilliseconds(lastSyncTime).LocalDateTime:g}";
+        }
+
+        private static BitTorrentSettings NormalizeBitTorrentSettings(BitTorrentSettings settings)
+        {
+            string listenPort = string.IsNullOrWhiteSpace(settings.ListenPort)
+                ? BitTorrentSettings.Default.ListenPort
+                : settings.ListenPort.Trim();
+            string sourceUrl = string.IsNullOrWhiteSpace(settings.TrackerSourceUrl)
+                ? BitTorrentSettings.DefaultTrackerSourceUrl
+                : settings.TrackerSourceUrl.Trim();
+
+            return settings with
+            {
+                IsEnabled = true,
+                SeedRatio = Math.Clamp(settings.SeedRatio, 0, 100),
+                SeedTimeMinutes = Math.Clamp(settings.SeedTimeMinutes, 0, 525600),
+                MaxPeers = Math.Clamp(settings.MaxPeers, 1, 1000),
+                ListenPort = listenPort,
+                TrackerSourceUrl = sourceUrl,
+                SelectedTrackerSourceUrls = NormalizeTrackerSourceUrls(settings.SelectedTrackerSourceUrls, sourceUrl, settings.CustomTrackerUrls),
+                CustomTrackerUrls = GetNormalizedUrls(settings.CustomTrackerUrls),
+                TrackerList = NormalizeTrackerList(settings.TrackerList)
+            };
+        }
+
+        private static string NormalizeTrackerList(string? trackerList)
+        {
+            if (string.IsNullOrWhiteSpace(trackerList))
+            {
+                return string.Empty;
+            }
+
+            return string.Join(Environment.NewLine, trackerList
+                .Replace(",", "\n", StringComparison.Ordinal)
+                .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Where(line => !line.StartsWith('#') && IsLikelyTrackerUrl(line))
+                .Distinct(StringComparer.OrdinalIgnoreCase));
+        }
+
+        private static bool IsLikelyTrackerUrl(string value)
+        {
+            return value.StartsWith("udp://", StringComparison.OrdinalIgnoreCase) ||
+                value.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                value.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ||
+                value.StartsWith("ws://", StringComparison.OrdinalIgnoreCase) ||
+                value.StartsWith("wss://", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsValidHttpUrl(string value)
+        {
+            return Uri.TryCreate(value, UriKind.Absolute, out Uri? uri) &&
+                (uri.Scheme.Equals(Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase) ||
+                    uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase));
+        }
+
         private void LoadDownloadSettings()
         {
             _settingsPageViewModel.LoadDownloadSettings();
@@ -731,6 +1266,16 @@ namespace OmniDown
             return numberBox is null || double.IsNaN(numberBox.Value) || numberBox.Value < 1
                 ? 1
                 : numberBox.Value;
+        }
+
+        private static double GetValidDoubleNumberBoxValue(NumberBox numberBox, double minimum, double maximum, double fallback)
+        {
+            if (numberBox is null || double.IsNaN(numberBox.Value))
+            {
+                return fallback;
+            }
+
+            return Math.Clamp(numberBox.Value, minimum, maximum);
         }
 
         private static int GetValidIntNumberBoxValue(NumberBox numberBox, int minimum, int maximum, int fallback)

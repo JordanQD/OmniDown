@@ -1,5 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Animation;
+using System;
 
 namespace OmniDown.Controls;
 
@@ -41,9 +43,14 @@ public sealed partial class SettingsPageControl : UserControl
     internal Border RetryWaitSettingCardControl => RetryWaitSettingCard;
     internal Border DownloadCleanupSettingCardControl => DownloadCleanupSettingCard;
     internal Border TorrentCleanupSettingCardControl => TorrentCleanupSettingCard;
-    internal Border BtEnableSettingCardControl => BtEnableSettingCard;
-    internal Border BtPortSettingCardControl => BtPortSettingCard;
-    internal Border BtSeedRatioSettingCardControl => BtSeedRatioSettingCard;
+    internal Border BtAutoDownloadSettingCardControl => BtAutoDownloadSettingCard;
+    internal Border BtForceEncryptionSettingCardControl => BtForceEncryptionSettingCard;
+    internal Border BtKeepSeedingSettingCardControl => BtKeepSeedingSettingCard;
+    internal Border BtMaxPeersSettingCardControl => BtMaxPeersSettingCard;
+    internal Border BtTrackerSourceSettingCardControl => BtTrackerSourceSettingCard;
+    internal Border BtTrackerCustomSourceSettingCardControl => BtTrackerCustomSourceSettingCard;
+    internal Border BtTrackerListSettingCardControl => BtTrackerListSettingCard;
+    internal Border BtAutoSyncTrackerSettingCardControl => BtAutoSyncTrackerSettingCard;
     internal Border UseSystemProxySettingCardControl => UseSystemProxySettingCard;
     internal Border CustomProxySettingCardControl => CustomProxySettingCard;
     internal Border RetrySettingCardControl => RetrySettingCard;
@@ -95,8 +102,38 @@ public sealed partial class SettingsPageControl : UserControl
     internal TextBlock AutoDeleteStaleRecordsStateTextControl => AutoDeleteStaleRecordsStateText;
     internal ToggleSwitch DeleteTorrentAfterCompleteToggleSwitchControl => DeleteTorrentAfterCompleteToggleSwitch;
     internal TextBlock DeleteTorrentAfterCompleteStateTextControl => DeleteTorrentAfterCompleteStateText;
-    internal ToggleSwitch BtEnableToggleSwitchControl => BtEnableToggleSwitch;
-    internal TextBlock BtEnableStateTextControl => BtEnableStateText;
+    internal ToggleSwitch BtAutoDownloadToggleSwitchControl => BtAutoDownloadToggleSwitch;
+    internal TextBlock BtAutoDownloadStateTextControl => BtAutoDownloadStateText;
+    internal ToggleSwitch BtForceEncryptionToggleSwitchControl => BtForceEncryptionToggleSwitch;
+    internal TextBlock BtForceEncryptionStateTextControl => BtForceEncryptionStateText;
+    internal ComboBox BtSeedingModeComboBoxControl => BtSeedingModeComboBox;
+    internal NumberBox BtSeedRatioNumberBoxControl => BtSeedRatioNumberBox;
+    internal NumberBox BtSeedTimeNumberBoxControl => BtSeedTimeNumberBox;
+    internal NumberBox BtMaxPeersNumberBoxControl => BtMaxPeersNumberBox;
+    internal Button BtTrackerSourceDropDownButtonControl => BtTrackerSourceDropDownButton;
+    internal TextBlock BtTrackerSourceSummaryTextControl => BtTrackerSourceSummaryText;
+    internal CheckBox BtTrackerNgosangBestCheckBoxControl => BtTrackerNgosangBestCheckBox;
+    internal CheckBox BtTrackerNgosangBestIpCheckBoxControl => BtTrackerNgosangBestIpCheckBox;
+    internal CheckBox BtTrackerNgosangAllCheckBoxControl => BtTrackerNgosangAllCheckBox;
+    internal CheckBox BtTrackerNgosangAllIpCheckBoxControl => BtTrackerNgosangAllIpCheckBox;
+    internal CheckBox BtTrackerNgosangCdnBestCheckBoxControl => BtTrackerNgosangCdnBestCheckBox;
+    internal CheckBox BtTrackerNgosangCdnBestIpCheckBoxControl => BtTrackerNgosangCdnBestIpCheckBox;
+    internal CheckBox BtTrackerNgosangCdnAllCheckBoxControl => BtTrackerNgosangCdnAllCheckBox;
+    internal CheckBox BtTrackerNgosangCdnAllIpCheckBoxControl => BtTrackerNgosangCdnAllIpCheckBox;
+    internal CheckBox BtTrackerXiu2BestCheckBoxControl => BtTrackerXiu2BestCheckBox;
+    internal CheckBox BtTrackerXiu2AllCheckBoxControl => BtTrackerXiu2AllCheckBox;
+    internal CheckBox BtTrackerXiu2HttpCheckBoxControl => BtTrackerXiu2HttpCheckBox;
+    internal CheckBox BtTrackerXiu2CdnBestCheckBoxControl => BtTrackerXiu2CdnBestCheckBox;
+    internal CheckBox BtTrackerXiu2CdnAllCheckBoxControl => BtTrackerXiu2CdnAllCheckBox;
+    internal CheckBox BtTrackerXiu2CdnHttpCheckBoxControl => BtTrackerXiu2CdnHttpCheckBox;
+    internal TextBox BtCustomTrackerSourceTextBoxControl => BtCustomTrackerSourceTextBox;
+    internal ListView BtCustomTrackerSourceListViewControl => BtCustomTrackerSourceListView;
+    internal TextBox BtTrackerSourceTextBoxControl => BtTrackerSourceTextBox;
+    internal Button BtSyncTrackerButtonControl => BtSyncTrackerButton;
+    internal TextBox BtTrackerListTextBoxControl => BtTrackerListTextBox;
+    internal ToggleSwitch BtAutoSyncTrackerToggleSwitchControl => BtAutoSyncTrackerToggleSwitch;
+    internal TextBlock BtAutoSyncTrackerStateTextControl => BtAutoSyncTrackerStateText;
+    internal TextBlock BtLastTrackerSyncTextControl => BtLastTrackerSyncText;
     internal ToggleSwitch UseSystemProxyCheckBoxControl => UseSystemProxyCheckBox;
     internal TextBlock UseSystemProxyStateTextControl => UseSystemProxyStateText;
     internal ToggleSwitch CustomProxyToggleSwitchControl => CustomProxyToggleSwitch;
@@ -116,6 +153,9 @@ public sealed partial class SettingsPageControl : UserControl
     internal event SelectionChangedEventHandler? NotificationActionSelectionChanged;
     internal event RoutedEventHandler? BrowseDownloadDirectoryRequested;
     internal event RoutedEventHandler? DownloadSettingChanged;
+    internal event RoutedEventHandler? BitTorrentSettingChanged;
+    internal event RoutedEventHandler? AddBtCustomTrackerRequested;
+    internal event RoutedEventHandler? SyncBtTrackerRequested;
     internal event RoutedEventHandler? StartAriaRequested;
     internal event RoutedEventHandler? StopAriaRequested;
     internal event RoutedEventHandler? CopyCloneCommandRequested;
@@ -165,6 +205,89 @@ public sealed partial class SettingsPageControl : UserControl
     private void DownloadSettingComboBox_SelectionChanged(object sender, SelectionChangedEventArgs args)
     {
         DownloadSettingChanged?.Invoke(sender, new RoutedEventArgs());
+    }
+
+    private void BitTorrentSettingToggleSwitch_Toggled(object sender, RoutedEventArgs args)
+    {
+        SettingToggleSwitch_Toggled(sender, args);
+        BitTorrentSettingChanged?.Invoke(sender, args);
+    }
+
+    private void BitTorrentSettingTextBox_TextChanged(object sender, TextChangedEventArgs args)
+    {
+        BitTorrentSettingChanged?.Invoke(sender, new RoutedEventArgs());
+    }
+
+    private void BitTorrentSettingNumberBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
+    {
+        BitTorrentSettingChanged?.Invoke(sender, new RoutedEventArgs());
+    }
+
+    private void BitTorrentSettingComboBox_SelectionChanged(object sender, SelectionChangedEventArgs args)
+    {
+        BitTorrentSettingChanged?.Invoke(sender, new RoutedEventArgs());
+    }
+
+    private void BitTorrentSettingCheckBox_Changed(object sender, RoutedEventArgs args)
+    {
+        BitTorrentSettingChanged?.Invoke(sender, args);
+    }
+
+    private void BitTorrentSettingListView_SelectionChanged(object sender, SelectionChangedEventArgs args)
+    {
+        BitTorrentSettingChanged?.Invoke(sender, new RoutedEventArgs());
+    }
+
+    private void AddBtCustomTrackerButton_Click(object sender, RoutedEventArgs args)
+    {
+        AddBtCustomTrackerRequested?.Invoke(sender, args);
+    }
+
+    private void ToggleBtSeedSettingsButton_Click(object sender, RoutedEventArgs args)
+    {
+        bool shouldExpand = BtSeedLimitsBox.Visibility != Visibility.Visible;
+        AnimateSettingsPanel(BtSeedLimitsBox, shouldExpand);
+        BtSeedChevronIcon.Glyph = shouldExpand ? "\uE70E" : "\uE70D";
+    }
+
+    private void ToggleBtTrackerListButton_Click(object sender, RoutedEventArgs args)
+    {
+        bool shouldExpand = BtTrackerListBox.Visibility != Visibility.Visible;
+        AnimateSettingsPanel(BtTrackerListBox, shouldExpand);
+        BtTrackerListChevronIcon.Glyph = shouldExpand ? "\uE70E" : "\uE70D";
+    }
+
+    private static void AnimateSettingsPanel(UIElement panel, bool expand)
+    {
+        if (expand)
+        {
+            panel.Visibility = Visibility.Visible;
+        }
+
+        DoubleAnimation opacityAnimation = new()
+        {
+            From = expand ? 0 : 1,
+            To = expand ? 1 : 0,
+            Duration = new Duration(TimeSpan.FromMilliseconds(140)),
+            EnableDependentAnimation = true
+        };
+
+        Storyboard.SetTarget(opacityAnimation, panel);
+        Storyboard.SetTargetProperty(opacityAnimation, "Opacity");
+
+        Storyboard storyboard = new();
+        storyboard.Children.Add(opacityAnimation);
+        if (!expand)
+        {
+            storyboard.Completed += (_, _) => panel.Visibility = Visibility.Collapsed;
+        }
+
+        storyboard.Begin();
+    }
+
+    private void SyncBtTrackerButton_Click(object sender, RoutedEventArgs args)
+    {
+        SyncBtTrackerRequested?.Invoke(sender, args);
     }
 
     private void StartAriaButton_Click(object sender, RoutedEventArgs args)

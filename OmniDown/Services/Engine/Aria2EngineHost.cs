@@ -2,6 +2,8 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -252,6 +254,8 @@ public sealed class Aria2EngineHost : IDisposable
             $"--dht-file-path6={dht6Path}"
         ];
 
+        AddBitTorrentArguments(arguments, options);
+
         string? confPath = ResolveBundledConfigPath(resolvedExecutablePath);
         if (!string.IsNullOrWhiteSpace(confPath))
         {
@@ -289,6 +293,68 @@ public sealed class Aria2EngineHost : IDisposable
         }
 
         return arguments;
+    }
+
+    private static void AddBitTorrentArguments(List<string> arguments, Aria2EngineOptions options)
+    {
+        var settings = options.BitTorrentSettings;
+        bool autoContent = settings.IsEnabled && settings.AutoDownloadContent;
+        double seedRatio = settings.KeepSeeding ? 0 : Math.Clamp(settings.SeedRatio, 0, 100);
+        int seedTime = settings.KeepSeeding ? 0 : Math.Clamp(settings.SeedTimeMinutes, 0, 525600);
+
+        arguments.AddRange(
+        [
+            $"--follow-torrent={FormatAriaBool(autoContent)}",
+            $"--follow-metalink={FormatAriaBool(autoContent)}",
+            $"--pause-metadata={FormatAriaBool(!autoContent)}",
+            $"--bt-force-encryption={FormatAriaBool(settings.IsEnabled && settings.ForceEncryption)}",
+            $"--seed-ratio={seedRatio.ToString("0.###", CultureInfo.InvariantCulture)}",
+            $"--seed-time={seedTime}",
+            $"--bt-max-peers={Math.Clamp(settings.MaxPeers, 1, 1000)}",
+            $"--listen-port={NormalizeListenPort(settings.ListenPort)}",
+            "--enable-dht=true",
+            "--enable-dht6=true",
+            "--enable-peer-exchange=true",
+            "--bt-enable-lpd=true",
+            "--bt-save-metadata=true",
+            "--bt-load-saved-metadata=true"
+        ]);
+
+        string trackers = ToAriaTrackerList(settings.TrackerList);
+        if (!string.IsNullOrWhiteSpace(trackers))
+        {
+            arguments.Add($"--bt-tracker={trackers}");
+        }
+    }
+
+    private static string NormalizeListenPort(string? listenPort)
+    {
+        return string.IsNullOrWhiteSpace(listenPort)
+            ? "6881-6999"
+            : listenPort.Trim();
+    }
+
+    private static string ToAriaTrackerList(string? trackerList)
+    {
+        if (string.IsNullOrWhiteSpace(trackerList))
+        {
+            return string.Empty;
+        }
+
+        return string.Join(",", trackerList
+            .Replace(",", "\n", StringComparison.Ordinal)
+            .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(IsLikelyTrackerUrl)
+            .Distinct(StringComparer.OrdinalIgnoreCase));
+    }
+
+    private static bool IsLikelyTrackerUrl(string value)
+    {
+        return value.StartsWith("udp://", StringComparison.OrdinalIgnoreCase) ||
+            value.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+            value.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ||
+            value.StartsWith("ws://", StringComparison.OrdinalIgnoreCase) ||
+            value.StartsWith("wss://", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string FormatAriaBool(bool value)

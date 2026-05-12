@@ -441,9 +441,14 @@ namespace OmniDown
             SetSettingVisibility(DownloadCleanupSettingCard, query, "cleanup", "stale", "record", "清理", "记录");
             SetSettingVisibility(TorrentCleanupSettingCard, query, "torrent", "cleanup", "delete", "种子", "清理", "删除");
 
-            SetSettingVisibility(BtEnableSettingCard, query, "bittorrent", "torrent", "magnet", "bt", "磁力", "种子");
-            SetSettingVisibility(BtPortSettingCard, query, "bittorrent", "port", "listen", "bt", "端口");
-            SetSettingVisibility(BtSeedRatioSettingCard, query, "bittorrent", "seed", "ratio", "bt", "做种", "分享率");
+            SetSettingVisibility(BtAutoDownloadSettingCard, query, "bittorrent", "torrent", "metalink", "magnet", "auto", "内容", "自动");
+            SetSettingVisibility(BtForceEncryptionSettingCard, query, "bittorrent", "encryption", "crypto", "加密");
+            SetSettingVisibility(BtKeepSeedingSettingCard, query, "bittorrent", "seed", "keep", "ratio", "time", "bt", "做种", "分享率", "时间");
+            SetSettingVisibility(BtMaxPeersSettingCard, query, "bittorrent", "peer", "max", "bt", "连接");
+            SetSettingVisibility(BtTrackerSourceSettingCard, query, "bittorrent", "tracker", "source", "sync", "bt", "同步");
+            SetSettingVisibility(BtTrackerCustomSourceSettingCard, query, "bittorrent", "tracker", "custom", "url", "bt", "自定义");
+            SetSettingVisibility(BtTrackerListSettingCard, query, "bittorrent", "tracker", "list", "bt");
+            SetSettingVisibility(BtAutoSyncTrackerSettingCard, query, "bittorrent", "tracker", "auto sync", "bt", "自动同步");
 
             SetSettingVisibility(UseSystemProxySettingCard, query, "proxy", "system proxy", Strings.Get("ProxyLabel.Text"), "Use Windows system proxy when aria2 starts", "代理");
             SetSettingVisibility(CustomProxySettingCard, query, "proxy", "http", "https", "socks", "custom", "代理");

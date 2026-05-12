@@ -16,6 +16,8 @@ internal sealed class SettingsPageViewModel
 
     public DownloadSettings DownloadSettings { get; private set; } = DownloadSettings.Default;
 
+    public BitTorrentSettings BitTorrentSettings { get; private set; } = BitTorrentSettings.Default;
+
     public CloseBehaviorSettings CloseBehaviorSettings { get; private set; } = CloseBehaviorSettings.Default;
 
     public SpeedLimitSettings SpeedLimitSettings { get; private set; } = SpeedLimitSettings.Default;
@@ -40,6 +42,17 @@ internal sealed class SettingsPageViewModel
     {
         DownloadSettings = settings;
         _settingsStore.SaveDownloadSettings(settings);
+    }
+
+    public void LoadBitTorrentSettings()
+    {
+        BitTorrentSettings = _settingsStore.ReadBitTorrentSettings();
+    }
+
+    public void SaveBitTorrentSettings(BitTorrentSettings settings)
+    {
+        BitTorrentSettings = settings;
+        _settingsStore.SaveBitTorrentSettings(settings);
     }
 
     public void LoadCloseBehaviorSettings()
