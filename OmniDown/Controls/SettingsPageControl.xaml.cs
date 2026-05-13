@@ -53,7 +53,13 @@ public sealed partial class SettingsPageControl : UserControl
     internal Border BtAutoSyncTrackerSettingCardControl => BtAutoSyncTrackerSettingCard;
     internal Border UseSystemProxySettingCardControl => UseSystemProxySettingCard;
     internal Border CustomProxySettingCardControl => CustomProxySettingCard;
-    internal Border RetrySettingCardControl => RetrySettingCard;
+    internal Border UpnpSettingCardControl => UpnpSettingCard;
+    internal Border BtPortSettingCardControl => BtPortSettingCard;
+    internal Border DhtPortSettingCardControl => DhtPortSettingCard;
+    internal Border UserAgentSettingCardControl => UserAgentSettingCard;
+    internal Border ConnectTimeoutSettingCardControl => ConnectTimeoutSettingCard;
+    internal Border TimeoutSettingCardControl => TimeoutSettingCard;
+    internal Border FileAllocationSettingCardControl => FileAllocationSettingCard;
     internal Border AriaPathSettingCardControl => AriaPathSettingCard;
     internal Border RpcPortSettingCardControl => RpcPortSettingCard;
     internal Border ProcessStatusSettingCardControl => ProcessStatusSettingCard;
@@ -62,6 +68,7 @@ public sealed partial class SettingsPageControl : UserControl
     internal Border AboutCloneCardControl => AboutCloneCard;
     internal Border AboutIssueCardControl => AboutIssueCard;
     internal Border AboutReferencesCardControl => AboutReferencesCard;
+    internal Border AboutTrackerSourcesCardControl => AboutTrackerSourcesCard;
     internal Border AboutLicenseCardControl => AboutLicenseCard;
     internal ToggleSwitch AutoStartToggleSwitchControl => AutoStartToggleSwitch;
     internal TextBlock AutoStartStateTextControl => AutoStartStateText;
@@ -138,6 +145,19 @@ public sealed partial class SettingsPageControl : UserControl
     internal TextBlock UseSystemProxyStateTextControl => UseSystemProxyStateText;
     internal ToggleSwitch CustomProxyToggleSwitchControl => CustomProxyToggleSwitch;
     internal TextBlock CustomProxyStateTextControl => CustomProxyStateText;
+    internal TextBox ProxyServerTextBoxControl => ProxyServerTextBox;
+    internal Button DetectSystemProxyButtonControl => DetectSystemProxyButton;
+    internal TextBox ProxyBypassTextBoxControl => ProxyBypassTextBox;
+    internal CheckBox ProxyDownloadsCheckBoxControl => ProxyDownloadsCheckBox;
+    internal CheckBox ProxyTrackersCheckBoxControl => ProxyTrackersCheckBox;
+    internal ToggleSwitch EnableUpnpToggleSwitchControl => EnableUpnpToggleSwitch;
+    internal TextBlock EnableUpnpStateTextControl => EnableUpnpStateText;
+    internal NumberBox BtListenPortNumberBoxControl => BtListenPortNumberBox;
+    internal NumberBox DhtListenPortNumberBoxControl => DhtListenPortNumberBox;
+    internal TextBox UserAgentTextBoxControl => UserAgentTextBox;
+    internal NumberBox ConnectTimeoutNumberBoxControl => ConnectTimeoutNumberBox;
+    internal NumberBox TimeoutNumberBoxControl => TimeoutNumberBox;
+    internal ComboBox FileAllocationComboBoxControl => FileAllocationComboBox;
     internal ToggleSwitch TerminalOutputToggleSwitchControl => TerminalOutputToggleSwitch;
     internal TextBlock TerminalOutputStateTextControl => TerminalOutputStateText;
     internal TextBox AriaPathTextBoxControl => AriaPathTextBox;
@@ -154,6 +174,11 @@ public sealed partial class SettingsPageControl : UserControl
     internal event RoutedEventHandler? BrowseDownloadDirectoryRequested;
     internal event RoutedEventHandler? DownloadSettingChanged;
     internal event RoutedEventHandler? BitTorrentSettingChanged;
+    internal event RoutedEventHandler? NetworkSettingChanged;
+    internal event RoutedEventHandler? DetectSystemProxyRequested;
+    internal event RoutedEventHandler? RandomBtPortRequested;
+    internal event RoutedEventHandler? RandomDhtPortRequested;
+    internal event RoutedEventHandler? UserAgentPresetRequested;
     internal event RoutedEventHandler? AddBtCustomTrackerRequested;
     internal event RoutedEventHandler? SyncBtTrackerRequested;
     internal event RoutedEventHandler? StartAriaRequested;
@@ -236,6 +261,52 @@ public sealed partial class SettingsPageControl : UserControl
     private void BitTorrentSettingListView_SelectionChanged(object sender, SelectionChangedEventArgs args)
     {
         BitTorrentSettingChanged?.Invoke(sender, new RoutedEventArgs());
+    }
+
+    private void NetworkSettingToggleSwitch_Toggled(object sender, RoutedEventArgs args)
+    {
+        SettingToggleSwitch_Toggled(sender, args);
+        NetworkSettingChanged?.Invoke(sender, args);
+    }
+
+    private void NetworkSettingTextBox_TextChanged(object sender, TextChangedEventArgs args)
+    {
+        NetworkSettingChanged?.Invoke(sender, new RoutedEventArgs());
+    }
+
+    private void NetworkSettingNumberBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
+    {
+        NetworkSettingChanged?.Invoke(sender, new RoutedEventArgs());
+    }
+
+    private void NetworkSettingComboBox_SelectionChanged(object sender, SelectionChangedEventArgs args)
+    {
+        NetworkSettingChanged?.Invoke(sender, new RoutedEventArgs());
+    }
+
+    private void NetworkSettingCheckBox_Changed(object sender, RoutedEventArgs args)
+    {
+        NetworkSettingChanged?.Invoke(sender, args);
+    }
+
+    private void DetectSystemProxyButton_Click(object sender, RoutedEventArgs args)
+    {
+        DetectSystemProxyRequested?.Invoke(sender, args);
+    }
+
+    private void RandomBtPortButton_Click(object sender, RoutedEventArgs args)
+    {
+        RandomBtPortRequested?.Invoke(sender, args);
+    }
+
+    private void RandomDhtPortButton_Click(object sender, RoutedEventArgs args)
+    {
+        RandomDhtPortRequested?.Invoke(sender, args);
+    }
+
+    private void UserAgentPresetButton_Click(object sender, RoutedEventArgs args)
+    {
+        UserAgentPresetRequested?.Invoke(sender, args);
     }
 
     private void AddBtCustomTrackerButton_Click(object sender, RoutedEventArgs args)

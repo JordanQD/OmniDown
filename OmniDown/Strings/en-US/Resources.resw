@@ -187,6 +187,8 @@
   <data name="AboutCloneTitleText.Text" xml:space="preserve"><value>To clone this repository</value></data>
   <data name="AboutIssueTitleText.Text" xml:space="preserve"><value>File a bug or request a feature</value></data>
   <data name="AboutReferencesTitleText.Text" xml:space="preserve"><value>Dependencies &amp; references</value></data>
+  <data name="AboutTrackerSourcesHeaderText.Text" xml:space="preserve"><value>Tracker sources</value></data>
+  <data name="AboutTrackerSourcesDescriptionText.Text" xml:space="preserve"><value>OmniDown can sync BitTorrent tracker lists from these public projects.</value></data>
   <data name="AboutWarrantyText.Text" xml:space="preserve"><value>THIS SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND. THIRD-PARTY COMPONENTS ARE LICENSED BY THEIR RESPECTIVE OWNERS.</value></data>
   <data name="AboutLicenseLink.Content" xml:space="preserve"><value>OmniDown license</value></data>
   <data name="AboutThirdPartyLink.Content" xml:space="preserve"><value>Third-party notices</value></data>

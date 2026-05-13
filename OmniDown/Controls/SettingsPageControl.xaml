@@ -583,7 +583,7 @@
                                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1"
-                                            CornerRadius="0,0,8,8">
+                                            CornerRadius="0">
                                             <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
                                                 <FontIcon
                                                     Width="24"
@@ -796,7 +796,7 @@
                                                 <NumberBox
                                                     x:Name="MaxConcurrentDownloadsNumberBox"
                                                     Grid.Column="2"
-                                                    Width="168"
+                                                    Width="180"
                                                     Height="32"
                                                     HorizontalAlignment="Right"
                                                     Minimum="1"
@@ -835,7 +835,7 @@
                                                 <NumberBox
                                                     x:Name="SplitCountNumberBox"
                                                     Grid.Column="2"
-                                                    Width="168"
+                                                    Width="180"
                                                     Height="32"
                                                     HorizontalAlignment="Right"
                                                     Minimum="1"
@@ -854,7 +854,7 @@
                                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1"
-                                            CornerRadius="0,0,8,8">
+                                            CornerRadius="0">
                                             <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
                                                 <FontIcon
                                                     Width="24"
@@ -874,7 +874,7 @@
                                                 <NumberBox
                                                     x:Name="MaxConnectionPerServerNumberBox"
                                                     Grid.Column="2"
-                                                    Width="168"
+                                                    Width="180"
                                                     Height="32"
                                                     HorizontalAlignment="Right"
                                                     Minimum="1"
@@ -1001,7 +1001,7 @@
                                                 <NumberBox
                                                     x:Name="MaxTriesNumberBox"
                                                     Grid.Column="2"
-                                                    Width="168"
+                                                    Width="180"
                                                     Height="32"
                                                     HorizontalAlignment="Right"
                                                     Minimum="0"
@@ -1020,7 +1020,7 @@
                                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1"
-                                            CornerRadius="0,0,8,8">
+                                            CornerRadius="0">
                                             <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
                                                 <FontIcon
                                                     Width="24"
@@ -1040,7 +1040,7 @@
                                                 <NumberBox
                                                     x:Name="RetryWaitNumberBox"
                                                     Grid.Column="2"
-                                                    Width="168"
+                                                    Width="180"
                                                     Height="32"
                                                     HorizontalAlignment="Right"
                                                     Minimum="0"
@@ -1876,56 +1876,130 @@
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1"
                                             CornerRadius="0,0,8,8">
-                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
                                                 <FontIcon
                                                     Width="24"
-                                                    VerticalAlignment="Center"
+                                                    VerticalAlignment="Top"
+                                                    Margin="0,2,0,0"
                                                     Glyph="&#xE8A7;" />
                                                 <StackPanel
                                                     Grid.Column="1"
-                                                    Spacing="3">
-                                                    <TextBlock
-                                                        FontWeight="SemiBold"
-                                                        Text="自定义代理地址" />
+                                                    Spacing="12">
+                                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                                                        <StackPanel Spacing="3">
+                                                            <TextBlock
+                                                                FontWeight="SemiBold"
+                                                                Text="自定义代理" />
+                                                            <TextBlock
+                                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                Text="为 aria2 设置 HTTP 或 HTTPS 代理；自定义代理会优先于系统代理。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                        </StackPanel>
+                                                        <StackPanel
+                                                            Grid.Column="1"
+                                                            HorizontalAlignment="Right"
+                                                            VerticalAlignment="Center"
+                                                            Orientation="Horizontal"
+                                                            Spacing="8">
+                                                            <TextBlock
+                                                                x:Name="CustomProxyStateText"
+                                                                VerticalAlignment="Center"
+                                                                Text="关" />
+                                                            <ToggleSwitch
+                                                                x:Name="CustomProxyToggleSwitch"
+                                                                Width="48"
+                                                                MinWidth="0"
+                                                                Padding="0"
+                                                                OffContent=""
+                                                                OnContent=""
+                                                                Toggled="NetworkSettingToggleSwitch_Toggled" />
+                                                        </StackPanel>
+                                                    </Grid>
+                                                    <Grid
+                                                        Width="360"
+                                                        Height="32"
+                                                        HorizontalAlignment="Left"
+                                                        ColumnDefinitions="*,Auto"
+                                                        ColumnSpacing="8">
+                                                        <TextBox
+                                                            x:Name="ProxyServerTextBox"
+                                                            Height="32"
+                                                            VerticalAlignment="Center"
+                                                            PlaceholderText="代理地址"
+                                                            TextChanged="NetworkSettingTextBox_TextChanged" />
+                                                        <Button
+                                                            x:Name="DetectSystemProxyButton"
+                                                            Grid.Column="1"
+                                                            Width="40"
+                                                            Height="32"
+                                                            MinWidth="40"
+                                                            Padding="0"
+                                                            VerticalAlignment="Center"
+                                                            Click="DetectSystemProxyButton_Click"
+                                                            ToolTipService.ToolTip="检测系统代理">
+                                                            <FontIcon Glyph="&#xE721;" />
+                                                        </Button>
+                                                    </Grid>
                                                     <TextBlock
                                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                        Text="预留给 HTTP、HTTPS、SOCKS 代理的独立配置。"
+                                                        Text="示例：http://127.0.0.1:7890 或 127.0.0.1:7890。当前 aria2 版本不支持 SOCKS 代理。"
                                                         TextWrapping="WrapWholeWords" />
+                                                    <TextBox
+                                                        x:Name="ProxyBypassTextBox"
+                                                        Width="360"
+                                                        Height="32"
+                                                        HorizontalAlignment="Left"
+                                                        PlaceholderText="不使用代理的地址"
+                                                        TextChanged="NetworkSettingTextBox_TextChanged"
+                                                        TextWrapping="NoWrap" />
+                                                    <StackPanel Spacing="8">
+                                                        <TextBlock
+                                                            FontWeight="SemiBold"
+                                                            Text="代理范围" />
+                                                        <StackPanel
+                                                            Orientation="Horizontal"
+                                                            Spacing="16">
+                                                            <CheckBox
+                                                                x:Name="ProxyDownloadsCheckBox"
+                                                                Checked="NetworkSettingCheckBox_Changed"
+                                                                Content="下载任务"
+                                                                Unchecked="NetworkSettingCheckBox_Changed" />
+                                                            <CheckBox
+                                                                x:Name="ProxyTrackersCheckBox"
+                                                                Checked="NetworkSettingCheckBox_Changed"
+                                                                Content="Tracker 同步"
+                                                                Unchecked="NetworkSettingCheckBox_Changed" />
+                                                        </StackPanel>
+                                                    </StackPanel>
                                                 </StackPanel>
-                                                <TextBox
-                                                    Grid.Column="2"
-                                                    Width="220"
-                                                    HorizontalAlignment="Right"
-                                                    Header="代理地址"
-                                                    PlaceholderText="http://127.0.0.1:7890" />
                                             </Grid>
                                         </Border>
 
                                         <TextBlock
                                             Margin="4,32,4,8"
                                             FontWeight="SemiBold"
-                                            Text="连接" />
+                                            Text="端口" />
                                         <Border
-                                            x:Name="RetrySettingCard"
+                                            x:Name="UpnpSettingCard"
                                             Padding="16"
                                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1"
-                                            CornerRadius="8">
+                                            CornerRadius="8,8,0,0">
                                             <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
                                                 <FontIcon
                                                     Width="24"
                                                     VerticalAlignment="Center"
-                                                    Glyph="&#xE8BB;" />
+                                                    Glyph="&#xE839;" />
                                                 <StackPanel
                                                     Grid.Column="1"
                                                     Spacing="3">
                                                     <TextBlock
                                                         FontWeight="SemiBold"
-                                                        Text="网络错误重试" />
+                                                        Text="UPnP/NAT-PMP" />
                                                     <TextBlock
                                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                        Text="临时网络失败时让下载任务自动重试。"
+                                                        Text="保存端口映射偏好；当前 Windows 版 aria2 启动参数会使用下方端口。"
                                                         TextWrapping="WrapWholeWords" />
                                                 </StackPanel>
                                                 <StackPanel
@@ -1935,19 +2009,303 @@
                                                     Orientation="Horizontal"
                                                     Spacing="8">
                                                     <TextBlock
-                                                        x:Name="CustomProxyStateText"
+                                                        x:Name="EnableUpnpStateText"
                                                         VerticalAlignment="Center"
-                                                        Text="开" />
+                                                        Text="关" />
                                                     <ToggleSwitch
-                                                        x:Name="CustomProxyToggleSwitch"
+                                                        x:Name="EnableUpnpToggleSwitch"
                                                         Width="48"
                                                         MinWidth="0"
                                                         Padding="0"
                                                         OffContent=""
                                                         OnContent=""
-                                                        IsOn="True"
-                                                        Toggled="SettingToggleSwitch_Toggled" />
+                                                        Toggled="NetworkSettingToggleSwitch_Toggled" />
                                                 </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                        <Border
+                                            x:Name="BtPortSettingCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE95A;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="BT 监听端口" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="用于接收 BitTorrent 对等连接。修改后需重启 aria2 生效。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <Grid
+                                                    Grid.Column="2"
+                                                    Width="216"
+                                                    Height="32"
+                                                    HorizontalAlignment="Right"
+                                                    ColumnDefinitions="*,40"
+                                                    ColumnSpacing="8"
+                                                    VerticalAlignment="Center">
+                                                    <NumberBox
+                                                        x:Name="BtListenPortNumberBox"
+                                                        Width="168"
+                                                        Height="32"
+                                                        HorizontalAlignment="Right"
+                                                        Minimum="1024"
+                                                        Maximum="65535"
+                                                        SmallChange="1"
+                                                        SpinButtonPlacementMode="Inline"
+                                                        ValueChanged="NetworkSettingNumberBox_ValueChanged" />
+                                                    <Button
+                                                        Grid.Column="1"
+                                                        Width="40"
+                                                        Height="32"
+                                                        MinWidth="40"
+                                                        Padding="0"
+                                                        VerticalAlignment="Center"
+                                                        Click="RandomBtPortButton_Click"
+                                                        ToolTipService.ToolTip="随机端口">
+                                                        <FontIcon Glyph="&#xE8B1;" />
+                                                    </Button>
+                                                </Grid>
+                                            </Grid>
+                                        </Border>
+                                        <Border
+                                            x:Name="DhtPortSettingCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="0,0,8,8">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE968;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="DHT 监听端口" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="用于 DHT 节点发现。修改后需重启 aria2 生效。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <Grid
+                                                    Grid.Column="2"
+                                                    Width="216"
+                                                    Height="32"
+                                                    HorizontalAlignment="Right"
+                                                    ColumnDefinitions="*,40"
+                                                    ColumnSpacing="8"
+                                                    VerticalAlignment="Center">
+                                                    <NumberBox
+                                                        x:Name="DhtListenPortNumberBox"
+                                                        Width="168"
+                                                        Height="32"
+                                                        HorizontalAlignment="Right"
+                                                        Minimum="1024"
+                                                        Maximum="65535"
+                                                        SmallChange="1"
+                                                        SpinButtonPlacementMode="Inline"
+                                                        ValueChanged="NetworkSettingNumberBox_ValueChanged" />
+                                                    <Button
+                                                        Grid.Column="1"
+                                                        Width="40"
+                                                        Height="32"
+                                                        MinWidth="40"
+                                                        Padding="0"
+                                                        VerticalAlignment="Center"
+                                                        Click="RandomDhtPortButton_Click"
+                                                        ToolTipService.ToolTip="随机端口">
+                                                        <FontIcon Glyph="&#xE8B1;" />
+                                                    </Button>
+                                                </Grid>
+                                            </Grid>
+                                        </Border>
+
+                                        <TextBlock
+                                            Margin="4,32,4,8"
+                                            FontWeight="SemiBold"
+                                            Text="User-Agent" />
+                                        <Border
+                                            x:Name="UserAgentSettingCard"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="8">
+                                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Top"
+                                                    Margin="0,2,0,0"
+                                                    Glyph="&#xE774;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="10">
+                                                    <TextBox
+                                                        x:Name="UserAgentTextBox"
+                                                        Height="32"
+                                                        HorizontalAlignment="Stretch"
+                                                        PlaceholderText="User-Agent"
+                                                        TextChanged="NetworkSettingTextBox_TextChanged"
+                                                        TextWrapping="NoWrap" />
+                                                    <StackPanel
+                                                        Orientation="Horizontal"
+                                                        Spacing="8">
+                                                        <Button
+                                                            Click="UserAgentPresetButton_Click"
+                                                            Content="Chrome"
+                                                            Tag="Chrome" />
+                                                        <Button
+                                                            Click="UserAgentPresetButton_Click"
+                                                            Content="Edge"
+                                                            Tag="Edge" />
+                                                        <Button
+                                                            Click="UserAgentPresetButton_Click"
+                                                            Content="Safari"
+                                                            Tag="Safari" />
+                                                        <Button
+                                                            Click="UserAgentPresetButton_Click"
+                                                            Content="Firefox"
+                                                            Tag="Firefox" />
+                                                        <Button
+                                                            Click="UserAgentPresetButton_Click"
+                                                            Content="Transmission"
+                                                            Tag="Transmission" />
+                                                        <Button
+                                                            Click="UserAgentPresetButton_Click"
+                                                            Content="重置"
+                                                            Tag="Reset" />
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+
+                                        <TextBlock
+                                            Margin="4,32,4,8"
+                                            FontWeight="SemiBold"
+                                            Text="传输参数" />
+                                        <Border
+                                            x:Name="ConnectTimeoutSettingCard"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="8,8,0,0">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE916;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="连接超时" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="建立连接时最多等待的秒数。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <NumberBox
+                                                    x:Name="ConnectTimeoutNumberBox"
+                                                    Grid.Column="2"
+                                                    Width="168"
+                                                    Height="32"
+                                                    HorizontalAlignment="Right"
+                                                    Minimum="1"
+                                                    Maximum="600"
+                                                    SmallChange="1"
+                                                    SpinButtonPlacementMode="Inline"
+                                                    ValueChanged="NetworkSettingNumberBox_ValueChanged" />
+                                            </Grid>
+                                        </Border>
+                                        <Border
+                                            x:Name="TimeoutSettingCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE823;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="传输超时" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="传输空闲超过该秒数后视为超时。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <NumberBox
+                                                    x:Name="TimeoutNumberBox"
+                                                    Grid.Column="2"
+                                                    Width="168"
+                                                    Height="32"
+                                                    HorizontalAlignment="Right"
+                                                    Minimum="1"
+                                                    Maximum="600"
+                                                    SmallChange="1"
+                                                    SpinButtonPlacementMode="Inline"
+                                                    ValueChanged="NetworkSettingNumberBox_ValueChanged" />
+                                            </Grid>
+                                        </Border>
+                                        <Border
+                                            x:Name="FileAllocationSettingCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="0,0,8,8">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xEDA2;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="文件预分配" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="控制下载开始时如何预留磁盘空间。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <ComboBox
+                                                    x:Name="FileAllocationComboBox"
+                                                    Grid.Column="2"
+                                                    Width="168"
+                                                    Height="32"
+                                                    HorizontalAlignment="Right"
+                                                    SelectionChanged="NetworkSettingComboBox_SelectionChanged">
+                                                    <ComboBoxItem Content="none" Tag="none" />
+                                                    <ComboBoxItem Content="prealloc" Tag="prealloc" />
+                                                    <ComboBoxItem Content="trunc" Tag="trunc" />
+                                                    <ComboBoxItem Content="falloc" Tag="falloc" />
+                                                </ComboBox>
                                             </Grid>
                                         </Border>
                                     </StackPanel>
@@ -2248,7 +2606,7 @@
                                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1"
-                                            CornerRadius="0,0,8,8">
+                                            CornerRadius="0">
                                             <StackPanel Spacing="12">
                                                 <TextBlock
                                                     FontWeight="SemiBold"
@@ -2257,32 +2615,69 @@
                                                 <ItemsControl>
                                                     <HyperlinkButton
                                                         Click="OpenAboutLinkButton_Click"
-                                                        Content="Files"
+                                                        Content="files-community/Files"
                                                         Tag="https://github.com/files-community/Files" />
                                                     <HyperlinkButton
                                                         Click="OpenAboutLinkButton_Click"
-                                                        Content="Motrix Next"
+                                                        Content="AnInsomniacy/motrix-next"
                                                         Tag="https://github.com/AnInsomniacy/motrix-next" />
                                                     <HyperlinkButton
                                                         Click="OpenAboutLinkButton_Click"
-                                                        Content="aria2"
+                                                        Content="aria2/aria2"
                                                         Tag="https://github.com/aria2/aria2" />
                                                     <HyperlinkButton
                                                         Click="OpenAboutLinkButton_Click"
-                                                        Content="UniGetUI"
+                                                        Content="Devolutions/UniGetUI"
                                                         Tag="https://github.com/Devolutions/UniGetUI" />
                                                     <HyperlinkButton
                                                         Click="OpenAboutLinkButton_Click"
-                                                        Content="WinUI Gallery"
+                                                        Content="microsoft/WinUI-Gallery"
                                                         Tag="https://github.com/microsoft/WinUI-Gallery" />
                                                     <HyperlinkButton
                                                         Click="OpenAboutLinkButton_Click"
-                                                        Content="Windows App SDK"
+                                                        Content="microsoft/WindowsAppSDK"
                                                         Tag="https://github.com/microsoft/WindowsAppSDK" />
                                                     <HyperlinkButton
                                                         Click="OpenAboutLinkButton_Click"
-                                                        Content="WinUI 3"
+                                                        Content="microsoft/microsoft-ui-xaml"
                                                         Tag="https://github.com/microsoft/microsoft-ui-xaml" />
+                                                </ItemsControl>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <Border
+                                            x:Name="AboutTrackerSourcesCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="0,0,8,8">
+                                            <StackPanel Spacing="12">
+                                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                                    <TextBlock
+                                                        VerticalAlignment="Center"
+                                                        FontWeight="SemiBold"
+                                                        Text="Tracker sources"
+                                                        x:Uid="AboutTrackerSourcesHeaderText" />
+                                                    <TextBlock
+                                                        Grid.Column="1"
+                                                        VerticalAlignment="Center"
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="OmniDown can sync BitTorrent tracker lists from these public projects."
+                                                        TextTrimming="CharacterEllipsis"
+                                                        TextWrapping="NoWrap"
+                                                        x:Uid="AboutTrackerSourcesDescriptionText" />
+                                                </Grid>
+                                                <ItemsControl>
+                                                    <HyperlinkButton
+                                                        Click="OpenAboutLinkButton_Click"
+                                                        Content="XIU2/TrackersListCollection"
+                                                        Tag="https://github.com/XIU2/TrackersListCollection" />
+                                                    <HyperlinkButton
+                                                        Click="OpenAboutLinkButton_Click"
+                                                        Content="ngosang/trackerslist"
+                                                        Tag="https://github.com/ngosang/trackerslist" />
                                                 </ItemsControl>
                                             </StackPanel>
                                         </Border>

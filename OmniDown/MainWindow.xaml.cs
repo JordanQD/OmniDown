@@ -83,6 +83,7 @@ namespace OmniDown
         private bool _isLoadingGeneralSettings;
         private bool _isLoadingDownloadSettings;
         private bool _isLoadingBitTorrentSettings;
+        private bool _isLoadingNetworkSettings;
         private bool _isNewDownloadDialogOpen;
         private bool _hasTriggeredAutoShutdown;
         private bool _hasSeenActiveDownloadsForAutoShutdown;
@@ -124,6 +125,7 @@ namespace OmniDown
 
             LoadDownloadSettings();
             LoadBitTorrentSettings();
+            LoadNetworkSettings();
             _ = AutoSyncBitTorrentTrackersIfNeededAsync();
             LoadSpeedLimitSettings();
             LoadCloseBehaviorSettings();

@@ -87,6 +87,7 @@ namespace OmniDown
                 downloadSettings.RemoteTime,
                 downloadSettings.MaxTries,
                 downloadSettings.RetryWaitSeconds,
+                _settingsPageViewModel.NetworkSettings,
                 _settingsPageViewModel.BitTorrentSettings));
 
             if (!result.Started)

@@ -24,6 +24,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -84,7 +85,13 @@ namespace OmniDown
         private Border BtAutoSyncTrackerSettingCard => SettingsPage.BtAutoSyncTrackerSettingCardControl;
         private Border UseSystemProxySettingCard => SettingsPage.UseSystemProxySettingCardControl;
         private Border CustomProxySettingCard => SettingsPage.CustomProxySettingCardControl;
-        private Border RetrySettingCard => SettingsPage.RetrySettingCardControl;
+        private Border UpnpSettingCard => SettingsPage.UpnpSettingCardControl;
+        private Border BtPortSettingCard => SettingsPage.BtPortSettingCardControl;
+        private Border DhtPortSettingCard => SettingsPage.DhtPortSettingCardControl;
+        private Border UserAgentSettingCard => SettingsPage.UserAgentSettingCardControl;
+        private Border ConnectTimeoutSettingCard => SettingsPage.ConnectTimeoutSettingCardControl;
+        private Border TimeoutSettingCard => SettingsPage.TimeoutSettingCardControl;
+        private Border FileAllocationSettingCard => SettingsPage.FileAllocationSettingCardControl;
         private Border AriaPathSettingCard => SettingsPage.AriaPathSettingCardControl;
         private Border RpcPortSettingCard => SettingsPage.RpcPortSettingCardControl;
         private Border ProcessStatusSettingCard => SettingsPage.ProcessStatusSettingCardControl;
@@ -93,6 +100,7 @@ namespace OmniDown
         private Border AboutCloneCard => SettingsPage.AboutCloneCardControl;
         private Border AboutIssueCard => SettingsPage.AboutIssueCardControl;
         private Border AboutReferencesCard => SettingsPage.AboutReferencesCardControl;
+        private Border AboutTrackerSourcesCard => SettingsPage.AboutTrackerSourcesCardControl;
         private Border AboutLicenseCard => SettingsPage.AboutLicenseCardControl;
         private ToggleSwitch AutoStartToggleSwitch => SettingsPage.AutoStartToggleSwitchControl;
         private TextBlock AutoStartStateText => SettingsPage.AutoStartStateTextControl;
@@ -169,6 +177,19 @@ namespace OmniDown
         private TextBlock UseSystemProxyStateText => SettingsPage.UseSystemProxyStateTextControl;
         private ToggleSwitch CustomProxyToggleSwitch => SettingsPage.CustomProxyToggleSwitchControl;
         private TextBlock CustomProxyStateText => SettingsPage.CustomProxyStateTextControl;
+        private TextBox ProxyServerTextBox => SettingsPage.ProxyServerTextBoxControl;
+        private Button DetectSystemProxyButton => SettingsPage.DetectSystemProxyButtonControl;
+        private TextBox ProxyBypassTextBox => SettingsPage.ProxyBypassTextBoxControl;
+        private CheckBox ProxyDownloadsCheckBox => SettingsPage.ProxyDownloadsCheckBoxControl;
+        private CheckBox ProxyTrackersCheckBox => SettingsPage.ProxyTrackersCheckBoxControl;
+        private ToggleSwitch EnableUpnpToggleSwitch => SettingsPage.EnableUpnpToggleSwitchControl;
+        private TextBlock EnableUpnpStateText => SettingsPage.EnableUpnpStateTextControl;
+        private NumberBox BtListenPortNumberBox => SettingsPage.BtListenPortNumberBoxControl;
+        private NumberBox DhtListenPortNumberBox => SettingsPage.DhtListenPortNumberBoxControl;
+        private TextBox UserAgentTextBox => SettingsPage.UserAgentTextBoxControl;
+        private NumberBox ConnectTimeoutNumberBox => SettingsPage.ConnectTimeoutNumberBoxControl;
+        private NumberBox TimeoutNumberBox => SettingsPage.TimeoutNumberBoxControl;
+        private ComboBox FileAllocationComboBox => SettingsPage.FileAllocationComboBoxControl;
         private ToggleSwitch TerminalOutputToggleSwitch => SettingsPage.TerminalOutputToggleSwitchControl;
         private TextBlock TerminalOutputStateText => SettingsPage.TerminalOutputStateTextControl;
         private TextBox AriaPathTextBox => SettingsPage.AriaPathTextBoxControl;
@@ -187,6 +208,11 @@ namespace OmniDown
             SettingsPage.BrowseDownloadDirectoryRequested += BrowseDownloadDirectoryButton_Click;
             SettingsPage.DownloadSettingChanged += DownloadSetting_Changed;
             SettingsPage.BitTorrentSettingChanged += BitTorrentSetting_Changed;
+            SettingsPage.NetworkSettingChanged += NetworkSetting_Changed;
+            SettingsPage.DetectSystemProxyRequested += DetectSystemProxyButton_Click;
+            SettingsPage.RandomBtPortRequested += RandomBtPortButton_Click;
+            SettingsPage.RandomDhtPortRequested += RandomDhtPortButton_Click;
+            SettingsPage.UserAgentPresetRequested += UserAgentPresetButton_Click;
             SettingsPage.AddBtCustomTrackerRequested += AddBtCustomTrackerButton_Click;
             SettingsPage.SyncBtTrackerRequested += SyncBtTrackerButton_Click;
             SettingsPage.StartAriaRequested += StartAriaButton_Click;
@@ -197,6 +223,11 @@ namespace OmniDown
 
         private void UseSystemProxyCheckBox_Changed(object sender, RoutedEventArgs e)
         {
+            if (!_isLoadingNetworkSettings)
+            {
+                SaveNetworkSettings();
+            }
+
             UpdateDebugStatus();
         }
 
@@ -575,6 +606,7 @@ namespace OmniDown
             if (ReferenceEquals(toggleSwitch, BtAutoSyncTrackerToggleSwitch)) return BtAutoSyncTrackerStateText;
             if (ReferenceEquals(toggleSwitch, UseSystemProxyCheckBox)) return UseSystemProxyStateText;
             if (ReferenceEquals(toggleSwitch, CustomProxyToggleSwitch)) return CustomProxyStateText;
+            if (ReferenceEquals(toggleSwitch, EnableUpnpToggleSwitch)) return EnableUpnpStateText;
             if (ReferenceEquals(toggleSwitch, TerminalOutputToggleSwitch)) return TerminalOutputStateText;
 
             return null;
@@ -723,6 +755,284 @@ namespace OmniDown
             UpdateTrackerSyncTimeText(settings.LastSyncTrackerTime);
         }
 
+        private void LoadNetworkSettings()
+        {
+            _settingsPageViewModel.LoadNetworkSettings();
+            _isLoadingNetworkSettings = true;
+            try
+            {
+                ApplyNetworkSettingsToUi();
+            }
+            finally
+            {
+                _isLoadingNetworkSettings = false;
+            }
+        }
+
+        private void ApplyNetworkSettingsToUi()
+        {
+            NetworkSettings settings = NormalizeNetworkSettings(_settingsPageViewModel.NetworkSettings);
+            if (settings != _settingsPageViewModel.NetworkSettings)
+            {
+                _settingsPageViewModel.SaveNetworkSettings(settings);
+            }
+
+            SetToggleSwitch(UseSystemProxyCheckBox, settings.UseSystemProxy);
+            SetToggleSwitch(CustomProxyToggleSwitch, settings.CustomProxyEnabled);
+            ProxyServerTextBox.Text = settings.ProxyServer;
+            ProxyBypassTextBox.Text = settings.ProxyBypass;
+            ProxyDownloadsCheckBox.IsChecked = settings.ProxyDownloads;
+            ProxyTrackersCheckBox.IsChecked = settings.ProxyTrackers;
+            SetToggleSwitch(EnableUpnpToggleSwitch, settings.EnableUpnp);
+            BtListenPortNumberBox.Value = settings.ListenPort;
+            DhtListenPortNumberBox.Value = settings.DhtListenPort;
+            UserAgentTextBox.Text = settings.UserAgent;
+            ConnectTimeoutNumberBox.Value = settings.ConnectTimeoutSeconds;
+            TimeoutNumberBox.Value = settings.TimeoutSeconds;
+            SetFileAllocationSelection(settings.FileAllocation);
+            UpdateNetworkDependentUi();
+        }
+
+        private void NetworkSetting_Changed(object sender, RoutedEventArgs e)
+        {
+            if (_isLoadingNetworkSettings)
+            {
+                return;
+            }
+
+            UpdateNetworkDependentUi();
+            SaveNetworkSettings();
+        }
+
+        private void DetectSystemProxyButton_Click(object sender, RoutedEventArgs e)
+        {
+            SystemProxySettings proxySettings = SystemProxyResolver.Resolve();
+            if (!proxySettings.HasProxy)
+            {
+                ShowMessage("没有检测到可用的 Windows 系统代理。", InfoBarSeverity.Informational);
+                return;
+            }
+
+            ProxyServerTextBox.Text = proxySettings.AllProxy ?? string.Empty;
+            ProxyBypassTextBox.Text = proxySettings.NoProxy ?? string.Empty;
+            SetToggleSwitch(CustomProxyToggleSwitch, true);
+            SaveNetworkSettings();
+            ShowMessage("已填入系统代理。", InfoBarSeverity.Success);
+        }
+
+        private void RandomBtPortButton_Click(object sender, RoutedEventArgs e)
+        {
+            BtListenPortNumberBox.Value = Random.Shared.Next(20000, 25000);
+            SaveNetworkSettings();
+        }
+
+        private void RandomDhtPortButton_Click(object sender, RoutedEventArgs e)
+        {
+            DhtListenPortNumberBox.Value = Random.Shared.Next(25000, 30000);
+            SaveNetworkSettings();
+        }
+
+        private void UserAgentPresetButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button button)
+            {
+                return;
+            }
+
+            UserAgentTextBox.Text = button.Tag?.ToString() switch
+            {
+                "Chrome" => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+                "Edge" => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0",
+                "Safari" => "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15",
+                "Firefox" => "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0",
+                "Transmission" => "Transmission/3.00",
+                _ => string.Empty
+            };
+            SaveNetworkSettings();
+        }
+
+        private void SaveNetworkSettings()
+        {
+            if (_isLoadingNetworkSettings)
+            {
+                return;
+            }
+
+            NetworkSettings settings = NormalizeNetworkSettings(new NetworkSettings(
+                UseSystemProxyCheckBox?.IsOn == true,
+                CustomProxyToggleSwitch?.IsOn == true,
+                ProxyServerTextBox.Text.Trim(),
+                ProxyBypassTextBox.Text.Trim(),
+                ProxyDownloadsCheckBox?.IsChecked == true,
+                ProxyTrackersCheckBox?.IsChecked == true,
+                EnableUpnpToggleSwitch?.IsOn == true,
+                GetValidIntNumberBoxValue(BtListenPortNumberBox, 1024, 65535, NetworkSettings.Default.ListenPort),
+                GetValidIntNumberBoxValue(DhtListenPortNumberBox, 1024, 65535, NetworkSettings.Default.DhtListenPort),
+                SanitizeHeaderValue(UserAgentTextBox.Text),
+                GetValidIntNumberBoxValue(ConnectTimeoutNumberBox, 1, 600, NetworkSettings.Default.ConnectTimeoutSeconds),
+                GetValidIntNumberBoxValue(TimeoutNumberBox, 1, 600, NetworkSettings.Default.TimeoutSeconds),
+                GetSelectedFileAllocation()));
+
+            if (settings.CustomProxyEnabled &&
+                !string.IsNullOrWhiteSpace(settings.ProxyServer) &&
+                !IsValidProxyUrl(settings.ProxyServer))
+            {
+                ShowMessage("代理地址格式不正确，请使用 http:// 或 https://。", InfoBarSeverity.Warning);
+                return;
+            }
+
+            if (UserAgentTextBox.Text != settings.UserAgent)
+            {
+                int selectionStart = UserAgentTextBox.SelectionStart;
+                UserAgentTextBox.Text = settings.UserAgent;
+                UserAgentTextBox.SelectionStart = Math.Min(selectionStart, settings.UserAgent.Length);
+            }
+
+            _settingsPageViewModel.SaveNetworkSettings(settings);
+        }
+
+        private void UpdateNetworkDependentUi()
+        {
+            bool proxyEnabled = CustomProxyToggleSwitch?.IsOn == true;
+            ProxyServerTextBox.IsEnabled = proxyEnabled;
+            ProxyBypassTextBox.IsEnabled = proxyEnabled;
+            ProxyDownloadsCheckBox.IsEnabled = proxyEnabled;
+            ProxyTrackersCheckBox.IsEnabled = proxyEnabled;
+            DetectSystemProxyButton.IsEnabled = true;
+        }
+
+        private void SetFileAllocationSelection(string fileAllocation)
+        {
+            string normalized = NormalizeFileAllocation(fileAllocation);
+            for (int index = 0; index < FileAllocationComboBox.Items.Count; index++)
+            {
+                if (FileAllocationComboBox.Items[index] is ComboBoxItem item &&
+                    item.Tag?.ToString()?.Equals(normalized, StringComparison.OrdinalIgnoreCase) == true)
+                {
+                    FileAllocationComboBox.SelectedIndex = index;
+                    return;
+                }
+            }
+
+            FileAllocationComboBox.SelectedIndex = 0;
+        }
+
+        private string GetSelectedFileAllocation()
+        {
+            return FileAllocationComboBox?.SelectedItem is ComboBoxItem item &&
+                item.Tag?.ToString() is string fileAllocation
+                ? NormalizeFileAllocation(fileAllocation)
+                : NetworkSettings.Default.FileAllocation;
+        }
+
+        private static NetworkSettings NormalizeNetworkSettings(NetworkSettings settings)
+        {
+            return settings with
+            {
+                ProxyServer = NormalizeProxyServer(settings.ProxyServer),
+                ProxyBypass = NormalizeProxyBypass(settings.ProxyBypass),
+                ListenPort = Math.Clamp(settings.ListenPort, 1024, 65535),
+                DhtListenPort = Math.Clamp(settings.DhtListenPort, 1024, 65535),
+                UserAgent = SanitizeHeaderValue(settings.UserAgent),
+                ConnectTimeoutSeconds = Math.Clamp(settings.ConnectTimeoutSeconds, 1, 600),
+                TimeoutSeconds = Math.Clamp(settings.TimeoutSeconds, 1, 600),
+                FileAllocation = NormalizeFileAllocation(settings.FileAllocation)
+            };
+        }
+
+        private static bool IsValidProxyUrl(string value)
+        {
+            return Uri.TryCreate(NormalizeProxyServer(value), UriKind.Absolute, out Uri? uri) &&
+                uri.Host.Length > 0 &&
+                (uri.Scheme.Equals(Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase) ||
+                    uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static string NormalizeProxyServer(string value)
+        {
+            string trimmed = value.Trim();
+            if (string.IsNullOrWhiteSpace(trimmed) ||
+                trimmed.Contains("://", StringComparison.Ordinal))
+            {
+                return trimmed;
+            }
+
+            return $"http://{trimmed}";
+        }
+
+        private static string NormalizeProxyBypass(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return NetworkSettings.DefaultProxyBypass;
+            }
+
+            return string.Join(";", value
+                .Replace(";", "\n", StringComparison.Ordinal)
+                .Replace(",", "\n", StringComparison.Ordinal)
+                .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Distinct(StringComparer.OrdinalIgnoreCase));
+        }
+
+        private static string NormalizeFileAllocation(string? value)
+        {
+            return value?.Trim().ToLowerInvariant() switch
+            {
+                "prealloc" => "prealloc",
+                "trunc" => "trunc",
+                "falloc" => "falloc",
+                _ => "none"
+            };
+        }
+
+        private static string SanitizeHeaderValue(string? value)
+        {
+            return string.IsNullOrEmpty(value)
+                ? string.Empty
+                : new string(value.Where(ch => ch is not ('\r' or '\n')).ToArray()).Trim();
+        }
+
+        private HttpClient CreateTrackerHttpClient()
+        {
+            NetworkSettings settings = _settingsPageViewModel.NetworkSettings;
+            HttpMessageHandler handler = new HttpClientHandler();
+            string? proxyServer = null;
+            string bypass = string.Empty;
+
+            if (settings.CustomProxyEnabled && settings.ProxyTrackers && !string.IsNullOrWhiteSpace(settings.ProxyServer))
+            {
+                proxyServer = settings.ProxyServer;
+                bypass = settings.ProxyBypass;
+            }
+            else if (settings.UseSystemProxy && settings.ProxyTrackers)
+            {
+                SystemProxySettings systemProxy = SystemProxyResolver.Resolve();
+                proxyServer = systemProxy.AllProxy;
+                bypass = systemProxy.NoProxy ?? string.Empty;
+            }
+
+            if (!string.IsNullOrWhiteSpace(proxyServer) &&
+                Uri.TryCreate(proxyServer, UriKind.Absolute, out Uri? proxyUri) &&
+                handler is HttpClientHandler httpHandler)
+            {
+                WebProxy proxy = new(proxyUri);
+                string[] bypassList = bypass
+                    .Split([';', ','], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                if (bypassList.Length > 0)
+                {
+                    proxy.BypassList = bypassList;
+                }
+
+                httpHandler.Proxy = proxy;
+                httpHandler.UseProxy = true;
+            }
+
+            return new HttpClient(handler)
+            {
+                Timeout = TimeSpan.FromSeconds(20)
+            };
+        }
+
         private void SaveBitTorrentSettings()
         {
             string[] selectedSources = GetSelectedTrackerSourceUrls();
@@ -758,10 +1068,7 @@ namespace OmniDown
             BtSyncTrackerButton.IsEnabled = false;
             try
             {
-                using HttpClient client = new()
-                {
-                    Timeout = TimeSpan.FromSeconds(20)
-                };
+                using HttpClient client = CreateTrackerHttpClient();
                 List<string> trackerBlocks = [];
                 List<string> failedSources = [];
                 foreach (string sourceUrl in sourceUrls)
@@ -831,10 +1138,7 @@ namespace OmniDown
 
             try
             {
-                using HttpClient client = new()
-                {
-                    Timeout = TimeSpan.FromSeconds(20)
-                };
+                using HttpClient client = CreateTrackerHttpClient();
                 List<string> trackerBlocks = [];
                 foreach (string sourceUrl in sourceUrls)
                 {

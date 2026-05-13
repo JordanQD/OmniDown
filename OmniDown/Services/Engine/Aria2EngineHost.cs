@@ -247,6 +247,10 @@ public sealed class Aria2EngineHost : IDisposable
             $"--remote-time={FormatAriaBool(options.RemoteTime)}",
             $"--max-tries={Math.Clamp(options.MaxTries, 0, 60)}",
             $"--retry-wait={Math.Clamp(options.RetryWaitSeconds, 0, 600)}",
+            $"--user-agent={options.NetworkSettings.UserAgent ?? string.Empty}",
+            $"--connect-timeout={Math.Clamp(options.NetworkSettings.ConnectTimeoutSeconds, 1, 600)}",
+            $"--timeout={Math.Clamp(options.NetworkSettings.TimeoutSeconds, 1, 600)}",
+            $"--file-allocation={NormalizeFileAllocation(options.NetworkSettings.FileAllocation)}",
             $"--dir={options.DownloadDirectory}",
             $"--save-session={sessionPath}",
             "--force-save=true",
@@ -292,7 +296,29 @@ public sealed class Aria2EngineHost : IDisposable
             }
         }
 
+        AddCustomProxyArguments(arguments, options.NetworkSettings);
+
         return arguments;
+    }
+
+    private static void AddCustomProxyArguments(List<string> arguments, OmniDown.Models.Settings.NetworkSettings settings)
+    {
+        if (!settings.CustomProxyEnabled ||
+            !settings.ProxyDownloads ||
+            string.IsNullOrWhiteSpace(settings.ProxyServer))
+        {
+            return;
+        }
+
+        arguments.RemoveAll(argument =>
+            argument.StartsWith("--all-proxy=", StringComparison.OrdinalIgnoreCase) ||
+            argument.StartsWith("--no-proxy=", StringComparison.OrdinalIgnoreCase));
+
+        arguments.Add($"--all-proxy={settings.ProxyServer.Trim()}");
+        if (!string.IsNullOrWhiteSpace(settings.ProxyBypass))
+        {
+            arguments.Add($"--no-proxy={NormalizeNoProxy(settings.ProxyBypass)}");
+        }
     }
 
     private static void AddBitTorrentArguments(List<string> arguments, Aria2EngineOptions options)
@@ -311,7 +337,8 @@ public sealed class Aria2EngineHost : IDisposable
             $"--seed-ratio={seedRatio.ToString("0.###", CultureInfo.InvariantCulture)}",
             $"--seed-time={seedTime}",
             $"--bt-max-peers={Math.Clamp(settings.MaxPeers, 1, 1000)}",
-            $"--listen-port={NormalizeListenPort(settings.ListenPort)}",
+            $"--listen-port={NormalizeListenPort(options.NetworkSettings.ListenPort)}",
+            $"--dht-listen-port={NormalizeListenPort(options.NetworkSettings.DhtListenPort)}",
             "--enable-dht=true",
             "--enable-dht6=true",
             "--enable-peer-exchange=true",
@@ -327,11 +354,36 @@ public sealed class Aria2EngineHost : IDisposable
         }
     }
 
+    private static string NormalizeListenPort(int listenPort)
+    {
+        return Math.Clamp(listenPort, 1024, 65535).ToString(CultureInfo.InvariantCulture);
+    }
+
     private static string NormalizeListenPort(string? listenPort)
     {
         return string.IsNullOrWhiteSpace(listenPort)
             ? "6881-6999"
             : listenPort.Trim();
+    }
+
+    private static string NormalizeFileAllocation(string? fileAllocation)
+    {
+        return fileAllocation?.Trim().ToLowerInvariant() switch
+        {
+            "prealloc" => "prealloc",
+            "trunc" => "trunc",
+            "falloc" => "falloc",
+            _ => "none"
+        };
+    }
+
+    private static string NormalizeNoProxy(string proxyBypass)
+    {
+        return string.Join(",", proxyBypass
+            .Replace(";", "\n", StringComparison.Ordinal)
+            .Replace(",", "\n", StringComparison.Ordinal)
+            .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Distinct(StringComparer.OrdinalIgnoreCase));
     }
 
     private static string ToAriaTrackerList(string? trackerList)

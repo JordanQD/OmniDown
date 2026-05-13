@@ -15,6 +15,7 @@ public sealed record Aria2EngineOptions(
     bool RemoteTime,
     int MaxTries,
     int RetryWaitSeconds,
+    NetworkSettings NetworkSettings,
     BitTorrentSettings BitTorrentSettings);
 
 public sealed record Aria2EngineStartResult(

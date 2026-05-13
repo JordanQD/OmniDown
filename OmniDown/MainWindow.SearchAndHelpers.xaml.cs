@@ -452,7 +452,13 @@ namespace OmniDown
 
             SetSettingVisibility(UseSystemProxySettingCard, query, "proxy", "system proxy", Strings.Get("ProxyLabel.Text"), "Use Windows system proxy when aria2 starts", "代理");
             SetSettingVisibility(CustomProxySettingCard, query, "proxy", "http", "https", "socks", "custom", "代理");
-            SetSettingVisibility(RetrySettingCard, query, "retry", "network", "connection", "重试", "网络");
+            SetSettingVisibility(UpnpSettingCard, query, "upnp", "nat", "pmp", "port", "端口", "映射");
+            SetSettingVisibility(BtPortSettingCard, query, "bt", "bittorrent", "listen", "port", "监听", "端口");
+            SetSettingVisibility(DhtPortSettingCard, query, "dht", "listen", "port", "监听", "端口");
+            SetSettingVisibility(UserAgentSettingCard, query, "user-agent", "ua", "browser", "transmission", "浏览器");
+            SetSettingVisibility(ConnectTimeoutSettingCard, query, "connect", "timeout", "seconds", "连接", "超时");
+            SetSettingVisibility(TimeoutSettingCard, query, "timeout", "seconds", "transfer", "传输", "超时");
+            SetSettingVisibility(FileAllocationSettingCard, query, "file", "allocation", "disk", "prealloc", "文件", "预分配");
 
             SetSettingVisibility(AriaPathSettingCard, query, "aria2c", "path", Strings.Get("AriaPathLabel.Text"), Strings.Get("AriaPathTextBox.PlaceholderText"), "路径");
             SetSettingVisibility(RpcPortSettingCard, query, "rpc", "port", Strings.Get("RpcPortLabel.Text"), "端口");
@@ -463,6 +469,7 @@ namespace OmniDown
             SetSettingVisibility(AboutCloneCard, query, "clone", "repository", "github", "克隆", "仓库");
             SetSettingVisibility(AboutIssueCard, query, "bug", "issue", "feature", "github", "问题", "建议");
             SetSettingVisibility(AboutReferencesCard, query, "dependencies", "references", "license", "files", "motrix", "aria2", "unigetui", "winui", "依赖", "参考", "许可证");
+            SetSettingVisibility(AboutTrackerSourcesCard, query, "tracker", "trackers", "trackerslist", "TrackersListCollection", "ngosang", "xiu2", "bittorrent", "追踪器", "服务器");
             SetSettingVisibility(AboutLicenseCard, query, "license", "third-party", "notice", "warranty", "mit", "gpl", "许可证", "第三方", "声明");
         }
 

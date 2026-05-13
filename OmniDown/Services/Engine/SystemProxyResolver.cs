@@ -62,11 +62,6 @@ public static class SystemProxyResolver
             return NormalizeProxyUri(httpProxy);
         }
 
-        if (entries.TryGetValue("socks", out string? socksProxy))
-        {
-            return NormalizeProxyUri(socksProxy, "socks5");
-        }
-
         return null;
     }
 

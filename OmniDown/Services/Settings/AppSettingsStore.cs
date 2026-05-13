@@ -18,6 +18,7 @@ internal sealed class AppSettingsStore
     private readonly string _generalSettingsPath = Path.Combine(AppPaths.LocalDataDirectory, "general-settings.json");
     private readonly string _downloadSettingsPath = Path.Combine(AppPaths.LocalDataDirectory, "download-settings.json");
     private readonly string _bitTorrentSettingsPath = Path.Combine(AppPaths.LocalDataDirectory, "bittorrent-settings.json");
+    private readonly string _networkSettingsPath = Path.Combine(AppPaths.LocalDataDirectory, "network-settings.json");
 
     public GeneralSettings ReadGeneralSettings()
     {
@@ -47,6 +48,16 @@ internal sealed class AppSettingsStore
     public void SaveBitTorrentSettings(BitTorrentSettings settings)
     {
         Save(_bitTorrentSettingsPath, settings);
+    }
+
+    public NetworkSettings ReadNetworkSettings()
+    {
+        return Read(_networkSettingsPath, NetworkSettings.Default);
+    }
+
+    public void SaveNetworkSettings(NetworkSettings settings)
+    {
+        Save(_networkSettingsPath, settings);
     }
 
     public SpeedLimitSettings ReadSpeedLimitSettings()
