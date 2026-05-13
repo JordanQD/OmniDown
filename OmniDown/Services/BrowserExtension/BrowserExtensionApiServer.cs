@@ -4,28 +4,40 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
 internal sealed class BrowserExtensionApiServer : IDisposable
 {
     private const int MaxRequestBodyChars = 1024 * 1024;
-    private readonly Func<BrowserExtensionDownloadRequest, Task<BrowserExtensionDownloadResult>> _downloadHandler;
+    private readonly Func<BrowserExtensionAddRequest, Task<BrowserExtensionAddResponse>> _addHandler;
+    private readonly Func<Task<BrowserExtensionStatResponse>> _statHandler;
+    private readonly Func<Task<BrowserExtensionActionResponse>> _pauseAllHandler;
+    private readonly Func<Task<BrowserExtensionActionResponse>> _resumeAllHandler;
+    private readonly Func<BrowserExtensionVersionResponse> _versionProvider;
     private TcpListener? _listener;
     private CancellationTokenSource? _cancellation;
     private Task? _acceptTask;
     private int _port;
     private string _secret = string.Empty;
 
-    public BrowserExtensionApiServer(Func<BrowserExtensionDownloadRequest, Task<BrowserExtensionDownloadResult>> downloadHandler)
+    public BrowserExtensionApiServer(
+        Func<BrowserExtensionAddRequest, Task<BrowserExtensionAddResponse>> addHandler,
+        Func<Task<BrowserExtensionStatResponse>> statHandler,
+        Func<Task<BrowserExtensionActionResponse>> pauseAllHandler,
+        Func<Task<BrowserExtensionActionResponse>> resumeAllHandler,
+        Func<BrowserExtensionVersionResponse> versionProvider)
     {
-        _downloadHandler = downloadHandler;
+        _addHandler = addHandler;
+        _statHandler = statHandler;
+        _pauseAllHandler = pauseAllHandler;
+        _resumeAllHandler = resumeAllHandler;
+        _versionProvider = versionProvider;
     }
 
     public bool IsRunning => _listener is not null;
@@ -93,74 +105,53 @@ internal sealed class BrowserExtensionApiServer : IDisposable
         client.ReceiveTimeout = 5000;
         client.SendTimeout = 5000;
 
+        BrowserExtensionHttpRequest? request = null;
         try
         {
-            string? requestLine = await reader.ReadLineAsync(cancellationToken);
-            if (string.IsNullOrWhiteSpace(requestLine))
+            request = await ReadRequestAsync(reader, cancellationToken);
+            if (request is null)
             {
-                await WriteJsonAsync(stream, 400, new { ok = false, error = "empty_request" }, cancellationToken);
+                await WriteJsonAsync(stream, 400, null, new { error = "invalid_request" }, cancellationToken);
                 return;
             }
 
-            string[] requestParts = requestLine.Split(' ', 3, StringSplitOptions.RemoveEmptyEntries);
-            if (requestParts.Length < 2)
+            if (request.Method == "OPTIONS")
             {
-                await WriteJsonAsync(stream, 400, new { ok = false, error = "invalid_request" }, cancellationToken);
+                await WriteJsonAsync(stream, 204, request.Origin, null, cancellationToken);
                 return;
             }
 
-            string method = requestParts[0].Trim().ToUpperInvariant();
-            string target = requestParts[1].Trim();
-            Dictionary<string, string> headers = await ReadHeadersAsync(reader, cancellationToken);
-
-            if (method == "OPTIONS")
+            switch ((request.Method, request.Path))
             {
-                await WriteJsonAsync(stream, 204, null, cancellationToken);
-                return;
+                case ("GET", "/ping"):
+                    await WriteJsonAsync(stream, 200, request.Origin, new BrowserExtensionPingResponse("ok", _versionProvider().App), cancellationToken);
+                    return;
+                case ("GET", "/version"):
+                    await WriteJsonAsync(stream, 200, request.Origin, _versionProvider(), cancellationToken);
+                    return;
+                case ("POST", "/add"):
+                    await HandleAuthorizedAsync(stream, request, () => HandleAddAsync(request.Body, cancellationToken), cancellationToken);
+                    return;
+                case ("GET", "/stat"):
+                    await HandleAuthorizedAsync(stream, request, _statHandler, cancellationToken);
+                    return;
+                case ("POST", "/pause-all"):
+                    await HandleAuthorizedAsync(stream, request, _pauseAllHandler, cancellationToken);
+                    return;
+                case ("POST", "/resume-all"):
+                    await HandleAuthorizedAsync(stream, request, _resumeAllHandler, cancellationToken);
+                    return;
+                default:
+                    await WriteJsonAsync(stream, 404, request.Origin, new { error = "not_found" }, cancellationToken);
+                    return;
             }
-
-            string body = await ReadBodyAsync(reader, headers, cancellationToken);
-            BrowserExtensionHttpRequest request = BrowserExtensionHttpRequest.Parse(method, target, headers, body);
-
-            if (request.Path.Equals("/health", StringComparison.OrdinalIgnoreCase))
-            {
-                await WriteJsonAsync(stream, 200, new { ok = true }, cancellationToken);
-                return;
-            }
-
-            if (!IsDownloadEndpoint(request.Path) || method is not ("GET" or "POST"))
-            {
-                await WriteJsonAsync(stream, 404, new { ok = false, error = "not_found" }, cancellationToken);
-                return;
-            }
-
-            if (!IsAuthorized(request.Secret))
-            {
-                await WriteJsonAsync(stream, 401, new { ok = false, error = "unauthorized" }, cancellationToken);
-                return;
-            }
-
-            if (request.Urls.Count == 0)
-            {
-                await WriteJsonAsync(stream, 400, new { ok = false, error = "missing_url" }, cancellationToken);
-                return;
-            }
-
-            BrowserExtensionDownloadResult result = await _downloadHandler(new BrowserExtensionDownloadRequest(request.Urls));
-            await WriteJsonAsync(stream, result.Success ? 200 : 500, new
-            {
-                ok = result.Success,
-                mode = result.Mode,
-                count = result.Count,
-                message = result.Message
-            }, cancellationToken);
         }
         catch (OperationCanceledException)
         {
         }
         catch (Exception ex)
         {
-            await WriteJsonAsync(stream, 500, new { ok = false, error = "server_error", message = ex.Message }, CancellationToken.None);
+            await WriteJsonAsync(stream, 500, request?.Origin, new { error = ex.Message }, CancellationToken.None);
         }
         finally
         {
@@ -168,23 +159,74 @@ internal sealed class BrowserExtensionApiServer : IDisposable
         }
     }
 
-    private bool IsAuthorized(string candidateSecret)
+    private async Task HandleAuthorizedAsync<T>(
+        NetworkStream stream,
+        BrowserExtensionHttpRequest request,
+        Func<Task<T>> handler,
+        CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(_secret) || string.IsNullOrWhiteSpace(candidateSecret))
+        if (!ValidateBearerToken(request.Authorization))
         {
-            return false;
+            await WriteJsonAsync(stream, 401, request.Origin, new { error = "unauthorized" }, cancellationToken);
+            return;
         }
 
-        byte[] expected = Encoding.UTF8.GetBytes(_secret);
-        byte[] actual = Encoding.UTF8.GetBytes(candidateSecret.Trim());
-        return CryptographicOperations.FixedTimeEquals(actual, expected);
+        T response = await handler();
+        await WriteJsonAsync(stream, 200, request.Origin, response, cancellationToken);
     }
 
-    private static bool IsDownloadEndpoint(string path)
+    private async Task<BrowserExtensionAddResponse> HandleAddAsync(string body, CancellationToken cancellationToken)
     {
-        return path.Equals("/api/download", StringComparison.OrdinalIgnoreCase) ||
-            path.Equals("/download", StringComparison.OrdinalIgnoreCase) ||
-            path.Equals("/api/capture", StringComparison.OrdinalIgnoreCase);
+        BrowserExtensionAddRequest? request = JsonSerializer.Deserialize<BrowserExtensionAddRequest>(
+            body,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        if (request is null || string.IsNullOrWhiteSpace(request.Url))
+        {
+            return new BrowserExtensionAddResponse("error", null, "Missing url.");
+        }
+
+        return await _addHandler(request with
+        {
+            Url = request.Url.Trim(),
+            Referer = request.Referer?.Trim(),
+            Cookie = request.Cookie?.Trim(),
+            Filename = request.Filename?.Trim()
+        });
+    }
+
+    private bool ValidateBearerToken(string authorization)
+    {
+        if (string.IsNullOrEmpty(_secret))
+        {
+            return true;
+        }
+
+        return string.Equals(authorization, $"Bearer {_secret}", StringComparison.Ordinal);
+    }
+
+    private static async Task<BrowserExtensionHttpRequest?> ReadRequestAsync(
+        StreamReader reader,
+        CancellationToken cancellationToken)
+    {
+        string? requestLine = await reader.ReadLineAsync(cancellationToken);
+        if (string.IsNullOrWhiteSpace(requestLine))
+        {
+            return null;
+        }
+
+        string[] requestParts = requestLine.Split(' ', 3, StringSplitOptions.RemoveEmptyEntries);
+        if (requestParts.Length < 2)
+        {
+            return null;
+        }
+
+        string method = requestParts[0].Trim().ToUpperInvariant();
+        string path = requestParts[1].Split('?', 2)[0].Trim();
+        Dictionary<string, string> headers = await ReadHeadersAsync(reader, cancellationToken);
+        string body = await ReadBodyAsync(reader, headers, cancellationToken);
+        string authorization = headers.TryGetValue("Authorization", out string? value) ? value : string.Empty;
+        string origin = headers.TryGetValue("Origin", out string? originValue) ? originValue : string.Empty;
+        return new BrowserExtensionHttpRequest(method, path, authorization, origin, body);
     }
 
     private static async Task<Dictionary<string, string>> ReadHeadersAsync(StreamReader reader, CancellationToken cancellationToken)
@@ -204,9 +246,7 @@ internal sealed class BrowserExtensionApiServer : IDisposable
                 continue;
             }
 
-            string name = line[..separatorIndex].Trim();
-            string value = line[(separatorIndex + 1)..].Trim();
-            headers[name] = value;
+            headers[line[..separatorIndex].Trim()] = line[(separatorIndex + 1)..].Trim();
         }
     }
 
@@ -242,6 +282,7 @@ internal sealed class BrowserExtensionApiServer : IDisposable
     private static async Task WriteJsonAsync(
         NetworkStream stream,
         int statusCode,
+        string? origin,
         object? payload,
         CancellationToken cancellationToken)
     {
@@ -258,11 +299,15 @@ internal sealed class BrowserExtensionApiServer : IDisposable
             ? string.Empty
             : JsonSerializer.Serialize(payload);
         byte[] bodyBytes = Encoding.UTF8.GetBytes(body);
+        string corsOrigin = !string.IsNullOrWhiteSpace(origin) && IsAllowedExtensionOrigin(origin)
+            ? $"Access-Control-Allow-Origin: {origin}\r\n"
+            : string.Empty;
         string header =
             $"HTTP/1.1 {statusCode} {reason}\r\n" +
-            "Access-Control-Allow-Origin: *\r\n" +
+            corsOrigin +
+            "Vary: Origin\r\n" +
             "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n" +
-            "Access-Control-Allow-Headers: Authorization, Content-Type, X-OmniDown-Secret\r\n" +
+            "Access-Control-Allow-Headers: Content-Type, Authorization\r\n" +
             "Content-Type: application/json; charset=utf-8\r\n" +
             $"Content-Length: {bodyBytes.Length}\r\n" +
             "Connection: close\r\n\r\n";
@@ -274,208 +319,47 @@ internal sealed class BrowserExtensionApiServer : IDisposable
         }
     }
 
+    private static bool IsAllowedExtensionOrigin(string? origin)
+    {
+        return origin?.StartsWith("chrome-extension://", StringComparison.OrdinalIgnoreCase) == true ||
+            origin?.StartsWith("moz-extension://", StringComparison.OrdinalIgnoreCase) == true;
+    }
+
     private sealed record BrowserExtensionHttpRequest(
         string Method,
         string Path,
-        IReadOnlyDictionary<string, string> Headers,
-        IReadOnlyDictionary<string, string> Query,
-        string Body,
-        string Secret,
-        IReadOnlyList<string> Urls)
-    {
-        public static BrowserExtensionHttpRequest Parse(
-            string method,
-            string target,
-            IReadOnlyDictionary<string, string> headers,
-            string body)
-        {
-            string path = target;
-            string queryText = string.Empty;
-            int queryStart = target.IndexOf('?');
-            if (queryStart >= 0)
-            {
-                path = target[..queryStart];
-                queryText = target[(queryStart + 1)..];
-            }
-
-            Dictionary<string, string> query = ParseQuery(queryText);
-            List<string> urls = [];
-            string secret = ResolveSecret(headers, query);
-
-            AddValue(urls, GetQueryValue(query, "url"));
-            AddValue(urls, GetQueryValue(query, "uri"));
-            AddValue(urls, GetQueryValue(query, "text"));
-
-            if (!string.IsNullOrWhiteSpace(body))
-            {
-                ParseBody(body, headers, urls, ref secret);
-            }
-
-            return new BrowserExtensionHttpRequest(method, path, headers, query, body, secret, urls);
-        }
-
-        private static void ParseBody(
-            string body,
-            IReadOnlyDictionary<string, string> headers,
-            List<string> urls,
-            ref string secret)
-        {
-            string contentType = headers.TryGetValue("Content-Type", out string? value) ? value : string.Empty;
-            if (contentType.Contains("application/json", StringComparison.OrdinalIgnoreCase))
-            {
-                ParseJsonBody(body, urls, ref secret);
-                return;
-            }
-
-            if (contentType.Contains("application/x-www-form-urlencoded", StringComparison.OrdinalIgnoreCase))
-            {
-                Dictionary<string, string> form = ParseQuery(body);
-                AddValue(urls, GetQueryValue(form, "url"));
-                AddValue(urls, GetQueryValue(form, "uri"));
-                AddValue(urls, GetQueryValue(form, "text"));
-                if (string.IsNullOrWhiteSpace(secret))
-                {
-                    secret = GetQueryValue(form, "secret") ?? GetQueryValue(form, "token") ?? string.Empty;
-                }
-
-                return;
-            }
-
-            AddValue(urls, body.Trim());
-        }
-
-        private static void ParseJsonBody(string body, List<string> urls, ref string secret)
-        {
-            using JsonDocument document = JsonDocument.Parse(body);
-            JsonElement root = document.RootElement;
-            if (root.ValueKind != JsonValueKind.Object)
-            {
-                return;
-            }
-
-            AddJsonString(urls, root, "url");
-            AddJsonString(urls, root, "uri");
-            AddJsonString(urls, root, "text");
-            AddJsonArray(urls, root, "urls");
-            AddJsonArray(urls, root, "uris");
-
-            if (string.IsNullOrWhiteSpace(secret))
-            {
-                secret = GetJsonString(root, "secret") ?? GetJsonString(root, "token") ?? string.Empty;
-            }
-        }
-
-        private static string ResolveSecret(
-            IReadOnlyDictionary<string, string> headers,
-            IReadOnlyDictionary<string, string> query)
-        {
-            if (headers.TryGetValue("X-OmniDown-Secret", out string? headerSecret) &&
-                !string.IsNullOrWhiteSpace(headerSecret))
-            {
-                return headerSecret;
-            }
-
-            if (headers.TryGetValue("Authorization", out string? authorization) &&
-                authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-            {
-                return authorization["Bearer ".Length..];
-            }
-
-            return GetQueryValue(query, "secret") ?? GetQueryValue(query, "token") ?? string.Empty;
-        }
-
-        private static void AddJsonString(List<string> urls, JsonElement root, string propertyName)
-        {
-            string? value = GetJsonString(root, propertyName);
-            AddValue(urls, value);
-        }
-
-        private static string? GetJsonString(JsonElement root, string propertyName)
-        {
-            return root.TryGetProperty(propertyName, out JsonElement property) &&
-                property.ValueKind == JsonValueKind.String
-                    ? property.GetString()
-                    : null;
-        }
-
-        private static void AddJsonArray(List<string> urls, JsonElement root, string propertyName)
-        {
-            if (!root.TryGetProperty(propertyName, out JsonElement property))
-            {
-                return;
-            }
-
-            if (property.ValueKind == JsonValueKind.String)
-            {
-                AddValue(urls, property.GetString());
-                return;
-            }
-
-            if (property.ValueKind != JsonValueKind.Array)
-            {
-                return;
-            }
-
-            foreach (JsonElement item in property.EnumerateArray())
-            {
-                if (item.ValueKind == JsonValueKind.String)
-                {
-                    AddValue(urls, item.GetString());
-                }
-            }
-        }
-
-        private static void AddValue(List<string> urls, string? value)
-        {
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                return;
-            }
-
-            foreach (string line in value.Split(["\r\n", "\n", "\r"], StringSplitOptions.RemoveEmptyEntries))
-            {
-                string trimmed = line.Trim();
-                if (!string.IsNullOrWhiteSpace(trimmed) &&
-                    !urls.Contains(trimmed, StringComparer.OrdinalIgnoreCase))
-                {
-                    urls.Add(trimmed);
-                }
-            }
-        }
-
-        private static Dictionary<string, string> ParseQuery(string queryText)
-        {
-            Dictionary<string, string> query = new(StringComparer.OrdinalIgnoreCase);
-            foreach (string part in queryText.Split('&', StringSplitOptions.RemoveEmptyEntries))
-            {
-                string[] pair = part.Split('=', 2);
-                string key = DecodeQueryValue(pair[0]);
-                string value = pair.Length == 2 ? DecodeQueryValue(pair[1]) : string.Empty;
-                query[key] = value;
-            }
-
-            return query;
-        }
-
-        private static string? GetQueryValue(IReadOnlyDictionary<string, string> query, string name)
-        {
-            return query.TryGetValue(name, out string? value) ? value : null;
-        }
-
-        private static string DecodeQueryValue(string value)
-        {
-            try
-            {
-                return Uri.UnescapeDataString(value.Replace('+', ' '));
-            }
-            catch
-            {
-                return value;
-            }
-        }
-    }
+        string Authorization,
+        string Origin,
+        string Body);
 }
 
-internal sealed record BrowserExtensionDownloadRequest(IReadOnlyList<string> Urls);
+internal sealed record BrowserExtensionAddRequest(
+    [property: JsonPropertyName("url")] string Url,
+    [property: JsonPropertyName("referer")] string? Referer,
+    [property: JsonPropertyName("cookie")] string? Cookie,
+    [property: JsonPropertyName("filename")] string? Filename);
 
-internal sealed record BrowserExtensionDownloadResult(bool Success, string Mode, int Count, string Message);
+internal sealed record BrowserExtensionAddResponse(
+    [property: JsonPropertyName("action")] string Action,
+    [property: JsonPropertyName("gid")] string? Gid,
+    [property: JsonPropertyName("message")] string? Message);
+
+internal sealed record BrowserExtensionPingResponse(
+    [property: JsonPropertyName("status")] string Status,
+    [property: JsonPropertyName("version")] string Version);
+
+internal sealed record BrowserExtensionVersionResponse(
+    [property: JsonPropertyName("app")] string App,
+    [property: JsonPropertyName("engine")] string Engine);
+
+internal sealed record BrowserExtensionStatResponse(
+    [property: JsonPropertyName("downloadSpeed")] string DownloadSpeed,
+    [property: JsonPropertyName("uploadSpeed")] string UploadSpeed,
+    [property: JsonPropertyName("numActive")] string NumActive,
+    [property: JsonPropertyName("numWaiting")] string NumWaiting,
+    [property: JsonPropertyName("numStopped")] string NumStopped,
+    [property: JsonPropertyName("numStoppedTotal")] string NumStoppedTotal);
+
+internal sealed record BrowserExtensionActionResponse(
+    [property: JsonPropertyName("status")] string Status,
+    [property: JsonPropertyName("error")] string? Error);

@@ -121,6 +121,8 @@
   <data name="TaskAddedNotificationBody" xml:space="preserve"><value>{0} has been added to the download queue.</value></data>
   <data name="TaskDownloadCompletedNotificationTitle" xml:space="preserve"><value>Download complete</value></data>
   <data name="TaskDownloadCompletedNotificationBody" xml:space="preserve"><value>{0} has finished downloading.</value></data>
+  <data name="TaskCompletedNotificationTitle" xml:space="preserve"><value>Task complete</value></data>
+  <data name="TaskCompletedNotificationBody" xml:space="preserve"><value>{0} is complete.</value></data>
   <data name="TaskDownloadFailedNotificationTitle" xml:space="preserve"><value>Download failed</value></data>
   <data name="TaskDownloadFailedNotificationBody" xml:space="preserve"><value>{0} could not be downloaded.</value></data>
   <data name="UnknownTaskName" xml:space="preserve"><value>This task</value></data>

@@ -4,6 +4,7 @@ using OmniDown.Models;
 using OmniDown.Models.Settings;
 using OmniDown.Services.BrowserExtension;
 using OmniDown.Services.Engine;
+using OmniDown.Services.Rpc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,35 +42,120 @@ namespace OmniDown
             }
         }
 
-        private Task<BrowserExtensionDownloadResult> HandleBrowserExtensionDownloadAsync(BrowserExtensionDownloadRequest request)
+        private Task<BrowserExtensionAddResponse> HandleBrowserExtensionAddAsync(BrowserExtensionAddRequest request)
         {
-            TaskCompletionSource<BrowserExtensionDownloadResult> completion = new();
+            TaskCompletionSource<BrowserExtensionAddResponse> completion = new();
             bool queued = DispatcherQueue.TryEnqueue(async () =>
             {
                 try
                 {
-                    BrowserExtensionDownloadResult result = await HandleBrowserExtensionDownloadOnUiThreadAsync(request);
+                    BrowserExtensionAddResponse result = await HandleBrowserExtensionAddOnUiThreadAsync(request);
                     completion.TrySetResult(result);
                 }
                 catch (Exception ex)
                 {
-                    completion.TrySetResult(new BrowserExtensionDownloadResult(false, "error", 0, ex.Message));
+                    completion.TrySetResult(new BrowserExtensionAddResponse("error", null, ex.Message));
                 }
             });
 
             if (!queued)
             {
-                completion.TrySetResult(new BrowserExtensionDownloadResult(false, "error", 0, "UI dispatcher is not available."));
+                completion.TrySetResult(new BrowserExtensionAddResponse("error", null, "UI dispatcher is not available."));
             }
 
             return completion.Task;
         }
 
-        private async Task<BrowserExtensionDownloadResult> HandleBrowserExtensionDownloadOnUiThreadAsync(
-            BrowserExtensionDownloadRequest request)
+        private Task<BrowserExtensionStatResponse> HandleBrowserExtensionStatAsync()
         {
-            List<string> sourceUris = request.Urls
-                .SelectMany(NewDownloadDialogHelpers.GetDownloadSourceUris)
+            TaskCompletionSource<BrowserExtensionStatResponse> completion = new();
+            bool queued = DispatcherQueue.TryEnqueue(async () =>
+            {
+                try
+                {
+                    Aria2GlobalStat stat = _aria2EngineHost.IsRunning
+                        ? await _aria2RpcClient.GetGlobalStatAsync()
+                        : new Aria2GlobalStat();
+                    completion.TrySetResult(new BrowserExtensionStatResponse(
+                        stat.DownloadSpeed,
+                        stat.UploadSpeed,
+                        stat.NumActive,
+                        stat.NumWaiting,
+                        stat.NumStopped,
+                        stat.NumStoppedTotal));
+                }
+                catch
+                {
+                    completion.TrySetResult(new BrowserExtensionStatResponse("0", "0", "0", "0", "0", "0"));
+                }
+            });
+
+            if (!queued)
+            {
+                completion.TrySetResult(new BrowserExtensionStatResponse("0", "0", "0", "0", "0", "0"));
+            }
+
+            return completion.Task;
+        }
+
+        private Task<BrowserExtensionActionResponse> PauseAllBrowserExtensionTasksAsync()
+        {
+            return RunBrowserExtensionTaskActionAsync(
+                () => _aria2RpcClient.ForcePauseAllAsync(),
+                "ok");
+        }
+
+        private Task<BrowserExtensionActionResponse> ResumeAllBrowserExtensionTasksAsync()
+        {
+            return RunBrowserExtensionTaskActionAsync(
+                () => _aria2RpcClient.UnpauseAllAsync(),
+                "ok");
+        }
+
+        private Task<BrowserExtensionActionResponse> RunBrowserExtensionTaskActionAsync(
+            Func<Task> action,
+            string successStatus)
+        {
+            TaskCompletionSource<BrowserExtensionActionResponse> completion = new();
+            bool queued = DispatcherQueue.TryEnqueue(async () =>
+            {
+                if (!_aria2EngineHost.IsRunning)
+                {
+                    completion.TrySetResult(new BrowserExtensionActionResponse("error", "Engine not running."));
+                    return;
+                }
+
+                try
+                {
+                    await action();
+                    await RefreshDownloadsAsync();
+                    completion.TrySetResult(new BrowserExtensionActionResponse(successStatus, null));
+                }
+                catch (Exception ex)
+                {
+                    completion.TrySetResult(new BrowserExtensionActionResponse("error", ex.Message));
+                }
+            });
+
+            if (!queued)
+            {
+                completion.TrySetResult(new BrowserExtensionActionResponse("error", "UI dispatcher is not available."));
+            }
+
+            return completion.Task;
+        }
+
+        private BrowserExtensionVersionResponse GetBrowserExtensionVersion()
+        {
+            return new BrowserExtensionVersionResponse(
+                GetAppVersionText(),
+                _aria2EngineHost.IsRunning ? "running" : "stopped");
+        }
+
+        private async Task<BrowserExtensionAddResponse> HandleBrowserExtensionAddOnUiThreadAsync(
+            BrowserExtensionAddRequest request)
+        {
+            List<string> sourceUris = NewDownloadDialogHelpers.GetDownloadSourceUris(request.Url)
                 .Where(NewDownloadDialogHelpers.IsLikelyDownloadSourceUri)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
@@ -77,27 +163,29 @@ namespace OmniDown
             if (sourceUris.Count == 0)
             {
                 ShowMessage("浏览器扩展没有传入可用链接。", InfoBarSeverity.Warning);
-                return new BrowserExtensionDownloadResult(false, "invalid", 0, "No valid download URL was provided.");
+                return new BrowserExtensionAddResponse("error", null, "No valid download URL was provided.");
             }
 
             string downloadText = string.Join(Environment.NewLine, sourceUris) + Environment.NewLine;
             if (!_settingsPageViewModel.AdvancedSettings.AutoSubmitFromExtension)
             {
                 ShowAndActivate();
-                _ = ShowNewDownloadDialogAsync(downloadText);
-                return new BrowserExtensionDownloadResult(true, "dialog", sourceUris.Count, "Opened new download dialog.");
+                _ = ShowNewDownloadDialogAsync(downloadText, request.Filename);
+                return new BrowserExtensionAddResponse("queued", null, null);
             }
 
-            return await AddBrowserExtensionDownloadsAsync(sourceUris);
+            return await AddBrowserExtensionDownloadsAsync(sourceUris, request);
         }
 
-        private async Task<BrowserExtensionDownloadResult> AddBrowserExtensionDownloadsAsync(IReadOnlyList<string> sourceUris)
+        private async Task<BrowserExtensionAddResponse> AddBrowserExtensionDownloadsAsync(
+            IReadOnlyList<string> sourceUris,
+            BrowserExtensionAddRequest request)
         {
             Aria2EngineStartResult startResult = await EnsureAria2StartedAsync();
             if (!startResult.Started)
             {
                 ShowMessage(startResult.Message, InfoBarSeverity.Error);
-                return new BrowserExtensionDownloadResult(false, "auto", 0, startResult.Message);
+                return new BrowserExtensionAddResponse("error", null, startResult.Message);
             }
 
             DownloadSettings downloadSettings = _settingsPageViewModel.DownloadSettings;
@@ -108,9 +196,11 @@ namespace OmniDown
                 {
                     DownloadTask task = await _downloadCoordinator.AddDownloadAsync(
                         sourceUri,
-                        string.Empty,
+                        sourceUris.Count == 1 ? request.Filename ?? string.Empty : string.Empty,
                         downloadSettings.DownloadDirectory,
-                        downloadSettings.SplitCount);
+                        downloadSettings.SplitCount,
+                        request.Referer,
+                        request.Cookie);
                     _observedTaskStatuses[task.Gid] = task.Status;
                     addedTasks.Add(task);
                     ShowTaskAddedNotification(task);
@@ -123,12 +213,12 @@ namespace OmniDown
                     InfoBarSeverity.Success);
                 await RefreshDownloadsAsync();
                 UpdateDashboard();
-                return new BrowserExtensionDownloadResult(true, "auto", addedTasks.Count, "Created download task.");
+                return new BrowserExtensionAddResponse("submitted", addedTasks.Count == 1 ? addedTasks[0].Gid : null, null);
             }
             catch (Exception ex)
             {
                 ShowMessage($"浏览器扩展添加任务失败：{ex.Message}", InfoBarSeverity.Error);
-                return new BrowserExtensionDownloadResult(false, "auto", addedTasks.Count, ex.Message);
+                return new BrowserExtensionAddResponse("error", addedTasks.Count == 1 ? addedTasks[0].Gid : null, ex.Message);
             }
         }
     }

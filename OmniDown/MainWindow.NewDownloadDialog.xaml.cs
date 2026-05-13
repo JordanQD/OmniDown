@@ -117,7 +117,7 @@ namespace OmniDown
             return activationText.Trim();
         }
 
-        private async Task ShowNewDownloadDialogAsync(string? initialDownloadText = null)
+        private async Task ShowNewDownloadDialogAsync(string? initialDownloadText = null, string? initialTaskName = null)
         {
             if (_isNewDownloadDialogOpen)
             {
@@ -389,7 +389,8 @@ namespace OmniDown
 
             TextBox fileNameTextBox = new()
             {
-                PlaceholderText = "Leave empty to infer from the URL"
+                PlaceholderText = "Leave empty to infer from the URL",
+                Text = initialTaskName?.Trim() ?? string.Empty
             };
             fileNameTextBox.Header = Strings.Get("NewDownloadTaskNameHeader");
             fileNameTextBox.PlaceholderText = Strings.Get("NewDownloadTaskNamePlaceholder");

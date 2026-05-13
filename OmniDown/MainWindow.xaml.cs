@@ -90,12 +90,18 @@ namespace OmniDown
         private bool _hasSeenActiveDownloadsForAutoShutdown;
         private bool _isShutdownPrepared;
         private string _lastClipboardDownloadText = string.Empty;
+        private readonly Dictionary<string, bool> _observedTaskDownloadCompletions = new(StringComparer.OrdinalIgnoreCase);
 
         public ObservableCollection<DownloadTask> Tasks { get; } = new();
 
         public MainWindow()
         {
-            _browserExtensionApiServer = new BrowserExtensionApiServer(HandleBrowserExtensionDownloadAsync);
+            _browserExtensionApiServer = new BrowserExtensionApiServer(
+                HandleBrowserExtensionAddAsync,
+                HandleBrowserExtensionStatAsync,
+                PauseAllBrowserExtensionTasksAsync,
+                ResumeAllBrowserExtensionTasksAsync,
+                GetBrowserExtensionVersion);
             _settingsPageViewModel = new SettingsPageViewModel(_settingsStore);
             InitializeComponent();
             HookSettingsPageEvents();

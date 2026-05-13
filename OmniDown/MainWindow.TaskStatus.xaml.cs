@@ -548,6 +548,7 @@ namespace OmniDown
             foreach (DownloadTask task in Tasks.Where(task => !string.IsNullOrWhiteSpace(task.Gid)))
             {
                 _observedTaskStatuses[task.Gid] = task.Status;
+                _observedTaskDownloadCompletions[task.Gid] = IsTaskDownloadContentCompleted(task);
             }
         }
 
@@ -560,9 +561,18 @@ namespace OmniDown
                 currentGids.Add(task.Gid);
                 if (_observedTaskStatuses.TryGetValue(task.Gid, out string? previousStatus))
                 {
-                    if (!IsCompletedTaskStatus(previousStatus) && IsCompletedTask(task))
+                    bool wasDownloadContentCompleted =
+                        _observedTaskDownloadCompletions.TryGetValue(task.Gid, out bool observedDownloadContentCompleted) &&
+                        observedDownloadContentCompleted;
+                    bool isDownloadContentCompleted = IsTaskDownloadContentCompleted(task);
+                    if (!wasDownloadContentCompleted && isDownloadContentCompleted)
                     {
                         ShowDownloadCompletedNotification(task);
+                    }
+
+                    if (!IsCompletedTaskStatus(previousStatus) && IsCompletedTask(task) && task.IsPeerTransfer)
+                    {
+                        ShowTaskCompletedNotification(task);
                     }
                     else if (!IsErrorTaskStatus(previousStatus) && IsErrorTaskStatus(task.Status))
                     {
@@ -571,11 +581,13 @@ namespace OmniDown
                 }
 
                 _observedTaskStatuses[task.Gid] = task.Status;
+                _observedTaskDownloadCompletions[task.Gid] = IsTaskDownloadContentCompleted(task);
             }
 
             foreach (string staleGid in _observedTaskStatuses.Keys.Except(currentGids, StringComparer.OrdinalIgnoreCase).ToArray())
             {
                 _observedTaskStatuses.Remove(staleGid);
+                _observedTaskDownloadCompletions.Remove(staleGid);
             }
         }
 
@@ -592,6 +604,14 @@ namespace OmniDown
             if (_settingsPageViewModel.GeneralSettings.SystemNotificationsEnabled && _settingsPageViewModel.GeneralSettings.DownloadCompleteNotificationsEnabled)
             {
                 _notifications.ShowDownloadCompleted(task);
+            }
+        }
+
+        private void ShowTaskCompletedNotification(DownloadTask task)
+        {
+            if (_settingsPageViewModel.GeneralSettings.SystemNotificationsEnabled && _settingsPageViewModel.GeneralSettings.DownloadCompleteNotificationsEnabled)
+            {
+                _notifications.ShowTaskCompleted(task);
             }
         }
 

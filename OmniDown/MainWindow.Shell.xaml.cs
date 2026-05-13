@@ -98,14 +98,18 @@ namespace OmniDown
 
         private void HandleNotificationInvoked(TaskNotificationInvokedEventArgs args)
         {
-            ShowAndActivate();
             switch (args.Action)
             {
                 case SystemNotificationService.ActionTaskAdded:
                 case SystemNotificationService.ActionDownloadFailed:
+                    ShowAndActivate();
                     NavigateToHome();
                     break;
                 case SystemNotificationService.ActionDownloadCompleted:
+                case SystemNotificationService.ActionTaskCompleted:
+                    ShowAndActivate();
+                    HandleDownloadCompletedNotificationInvoked(args);
+                    break;
                 case SystemNotificationService.ActionOpenDownloadedFile:
                 case SystemNotificationService.ActionOpenDownloadedFolder:
                     HandleDownloadCompletedNotificationInvoked(args);
@@ -137,7 +141,7 @@ namespace OmniDown
 
         private void OpenNotificationFile(string? filePath)
         {
-            if (!string.IsNullOrWhiteSpace(filePath) && File.Exists(filePath))
+            if (!string.IsNullOrWhiteSpace(filePath) && (File.Exists(filePath) || Directory.Exists(filePath)))
             {
                 OpenShellTarget(filePath);
                 return;

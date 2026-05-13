@@ -121,6 +121,8 @@
   <data name="TaskAddedNotificationBody" xml:space="preserve"><value>{0} 已加入下载队列。</value></data>
   <data name="TaskDownloadCompletedNotificationTitle" xml:space="preserve"><value>任务下载成功</value></data>
   <data name="TaskDownloadCompletedNotificationBody" xml:space="preserve"><value>{0} 已下载完成。</value></data>
+  <data name="TaskCompletedNotificationTitle" xml:space="preserve"><value>任务完成</value></data>
+  <data name="TaskCompletedNotificationBody" xml:space="preserve"><value>{0} 已完成。</value></data>
   <data name="TaskDownloadFailedNotificationTitle" xml:space="preserve"><value>任务下载失败</value></data>
   <data name="TaskDownloadFailedNotificationBody" xml:space="preserve"><value>{0} 下载失败。</value></data>
   <data name="UnknownTaskName" xml:space="preserve"><value>该任务</value></data>

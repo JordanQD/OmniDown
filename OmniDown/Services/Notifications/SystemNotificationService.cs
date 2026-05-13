@@ -12,6 +12,7 @@ public sealed class SystemNotificationService
 {
     public const string ActionTaskAdded = "TaskAdded";
     public const string ActionDownloadCompleted = "DownloadCompleted";
+    public const string ActionTaskCompleted = "TaskCompleted";
     public const string ActionDownloadFailed = "DownloadFailed";
     public const string ActionOpenDownloadedFile = "OpenDownloadedFile";
     public const string ActionOpenDownloadedFolder = "OpenDownloadedFolder";
@@ -70,6 +71,16 @@ public sealed class SystemNotificationService
             ResolveTaskFolderPath(task));
     }
 
+    public void ShowTaskCompleted(DownloadTask task)
+    {
+        Show(
+            Strings.Get("TaskCompletedNotificationTitle"),
+            Strings.Format("TaskCompletedNotificationBody", GetTaskName(task)),
+            ActionTaskCompleted,
+            ResolveTaskFilePath(task),
+            ResolveTaskFolderPath(task));
+    }
+
     public void ShowDownloadFailed(DownloadTask task)
     {
         Show(
@@ -97,7 +108,7 @@ public sealed class SystemNotificationService
                 builder.AddArgument("folderPath", folderPath);
             }
 
-            if (action == ActionDownloadCompleted)
+            if (action is ActionDownloadCompleted or ActionTaskCompleted)
             {
                 builder
                     .AddButton(CreateDownloadCompletedButton(
@@ -165,9 +176,22 @@ public sealed class SystemNotificationService
 
     private static string ResolveTaskFolderPath(DownloadTask task)
     {
-        return !string.IsNullOrWhiteSpace(task.SaveDirectory)
-            ? task.SaveDirectory
-            : Path.GetDirectoryName(ResolveTaskFilePath(task)) ?? string.Empty;
+        string filePath = ResolveTaskFilePath(task);
+        if (!string.IsNullOrWhiteSpace(filePath))
+        {
+            if (Directory.Exists(filePath))
+            {
+                return filePath;
+            }
+
+            string? fileDirectory = Path.GetDirectoryName(filePath);
+            if (!string.IsNullOrWhiteSpace(fileDirectory))
+            {
+                return fileDirectory;
+            }
+        }
+
+        return task.SaveDirectory;
     }
 
     private void OnNotificationInvoked(

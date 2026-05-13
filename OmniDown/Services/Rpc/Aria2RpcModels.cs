@@ -59,4 +59,13 @@ public sealed record Aria2GlobalStat
 
     [JsonPropertyName("numActive")]
     public string NumActive { get; init; } = "0";
+
+    [JsonPropertyName("numWaiting")]
+    public string NumWaiting { get; init; } = "0";
+
+    [JsonPropertyName("numStopped")]
+    public string NumStopped { get; init; } = "0";
+
+    [JsonPropertyName("numStoppedTotal")]
+    public string NumStoppedTotal { get; init; } = "0";
 }

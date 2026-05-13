@@ -267,9 +267,22 @@ namespace OmniDown
 
         private static string ResolveTaskFolderPath(DownloadTask task)
         {
-            return !string.IsNullOrWhiteSpace(task.SaveDirectory) && Directory.Exists(task.SaveDirectory)
-                ? task.SaveDirectory
-                : Path.GetDirectoryName(ResolveTaskFilePath(task)) ?? string.Empty;
+            string filePath = ResolveTaskFilePath(task);
+            if (!string.IsNullOrWhiteSpace(filePath))
+            {
+                if (Directory.Exists(filePath))
+                {
+                    return filePath;
+                }
+
+                string? fileDirectory = Path.GetDirectoryName(filePath);
+                if (!string.IsNullOrWhiteSpace(fileDirectory))
+                {
+                    return fileDirectory;
+                }
+            }
+
+            return task.SaveDirectory;
         }
 
         private static void OpenShellTarget(string path)
@@ -341,6 +354,18 @@ namespace OmniDown
         private static bool IsCompletedTask(DownloadTask task)
         {
             return IsCompletedTaskStatus(task.Status);
+        }
+
+        private static bool IsTaskDownloadContentCompleted(DownloadTask task)
+        {
+            if (IsCompletedTask(task))
+            {
+                return true;
+            }
+
+            return task.IsPeerTransfer &&
+                task.TotalLength > 0 &&
+                task.CompletedLength >= task.TotalLength;
         }
 
         private static bool IsIssueTask(DownloadTask task)

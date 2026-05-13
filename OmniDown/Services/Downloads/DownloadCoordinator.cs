@@ -34,11 +34,13 @@ public sealed class DownloadCoordinator
         string requestedName,
         string saveDirectory,
         int splitCount,
+        string? referer = null,
+        string? cookie = null,
         CancellationToken cancellationToken = default)
     {
         string name = ResolveTaskName(sourceUri, requestedName);
         string? outputFileName = string.IsNullOrWhiteSpace(requestedName) ? null : name;
-        string gid = await _rpcClient.AddUriAsync(sourceUri, outputFileName, saveDirectory, splitCount, cancellationToken);
+        string gid = await _rpcClient.AddUriAsync(sourceUri, outputFileName, saveDirectory, splitCount, referer, cookie, cancellationToken);
 
         DownloadTask task = new()
         {
@@ -154,6 +156,8 @@ public sealed class DownloadCoordinator
                 outputFileName,
                 saveDirectory,
                 splitCount,
+                null,
+                null,
                 cancellationToken);
 
             await RemoveCompletedDownloadResultAsync(oldGid, cancellationToken);

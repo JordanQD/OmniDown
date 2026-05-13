@@ -42,6 +42,8 @@ public sealed class Aria2RpcClient : IDisposable
         string? outputFileName,
         string directory,
         int splitCount,
+        string? referer = null,
+        string? cookie = null,
         CancellationToken cancellationToken = default)
     {
         Dictionary<string, string> options = new()
@@ -53,6 +55,18 @@ public sealed class Aria2RpcClient : IDisposable
         if (!string.IsNullOrWhiteSpace(outputFileName))
         {
             options["out"] = outputFileName.Trim();
+        }
+
+        string sanitizedReferer = SanitizeHeaderValue(referer);
+        if (!string.IsNullOrWhiteSpace(sanitizedReferer))
+        {
+            options["referer"] = sanitizedReferer;
+        }
+
+        string sanitizedCookie = SanitizeHeaderValue(cookie);
+        if (!string.IsNullOrWhiteSpace(sanitizedCookie))
+        {
+            options["header"] = $"Cookie: {sanitizedCookie}";
         }
 
         return await SendAsync<string>("aria2.addUri", [new[] { uri }, options], cancellationToken);
@@ -105,6 +119,16 @@ public sealed class Aria2RpcClient : IDisposable
         CancellationToken cancellationToken = default)
     {
         return SendAsync<string>("aria2.changeGlobalOption", [options], cancellationToken);
+    }
+
+    public Task ForcePauseAllAsync(CancellationToken cancellationToken = default)
+    {
+        return SendAsync<string>("aria2.forcePauseAll", [], cancellationToken);
+    }
+
+    public Task UnpauseAllAsync(CancellationToken cancellationToken = default)
+    {
+        return SendAsync<string>("aria2.unpauseAll", [], cancellationToken);
     }
 
     public Task PauseAsync(string gid, CancellationToken cancellationToken = default)
@@ -273,7 +297,10 @@ public sealed class Aria2RpcClient : IDisposable
             {
                 DownloadSpeed = TryGetString(result, "downloadSpeed"),
                 UploadSpeed = TryGetString(result, "uploadSpeed"),
-                NumActive = TryGetString(result, "numActive")
+                NumActive = TryGetString(result, "numActive"),
+                NumWaiting = TryGetString(result, "numWaiting"),
+                NumStopped = TryGetString(result, "numStopped"),
+                NumStoppedTotal = TryGetString(result, "numStoppedTotal")
             };
         }
 
@@ -353,6 +380,13 @@ public sealed class Aria2RpcClient : IDisposable
         return element.TryGetProperty(propertyName, out JsonElement property) && property.ValueKind is JsonValueKind.String
             ? property.GetString() ?? string.Empty
             : string.Empty;
+    }
+
+    private static string SanitizeHeaderValue(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value)
+            ? string.Empty
+            : value.Replace("\r", string.Empty).Replace("\n", string.Empty).Trim();
     }
 
     private static int TryGetInt32(JsonElement element, string propertyName)
