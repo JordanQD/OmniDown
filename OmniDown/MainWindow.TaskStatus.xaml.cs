@@ -567,10 +567,19 @@ namespace OmniDown
                     bool isDownloadContentCompleted = IsTaskDownloadContentCompleted(task);
                     if (!wasDownloadContentCompleted && isDownloadContentCompleted)
                     {
-                        ShowDownloadCompletedNotification(task);
+                        if (IsAutoDownloadedMetadataTask(task))
+                        {
+                            ShowTaskAddedNotification(task);
+                        }
+                        else
+                        {
+                            ShowDownloadCompletedNotification(task);
+                        }
                     }
 
-                    if (!IsCompletedTaskStatus(previousStatus) && IsCompletedTask(task) && task.IsPeerTransfer)
+                    if (!IsCompletedTaskStatus(previousStatus) &&
+                        IsCompletedTask(task) &&
+                        ShouldShowTaskCompletedAfterSeedingNotification(task))
                     {
                         ShowTaskCompletedNotification(task);
                     }
@@ -613,6 +622,25 @@ namespace OmniDown
             {
                 _notifications.ShowTaskCompleted(task);
             }
+        }
+
+        private bool IsAutoDownloadedMetadataTask(DownloadTask task)
+        {
+            return task.IsMetadataTransfer &&
+                _settingsPageViewModel.BitTorrentSettings.IsEnabled &&
+                _settingsPageViewModel.BitTorrentSettings.AutoDownloadContent;
+        }
+
+        private bool ShouldShowTaskCompletedAfterSeedingNotification(DownloadTask task)
+        {
+            if (!task.IsPeerTransfer || task.IsMetadataTransfer)
+            {
+                return false;
+            }
+
+            BitTorrentSettings settings = _settingsPageViewModel.BitTorrentSettings;
+            return settings.IsEnabled &&
+                (settings.KeepSeeding || settings.SeedRatio > 0 || settings.SeedTimeMinutes > 0);
         }
 
         private void ShowDownloadFailedNotification(DownloadTask task)

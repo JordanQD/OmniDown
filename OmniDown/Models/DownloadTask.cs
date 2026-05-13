@@ -28,6 +28,7 @@ public sealed class DownloadTask : INotifyPropertyChanged
     private long _downloadSpeed;
     private long _uploadSpeed;
     private bool _isPeerTransfer;
+    private bool _isMetadataTransfer;
     private DateTimeOffset _createdAt = DateTimeOffset.Now;
     private bool _isSelected;
 
@@ -254,6 +255,12 @@ public sealed class DownloadTask : INotifyPropertyChanged
                 OnPropertyChanged(nameof(PeerSpeedVisibility));
             }
         }
+    }
+
+    public bool IsMetadataTransfer
+    {
+        get => _isMetadataTransfer;
+        set => SetProperty(ref _isMetadataTransfer, value);
     }
 
     public Visibility NormalSpeedVisibility => IsPeerTransfer ? Visibility.Collapsed : Visibility.Visible;

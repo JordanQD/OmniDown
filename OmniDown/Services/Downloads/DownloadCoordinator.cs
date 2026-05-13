@@ -51,6 +51,7 @@ public sealed class DownloadCoordinator
             LocalFilePath = string.IsNullOrWhiteSpace(name) ? string.Empty : Path.Combine(saveDirectory, name),
             Status = "Waiting",
             IsPeerTransfer = IsPeerTransfer(sourceUri),
+            IsMetadataTransfer = IsMetadataTransfer(sourceUri),
             Progress = 0
         };
 
@@ -82,6 +83,7 @@ public sealed class DownloadCoordinator
             LocalFilePath = string.IsNullOrWhiteSpace(name) ? string.Empty : Path.Combine(saveDirectory, name),
             Status = "Waiting",
             IsPeerTransfer = true,
+            IsMetadataTransfer = false,
             TotalLength = metadata.Files
                 .Where(file => selectedFileIndexes.Count == 0 || selectedFileIndexes.Contains(file.Index))
                 .Sum(file => file.Length),
@@ -326,6 +328,7 @@ public sealed class DownloadCoordinator
         task.DownloadSpeed = isDownloading ? ParseLong(remoteTask.DownloadSpeed) : 0;
         task.UploadSpeed = isDownloading ? ParseLong(remoteTask.UploadSpeed) : 0;
         task.IsPeerTransfer = IsPeerTransfer(remoteTask);
+        task.IsMetadataTransfer = IsMetadataTransfer(remoteTask);
         task.Progress = task.TotalLength <= 0 ? task.Progress : Math.Clamp(task.CompletedLength * 100d / task.TotalLength, 0, 100);
 
         string resolvedRemoteName = ResolveRemoteName(remoteTask);
@@ -541,8 +544,17 @@ public sealed class DownloadCoordinator
 
     private static bool IsPeerTransfer(string sourceUri)
     {
-        return sourceUri.StartsWith("magnet:", StringComparison.OrdinalIgnoreCase)
-            || sourceUri.EndsWith(".torrent", StringComparison.OrdinalIgnoreCase);
+        return sourceUri.StartsWith("magnet:", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsMetadataTransfer(Aria2TaskStatus task)
+    {
+        return task.Files.Any(file => IsMetadataPath(file.Path));
+    }
+
+    private static bool IsMetadataTransfer(string sourceUri)
+    {
+        return sourceUri.StartsWith("magnet:", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string NormalizeStatus(string status)
@@ -685,6 +697,7 @@ public sealed class DownloadCoordinator
                     CompletedLength = cachedTask.CompletedLength,
                     TotalLength = cachedTask.TotalLength,
                     IsPeerTransfer = cachedTask.IsPeerTransfer,
+                    IsMetadataTransfer = cachedTask.IsMetadataTransfer,
                     CreatedAt = cachedTask.CreatedAt
                 });
             }
@@ -713,6 +726,7 @@ public sealed class DownloadCoordinator
                     task.CompletedLength,
                     task.TotalLength,
                     task.IsPeerTransfer,
+                    task.IsMetadataTransfer,
                     task.CreatedAt))
                 .ToList();
 
@@ -804,4 +818,5 @@ internal sealed record CachedDownloadTask(
     long CompletedLength,
     long TotalLength,
     bool IsPeerTransfer,
+    bool IsMetadataTransfer,
     DateTimeOffset CreatedAt);
