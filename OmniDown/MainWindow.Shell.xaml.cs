@@ -42,14 +42,31 @@ namespace OmniDown
 {
     public sealed partial class MainWindow
     {
-        private async void StartAriaButton_Click(object sender, RoutedEventArgs e)
+        private async void StartStopAriaButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_aria2EngineHost.IsRunning)
+            {
+                await StopAriaAsync();
+                return;
+            }
+
+            await StartAriaAsync();
+        }
+
+        private async void RestartAriaButton_Click(object sender, RoutedEventArgs e)
+        {
+            await StopAriaAsync(showMessage: false);
+            await StartAriaAsync();
+        }
+
+        private async Task StartAriaAsync()
         {
             Aria2EngineStartResult result = await EnsureAria2StartedAsync();
             UpdateAriaStatus();
             ShowMessage(result.Message, result.Started ? InfoBarSeverity.Success : InfoBarSeverity.Error);
         }
 
-        private async void StopAriaButton_Click(object sender, RoutedEventArgs e)
+        private async Task StopAriaAsync(bool showMessage = true)
         {
             _refreshTimer.Stop();
             await SaveAriaSessionIfRunningAsync();
@@ -58,7 +75,10 @@ namespace OmniDown
             _taskbarProgress.Clear();
             UpdateGlobalSpeedLimitText();
             UpdateAriaStatus();
-            ShowMessage(Strings.Get("AriaStoppedMessage"), InfoBarSeverity.Informational);
+            if (showMessage)
+            {
+                ShowMessage(Strings.Get("AriaStoppedMessage"), InfoBarSeverity.Informational);
+            }
         }
 
         private void TrayIcon_ShowRequested(object? sender, EventArgs e)
@@ -86,6 +106,8 @@ namespace OmniDown
                     NavigateToHome();
                     break;
                 case SystemNotificationService.ActionDownloadCompleted:
+                case SystemNotificationService.ActionOpenDownloadedFile:
+                case SystemNotificationService.ActionOpenDownloadedFolder:
                     HandleDownloadCompletedNotificationInvoked(args);
                     break;
             }
@@ -93,12 +115,12 @@ namespace OmniDown
 
         private void HandleDownloadCompletedNotificationInvoked(TaskNotificationInvokedEventArgs args)
         {
-            switch (_settingsPageViewModel.GeneralSettings.DownloadCompleteNotificationAction)
+            switch (args.Action)
             {
-                case "OpenFile":
+                case SystemNotificationService.ActionOpenDownloadedFile:
                     OpenNotificationFile(args.FilePath);
                     break;
-                case "OpenFolder":
+                case SystemNotificationService.ActionOpenDownloadedFolder:
                     OpenNotificationFolder(args.FolderPath, args.FilePath);
                     break;
                 default:
@@ -233,6 +255,7 @@ namespace OmniDown
             string tag = item.Tag?.ToString() ?? "General";
             ShowSettingsSection(tag);
             ApplySettingsFilter();
+            ResetSettingsSectionViewport();
         }
 
         private void ShowSettingsPage()
@@ -241,6 +264,7 @@ namespace OmniDown
             {
                 ShowSettingsSection(GetSelectedSettingsSectionTag());
                 ApplySettingsFilter();
+                ResetSettingsSectionFocus();
             }
             catch (Exception ex)
             {
@@ -267,6 +291,24 @@ namespace OmniDown
             NetworkSettingsContent.Visibility = tag == "Network" ? Visibility.Visible : Visibility.Collapsed;
             AdvancedSettingsContent.Visibility = tag == "Advanced" ? Visibility.Visible : Visibility.Collapsed;
             AboutSettingsContent.Visibility = tag == "About" ? Visibility.Visible : Visibility.Collapsed;
+            if (tag == "Advanced")
+            {
+                RefreshProtocolDefaultToggles();
+            }
+        }
+
+        private void ResetSettingsSectionViewport()
+        {
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                SettingsContentScrollViewer?.ChangeView(null, 0, null, disableAnimation: true);
+                ResetSettingsSectionFocus();
+            });
+        }
+
+        private void ResetSettingsSectionFocus()
+        {
+            SettingsContentScrollViewer?.Focus(FocusState.Programmatic);
         }
 
         private void InitializeAboutSection()
@@ -454,6 +496,7 @@ namespace OmniDown
         private async void MainWindow_Closed(object sender, WindowEventArgs args)
         {
             _refreshTimer.Stop();
+            Clipboard.ContentChanged -= Clipboard_ContentChanged;
             ReleaseSystemSleepOverride();
             SaveWindowPlacementSettings();
             _taskbarProgress.Clear();
@@ -464,6 +507,7 @@ namespace OmniDown
             _notifications.Unregister();
             _notifications.NotificationInvoked -= Notifications_NotificationInvoked;
             _trayIcon?.Dispose();
+            _browserExtensionApiServer.Dispose();
             _aria2RpcClient.Dispose();
             _aria2EngineHost.Dispose();
         }

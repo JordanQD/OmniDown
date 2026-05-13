@@ -8,6 +8,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.Win32;
 using OmniDown.Models;
 using OmniDown.Models.Settings;
+using OmniDown.Services.BrowserExtension;
 using OmniDown.Services.Downloads;
 using OmniDown.Services.Engine;
 using OmniDown.Services.Localization;
@@ -25,7 +26,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -57,7 +57,7 @@ namespace OmniDown
         private TrayIconService? _trayIcon;
         private readonly DispatcherTimer _refreshTimer = new();
         private readonly DispatcherTimer _statusMessageTimer = new();
-        private readonly string _rpcSecret = Convert.ToHexString(RandomNumberGenerator.GetBytes(16));
+        private string _rpcSecret = AdvancedSettings.Default.RpcSecret;
         private readonly ObservableCollection<DownloadTask> _visibleTasks = new();
         private readonly ObservableCollection<AppStatusMessage> _statusMessages = new();
         private readonly AutoStartService _autoStartService = new();
@@ -84,15 +84,18 @@ namespace OmniDown
         private bool _isLoadingDownloadSettings;
         private bool _isLoadingBitTorrentSettings;
         private bool _isLoadingNetworkSettings;
+        private bool _isLoadingAdvancedSettings;
         private bool _isNewDownloadDialogOpen;
         private bool _hasTriggeredAutoShutdown;
         private bool _hasSeenActiveDownloadsForAutoShutdown;
         private bool _isShutdownPrepared;
+        private string _lastClipboardDownloadText = string.Empty;
 
         public ObservableCollection<DownloadTask> Tasks { get; } = new();
 
         public MainWindow()
         {
+            _browserExtensionApiServer = new BrowserExtensionApiServer(HandleBrowserExtensionDownloadAsync);
             _settingsPageViewModel = new SettingsPageViewModel(_settingsStore);
             InitializeComponent();
             HookSettingsPageEvents();
@@ -126,6 +129,9 @@ namespace OmniDown
             LoadDownloadSettings();
             LoadBitTorrentSettings();
             LoadNetworkSettings();
+            LoadAdvancedSettings();
+            StartBrowserExtensionApiServer();
+            Clipboard.ContentChanged += Clipboard_ContentChanged;
             _ = AutoSyncBitTorrentTrackersIfNeededAsync();
             LoadSpeedLimitSettings();
             LoadCloseBehaviorSettings();

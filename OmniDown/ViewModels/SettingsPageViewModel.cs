@@ -2,6 +2,7 @@ namespace OmniDown.ViewModels;
 
 using OmniDown.Models.Settings;
 using OmniDown.Services.Settings;
+using System;
 
 internal sealed class SettingsPageViewModel
 {
@@ -19,6 +20,8 @@ internal sealed class SettingsPageViewModel
     public BitTorrentSettings BitTorrentSettings { get; private set; } = BitTorrentSettings.Default;
 
     public NetworkSettings NetworkSettings { get; private set; } = NetworkSettings.Default;
+
+    public AdvancedSettings AdvancedSettings { get; private set; } = AdvancedSettings.Default;
 
     public CloseBehaviorSettings CloseBehaviorSettings { get; private set; } = CloseBehaviorSettings.Default;
 
@@ -66,6 +69,18 @@ internal sealed class SettingsPageViewModel
     {
         NetworkSettings = settings;
         _settingsStore.SaveNetworkSettings(settings);
+    }
+
+    public void LoadAdvancedSettings()
+    {
+        AdvancedSettings = NormalizeAdvancedSettings(_settingsStore.ReadAdvancedSettings());
+        _settingsStore.SaveAdvancedSettings(AdvancedSettings);
+    }
+
+    public void SaveAdvancedSettings(AdvancedSettings settings)
+    {
+        AdvancedSettings = NormalizeAdvancedSettings(settings);
+        _settingsStore.SaveAdvancedSettings(AdvancedSettings);
     }
 
     public void LoadCloseBehaviorSettings()
@@ -117,7 +132,6 @@ internal sealed class SettingsPageViewModel
         bool systemNotificationsEnabled,
         bool downloadStartNotificationsEnabled,
         bool downloadCompleteNotificationsEnabled,
-        string downloadCompleteNotificationAction,
         bool autoShutdownWhenComplete,
         bool preventSleepWhileDownloading,
         string theme)
@@ -132,7 +146,6 @@ internal sealed class SettingsPageViewModel
             SystemNotificationsEnabled = systemNotificationsEnabled,
             DownloadStartNotificationsEnabled = downloadStartNotificationsEnabled,
             DownloadCompleteNotificationsEnabled = downloadCompleteNotificationsEnabled,
-            DownloadCompleteNotificationAction = downloadCompleteNotificationAction,
             AutoShutdownWhenComplete = autoShutdownWhenComplete,
             PreventSleepWhileDownloading = preventSleepWhileDownloading,
             Theme = theme
@@ -141,18 +154,34 @@ internal sealed class SettingsPageViewModel
 
     private static GeneralSettings NormalizeGeneralSettings(GeneralSettings settings)
     {
-        string notificationAction = settings.DownloadCompleteNotificationAction;
-        if (notificationAction is not ("Home" or "OpenFile" or "OpenFolder"))
+        return settings with
         {
-            notificationAction = GeneralSettings.Default.DownloadCompleteNotificationAction;
+            Theme = string.IsNullOrWhiteSpace(settings.Theme)
+                ? GeneralSettings.Default.Theme
+                : settings.Theme
+        };
+    }
+
+    private static AdvancedSettings NormalizeAdvancedSettings(AdvancedSettings settings)
+    {
+        string logLevel = settings.LogLevel?.Trim().ToLowerInvariant() ?? string.Empty;
+        if (logLevel is not ("debug" or "info" or "notice" or "warn" or "error"))
+        {
+            logLevel = AdvancedSettings.Default.LogLevel;
         }
 
         return settings with
         {
-            DownloadCompleteNotificationAction = notificationAction,
-            Theme = string.IsNullOrWhiteSpace(settings.Theme)
-                ? GeneralSettings.Default.Theme
-                : settings.Theme
+            RpcPort = Math.Clamp(settings.RpcPort, 1024, 65535),
+            RpcSecret = string.IsNullOrWhiteSpace(settings.RpcSecret)
+                ? AdvancedSettings.GenerateSecret()
+                : settings.RpcSecret.Trim(),
+            ExtensionApiPort = Math.Clamp(settings.ExtensionApiPort, 1024, 65535),
+            ExtensionApiSecret = string.IsNullOrWhiteSpace(settings.ExtensionApiSecret)
+                ? AdvancedSettings.GenerateSecret()
+                : settings.ExtensionApiSecret.Trim(),
+            LogLevel = logLevel,
+            Aria2Path = settings.Aria2Path?.Trim() ?? string.Empty
         };
     }
 }

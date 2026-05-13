@@ -70,12 +70,14 @@ namespace OmniDown
 
         private async System.Threading.Tasks.Task<Aria2EngineStartResult> EnsureAria2StartedAsync()
         {
-            int rpcPort = double.IsNaN(RpcPortNumberBox.Value) ? 6800 : (int)RpcPortNumberBox.Value;
+            AdvancedSettings advancedSettings = _settingsPageViewModel.AdvancedSettings;
+            int rpcPort = advancedSettings.RpcPort;
+            _rpcSecret = advancedSettings.RpcSecret;
             DownloadSettings downloadSettings = _settingsPageViewModel.DownloadSettings;
             _aria2RpcClient.Configure(rpcPort, _rpcSecret);
 
             Aria2EngineStartResult result = await _aria2EngineHost.StartAsync(new Aria2EngineOptions(
-                string.IsNullOrWhiteSpace(AriaPathTextBox.Text) ? null : AriaPathTextBox.Text.Trim(),
+                string.IsNullOrWhiteSpace(advancedSettings.Aria2Path) ? null : advancedSettings.Aria2Path,
                 rpcPort,
                 downloadSettings.DownloadDirectory,
                 _rpcSecret,
@@ -88,7 +90,8 @@ namespace OmniDown
                 downloadSettings.MaxTries,
                 downloadSettings.RetryWaitSeconds,
                 _settingsPageViewModel.NetworkSettings,
-                _settingsPageViewModel.BitTorrentSettings));
+                _settingsPageViewModel.BitTorrentSettings,
+                advancedSettings));
 
             if (!result.Started)
             {
@@ -448,11 +451,27 @@ namespace OmniDown
 
         private void UpdateAriaStatus()
         {
-            string status = _aria2EngineHost.IsRunning
+            bool isRunning = _aria2EngineHost.IsRunning;
+            string status = isRunning
                 ? Strings.Format("AriaRunningStatus", _aria2EngineHost.ProcessId ?? 0)
                 : Strings.Get("AriaStoppedStatus");
 
             SettingsAriaStatusText.Text = status;
+            if (AriaStartStopIcon is not null)
+            {
+                AriaStartStopIcon.Glyph = isRunning ? "\uE769" : "\uE768";
+            }
+
+            if (AriaStartStopButton is not null)
+            {
+                ToolTipService.SetToolTip(AriaStartStopButton, isRunning ? "停止" : "启动");
+            }
+
+            if (AriaRestartButton is not null)
+            {
+                AriaRestartButton.IsEnabled = isRunning;
+            }
+
             UpdateDebugStatus();
         }
 

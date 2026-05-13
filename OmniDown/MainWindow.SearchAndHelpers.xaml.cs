@@ -426,7 +426,6 @@ namespace OmniDown
             SetSettingVisibility(NotificationsSettingCard, query, "notification", "complete", "failed", "通知");
             SetSettingVisibility(DownloadStartNotificationSettingCard, query, "notification", "start", "download", "开始", "通知");
             SetSettingVisibility(DownloadCompleteNotificationSettingCard, query, "notification", "complete", "failed", "download", "完成", "失败", "通知");
-            SetSettingVisibility(DownloadCompleteNotificationActionSettingCard, query, "notification", "complete", "click", "action", "file", "folder", "通知", "点击", "动作", "文件", "文件夹");
             SetSettingVisibility(AutoShutdownSettingCard, query, "shutdown", "complete", "download", "关机", "完成");
             SetSettingVisibility(PreventSleepSettingCard, query, "sleep", "power", "download", "休眠", "睡眠", "下载");
 
@@ -462,7 +461,19 @@ namespace OmniDown
 
             SetSettingVisibility(AriaPathSettingCard, query, "aria2c", "path", Strings.Get("AriaPathLabel.Text"), Strings.Get("AriaPathTextBox.PlaceholderText"), "路径");
             SetSettingVisibility(RpcPortSettingCard, query, "rpc", "port", Strings.Get("RpcPortLabel.Text"), "端口");
+            SetSettingVisibility(RpcSecretSettingCard, query, "rpc", "secret", "token", "密钥", "令牌");
             SetSettingVisibility(ProcessStatusSettingCard, query, "process", "status", "aria2", Strings.Get("ProcessStatusLabel.Text"), "状态");
+            SetSettingVisibility(ExtensionAutoSubmitSettingCard, query, "extension", "browser", "auto submit", "扩展", "浏览器", "自动提交");
+            SetSettingVisibility(ExtensionApiPortSettingCard, query, "extension", "api", "port", "browser", "扩展", "端口");
+            SetSettingVisibility(ExtensionApiSecretSettingCard, query, "extension", "api", "secret", "browser", "扩展", "密钥");
+            SetSettingVisibility(LogLevelSettingCard, query, "log", "level", "debug", "日志", "级别");
+            SetSettingVisibility(AdvancedPathsSettingCard, query, "config", "session", "folder", "path", "配置", "会话", "目录");
+            SetSettingVisibility(SessionResetSettingCard, query, "session", "reset", "clear", "aria2", "会话", "清空");
+            SetSettingVisibility(ClipboardDetectionSettingCard, query, "clipboard", "detect", "paste", "剪贴板", "检测", "粘贴");
+            SetSettingVisibility(ClipboardTypesSettingCard, query, "clipboard", "http", "ftp", "magnet", "thunder", "hash", "剪贴板", "磁力", "迅雷");
+            SetSettingVisibility(ProtocolMagnetSettingCard, query, "default", "program", "protocol", "magnet", "默认程序", "协议", "磁力");
+            SetSettingVisibility(ProtocolThunderSettingCard, query, "default", "program", "protocol", "thunder", "默认程序", "协议", "迅雷");
+            SetSettingVisibility(ProtocolOmniDownSettingCard, query, "default", "program", "protocol", "omnidown", "extension", "默认程序", "协议", "扩展");
             SetSettingVisibility(TerminalSettingCard, query, "terminal", "log", "debug", "aria2", "终端", "日志");
 
             SetSettingVisibility(AboutAppCard, query, "about", "version", "omnidown", "关于", "版本");

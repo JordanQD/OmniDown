@@ -16,7 +16,8 @@ public sealed record Aria2EngineOptions(
     int MaxTries,
     int RetryWaitSeconds,
     NetworkSettings NetworkSettings,
-    BitTorrentSettings BitTorrentSettings);
+    BitTorrentSettings BitTorrentSettings,
+    AdvancedSettings AdvancedSettings);
 
 public sealed record Aria2EngineStartResult(
     bool Started,

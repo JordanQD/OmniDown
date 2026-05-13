@@ -55,7 +55,69 @@ namespace OmniDown
             _ = ShowNewDownloadDialogAsync();
         }
 
-        private async Task ShowNewDownloadDialogAsync()
+        private async void Clipboard_ContentChanged(object? sender, object e)
+        {
+            AdvancedSettings settings = _settingsPageViewModel.AdvancedSettings;
+            if (!settings.ClipboardDetectionEnabled || _isNewDownloadDialogOpen)
+            {
+                return;
+            }
+
+            string? clipboardDownloadText = await GetClipboardDownloadTextAsync(settings);
+            if (string.IsNullOrWhiteSpace(clipboardDownloadText) ||
+                string.Equals(clipboardDownloadText, _lastClipboardDownloadText, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            _lastClipboardDownloadText = clipboardDownloadText;
+            await ShowNewDownloadDialogAsync(clipboardDownloadText);
+        }
+
+        internal async Task HandleExternalDownloadTextAsync(string activationText)
+        {
+            if (string.IsNullOrWhiteSpace(activationText))
+            {
+                return;
+            }
+
+            string downloadText = ExtractProtocolDownloadText(activationText);
+            if (string.IsNullOrWhiteSpace(downloadText))
+            {
+                return;
+            }
+
+            await ShowNewDownloadDialogAsync(downloadText.EndsWith(Environment.NewLine, StringComparison.Ordinal)
+                ? downloadText
+                : downloadText + Environment.NewLine);
+        }
+
+        private static string ExtractProtocolDownloadText(string activationText)
+        {
+            if (!Uri.TryCreate(activationText, UriKind.Absolute, out Uri? uri))
+            {
+                return activationText.Trim();
+            }
+
+            if (uri.Scheme.Equals("omnidown", StringComparison.OrdinalIgnoreCase))
+            {
+                string query = uri.Query.TrimStart('?');
+                foreach (string part in query.Split('&', StringSplitOptions.RemoveEmptyEntries))
+                {
+                    string[] pair = part.Split('=', 2);
+                    if (pair.Length == 2 &&
+                        (pair[0].Equals("url", StringComparison.OrdinalIgnoreCase) ||
+                            pair[0].Equals("uri", StringComparison.OrdinalIgnoreCase)))
+                    {
+                        return Uri.UnescapeDataString(pair[1]).Trim();
+                    }
+                }
+            }
+
+            return activationText.Trim();
+        }
+
+        private async Task ShowNewDownloadDialogAsync(string? initialDownloadText = null)
         {
             if (_isNewDownloadDialogOpen)
             {
@@ -446,8 +508,8 @@ namespace OmniDown
                 updateTorrentPanelVisibility();
             };
             setTaskMode(false);
-            string? clipboardDownloadText = await GetClipboardDownloadTextAsync();
-            if (clipboardDownloadText is not null)
+            string? clipboardDownloadText = initialDownloadText ?? await GetClipboardDownloadTextAsync(_settingsPageViewModel.AdvancedSettings);
+            if (!string.IsNullOrWhiteSpace(clipboardDownloadText))
             {
                 uriTextBox.Text = clipboardDownloadText;
                 uriTextBox.SelectionStart = uriTextBox.Text.Length;

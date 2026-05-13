@@ -13,6 +13,8 @@ public sealed class SystemNotificationService
     public const string ActionTaskAdded = "TaskAdded";
     public const string ActionDownloadCompleted = "DownloadCompleted";
     public const string ActionDownloadFailed = "DownloadFailed";
+    public const string ActionOpenDownloadedFile = "OpenDownloadedFile";
+    public const string ActionOpenDownloadedFolder = "OpenDownloadedFolder";
 
     private bool _isRegistered;
 
@@ -95,6 +97,21 @@ public sealed class SystemNotificationService
                 builder.AddArgument("folderPath", folderPath);
             }
 
+            if (action == ActionDownloadCompleted)
+            {
+                builder
+                    .AddButton(CreateDownloadCompletedButton(
+                        Strings.Get("TaskOpenFileActionText"),
+                        ActionOpenDownloadedFile,
+                        filePath,
+                        folderPath))
+                    .AddButton(CreateDownloadCompletedButton(
+                        Strings.Get("TaskOpenFolderActionText"),
+                        ActionOpenDownloadedFolder,
+                        filePath,
+                        folderPath));
+            }
+
             AppNotification notification = builder.BuildNotification();
 
             AppNotificationManager.Default.Show(notification);
@@ -110,6 +127,28 @@ public sealed class SystemNotificationService
         return string.IsNullOrWhiteSpace(task.Name)
             ? Strings.Get("UnknownTaskName")
             : task.Name;
+    }
+
+    private static AppNotificationButton CreateDownloadCompletedButton(
+        string text,
+        string action,
+        string? filePath,
+        string? folderPath)
+    {
+        AppNotificationButton button = new(text);
+        button.AddArgument("action", action);
+
+        if (!string.IsNullOrWhiteSpace(filePath))
+        {
+            button.AddArgument("filePath", filePath);
+        }
+
+        if (!string.IsNullOrWhiteSpace(folderPath))
+        {
+            button.AddArgument("folderPath", folderPath);
+        }
+
+        return button;
     }
 
     private static string ResolveTaskFilePath(DownloadTask task)

@@ -58,7 +58,9 @@
                             </ListView>
 
                             <ScrollViewer
+                                x:Name="SettingsContentScrollViewer"
                                 Grid.Column="1"
+                                IsTabStop="True"
                                 Padding="0,0,8,0"
                                 HorizontalContentAlignment="Center"
                                 HorizontalScrollBarVisibility="Disabled"
@@ -69,6 +71,11 @@
                                     <StackPanel
                                         x:Name="GeneralSettingsContent"
                                         Spacing="0">
+                                        <TextBlock
+                                            Margin="4,0,4,20"
+                                            FontSize="28"
+                                            FontWeight="SemiBold"
+                                            Text="通用" />
                                         <TextBlock
                                             Margin="4,0,4,8"
                                             FontWeight="SemiBold"
@@ -537,7 +544,7 @@
                                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1"
-                                            CornerRadius="0">
+                                            CornerRadius="0,0,8,8">
                                             <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
                                                 <FontIcon
                                                     Width="24"
@@ -574,43 +581,6 @@
                                                         IsOn="True"
                                                         Toggled="SettingToggleSwitch_Toggled" />
                                                 </StackPanel>
-                                            </Grid>
-                                        </Border>
-                                        <Border
-                                            x:Name="DownloadCompleteNotificationActionSettingCard"
-                                            Margin="0,-1,0,0"
-                                            Padding="16"
-                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                            BorderThickness="1"
-                                            CornerRadius="0">
-                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
-                                                <FontIcon
-                                                    Width="24"
-                                                    VerticalAlignment="Center"
-                                                    Glyph="&#xE8A7;" />
-                                                <StackPanel
-                                                    Grid.Column="1"
-                                                    Spacing="3">
-                                                    <TextBlock
-                                                        FontWeight="SemiBold"
-                                                        Text="点击下载成功通知" />
-                                                    <TextBlock
-                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                        Text="选择点击任务下载成功通知后的动作。"
-                                                        TextWrapping="WrapWholeWords" />
-                                                </StackPanel>
-                                                <ComboBox
-                                                    x:Name="DownloadCompleteNotificationActionComboBox"
-                                                    Grid.Column="2"
-                                                    MinWidth="180"
-                                                    HorizontalAlignment="Right"
-                                                    VerticalAlignment="Center"
-                                                    SelectionChanged="NotificationActionComboBox_SelectionChanged">
-                                                    <ComboBoxItem Content="跳转到首页" Tag="Home" />
-                                                    <ComboBoxItem Content="打开文件" Tag="OpenFile" />
-                                                    <ComboBoxItem Content="打开文件夹" Tag="OpenFolder" />
-                                                </ComboBox>
                                             </Grid>
                                         </Border>
 
@@ -714,9 +684,14 @@
                                         Spacing="0"
                                         Visibility="Collapsed">
                                         <TextBlock
-                                            Margin="4,0,4,8"
+                                            Margin="4,0,4,20"
+                                            FontSize="28"
                                             FontWeight="SemiBold"
                                             Text="下载" />
+                                        <TextBlock
+                                            Margin="4,0,4,8"
+                                            FontWeight="SemiBold"
+                                            Text="任务默认值" />
                                         <Border
                                             x:Name="DefaultDirectorySettingCard"
                                             Padding="16"
@@ -724,7 +699,7 @@
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1"
                                             CornerRadius="8,8,0,0">
-                                            <Grid ColumnDefinitions="Auto,*,360" ColumnSpacing="14">
+                                            <Grid ColumnDefinitions="Auto,*,300" ColumnSpacing="14">
                                                 <FontIcon
                                                     Width="24"
                                                     VerticalAlignment="Center"
@@ -743,7 +718,7 @@
                                                 </StackPanel>
                                                 <Grid
                                                     Grid.Column="2"
-                                                    Width="360"
+                                                    Width="300"
                                                     Height="32"
                                                     HorizontalAlignment="Right"
                                                     VerticalAlignment="Center"
@@ -854,7 +829,7 @@
                                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1"
-                                            CornerRadius="0">
+                                            CornerRadius="0,0,8,8">
                                             <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
                                                 <FontIcon
                                                     Width="24"
@@ -1020,7 +995,7 @@
                                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1"
-                                            CornerRadius="0">
+                                            CornerRadius="0,0,8,8">
                                             <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
                                                 <FontIcon
                                                     Width="24"
@@ -1153,9 +1128,14 @@
                                         Spacing="0"
                                         Visibility="Collapsed">
                                         <TextBlock
-                                            Margin="4,0,4,8"
+                                            Margin="4,0,4,20"
+                                            FontSize="28"
                                             FontWeight="SemiBold"
                                             Text="BitTorrent" />
+                                        <TextBlock
+                                            Margin="4,0,4,8"
+                                            FontWeight="SemiBold"
+                                            Text="基础选项" />
                                         <Border
                                             x:Name="BtAutoDownloadSettingCard"
                                             Padding="16"
@@ -1163,7 +1143,7 @@
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1"
                                             CornerRadius="8,8,0,0">
-                                            <Grid ColumnDefinitions="Auto,*,400" ColumnSpacing="14">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
                                                 <FontIcon
                                                     Width="24"
                                                     VerticalAlignment="Center"
@@ -1177,7 +1157,8 @@
                                                     <TextBlock
                                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                         Text="添加 .torrent、metalink 或磁力链接后自动获取真实文件内容。"
-                                                        TextWrapping="WrapWholeWords" />
+                                                        TextTrimming="CharacterEllipsis"
+                                                        TextWrapping="NoWrap" />
                                                 </StackPanel>
                                                 <StackPanel
                                                     Grid.Column="2"
@@ -1210,7 +1191,7 @@
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1"
                                             CornerRadius="0">
-                                            <Grid ColumnDefinitions="Auto,*,520" ColumnSpacing="14">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
                                                 <FontIcon
                                                     Width="24"
                                                     VerticalAlignment="Center"
@@ -1223,8 +1204,9 @@
                                                         Text="强制加密" />
                                                     <TextBlock
                                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                        Text="要求 BitTorrent 消息负载加密，部分旧 peer 可能无法连接。"
-                                                        TextWrapping="WrapWholeWords" />
+                                                        Text="要求 BitTorrent 消息负载加密，部分旧 Peer 可能无法连接。"
+                                                        TextTrimming="CharacterEllipsis"
+                                                        TextWrapping="NoWrap" />
                                                 </StackPanel>
                                                 <StackPanel
                                                     Grid.Column="2"
@@ -1818,6 +1800,11 @@
                                         Spacing="0"
                                         Visibility="Collapsed">
                                         <TextBlock
+                                            Margin="4,0,4,20"
+                                            FontSize="28"
+                                            FontWeight="SemiBold"
+                                            Text="网络" />
+                                        <TextBlock
                                             Margin="4,0,4,8"
                                             FontWeight="SemiBold"
                                             Text="代理" />
@@ -2315,6 +2302,11 @@
                                         Spacing="0"
                                         Visibility="Collapsed">
                                         <TextBlock
+                                            Margin="4,0,4,20"
+                                            FontSize="28"
+                                            FontWeight="SemiBold"
+                                            Text="高级" />
+                                        <TextBlock
                                             Margin="4,0,4,8"
                                             FontWeight="SemiBold"
                                             Text="aria2 引擎" />
@@ -2325,7 +2317,7 @@
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1"
                                             CornerRadius="8,8,0,0">
-                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                            <Grid ColumnDefinitions="Auto,*,300" ColumnSpacing="14">
                                                 <FontIcon
                                                     Width="24"
                                                     VerticalAlignment="Center"
@@ -2342,14 +2334,32 @@
                                                         Text="留空时从应用内置引擎或 PATH 解析 aria2c.exe。"
                                                         TextWrapping="WrapWholeWords" />
                                                 </StackPanel>
-                                                <TextBox
-                                                    x:Name="AriaPathTextBox"
+                                                <Grid
                                                     Grid.Column="2"
-                                                    Width="220"
+                                                    Width="300"
+                                                    Height="32"
                                                     HorizontalAlignment="Right"
-                                                    Header="aria2c path"
-                                                    x:Uid="AriaPathTextBox"
-                                                    PlaceholderText="Leave empty to resolve aria2c.exe from PATH" />
+                                                    VerticalAlignment="Center"
+                                                    ColumnDefinitions="*,Auto"
+                                                    ColumnSpacing="8">
+                                                    <TextBox
+                                                        x:Name="AriaPathTextBox"
+                                                        Height="32"
+                                                        VerticalAlignment="Center"
+                                                        TextChanged="AdvancedSettingTextBox_TextChanged" />
+                                                    <Button
+                                                        Grid.Column="1"
+                                                        Width="40"
+                                                        Height="32"
+                                                        MinWidth="40"
+                                                        Padding="0"
+                                                        VerticalAlignment="Center"
+                                                        Click="BrowseAriaPathButton_Click">
+                                                        <FontIcon
+                                                            FontSize="14"
+                                                            Glyph="&#xE838;" />
+                                                    </Button>
+                                                </Grid>
                                             </Grid>
                                         </Border>
 
@@ -2380,24 +2390,679 @@
                                                 <NumberBox
                                                     x:Name="RpcPortNumberBox"
                                                     Grid.Column="2"
-                                                    Width="168"
+                                                    Width="180"
                                                     Height="32"
                                                     HorizontalAlignment="Right"
-                                                    Minimum="1"
+                                                    Minimum="1024"
                                                     Maximum="65535"
                                                     SpinButtonPlacementMode="Inline"
+                                                    ValueChanged="AdvancedSettingNumberBox_ValueChanged"
                                                     Value="6800" />
                                             </Grid>
                                         </Border>
 
                                         <Border
-                                            x:Name="ProcessStatusSettingCard"
+                                            x:Name="RpcSecretSettingCard"
                                             Margin="0,-1,0,0"
                                             Padding="16"
                                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1"
                                             CornerRadius="0,0,8,8">
+                                            <Grid ColumnDefinitions="Auto,*,300" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE72E;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="RPC 密钥" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="用于保护本地 JSON-RPC 连接；修改后需要重启 aria2。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <Grid
+                                                    Grid.Column="2"
+                                                    Width="300"
+                                                    Height="32"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    ColumnDefinitions="*,Auto,Auto"
+                                                    ColumnSpacing="8">
+                                                    <PasswordBox
+                                                        x:Name="RpcSecretPasswordBox"
+                                                        Height="32"
+                                                        VerticalAlignment="Center"
+                                                        PasswordChanged="AdvancedSettingPasswordBox_PasswordChanged"
+                                                        PasswordRevealMode="Peek" />
+                                                    <Button
+                                                        Grid.Column="1"
+                                                        Width="40"
+                                                        Height="32"
+                                                        MinWidth="40"
+                                                        Padding="0"
+                                                        VerticalAlignment="Center"
+                                                        Click="CopyRpcSecretButton_Click">
+                                                        <FontIcon
+                                                            FontSize="14"
+                                                            Glyph="&#xE8C8;" />
+                                                    </Button>
+                                                    <Button
+                                                        Grid.Column="2"
+                                                        Width="40"
+                                                        Height="32"
+                                                        MinWidth="40"
+                                                        Padding="0"
+                                                        VerticalAlignment="Center"
+                                                        Click="GenerateRpcSecretButton_Click">
+                                                        <FontIcon
+                                                            FontSize="14"
+                                                            Glyph="&#xE8EE;" />
+                                                    </Button>
+                                                </Grid>
+                                            </Grid>
+                                        </Border>
+
+                                        <TextBlock
+                                            Margin="4,32,4,8"
+                                            FontWeight="SemiBold"
+                                            Text="浏览器扩展" />
+                                        <Border
+                                            x:Name="ExtensionAutoSubmitSettingCard"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="8,8,0,0">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE71B;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="扩展捕获后自动提交" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="浏览器扩展传入链接时，自动使用当前默认下载设置创建任务。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <StackPanel
+                                                    Grid.Column="2"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+                                                    <TextBlock
+                                                        x:Name="ExtensionAutoSubmitStateText"
+                                                        VerticalAlignment="Center"
+                                                        Text="关" />
+                                                    <ToggleSwitch
+                                                        x:Name="ExtensionAutoSubmitToggleSwitch"
+                                                        Width="48"
+                                                        MinWidth="0"
+                                                        Padding="0"
+                                                        OffContent=""
+                                                        OnContent=""
+                                                        Toggled="AdvancedSettingToggleSwitch_Toggled" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                        <Border
+                                            x:Name="ExtensionApiPortSettingCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE968;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="扩展 API 端口" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="预留给浏览器扩展连接 OmniDown 的本地端口。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <NumberBox
+                                                    x:Name="ExtensionApiPortNumberBox"
+                                                    Grid.Column="2"
+                                                    Width="180"
+                                                    Height="32"
+                                                    HorizontalAlignment="Right"
+                                                    Minimum="1024"
+                                                    Maximum="65535"
+                                                    SpinButtonPlacementMode="Inline"
+                                                    ValueChanged="AdvancedSettingNumberBox_ValueChanged"
+                                                    Value="16800" />
+                                            </Grid>
+                                        </Border>
+                                        <Border
+                                            x:Name="ExtensionApiSecretSettingCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="0,0,8,8">
+                                            <Grid ColumnDefinitions="Auto,*,300" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE72E;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="扩展 API 密钥" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="在浏览器扩展设置中填写此密钥，用于验证扩展请求。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <Grid
+                                                    Grid.Column="2"
+                                                    Width="300"
+                                                    Height="32"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    ColumnDefinitions="*,Auto,Auto"
+                                                    ColumnSpacing="8">
+                                                    <PasswordBox
+                                                        x:Name="ExtensionApiSecretPasswordBox"
+                                                        Height="32"
+                                                        VerticalAlignment="Center"
+                                                        PasswordChanged="AdvancedSettingPasswordBox_PasswordChanged"
+                                                        PasswordRevealMode="Peek" />
+                                                    <Button
+                                                        Grid.Column="1"
+                                                        Width="40"
+                                                        Height="32"
+                                                        MinWidth="40"
+                                                        Padding="0"
+                                                        VerticalAlignment="Center"
+                                                        Click="CopyExtensionApiSecretButton_Click">
+                                                        <FontIcon
+                                                            FontSize="14"
+                                                            Glyph="&#xE8C8;" />
+                                                    </Button>
+                                                    <Button
+                                                        Grid.Column="2"
+                                                        Width="40"
+                                                        Height="32"
+                                                        MinWidth="40"
+                                                        Padding="0"
+                                                        VerticalAlignment="Center"
+                                                        Click="GenerateExtensionApiSecretButton_Click">
+                                                        <FontIcon
+                                                            FontSize="14"
+                                                            Glyph="&#xE8EE;" />
+                                                    </Button>
+                                                </Grid>
+                                            </Grid>
+                                        </Border>
+
+                                        <TextBlock
+                                            Margin="4,32,4,8"
+                                            FontWeight="SemiBold"
+                                            Text="日志与诊断" />
+                                        <Border
+                                            x:Name="LogLevelSettingCard"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="8,8,0,0">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE9D9;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="日志级别" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="控制 aria2 输出日志的详细程度；重启 aria2 后生效。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <ComboBox
+                                                    x:Name="LogLevelComboBox"
+                                                    Grid.Column="2"
+                                                    Width="180"
+                                                    Height="32"
+                                                    HorizontalAlignment="Right"
+                                                    SelectionChanged="AdvancedSettingComboBox_SelectionChanged">
+                                                    <ComboBoxItem Content="debug" Tag="debug" />
+                                                    <ComboBoxItem Content="info" Tag="info" />
+                                                    <ComboBoxItem Content="notice" Tag="notice" />
+                                                    <ComboBoxItem Content="warn" Tag="warn" />
+                                                    <ComboBoxItem Content="error" Tag="error" />
+                                                </ComboBox>
+                                            </Grid>
+                                        </Border>
+                                        <Border
+                                            x:Name="AdvancedPathsSettingCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1">
+                                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE8B7;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="配置与会话目录" />
+                                                    <TextBlock
+                                                        x:Name="AdvancedPathsSummaryText"
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <StackPanel
+                                                    Grid.Column="2"
+                                                    HorizontalAlignment="Right"
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+                                                    <Button
+                                                        Click="OpenConfigFolderButton_Click"
+                                                        Content="打开目录" />
+                                                    <Button
+                                                        Click="CopySessionPathButton_Click"
+                                                        Content="复制会话路径" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                        <Border
+                                            x:Name="SessionResetSettingCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="0,0,8,8">
+                                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE74D;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="清空 aria2 会话" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="删除本地 download.session，下次启动不再恢复 aria2 会话中的遗留任务。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <Button
+                                                    Grid.Column="2"
+                                                    HorizontalAlignment="Right"
+                                                    Click="ClearSessionButton_Click"
+                                                    Content="清空会话" />
+                                            </Grid>
+                                        </Border>
+
+                                        <TextBlock
+                                            Margin="4,32,4,8"
+                                            FontWeight="SemiBold"
+                                            Text="剪贴板检测" />
+                                        <Border
+                                            x:Name="ClipboardDetectionSettingCard"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="8,8,0,0">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE8C8;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="自动检测剪贴板链接" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="复制下载链接后自动打开新建下载窗口。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <StackPanel
+                                                    Grid.Column="2"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+                                                    <TextBlock
+                                                        x:Name="ClipboardDetectionStateText"
+                                                        VerticalAlignment="Center"
+                                                        Text="关" />
+                                                    <ToggleSwitch
+                                                        x:Name="ClipboardDetectionToggleSwitch"
+                                                        Width="48"
+                                                        MinWidth="0"
+                                                        Padding="0"
+                                                        OffContent=""
+                                                        OnContent=""
+                                                        Toggled="AdvancedSettingToggleSwitch_Toggled" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                        <Border
+                                            x:Name="ClipboardTypesSettingCard"
+                                            Margin="0,-1,0,0"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="0,0,8,8">
+                                            <StackPanel>
+                                                <Button
+                                                    Padding="0"
+                                                    HorizontalAlignment="Stretch"
+                                                    HorizontalContentAlignment="Stretch"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Click="ToggleClipboardTypesButton_Click">
+                                                    <Grid
+                                                        Padding="16"
+                                                        ColumnDefinitions="Auto,*,Auto"
+                                                        ColumnSpacing="14">
+                                                        <FontIcon
+                                                            Width="24"
+                                                            VerticalAlignment="Center"
+                                                            Glyph="&#xE8EC;" />
+                                                        <StackPanel
+                                                            Grid.Column="1"
+                                                            Spacing="3">
+                                                            <TextBlock
+                                                                FontWeight="SemiBold"
+                                                                Text="检测类型" />
+                                                            <TextBlock
+                                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                Text="选择剪贴板中哪些内容会触发新建下载。"
+                                                                TextWrapping="WrapWholeWords" />
+                                                        </StackPanel>
+                                                        <FontIcon
+                                                            x:Name="ClipboardTypesChevronIcon"
+                                                            Grid.Column="2"
+                                                            Width="16"
+                                                            VerticalAlignment="Center"
+                                                            FontSize="12"
+                                                            Glyph="&#xE70D;" />
+                                                    </Grid>
+                                                </Button>
+                                            <Border
+                                                x:Name="ClipboardTypesBox"
+                                                Padding="16,8,16,16"
+                                                Background="Transparent"
+                                                Opacity="0"
+                                                Visibility="Collapsed">
+                                                <Grid
+                                                    ColumnDefinitions="24,*,220"
+                                                    RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+                                                    ColumnSpacing="14"
+                                                    RowSpacing="10">
+                                                    <TextBlock
+                                                        Grid.Column="1"
+                                                        VerticalAlignment="Center"
+                                                        Text="HTTP(S)" />
+                                                    <TextBlock
+                                                        Grid.Row="1"
+                                                        Grid.Column="1"
+                                                        VerticalAlignment="Center"
+                                                        Text="FTP / SFTP" />
+                                                    <TextBlock
+                                                        Grid.Row="2"
+                                                        Grid.Column="1"
+                                                        VerticalAlignment="Center"
+                                                        Text="Magnet" />
+                                                    <TextBlock
+                                                        Grid.Row="3"
+                                                        Grid.Column="1"
+                                                        VerticalAlignment="Center"
+                                                        Text="Thunder" />
+                                                    <TextBlock
+                                                        Grid.Row="4"
+                                                        Grid.Column="1"
+                                                        VerticalAlignment="Center"
+                                                        Text="BT Hash" />
+                                                    <ToggleSwitch
+                                                        x:Name="ClipboardHttpToggleSwitch"
+                                                        Grid.Column="2"
+                                                        Width="48"
+                                                        MinWidth="0"
+                                                        Padding="0"
+                                                        HorizontalAlignment="Right"
+                                                        OffContent=""
+                                                        OnContent=""
+                                                        Toggled="AdvancedSettingToggleSwitch_Toggled" />
+                                                    <ToggleSwitch
+                                                        x:Name="ClipboardFtpToggleSwitch"
+                                                        Grid.Row="1"
+                                                        Grid.Column="2"
+                                                        Width="48"
+                                                        MinWidth="0"
+                                                        Padding="0"
+                                                        HorizontalAlignment="Right"
+                                                        OffContent=""
+                                                        OnContent=""
+                                                        Toggled="AdvancedSettingToggleSwitch_Toggled" />
+                                                    <ToggleSwitch
+                                                        x:Name="ClipboardMagnetToggleSwitch"
+                                                        Grid.Row="2"
+                                                        Grid.Column="2"
+                                                        Width="48"
+                                                        MinWidth="0"
+                                                        Padding="0"
+                                                        HorizontalAlignment="Right"
+                                                        OffContent=""
+                                                        OnContent=""
+                                                        Toggled="AdvancedSettingToggleSwitch_Toggled" />
+                                                    <ToggleSwitch
+                                                        x:Name="ClipboardThunderToggleSwitch"
+                                                        Grid.Row="3"
+                                                        Grid.Column="2"
+                                                        Width="48"
+                                                        MinWidth="0"
+                                                        Padding="0"
+                                                        HorizontalAlignment="Right"
+                                                        OffContent=""
+                                                        OnContent=""
+                                                        Toggled="AdvancedSettingToggleSwitch_Toggled" />
+                                                    <ToggleSwitch
+                                                        x:Name="ClipboardBtHashToggleSwitch"
+                                                        Grid.Row="4"
+                                                        Grid.Column="2"
+                                                        Width="48"
+                                                        MinWidth="0"
+                                                        Padding="0"
+                                                        HorizontalAlignment="Right"
+                                                        OffContent=""
+                                                        OnContent=""
+                                                        Toggled="AdvancedSettingToggleSwitch_Toggled" />
+                                                </Grid>
+                                            </Border>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <TextBlock
+                                            Margin="4,32,4,8"
+                                            FontWeight="SemiBold"
+                                            Text="默认程序" />
+                                        <Border
+                                            x:Name="ProtocolMagnetSettingCard"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="8,8,0,0">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE71B;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="magnet:// 链接" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="将磁力链接交给 OmniDown 打开。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <StackPanel
+                                                    Grid.Column="2"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+                                                    <TextBlock
+                                                        x:Name="ProtocolMagnetStateText"
+                                                        VerticalAlignment="Center"
+                                                        Text="关" />
+                                                    <ToggleSwitch
+                                                        x:Name="ProtocolMagnetToggleSwitch"
+                                                        Width="48"
+                                                        MinWidth="0"
+                                                        Padding="0"
+                                                        OffContent=""
+                                                        OnContent=""
+                                                        Toggled="AdvancedSettingToggleSwitch_Toggled" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                        <Border
+                                            x:Name="ProtocolThunderSettingCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE945;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="thunder:// 链接" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="将迅雷链接交给 OmniDown 打开。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <StackPanel
+                                                    Grid.Column="2"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+                                                    <TextBlock
+                                                        x:Name="ProtocolThunderStateText"
+                                                        VerticalAlignment="Center"
+                                                        Text="关" />
+                                                    <ToggleSwitch
+                                                        x:Name="ProtocolThunderToggleSwitch"
+                                                        Width="48"
+                                                        MinWidth="0"
+                                                        Padding="0"
+                                                        OffContent=""
+                                                        OnContent=""
+                                                        Toggled="AdvancedSettingToggleSwitch_Toggled" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                        <Border
+                                            x:Name="ProtocolOmniDownSettingCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="0,0,8,8">
+                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE774;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="omnidown:// 扩展链接" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="用于浏览器扩展或其他应用唤起 OmniDown。"
+                                                        TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                                <StackPanel
+                                                    Grid.Column="2"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+                                                    <TextBlock
+                                                        x:Name="ProtocolOmniDownStateText"
+                                                        VerticalAlignment="Center"
+                                                        Text="开" />
+                                                    <ToggleSwitch
+                                                        x:Name="ProtocolOmniDownToggleSwitch"
+                                                        Width="48"
+                                                        MinWidth="0"
+                                                        Padding="0"
+                                                        OffContent=""
+                                                        OnContent=""
+                                                        IsOn="True"
+                                                        Toggled="AdvancedSettingToggleSwitch_Toggled" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+
+                                        <TextBlock
+                                            Margin="4,32,4,8"
+                                            FontWeight="SemiBold"
+                                            Text="开发者选项" />
+                                        <Border
+                                            x:Name="ProcessStatusSettingCard"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="8,8,0,0">
                                             <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
                                                 <FontIcon
                                                     Width="24"
@@ -2423,28 +3088,41 @@
                                                     Orientation="Horizontal"
                                                     Spacing="8">
                                                     <Button
-                                                        Click="StartAriaButton_Click"
-                                                        x:Uid="SettingsStartButton"
-                                                        Content="Start" />
+                                                        x:Name="AriaStartStopButton"
+                                                        Width="40"
+                                                        Height="32"
+                                                        MinWidth="40"
+                                                        Padding="0"
+                                                        Click="StartStopAriaButton_Click"
+                                                        ToolTipService.ToolTip="启动">
+                                                        <FontIcon
+                                                            x:Name="AriaStartStopIcon"
+                                                            FontSize="14"
+                                                            Glyph="&#xE768;" />
+                                                    </Button>
                                                     <Button
-                                                        Click="StopAriaButton_Click"
-                                                        x:Uid="SettingsStopButton"
-                                                        Content="Stop" />
+                                                        x:Name="AriaRestartButton"
+                                                        Width="40"
+                                                        Height="32"
+                                                        MinWidth="40"
+                                                        Padding="0"
+                                                        Click="RestartAriaButton_Click"
+                                                        ToolTipService.ToolTip="重启">
+                                                        <FontIcon
+                                                            FontSize="14"
+                                                            Glyph="&#xE72C;" />
+                                                    </Button>
                                                 </StackPanel>
                                             </Grid>
                                         </Border>
-
-                                        <TextBlock
-                                            Margin="4,32,4,8"
-                                            FontWeight="SemiBold"
-                                            Text="开发者选项" />
                                         <Border
                                             x:Name="TerminalSettingCard"
+                                            Margin="0,-1,0,0"
                                             Padding="16"
                                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1"
-                                            CornerRadius="8">
+                                            CornerRadius="0,0,8,8">
                                             <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
                                                 <FontIcon
                                                     Width="24"
@@ -2489,10 +3167,10 @@
                                         Spacing="0"
                                         Visibility="Collapsed">
                                         <TextBlock
-                                            Margin="4,0,4,8"
+                                            Margin="4,0,4,20"
+                                            FontSize="28"
                                             FontWeight="SemiBold"
-                                            Text="About"
-                                            x:Uid="AboutSettingsHeaderText" />
+                                            Text="关于" />
                                         <Border
                                             x:Name="AboutAppCard"
                                             Padding="16"

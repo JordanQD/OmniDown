@@ -45,6 +45,7 @@ namespace OmniDown
     public sealed partial class MainWindow
     {
         private ListView SettingsSectionListView => SettingsPage.SettingsSectionListViewControl;
+        private ScrollViewer SettingsContentScrollViewer => SettingsPage.SettingsContentScrollViewerControl;
         private StackPanel GeneralSettingsContent => SettingsPage.GeneralSettingsContentControl;
         private StackPanel DownloadSettingsContent => SettingsPage.DownloadSettingsContentControl;
         private StackPanel BitTorrentSettingsContent => SettingsPage.BitTorrentSettingsContentControl;
@@ -62,7 +63,6 @@ namespace OmniDown
         private Border NotificationsSettingCard => SettingsPage.NotificationsSettingCardControl;
         private Border DownloadStartNotificationSettingCard => SettingsPage.DownloadStartNotificationSettingCardControl;
         private Border DownloadCompleteNotificationSettingCard => SettingsPage.DownloadCompleteNotificationSettingCardControl;
-        private Border DownloadCompleteNotificationActionSettingCard => SettingsPage.DownloadCompleteNotificationActionSettingCardControl;
         private Border AutoShutdownSettingCard => SettingsPage.AutoShutdownSettingCardControl;
         private Border PreventSleepSettingCard => SettingsPage.PreventSleepSettingCardControl;
         private Border DefaultDirectorySettingCard => SettingsPage.DefaultDirectorySettingCardControl;
@@ -94,7 +94,19 @@ namespace OmniDown
         private Border FileAllocationSettingCard => SettingsPage.FileAllocationSettingCardControl;
         private Border AriaPathSettingCard => SettingsPage.AriaPathSettingCardControl;
         private Border RpcPortSettingCard => SettingsPage.RpcPortSettingCardControl;
+        private Border RpcSecretSettingCard => SettingsPage.RpcSecretSettingCardControl;
         private Border ProcessStatusSettingCard => SettingsPage.ProcessStatusSettingCardControl;
+        private Border ExtensionAutoSubmitSettingCard => SettingsPage.ExtensionAutoSubmitSettingCardControl;
+        private Border ExtensionApiPortSettingCard => SettingsPage.ExtensionApiPortSettingCardControl;
+        private Border ExtensionApiSecretSettingCard => SettingsPage.ExtensionApiSecretSettingCardControl;
+        private Border LogLevelSettingCard => SettingsPage.LogLevelSettingCardControl;
+        private Border AdvancedPathsSettingCard => SettingsPage.AdvancedPathsSettingCardControl;
+        private Border SessionResetSettingCard => SettingsPage.SessionResetSettingCardControl;
+        private Border ClipboardDetectionSettingCard => SettingsPage.ClipboardDetectionSettingCardControl;
+        private Border ClipboardTypesSettingCard => SettingsPage.ClipboardTypesSettingCardControl;
+        private Border ProtocolMagnetSettingCard => SettingsPage.ProtocolMagnetSettingCardControl;
+        private Border ProtocolThunderSettingCard => SettingsPage.ProtocolThunderSettingCardControl;
+        private Border ProtocolOmniDownSettingCard => SettingsPage.ProtocolOmniDownSettingCardControl;
         private Border TerminalSettingCard => SettingsPage.TerminalSettingCardControl;
         private Border AboutAppCard => SettingsPage.AboutAppCardControl;
         private Border AboutCloneCard => SettingsPage.AboutCloneCardControl;
@@ -123,7 +135,6 @@ namespace OmniDown
         private TextBlock DownloadStartNotificationsStateText => SettingsPage.DownloadStartNotificationsStateTextControl;
         private ToggleSwitch DownloadCompleteNotificationsToggleSwitch => SettingsPage.DownloadCompleteNotificationsToggleSwitchControl;
         private TextBlock DownloadCompleteNotificationsStateText => SettingsPage.DownloadCompleteNotificationsStateTextControl;
-        private ComboBox DownloadCompleteNotificationActionComboBox => SettingsPage.DownloadCompleteNotificationActionComboBoxControl;
         private ToggleSwitch AutoShutdownWhenCompleteToggleSwitch => SettingsPage.AutoShutdownWhenCompleteToggleSwitchControl;
         private TextBlock AutoShutdownWhenCompleteStateText => SettingsPage.AutoShutdownWhenCompleteStateTextControl;
         private ToggleSwitch PreventSleepWhileDownloadingToggleSwitch => SettingsPage.PreventSleepWhileDownloadingToggleSwitchControl;
@@ -194,8 +205,31 @@ namespace OmniDown
         private TextBlock TerminalOutputStateText => SettingsPage.TerminalOutputStateTextControl;
         private TextBox AriaPathTextBox => SettingsPage.AriaPathTextBoxControl;
         private NumberBox RpcPortNumberBox => SettingsPage.RpcPortNumberBoxControl;
+        private PasswordBox RpcSecretPasswordBox => SettingsPage.RpcSecretPasswordBoxControl;
+        private ToggleSwitch ExtensionAutoSubmitToggleSwitch => SettingsPage.ExtensionAutoSubmitToggleSwitchControl;
+        private TextBlock ExtensionAutoSubmitStateText => SettingsPage.ExtensionAutoSubmitStateTextControl;
+        private NumberBox ExtensionApiPortNumberBox => SettingsPage.ExtensionApiPortNumberBoxControl;
+        private PasswordBox ExtensionApiSecretPasswordBox => SettingsPage.ExtensionApiSecretPasswordBoxControl;
+        private ComboBox LogLevelComboBox => SettingsPage.LogLevelComboBoxControl;
+        private TextBlock AdvancedPathsSummaryText => SettingsPage.AdvancedPathsSummaryTextControl;
+        private ToggleSwitch ClipboardDetectionToggleSwitch => SettingsPage.ClipboardDetectionToggleSwitchControl;
+        private TextBlock ClipboardDetectionStateText => SettingsPage.ClipboardDetectionStateTextControl;
+        private ToggleSwitch ClipboardHttpToggleSwitch => SettingsPage.ClipboardHttpToggleSwitchControl;
+        private ToggleSwitch ClipboardFtpToggleSwitch => SettingsPage.ClipboardFtpToggleSwitchControl;
+        private ToggleSwitch ClipboardMagnetToggleSwitch => SettingsPage.ClipboardMagnetToggleSwitchControl;
+        private ToggleSwitch ClipboardThunderToggleSwitch => SettingsPage.ClipboardThunderToggleSwitchControl;
+        private ToggleSwitch ClipboardBtHashToggleSwitch => SettingsPage.ClipboardBtHashToggleSwitchControl;
+        private ToggleSwitch ProtocolMagnetToggleSwitch => SettingsPage.ProtocolMagnetToggleSwitchControl;
+        private TextBlock ProtocolMagnetStateText => SettingsPage.ProtocolMagnetStateTextControl;
+        private ToggleSwitch ProtocolThunderToggleSwitch => SettingsPage.ProtocolThunderToggleSwitchControl;
+        private TextBlock ProtocolThunderStateText => SettingsPage.ProtocolThunderStateTextControl;
+        private ToggleSwitch ProtocolOmniDownToggleSwitch => SettingsPage.ProtocolOmniDownToggleSwitchControl;
+        private TextBlock ProtocolOmniDownStateText => SettingsPage.ProtocolOmniDownStateTextControl;
         private TextBlock SettingsAriaStatusText => SettingsPage.SettingsAriaStatusTextControl;
         private StackPanel ProcessStatusSettingControl => SettingsPage.ProcessStatusSettingControlControl;
+        private FontIcon AriaStartStopIcon => SettingsPage.AriaStartStopIconControl;
+        private Button AriaStartStopButton => SettingsPage.AriaStartStopButtonControl;
+        private Button AriaRestartButton => SettingsPage.AriaRestartButtonControl;
         private TextBlock AboutVersionText => SettingsPage.AboutVersionTextControl;
         private TextBlock AboutCloneCommandText => SettingsPage.AboutCloneCommandTextControl;
 
@@ -204,7 +238,6 @@ namespace OmniDown
             SettingsPage.SectionSelectionChanged += SettingsSectionListView_SelectionChanged;
             SettingsPage.SettingToggleSwitchToggled += SettingToggleSwitch_Toggled;
             SettingsPage.ThemeSelectionChanged += ThemeComboBox_SelectionChanged;
-            SettingsPage.NotificationActionSelectionChanged += NotificationActionComboBox_SelectionChanged;
             SettingsPage.BrowseDownloadDirectoryRequested += BrowseDownloadDirectoryButton_Click;
             SettingsPage.DownloadSettingChanged += DownloadSetting_Changed;
             SettingsPage.BitTorrentSettingChanged += BitTorrentSetting_Changed;
@@ -213,10 +246,19 @@ namespace OmniDown
             SettingsPage.RandomBtPortRequested += RandomBtPortButton_Click;
             SettingsPage.RandomDhtPortRequested += RandomDhtPortButton_Click;
             SettingsPage.UserAgentPresetRequested += UserAgentPresetButton_Click;
+            SettingsPage.AdvancedSettingChanged += AdvancedSetting_Changed;
+            SettingsPage.BrowseAriaPathRequested += BrowseAriaPathButton_Click;
+            SettingsPage.CopyRpcSecretRequested += CopyRpcSecretButton_Click;
+            SettingsPage.GenerateRpcSecretRequested += GenerateRpcSecretButton_Click;
+            SettingsPage.CopyExtensionApiSecretRequested += CopyExtensionApiSecretButton_Click;
+            SettingsPage.GenerateExtensionApiSecretRequested += GenerateExtensionApiSecretButton_Click;
+            SettingsPage.OpenConfigFolderRequested += OpenConfigFolderButton_Click;
+            SettingsPage.CopySessionPathRequested += CopySessionPathButton_Click;
+            SettingsPage.ClearSessionRequested += ClearSessionButton_Click;
             SettingsPage.AddBtCustomTrackerRequested += AddBtCustomTrackerButton_Click;
             SettingsPage.SyncBtTrackerRequested += SyncBtTrackerButton_Click;
-            SettingsPage.StartAriaRequested += StartAriaButton_Click;
-            SettingsPage.StopAriaRequested += StopAriaButton_Click;
+            SettingsPage.StartStopAriaRequested += StartStopAriaButton_Click;
+            SettingsPage.RestartAriaRequested += RestartAriaButton_Click;
             SettingsPage.CopyCloneCommandRequested += CopyCloneCommandButton_Click;
             SettingsPage.OpenAboutLinkRequested += OpenAboutLinkButton_Click;
         }
@@ -294,6 +336,12 @@ namespace OmniDown
             if (ReferenceEquals(toggleSwitch, UseSystemProxyCheckBox))
             {
                 UseSystemProxyCheckBox_Changed(sender, e);
+            }
+
+            if (IsAdvancedSettingsToggle(toggleSwitch))
+            {
+                SaveAdvancedSettings();
+                return;
             }
 
             if (ReferenceEquals(toggleSwitch, CloseToTrayToggleSwitch))
@@ -486,7 +534,6 @@ namespace OmniDown
             SetToggleSwitch(SystemNotificationsToggleSwitch, settings.SystemNotificationsEnabled);
             SetToggleSwitch(DownloadStartNotificationsToggleSwitch, settings.DownloadStartNotificationsEnabled);
             SetToggleSwitch(DownloadCompleteNotificationsToggleSwitch, settings.DownloadCompleteNotificationsEnabled);
-            SetDownloadCompleteNotificationActionSelection(settings.DownloadCompleteNotificationAction);
             SetToggleSwitch(AutoShutdownWhenCompleteToggleSwitch, settings.AutoShutdownWhenComplete);
             SetToggleSwitch(PreventSleepWhileDownloadingToggleSwitch, settings.PreventSleepWhileDownloading);
             SetThemeComboBoxSelection(settings.Theme);
@@ -503,7 +550,6 @@ namespace OmniDown
                 SystemNotificationsToggleSwitch?.IsOn == true,
                 DownloadStartNotificationsToggleSwitch?.IsOn == true,
                 DownloadCompleteNotificationsToggleSwitch?.IsOn == true,
-                GetSelectedDownloadCompleteNotificationAction(),
                 AutoShutdownWhenCompleteToggleSwitch?.IsOn == true,
                 PreventSleepWhileDownloadingToggleSwitch?.IsOn == true,
                 GetSelectedTheme());
@@ -607,6 +653,11 @@ namespace OmniDown
             if (ReferenceEquals(toggleSwitch, UseSystemProxyCheckBox)) return UseSystemProxyStateText;
             if (ReferenceEquals(toggleSwitch, CustomProxyToggleSwitch)) return CustomProxyStateText;
             if (ReferenceEquals(toggleSwitch, EnableUpnpToggleSwitch)) return EnableUpnpStateText;
+            if (ReferenceEquals(toggleSwitch, ExtensionAutoSubmitToggleSwitch)) return ExtensionAutoSubmitStateText;
+            if (ReferenceEquals(toggleSwitch, ClipboardDetectionToggleSwitch)) return ClipboardDetectionStateText;
+            if (ReferenceEquals(toggleSwitch, ProtocolMagnetToggleSwitch)) return ProtocolMagnetStateText;
+            if (ReferenceEquals(toggleSwitch, ProtocolThunderToggleSwitch)) return ProtocolThunderStateText;
+            if (ReferenceEquals(toggleSwitch, ProtocolOmniDownToggleSwitch)) return ProtocolOmniDownStateText;
             if (ReferenceEquals(toggleSwitch, TerminalOutputToggleSwitch)) return TerminalOutputStateText;
 
             return null;
@@ -621,17 +672,6 @@ namespace OmniDown
 
             UpdateGeneralSettingsFromUi();
             ApplyThemeSetting(_settingsPageViewModel.GeneralSettings.Theme);
-            SaveGeneralSettings();
-        }
-
-        private void NotificationActionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (_isLoadingGeneralSettings)
-            {
-                return;
-            }
-
-            UpdateGeneralSettingsFromUi();
             SaveGeneralSettings();
         }
 
@@ -662,35 +702,6 @@ namespace OmniDown
             }
 
             ThemeComboBox.SelectedIndex = 0;
-        }
-
-        private string GetSelectedDownloadCompleteNotificationAction()
-        {
-            return DownloadCompleteNotificationActionComboBox?.SelectedItem is ComboBoxItem item &&
-                item.Tag?.ToString() is string action &&
-                !string.IsNullOrWhiteSpace(action)
-                ? action
-                : "Home";
-        }
-
-        private void SetDownloadCompleteNotificationActionSelection(string action)
-        {
-            if (DownloadCompleteNotificationActionComboBox is null)
-            {
-                return;
-            }
-
-            for (int index = 0; index < DownloadCompleteNotificationActionComboBox.Items.Count; index++)
-            {
-                if (DownloadCompleteNotificationActionComboBox.Items[index] is ComboBoxItem item &&
-                    item.Tag?.ToString()?.Equals(action, StringComparison.OrdinalIgnoreCase) == true)
-                {
-                    DownloadCompleteNotificationActionComboBox.SelectedIndex = index;
-                    return;
-                }
-            }
-
-            DownloadCompleteNotificationActionComboBox.SelectedIndex = 0;
         }
 
         private void ApplyThemeSetting(string theme)
@@ -849,6 +860,302 @@ namespace OmniDown
                 _ => string.Empty
             };
             SaveNetworkSettings();
+        }
+
+        private void LoadAdvancedSettings()
+        {
+            _settingsPageViewModel.LoadAdvancedSettings();
+            _isLoadingAdvancedSettings = true;
+            try
+            {
+                ApplyAdvancedSettingsToUi();
+            }
+            finally
+            {
+                _isLoadingAdvancedSettings = false;
+            }
+        }
+
+        private void ApplyAdvancedSettingsToUi()
+        {
+            AdvancedSettings settings = _settingsPageViewModel.AdvancedSettings;
+            AriaPathTextBox.Text = settings.Aria2Path;
+            RpcPortNumberBox.Value = settings.RpcPort;
+            RpcSecretPasswordBox.Password = settings.RpcSecret;
+            SetToggleSwitch(ExtensionAutoSubmitToggleSwitch, settings.AutoSubmitFromExtension);
+            ExtensionApiPortNumberBox.Value = settings.ExtensionApiPort;
+            ExtensionApiSecretPasswordBox.Password = settings.ExtensionApiSecret;
+            SetLogLevelSelection(settings.LogLevel);
+            SetToggleSwitch(TerminalOutputToggleSwitch, settings.ShowTerminalOutput);
+            SetToggleSwitch(ClipboardDetectionToggleSwitch, settings.ClipboardDetectionEnabled);
+            SetToggleSwitch(ClipboardHttpToggleSwitch, settings.ClipboardHttpEnabled);
+            SetToggleSwitch(ClipboardFtpToggleSwitch, settings.ClipboardFtpEnabled);
+            SetToggleSwitch(ClipboardMagnetToggleSwitch, settings.ClipboardMagnetEnabled);
+            SetToggleSwitch(ClipboardThunderToggleSwitch, settings.ClipboardThunderEnabled);
+            SetToggleSwitch(ClipboardBtHashToggleSwitch, settings.ClipboardBtHashEnabled);
+            RefreshProtocolDefaultToggles();
+            AdvancedPathsSummaryText.Text = $"会话文件：{Path.GetFileName(GetAriaSessionPath())}";
+            _rpcSecret = settings.RpcSecret;
+            UpdateClipboardTypeControls();
+        }
+
+        private void AdvancedSetting_Changed(object sender, RoutedEventArgs e)
+        {
+            if (_isLoadingAdvancedSettings)
+            {
+                return;
+            }
+
+            SaveAdvancedSettings();
+            if (sender is ToggleSwitch toggleSwitch &&
+                toggleSwitch.IsOn &&
+                (ReferenceEquals(toggleSwitch, ProtocolMagnetToggleSwitch) ||
+                    ReferenceEquals(toggleSwitch, ProtocolThunderToggleSwitch) ||
+                    ReferenceEquals(toggleSwitch, ProtocolOmniDownToggleSwitch)))
+            {
+                _ = Launcher.LaunchUriAsync(new Uri("ms-settings:defaultapps"));
+                ShowMessage("已保存协议开关。请在 Windows 默认应用中确认 OmniDown 的协议关联。", InfoBarSeverity.Informational);
+            }
+        }
+
+        private async void BrowseAriaPathButton_Click(object sender, RoutedEventArgs e)
+        {
+            FileOpenPicker picker = new()
+            {
+                SuggestedStartLocation = PickerLocationId.ComputerFolder
+            };
+            picker.FileTypeFilter.Add(".exe");
+            InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
+
+            StorageFile? file = await picker.PickSingleFileAsync();
+            if (file is null)
+            {
+                return;
+            }
+
+            AriaPathTextBox.Text = file.Path;
+            SaveAdvancedSettings();
+        }
+
+        private void CopyRpcSecretButton_Click(object sender, RoutedEventArgs e)
+        {
+            CopyTextToClipboard(RpcSecretPasswordBox.Password);
+            ShowMessage("RPC 密钥已复制。", InfoBarSeverity.Success);
+        }
+
+        private void GenerateRpcSecretButton_Click(object sender, RoutedEventArgs e)
+        {
+            RpcSecretPasswordBox.Password = AdvancedSettings.GenerateSecret();
+            SaveAdvancedSettings();
+        }
+
+        private void CopyExtensionApiSecretButton_Click(object sender, RoutedEventArgs e)
+        {
+            CopyTextToClipboard(ExtensionApiSecretPasswordBox.Password);
+            ShowMessage("扩展 API 密钥已复制。", InfoBarSeverity.Success);
+        }
+
+        private void GenerateExtensionApiSecretButton_Click(object sender, RoutedEventArgs e)
+        {
+            ExtensionApiSecretPasswordBox.Password = AdvancedSettings.GenerateSecret();
+            SaveAdvancedSettings();
+        }
+
+        private async void OpenConfigFolderButton_Click(object sender, RoutedEventArgs e)
+        {
+            Directory.CreateDirectory(AppPaths.LocalDataDirectory);
+            await Launcher.LaunchFolderPathAsync(AppPaths.LocalDataDirectory);
+        }
+
+        private void CopySessionPathButton_Click(object sender, RoutedEventArgs e)
+        {
+            CopyTextToClipboard(GetAriaSessionPath());
+            ShowMessage("会话文件路径已复制。", InfoBarSeverity.Success);
+        }
+
+        private async void ClearSessionButton_Click(object sender, RoutedEventArgs e)
+        {
+            ContentDialog dialog = new()
+            {
+                XamlRoot = Content.XamlRoot,
+                Title = "清空 aria2 会话？",
+                Content = "这会删除本地 download.session。正在运行的下载不会被删除，但建议先停止 aria2 后再清空。",
+                PrimaryButtonText = "清空",
+                CloseButtonText = "取消",
+                DefaultButton = ContentDialogButton.Close
+            };
+
+            if (await dialog.ShowAsync() != ContentDialogResult.Primary)
+            {
+                return;
+            }
+
+            try
+            {
+                string sessionPath = GetAriaSessionPath();
+                if (File.Exists(sessionPath))
+                {
+                    File.Delete(sessionPath);
+                }
+
+                ShowMessage("aria2 会话已清空。", InfoBarSeverity.Success);
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"清空会话失败：{ex.Message}", InfoBarSeverity.Error);
+            }
+        }
+
+        private void SaveAdvancedSettings()
+        {
+            if (_isLoadingAdvancedSettings)
+            {
+                return;
+            }
+
+            AdvancedSettings settings = new(
+                AriaPathTextBox.Text.Trim(),
+                GetValidIntNumberBoxValue(RpcPortNumberBox, 1024, 65535, AdvancedSettings.Default.RpcPort),
+                string.IsNullOrWhiteSpace(RpcSecretPasswordBox.Password)
+                    ? AdvancedSettings.GenerateSecret()
+                    : RpcSecretPasswordBox.Password.Trim(),
+                ExtensionAutoSubmitToggleSwitch?.IsOn == true,
+                GetValidIntNumberBoxValue(ExtensionApiPortNumberBox, 1024, 65535, AdvancedSettings.Default.ExtensionApiPort),
+                string.IsNullOrWhiteSpace(ExtensionApiSecretPasswordBox.Password)
+                    ? AdvancedSettings.GenerateSecret()
+                    : ExtensionApiSecretPasswordBox.Password.Trim(),
+                GetSelectedLogLevel(),
+                TerminalOutputToggleSwitch?.IsOn == true,
+                ClipboardDetectionToggleSwitch?.IsOn == true,
+                ClipboardHttpToggleSwitch?.IsOn == true,
+                ClipboardFtpToggleSwitch?.IsOn == true,
+                ClipboardMagnetToggleSwitch?.IsOn == true,
+                ClipboardThunderToggleSwitch?.IsOn == true,
+                ClipboardBtHashToggleSwitch?.IsOn == true,
+                ProtocolMagnetToggleSwitch?.IsOn == true,
+                ProtocolThunderToggleSwitch?.IsOn == true,
+                ProtocolOmniDownToggleSwitch?.IsOn == true);
+
+            _settingsPageViewModel.SaveAdvancedSettings(settings);
+            _rpcSecret = _settingsPageViewModel.AdvancedSettings.RpcSecret;
+            _aria2RpcClient.Configure(_settingsPageViewModel.AdvancedSettings.RpcPort, _rpcSecret);
+            RestartBrowserExtensionApiServer();
+            TerminalToggleButton.IsChecked = settings.ShowTerminalOutput;
+            TerminalPanel.Visibility = settings.ShowTerminalOutput ? Visibility.Visible : Visibility.Collapsed;
+            UpdateClipboardTypeControls();
+        }
+
+        private void SetLogLevelSelection(string logLevel)
+        {
+            string normalized = string.IsNullOrWhiteSpace(logLevel) ? AdvancedSettings.Default.LogLevel : logLevel.Trim();
+            for (int index = 0; index < LogLevelComboBox.Items.Count; index++)
+            {
+                if (LogLevelComboBox.Items[index] is ComboBoxItem item &&
+                    item.Tag?.ToString()?.Equals(normalized, StringComparison.OrdinalIgnoreCase) == true)
+                {
+                    LogLevelComboBox.SelectedIndex = index;
+                    return;
+                }
+            }
+
+            LogLevelComboBox.SelectedIndex = 2;
+        }
+
+        private string GetSelectedLogLevel()
+        {
+            return LogLevelComboBox?.SelectedItem is ComboBoxItem item
+                ? item.Tag?.ToString() ?? AdvancedSettings.Default.LogLevel
+                : AdvancedSettings.Default.LogLevel;
+        }
+
+        private static bool IsAdvancedSettingsToggle(ToggleSwitch toggleSwitch)
+        {
+            return toggleSwitch.Name is "ExtensionAutoSubmitToggleSwitch"
+                or "TerminalOutputToggleSwitch"
+                or "ClipboardDetectionToggleSwitch"
+                or "ClipboardHttpToggleSwitch"
+                or "ClipboardFtpToggleSwitch"
+                or "ClipboardMagnetToggleSwitch"
+                or "ClipboardThunderToggleSwitch"
+                or "ClipboardBtHashToggleSwitch"
+                or "ProtocolMagnetToggleSwitch"
+                or "ProtocolThunderToggleSwitch"
+                or "ProtocolOmniDownToggleSwitch";
+        }
+
+        private void UpdateClipboardTypeControls()
+        {
+            bool enabled = ClipboardDetectionToggleSwitch?.IsOn == true;
+            ClipboardHttpToggleSwitch.IsEnabled = enabled;
+            ClipboardFtpToggleSwitch.IsEnabled = enabled;
+            ClipboardMagnetToggleSwitch.IsEnabled = enabled;
+            ClipboardThunderToggleSwitch.IsEnabled = enabled;
+            ClipboardBtHashToggleSwitch.IsEnabled = enabled;
+        }
+
+        private void RefreshProtocolDefaultToggles()
+        {
+            SetToggleSwitch(ProtocolMagnetToggleSwitch, IsOmniDownDefaultProtocol("magnet"));
+            SetToggleSwitch(ProtocolThunderToggleSwitch, IsOmniDownDefaultProtocol("thunder"));
+            SetToggleSwitch(ProtocolOmniDownToggleSwitch, IsOmniDownDefaultProtocol("omnidown"));
+        }
+
+        private static bool IsOmniDownDefaultProtocol(string protocol)
+        {
+            try
+            {
+                using RegistryKey? userChoice = Registry.CurrentUser.OpenSubKey(
+                    $@"Software\Microsoft\Windows\Shell\Associations\UrlAssociations\{protocol}\UserChoice");
+                string? progId = userChoice?.GetValue("ProgId")?.ToString();
+                if (string.IsNullOrWhiteSpace(progId))
+                {
+                    return false;
+                }
+
+                return IsOmniDownProgId(progId);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static bool IsOmniDownProgId(string progId)
+        {
+            static bool Matches(RegistryKey? key)
+            {
+                if (key is null)
+                {
+                    return false;
+                }
+
+                string appName = key.GetValue("ApplicationName")?.ToString() ?? string.Empty;
+                string appUserModelId = key.GetValue("AppUserModelID")?.ToString() ?? string.Empty;
+                return appName.Contains("OmniDown", StringComparison.OrdinalIgnoreCase) ||
+                    appUserModelId.Contains("4a0e4208-8be1-4e00-90d0-404bf41c73d8", StringComparison.OrdinalIgnoreCase) ||
+                    appUserModelId.Contains("OmniDown", StringComparison.OrdinalIgnoreCase);
+            }
+
+            using RegistryKey? currentUserApp = Registry.CurrentUser.OpenSubKey($@"Software\Classes\{progId}\Application");
+            if (Matches(currentUserApp))
+            {
+                return true;
+            }
+
+            using RegistryKey? classesRootApp = Registry.ClassesRoot.OpenSubKey($@"{progId}\Application");
+            return Matches(classesRootApp);
+        }
+
+        private static string GetAriaSessionPath()
+        {
+            return Path.Combine(AppPaths.LocalDataDirectory, "download.session");
+        }
+
+        private static void CopyTextToClipboard(string text)
+        {
+            DataPackage package = new();
+            package.SetText(text);
+            Clipboard.SetContent(package);
         }
 
         private void SaveNetworkSettings()

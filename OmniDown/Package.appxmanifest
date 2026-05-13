@@ -44,11 +44,20 @@
           Category="windows.startupTask"
           Executable="$targetnametoken$.exe"
           EntryPoint="$targetentrypoint$">
-          <uap5:StartupTask
+        <uap5:StartupTask
             TaskId="OmniDownStartupTask"
             Enabled="false"
             DisplayName="OmniDown" />
         </uap5:Extension>
+        <uap:Extension Category="windows.protocol">
+          <uap:Protocol Name="magnet" />
+        </uap:Extension>
+        <uap:Extension Category="windows.protocol">
+          <uap:Protocol Name="thunder" />
+        </uap:Extension>
+        <uap:Extension Category="windows.protocol">
+          <uap:Protocol Name="omnidown" />
+        </uap:Extension>
       </Extensions>
     </Application>
   </Applications>

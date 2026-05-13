@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI;
 using OmniDown.Models;
+using OmniDown.Models.Settings;
 using OmniDown.Services.Localization;
 using System;
 using System.Collections.Generic;
@@ -259,7 +260,7 @@ internal static class NewDownloadDialogHelpers
             .ToList();
     }
 
-    public static async Task<string?> GetClipboardDownloadTextAsync()
+    public static async Task<string?> GetClipboardDownloadTextAsync(AdvancedSettings? settings = null)
     {
         try
         {
@@ -271,7 +272,9 @@ internal static class NewDownloadDialogHelpers
 
             string clipboardText = await content.GetTextAsync();
             List<string> sourceUris = GetDownloadSourceUris(clipboardText)
-                .Where(IsLikelyDownloadSourceUri)
+                .Select(uri => NormalizeClipboardSourceUri(uri, settings))
+                .Where(uri => uri is not null)
+                .Select(uri => uri!)
                 .ToList();
             return sourceUris.Count == 0
                 ? null
@@ -332,7 +335,7 @@ internal static class NewDownloadDialogHelpers
         return Math.Clamp((int)Math.Round(numberBox.Value), 1, 256);
     }
 
-    private static bool IsLikelyDownloadSourceUri(string text)
+    public static bool IsLikelyDownloadSourceUri(string text)
     {
         if (text.StartsWith("magnet:", StringComparison.OrdinalIgnoreCase))
         {
@@ -348,6 +351,61 @@ internal static class NewDownloadDialogHelpers
             uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase) ||
             uri.Scheme.Equals(Uri.UriSchemeFtp, StringComparison.OrdinalIgnoreCase) ||
             uri.Scheme.Equals("sftp", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string? NormalizeClipboardSourceUri(string text, AdvancedSettings? settings)
+    {
+        bool httpEnabled = settings?.ClipboardHttpEnabled ?? true;
+        bool ftpEnabled = settings?.ClipboardFtpEnabled ?? true;
+        bool magnetEnabled = settings?.ClipboardMagnetEnabled ?? true;
+        bool thunderEnabled = settings?.ClipboardThunderEnabled ?? false;
+        bool btHashEnabled = settings?.ClipboardBtHashEnabled ?? false;
+
+        if (text.StartsWith("magnet:", StringComparison.OrdinalIgnoreCase))
+        {
+            return magnetEnabled ? text : null;
+        }
+
+        if (text.StartsWith("thunder://", StringComparison.OrdinalIgnoreCase))
+        {
+            return thunderEnabled ? text : null;
+        }
+
+        if (btHashEnabled && IsLikelyBtHash(text))
+        {
+            return $"magnet:?xt=urn:btih:{text}";
+        }
+
+        if (!Uri.TryCreate(text, UriKind.Absolute, out Uri? uri))
+        {
+            return null;
+        }
+
+        if ((uri.Scheme.Equals(Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase) ||
+                uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase)) &&
+            httpEnabled)
+        {
+            return text;
+        }
+
+        if ((uri.Scheme.Equals(Uri.UriSchemeFtp, StringComparison.OrdinalIgnoreCase) ||
+                uri.Scheme.Equals("sftp", StringComparison.OrdinalIgnoreCase)) &&
+            ftpEnabled)
+        {
+            return text;
+        }
+
+        return null;
+    }
+
+    private static bool IsLikelyBtHash(string text)
+    {
+        string trimmed = text.Trim();
+        return trimmed.Length is 32 or 40 &&
+            trimmed.All(character =>
+                (character >= '0' && character <= '9') ||
+                (character >= 'a' && character <= 'f') ||
+                (character >= 'A' && character <= 'F'));
     }
 
     private static string EnsureTrailingLineBreak(string text)

@@ -7,7 +7,9 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Microsoft.UI.Xaml.Shapes;
+using Microsoft.Windows.AppLifecycle;
 using OmniDown.Services.Notifications;
+using OmniDown.Services.Storage;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -32,6 +34,7 @@ namespace OmniDown
     {
         private const string SingleInstanceMutexName = @"Local\OmniDown.SingleInstance";
         private const string ActivationEventName = @"Local\OmniDown.ActivateExistingInstance";
+        private static readonly string PendingActivationPath = System.IO.Path.Combine(AppPaths.LocalDataDirectory, "pending-activation.txt");
 
         private Window? _window;
         private DispatcherQueue? _dispatcherQueue;
@@ -57,19 +60,47 @@ namespace OmniDown
         /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
+            string? activationText = GetActivationText(args.Arguments);
             if (!TryAcquireSingleInstance())
             {
-                SignalExistingInstance();
+                SignalExistingInstance(activationText);
                 Exit();
                 return;
             }
 
+            CreateAndActivateMainWindow(activationText);
+        }
+
+        private static string? GetActivationText(string launchArguments)
+        {
+            try
+            {
+                AppActivationArguments activatedEventArgs = Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent().GetActivatedEventArgs();
+                if (activatedEventArgs.Kind == ExtendedActivationKind.Protocol &&
+                    activatedEventArgs.Data is ProtocolActivatedEventArgs protocolArgs)
+                {
+                    return protocolArgs.Uri?.ToString();
+                }
+            }
+            catch
+            {
+            }
+
+            return string.IsNullOrWhiteSpace(launchArguments) ? null : launchArguments;
+        }
+
+        private void CreateAndActivateMainWindow(string? activationText)
+        {
             _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
             StartActivationListener();
             _window = new MainWindow();
             _window.Closed += MainWindow_Closed;
             Notifications.Register();
             _window.Activate();
+            if (_window is MainWindow mainWindow && !string.IsNullOrWhiteSpace(activationText))
+            {
+                _ = mainWindow.HandleExternalDownloadTextAsync(activationText);
+            }
         }
 
         private bool TryAcquireSingleInstance()
@@ -86,10 +117,16 @@ namespace OmniDown
             return true;
         }
 
-        private static void SignalExistingInstance()
+        private static void SignalExistingInstance(string? activationText)
         {
             try
             {
+                if (!string.IsNullOrWhiteSpace(activationText))
+                {
+                    Directory.CreateDirectory(AppPaths.LocalDataDirectory);
+                    File.WriteAllText(PendingActivationPath, activationText);
+                }
+
                 using EventWaitHandle activationEvent = EventWaitHandle.OpenExisting(ActivationEventName);
                 activationEvent.Set();
             }
@@ -126,10 +163,35 @@ namespace OmniDown
             if (_window is MainWindow mainWindow)
             {
                 mainWindow.ShowAndActivate();
+                if (TryReadPendingActivation(out string activationText))
+                {
+                    _ = mainWindow.HandleExternalDownloadTextAsync(activationText);
+                }
+
                 return;
             }
 
             _window?.Activate();
+        }
+
+        private static bool TryReadPendingActivation(out string activationText)
+        {
+            activationText = string.Empty;
+            try
+            {
+                if (!File.Exists(PendingActivationPath))
+                {
+                    return false;
+                }
+
+                activationText = File.ReadAllText(PendingActivationPath);
+                File.Delete(PendingActivationPath);
+                return !string.IsNullOrWhiteSpace(activationText);
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private void MainWindow_Closed(object sender, WindowEventArgs args)

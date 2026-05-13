@@ -248,6 +248,7 @@ public sealed class Aria2EngineHost : IDisposable
             $"--max-tries={Math.Clamp(options.MaxTries, 0, 60)}",
             $"--retry-wait={Math.Clamp(options.RetryWaitSeconds, 0, 600)}",
             $"--user-agent={options.NetworkSettings.UserAgent ?? string.Empty}",
+            $"--log-level={NormalizeLogLevel(options.AdvancedSettings.LogLevel)}",
             $"--connect-timeout={Math.Clamp(options.NetworkSettings.ConnectTimeoutSeconds, 1, 600)}",
             $"--timeout={Math.Clamp(options.NetworkSettings.TimeoutSeconds, 1, 600)}",
             $"--file-allocation={NormalizeFileAllocation(options.NetworkSettings.FileAllocation)}",
@@ -374,6 +375,19 @@ public sealed class Aria2EngineHost : IDisposable
             "trunc" => "trunc",
             "falloc" => "falloc",
             _ => "none"
+        };
+    }
+
+    private static string NormalizeLogLevel(string? logLevel)
+    {
+        return logLevel?.Trim().ToLowerInvariant() switch
+        {
+            "debug" => "debug",
+            "info" => "info",
+            "notice" => "notice",
+            "warn" => "warn",
+            "error" => "error",
+            _ => "notice"
         };
     }
 
