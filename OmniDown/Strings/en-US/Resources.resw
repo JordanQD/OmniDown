@@ -83,6 +83,10 @@
   <data name="NotificationSeverityWarning" xml:space="preserve"><value>Warning</value></data>
   <data name="NotificationSeverityError" xml:space="preserve"><value>Error</value></data>
   <data name="NotificationSeverityInfo" xml:space="preserve"><value>Info</value></data>
+  <data name="StatusBarItemCountText" xml:space="preserve"><value>{0} items</value></data>
+  <data name="StatusBarSelectedItemCountText" xml:space="preserve"><value>{0} selected</value></data>
+  <data name="StatusBarSpeedLimitText" xml:space="preserve"><value>limit {0}</value></data>
+  <data name="StatusToastCopyButtonLabel.Text" xml:space="preserve"><value>Copy</value></data>
   <data name="ClearTerminalButtonLabel.Text" xml:space="preserve"><value>Clear</value></data>
   <data name="TerminalToggleButtonLabel.Text" xml:space="preserve"><value>Terminal</value></data>
   <data name="TerminalTextBlock.Text" xml:space="preserve"><value>aria2 terminal output will appear here.</value></data>

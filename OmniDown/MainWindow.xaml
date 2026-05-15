@@ -136,7 +136,7 @@
             <Grid>
                 <Grid
                     Grid.Column="0"
-                    Padding="16,20,0,0"
+                    Padding="16,8,0,0"
                     RowDefinitions="Auto,*,Auto">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -364,7 +364,8 @@
                         x:Name="StatsPanel"
                         Grid.Row="0"
                         Margin="0,20,0,14"
-                        ColumnDefinitions="*,*,*,*,*,Auto">
+                        ColumnDefinitions="*,*,*,*,*,Auto"
+                        Visibility="Collapsed">
                         <StackPanel
                             x:Name="TotalMetricPanel"
                             Margin="0,8,0,0"
@@ -674,7 +675,7 @@
                     <Border
                         x:Name="TasksListHeaderPanel"
                         Grid.Row="1"
-                        Margin="0,0,0,4"
+                        Margin="0,8,0,4"
                         Background="{ThemeResource LayerFillColorDefaultBrush}"
                         CornerRadius="4">
                         <Grid
@@ -957,69 +958,197 @@
                 <Grid
                     Grid.Row="2"
                     Grid.ColumnSpan="2"
-                    Margin="-28,0,0,0"
+                    Margin="-16,0,0,0"
                     RowDefinitions="*,Auto">
                     <Border
+                        x:Name="StatusBarPanel"
                         Grid.Row="1"
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="0,1,0,0">
                         <Grid RowDefinitions="Auto,Auto">
                             <Grid
-                            Padding="12,6"
-                            ColumnDefinitions="Auto,*,Auto,Auto,Auto"
+                            MinHeight="40"
+                            Padding="16,0,8,0"
+                            ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto"
                             ColumnSpacing="12">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon FontSize="12" Glyph="&#xE756;" />
-                                <TextBlock
-                                    x:Name="DebugEngineText"
-                                    VerticalAlignment="Center"
-                                    x:Uid="DebugEngineText"
-                                    Text="aria2 stopped" />
-                            </StackPanel>
-                            <TextBlock
-                                Grid.Column="1"
+                            <StackPanel
                                 VerticalAlignment="Center"
-                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                x:Uid="TerminalSummaryText"
-                                Text="aria2 terminal output"
-                                TextTrimming="CharacterEllipsis" />
-                            <Button
-                                x:Name="ClearTerminalButton"
+                                Orientation="Horizontal"
+                                Spacing="12">
+                                <TextBlock
+                                    x:Name="StatusBarItemCountText"
+                                    VerticalAlignment="Center"
+                                    Text="0 个项目" />
+                                <Rectangle
+                                    x:Name="StatusBarSelectedCountDivider"
+                                    Width="1"
+                                    Height="18"
+                                    VerticalAlignment="Center"
+                                    Fill="{ThemeResource DividerStrokeColorDefaultBrush}"
+                                    Visibility="Collapsed" />
+                                <TextBlock
+                                    x:Name="StatusBarSelectedCountText"
+                                    VerticalAlignment="Center"
+                                    Text="已选择 0 个项目"
+                                    Visibility="Collapsed" />
+                            </StackPanel>
+                            <Rectangle
+                                x:Name="StatusBarTaskCountsDivider"
+                                Grid.Column="1"
+                                Width="1"
+                                Height="18"
+                                VerticalAlignment="Center"
+                                Fill="{ThemeResource DividerStrokeColorDefaultBrush}"
+                                Visibility="Collapsed" />
+                            <StackPanel
+                                x:Name="StatusBarTaskCountsPanel"
                                 Grid.Column="2"
-                                Click="ClearTerminalButton_Click"
-                                Padding="10,4">
-                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                    <FontIcon FontSize="14" Glyph="&#xE75C;" />
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal"
+                                Spacing="12"
+                                Visibility="Collapsed">
+                                <Grid ColumnDefinitions="16,Auto" ColumnSpacing="4">
+                                    <FontIcon
+                                        Width="16"
+                                        VerticalAlignment="Center"
+                                        FontSize="13"
+                                        Glyph="&#xE768;" />
                                     <TextBlock
-                                        x:Uid="ClearTerminalButtonLabel"
-                                        Text="Clear" />
-                                </StackPanel>
-                            </Button>
-                            <ToggleButton
-                                x:Name="TerminalToggleButton"
+                                        x:Name="StatusBarActiveTasksText"
+                                        Grid.Column="1"
+                                        VerticalAlignment="Center"
+                                        Text="0" />
+                                </Grid>
+                                <Grid ColumnDefinitions="16,Auto" ColumnSpacing="4">
+                                    <FontIcon
+                                        Width="16"
+                                        VerticalAlignment="Center"
+                                        FontSize="13"
+                                        Glyph="&#xE769;" />
+                                    <TextBlock
+                                        x:Name="StatusBarPausedTasksText"
+                                        Grid.Column="1"
+                                        VerticalAlignment="Center"
+                                        Text="0" />
+                                </Grid>
+                                <Grid
+                                    x:Name="StatusBarIssueTasksPanel"
+                                    ColumnDefinitions="16,Auto"
+                                    ColumnSpacing="4"
+                                    Visibility="Collapsed">
+                                    <FontIcon
+                                        Width="16"
+                                        VerticalAlignment="Center"
+                                        FontSize="13"
+                                        Glyph="&#xE7BA;" />
+                                    <TextBlock
+                                        x:Name="StatusBarIssueTasksText"
+                                        Grid.Column="1"
+                                        VerticalAlignment="Center"
+                                        Text="0" />
+                                </Grid>
+                            </StackPanel>
+                            <StackPanel
+                                x:Name="StatusBarSpeedPanel"
                                 Grid.Column="3"
-                                Checked="TerminalToggleButton_Changed"
-                                Padding="10,4"
-                                Unchecked="TerminalToggleButton_Changed">
-                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                    <FontIcon FontSize="14" Glyph="&#xE756;" />
-                                    <TextBlock
-                                        x:Uid="TerminalToggleButtonLabel"
-                                        Text="Terminal" />
-                                </StackPanel>
-                            </ToggleButton>
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal"
+                                Spacing="12"
+                                Visibility="Collapsed">
+                                <Rectangle
+                                    Width="1"
+                                    Height="18"
+                                    VerticalAlignment="Center"
+                                    Fill="{ThemeResource DividerStrokeColorDefaultBrush}" />
+                                <Button
+                                    x:Name="StatusBarSpeedButton"
+                                    Padding="0"
+                                    VerticalAlignment="Center"
+                                    Background="Transparent"
+                                    BorderBrush="Transparent"
+                                    BorderThickness="0"
+                                    Click="StatusBarSpeedButton_Click">
+                                    <StackPanel Orientation="Horizontal" Spacing="12">
+                                        <Grid ColumnDefinitions="16,Auto,Auto" ColumnSpacing="4">
+                                            <FontIcon
+                                                Width="16"
+                                                VerticalAlignment="Center"
+                                                FontSize="13"
+                                                Glyph="&#xE74A;" />
+                                            <TextBlock
+                                                x:Name="StatusBarUploadSpeedText"
+                                                Grid.Column="1"
+                                                VerticalAlignment="Center"
+                                                Text="0 B/s" />
+                                            <StackPanel
+                                                x:Name="StatusBarUploadLimitPanel"
+                                                Grid.Column="2"
+                                                Margin="8,0,0,0"
+                                                VerticalAlignment="Center"
+                                                Orientation="Horizontal"
+                                                Spacing="4"
+                                                Visibility="Collapsed">
+                                                <FontIcon
+                                                    VerticalAlignment="Center"
+                                                    FontSize="11"
+                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                    Glyph="&#xE72E;" />
+                                                <TextBlock
+                                                    x:Name="StatusBarUploadLimitText"
+                                                    VerticalAlignment="Center"
+                                                    FontSize="12"
+                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                    Text="" />
+                                            </StackPanel>
+                                        </Grid>
+                                        <Grid ColumnDefinitions="16,Auto,Auto" ColumnSpacing="4">
+                                            <FontIcon
+                                                Width="16"
+                                                VerticalAlignment="Center"
+                                                FontSize="13"
+                                                Glyph="&#xE74B;" />
+                                            <TextBlock
+                                                x:Name="StatusBarDownloadSpeedText"
+                                                Grid.Column="1"
+                                                VerticalAlignment="Center"
+                                                Text="0 B/s" />
+                                            <StackPanel
+                                                x:Name="StatusBarDownloadLimitPanel"
+                                                Grid.Column="2"
+                                                Margin="8,0,0,0"
+                                                VerticalAlignment="Center"
+                                                Orientation="Horizontal"
+                                                Spacing="4"
+                                                Visibility="Collapsed">
+                                                <FontIcon
+                                                    VerticalAlignment="Center"
+                                                    FontSize="11"
+                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                    Glyph="&#xE72E;" />
+                                                <TextBlock
+                                                    x:Name="StatusBarDownloadLimitText"
+                                                    VerticalAlignment="Center"
+                                                    FontSize="12"
+                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                    Text="" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
                             <Button
                                 x:Name="NotificationHistoryButton"
-                                Grid.Column="4"
-                                Padding="10,4"
-                                HorizontalAlignment="Right">
-                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                    <FontIcon FontSize="14" Glyph="&#xE7F4;" />
-                                    <TextBlock
-                                        x:Uid="NotificationHistoryButtonLabel"
-                                        Text="Notifications" />
-                                </StackPanel>
+                                Grid.Column="5"
+                                Width="32"
+                                Height="32"
+                                MinWidth="32"
+                                Padding="0"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                AutomationProperties.AutomationId="NotificationHistoryButton"
+                                x:Uid="NotificationHistoryButton">
+                                <FontIcon FontSize="14" Glyph="&#xE7F4;" />
                                 <Button.Flyout>
                                     <Flyout Placement="TopEdgeAlignedRight">
                                         <Grid
@@ -1074,6 +1203,13 @@
                             </Button>
                             </Grid>
 
+                            <Grid Visibility="Collapsed">
+                                <TextBlock x:Name="DebugEngineText" />
+                                <TextBlock x:Name="TerminalSummaryText" />
+                                <Button x:Name="ClearTerminalButton" />
+                                <ToggleButton x:Name="TerminalToggleButton" />
+                            </Grid>
+
                         <Border
                             x:Name="TerminalPanel"
                             Grid.Row="1"
@@ -1097,34 +1233,36 @@
                         </Border>
                         </Grid>
                     </Border>
-
-                    <Border
-                        x:Name="StatusToastPanel"
-                        Width="360"
-                        MinHeight="72"
-                        Margin="0,0,16,54"
-                        Padding="14,12"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Bottom"
-                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1"
-                        CornerRadius="8"
-                        Visibility="Collapsed">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
-                            <FontIcon
-                                x:Name="StatusToastGlyph"
-                                Width="22"
-                                VerticalAlignment="Top"
-                                FontSize="18"
-                                Glyph="&#xE946;" />
-                            <TextBlock
-                                x:Name="StatusToastMessageText"
-                                Grid.Column="1"
-                                TextWrapping="WrapWholeWords" />
-                        </Grid>
-                    </Border>
                 </Grid>
+
+                <InfoBar
+                    x:Name="StatusToastInfoBar"
+                    Grid.Row="1"
+                    Grid.ColumnSpan="2"
+                    AutomationProperties.AutomationId="StatusToastInfoBar"
+                    Width="420"
+                    Margin="0,0,16,8"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Closed="StatusToastInfoBar_Closed"
+                    IsOpen="False"
+                    Severity="Informational"
+                    Visibility="Collapsed">
+                    <InfoBar.ActionButton>
+                        <Button
+                            x:Name="StatusToastCopyButton"
+                            AutomationProperties.AutomationId="StatusToastCopyButton"
+                            Click="StatusToastCopyButton_Click"
+                            Visibility="Collapsed">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon FontSize="14" Glyph="&#xE8C8;" />
+                                <TextBlock
+                                    x:Uid="StatusToastCopyButtonLabel"
+                                    Text="Copy" />
+                            </StackPanel>
+                        </Button>
+                    </InfoBar.ActionButton>
+                </InfoBar>
             </Grid>
             </Grid>
         </NavigationView>

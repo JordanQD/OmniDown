@@ -332,6 +332,7 @@ namespace OmniDown
             OpenSelectedTaskFolderButton.IsEnabled = singleSelectedTask is not null && CanOpenTaskFolder(singleSelectedTask);
             CopySelectedTaskLinksButton.IsEnabled = selectedTasks.Any(task => !string.IsNullOrWhiteSpace(task.SourceUri));
             UpdateSelectAllCheckBox();
+            UpdateStatusBar();
         }
 
         private static bool CanOpenTaskFile(DownloadTask task)
@@ -566,12 +567,10 @@ namespace OmniDown
                 return;
             }
 
-            StatsPanel.Visibility = tag is "Home" or "Downloading" ? Visibility.Visible : Visibility.Collapsed;
+            StatsPanel.Visibility = Visibility.Collapsed;
             CompletedMetricPanel.Visibility = tag == "Home" ? Visibility.Visible : Visibility.Collapsed;
             IssueMetricPanel.Visibility = tag == "Home" ? Visibility.Visible : Visibility.Collapsed;
-            TasksListHeaderPanel.Margin = tag is "Home" or "Downloading"
-                ? new Thickness(0, 0, 0, 4)
-                : new Thickness(0, 20, 0, 4);
+            TasksListHeaderPanel.Margin = new Thickness(0, 8, 0, 4);
         }
 
         private IEnumerable<DownloadTask> SortTasks(IEnumerable<DownloadTask> tasks)

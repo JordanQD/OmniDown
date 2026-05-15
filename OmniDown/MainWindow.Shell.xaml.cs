@@ -272,6 +272,7 @@ namespace OmniDown
                 TaskDetailsPane.Visibility = Visibility.Collapsed;
                 ClearTitleSearchBox();
                 UpdateSearchPlaceholder();
+                UpdateStatusBar();
                 ShowSettingsPage();
                 return;
             }
@@ -421,7 +422,7 @@ namespace OmniDown
 
         private void ApplyToolbarTooltips()
         {
-            SetToolbarText(NewDownloadButton, Strings.Get("NewDownloadButton.Label"), "Ctrl+N");
+            SetToolbarText(NewDownloadButton, Strings.Get("NewDownloadButton.Label"));
             SetToolbarText(ResumeTasksButton, Strings.Get("ResumeTasksButton.Label"));
             SetToolbarText(PauseTasksButton, Strings.Get("PauseTasksButton.Label"));
             SetToolbarText(RecoverTasksButton, Strings.Get("RecoverTasksButton.Label"));

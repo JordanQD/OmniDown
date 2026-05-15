@@ -61,6 +61,7 @@ namespace OmniDown
             RestoreSelection(selectedGids);
             UpdateSelectionCommands();
             UpdateTaskDetailsPane();
+            UpdateStatusBar();
         }
 
         private async void RefreshTimer_Tick(object? sender, object e)
@@ -242,6 +243,16 @@ namespace OmniDown
             {
                 GlobalUploadSpeedText.Text = FormatSpeed(uploadSpeed);
             }
+
+            if (StatusBarDownloadSpeedText is not null)
+            {
+                StatusBarDownloadSpeedText.Text = FormatSpeed(downloadSpeed);
+            }
+
+            if (StatusBarUploadSpeedText is not null)
+            {
+                StatusBarUploadSpeedText.Text = FormatSpeed(uploadSpeed);
+            }
         }
 
         private void UpdateGlobalSpeedsFromTasks()
@@ -249,6 +260,53 @@ namespace OmniDown
             UpdateGlobalSpeeds(
                 Tasks.Sum(task => task.DownloadSpeed),
                 Tasks.Sum(task => task.UploadSpeed));
+        }
+
+        private void UpdateStatusBar()
+        {
+            if (StatusBarItemCountText is null)
+            {
+                return;
+            }
+
+            bool isSettings = _currentTaskFilter == "Settings";
+            StatusBarPanel.Visibility = isSettings ? Visibility.Collapsed : Visibility.Visible;
+            if (isSettings)
+            {
+                return;
+            }
+
+            bool showTransferSummary = _currentTaskFilter is "Home" or "Downloading";
+            bool showIssues = _currentTaskFilter == "Home";
+            int selectedItemCount = GetSelectedTasks().Count;
+
+            StatusBarItemCountText.Text = FormatStatusBarItemCount(_visibleTasks.Count);
+            StatusBarSelectedCountText.Text = FormatStatusBarSelectedItemCount(selectedItemCount);
+            StatusBarSelectedCountText.Visibility = selectedItemCount > 0 ? Visibility.Visible : Visibility.Collapsed;
+            StatusBarSelectedCountDivider.Visibility = selectedItemCount > 0 ? Visibility.Visible : Visibility.Collapsed;
+            StatusBarTaskCountsDivider.Visibility = showTransferSummary ? Visibility.Visible : Visibility.Collapsed;
+            StatusBarTaskCountsPanel.Visibility = showTransferSummary ? Visibility.Visible : Visibility.Collapsed;
+            StatusBarSpeedPanel.Visibility = showTransferSummary ? Visibility.Visible : Visibility.Collapsed;
+            StatusBarIssueTasksPanel.Visibility = showIssues ? Visibility.Visible : Visibility.Collapsed;
+
+            if (!showTransferSummary)
+            {
+                return;
+            }
+
+            StatusBarActiveTasksText.Text = _visibleTasks.Count(IsActiveTransferTask).ToString(CultureInfo.CurrentCulture);
+            StatusBarPausedTasksText.Text = _visibleTasks.Count(IsPausedTask).ToString(CultureInfo.CurrentCulture);
+            StatusBarIssueTasksText.Text = _visibleTasks.Count(IsIssueTask).ToString(CultureInfo.CurrentCulture);
+        }
+
+        private static string FormatStatusBarItemCount(int itemCount)
+        {
+            return Strings.Format("StatusBarItemCountText", itemCount);
+        }
+
+        private static string FormatStatusBarSelectedItemCount(int itemCount)
+        {
+            return Strings.Format("StatusBarSelectedItemCountText", itemCount);
         }
 
         private void HideToTray()
@@ -436,6 +494,16 @@ namespace OmniDown
                 GlobalUploadLimitText.Text = showUploadLimit ? FormatSpeed(_uploadLimitBytesPerSecond) : string.Empty;
             }
 
+            if (StatusBarUploadLimitText is not null)
+            {
+                StatusBarUploadLimitText.Text = showUploadLimit ? FormatSpeed(_uploadLimitBytesPerSecond) : string.Empty;
+            }
+
+            if (StatusBarUploadLimitPanel is not null)
+            {
+                StatusBarUploadLimitPanel.Visibility = showUploadLimit ? Visibility.Visible : Visibility.Collapsed;
+            }
+
             bool showDownloadLimit = _isDownloadSpeedLimitEnabled && _downloadLimitBytesPerSecond > 0;
             if (GlobalDownloadLimitIconPanel is not null)
             {
@@ -446,6 +514,24 @@ namespace OmniDown
             {
                 GlobalDownloadLimitText.Opacity = showDownloadLimit ? 1 : 0;
                 GlobalDownloadLimitText.Text = showDownloadLimit ? FormatSpeed(_downloadLimitBytesPerSecond) : string.Empty;
+            }
+
+            if (StatusBarDownloadLimitText is not null)
+            {
+                StatusBarDownloadLimitText.Text = showDownloadLimit ? FormatSpeed(_downloadLimitBytesPerSecond) : string.Empty;
+            }
+
+            if (StatusBarDownloadLimitPanel is not null)
+            {
+                StatusBarDownloadLimitPanel.Visibility = showDownloadLimit ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
+        private void StatusBarSpeedButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement placementTarget)
+            {
+                SpeedLimitButton.Flyout?.ShowAt(placementTarget);
             }
         }
 
@@ -483,11 +569,12 @@ namespace OmniDown
                 GetSeverityText(severity),
                 GetSeverityGlyph(severity),
                 GetSeverityBrush(severity)));
-            StatusToastMessageText.Text = message;
-            StatusToastGlyph.Glyph = GetSeverityGlyph(severity);
-            StatusToastGlyph.Foreground = GetSeverityBrush(severity);
-            StatusToastPanel.BorderBrush = GetSeverityBrush(severity);
-            StatusToastPanel.Visibility = Visibility.Visible;
+            StatusToastInfoBar.Title = GetSeverityText(severity);
+            StatusToastInfoBar.Message = message;
+            StatusToastInfoBar.Severity = severity;
+            StatusToastCopyButton.Visibility = IsCopyableStatusMessage(severity) ? Visibility.Visible : Visibility.Collapsed;
+            StatusToastInfoBar.Visibility = Visibility.Visible;
+            StatusToastInfoBar.IsOpen = true;
             _statusMessageTimer.Stop();
             _statusMessageTimer.Start();
         }
@@ -495,7 +582,25 @@ namespace OmniDown
         private void StatusMessageTimer_Tick(object? sender, object e)
         {
             _statusMessageTimer.Stop();
-            StatusToastPanel.Visibility = Visibility.Collapsed;
+            StatusToastInfoBar.IsOpen = false;
+            StatusToastInfoBar.Visibility = Visibility.Collapsed;
+            StatusToastCopyButton.Visibility = Visibility.Collapsed;
+        }
+
+        private void StatusToastInfoBar_Closed(InfoBar sender, InfoBarClosedEventArgs args)
+        {
+            StatusToastInfoBar.Visibility = Visibility.Collapsed;
+            StatusToastCopyButton.Visibility = Visibility.Collapsed;
+        }
+
+        private void StatusToastCopyButton_Click(object sender, RoutedEventArgs e)
+        {
+            DataPackage package = new()
+            {
+                RequestedOperation = DataPackageOperation.Copy
+            };
+            package.SetText(StatusToastInfoBar.Message);
+            Clipboard.SetContent(package);
         }
 
         private static string FormatStatusMessageDetail(DateTimeOffset timestamp)
@@ -512,6 +617,11 @@ namespace OmniDown
                 InfoBarSeverity.Error => Strings.Get("NotificationSeverityError"),
                 _ => Strings.Get("NotificationSeverityInfo")
             };
+        }
+
+        private static bool IsCopyableStatusMessage(InfoBarSeverity severity)
+        {
+            return severity is InfoBarSeverity.Warning or InfoBarSeverity.Error;
         }
 
         private static string GetSeverityGlyph(InfoBarSeverity severity)
