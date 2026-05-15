@@ -268,6 +268,16 @@ namespace OmniDown
         private static string ResolveTaskFolderPath(DownloadTask task)
         {
             string filePath = ResolveTaskFilePath(task);
+            if (!string.IsNullOrWhiteSpace(task.SaveDirectory) &&
+                !string.IsNullOrWhiteSpace(task.Name))
+            {
+                string contentDirectory = Path.Combine(task.SaveDirectory, task.Name);
+                if (Directory.Exists(contentDirectory))
+                {
+                    return contentDirectory;
+                }
+            }
+
             if (!string.IsNullOrWhiteSpace(filePath))
             {
                 if (Directory.Exists(filePath))
@@ -370,8 +380,7 @@ namespace OmniDown
 
         private static bool IsIssueTask(DownloadTask task)
         {
-            return IsErrorTaskStatus(task.Status)
-                || task.Status.Contains("removed", StringComparison.OrdinalIgnoreCase);
+            return IsErrorTaskStatus(task.Status);
         }
 
         private static bool IsRecoverableTask(DownloadTask task)

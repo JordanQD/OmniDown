@@ -97,6 +97,8 @@ public sealed class DownloadCoordinator
 
     public async Task<DownloadSnapshot> RefreshAsync(CancellationToken cancellationToken = default)
     {
+        RemoveRemovedTasks();
+
         List<Aria2TaskStatus> remoteTasks = [];
         remoteTasks.AddRange(await _rpcClient.TellActiveAsync(cancellationToken));
         remoteTasks.AddRange(await _rpcClient.TellWaitingAsync(cancellationToken));
@@ -176,6 +178,25 @@ public sealed class DownloadCoordinator
 
         SaveTaskCache();
         await SaveAria2SessionAsync(cancellationToken);
+    }
+
+    private void RemoveRemovedTasks()
+    {
+        DownloadTask[] removedTasks = _tasks
+            .Where(task => task.Status.Contains("removed", StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+
+        if (removedTasks.Length == 0)
+        {
+            return;
+        }
+
+        foreach (DownloadTask task in removedTasks)
+        {
+            _tasks.Remove(task);
+        }
+
+        SaveTaskCache();
     }
 
     public async Task DeleteAsync(IEnumerable<DownloadTask> tasks, bool deleteFiles = false, CancellationToken cancellationToken = default)
@@ -683,7 +704,9 @@ public sealed class DownloadCoordinator
                 return;
             }
 
-            foreach (CachedDownloadTask cachedTask in cachedTasks.Where(task => !string.IsNullOrWhiteSpace(task.Gid)))
+            foreach (CachedDownloadTask cachedTask in cachedTasks.Where(task =>
+                !string.IsNullOrWhiteSpace(task.Gid) &&
+                !task.Status.Contains("removed", StringComparison.OrdinalIgnoreCase)))
             {
                 _tasks.Add(new DownloadTask
                 {
@@ -714,7 +737,9 @@ public sealed class DownloadCoordinator
         {
             Directory.CreateDirectory(Path.GetDirectoryName(_taskCachePath)!);
             List<CachedDownloadTask> cachedTasks = _tasks
-                .Where(task => !string.IsNullOrWhiteSpace(task.Gid))
+                .Where(task =>
+                    !string.IsNullOrWhiteSpace(task.Gid) &&
+                    !task.Status.Contains("removed", StringComparison.OrdinalIgnoreCase))
                 .Select(task => new CachedDownloadTask(
                     task.Gid,
                     task.Name,

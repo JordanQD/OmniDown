@@ -96,6 +96,11 @@ namespace OmniDown
             DispatcherQueue.TryEnqueue(() => HandleNotificationInvoked(args));
         }
 
+        public void HandleNotificationActivation(TaskNotificationInvokedEventArgs args)
+        {
+            DispatcherQueue.TryEnqueue(() => HandleNotificationInvoked(args));
+        }
+
         private void HandleNotificationInvoked(TaskNotificationInvokedEventArgs args)
         {
             switch (args.Action)
@@ -122,10 +127,10 @@ namespace OmniDown
             switch (args.Action)
             {
                 case SystemNotificationService.ActionOpenDownloadedFile:
-                    OpenNotificationFile(args.FilePath);
+                    OpenNotificationFile(args);
                     break;
                 case SystemNotificationService.ActionOpenDownloadedFolder:
-                    OpenNotificationFolder(args.FolderPath, args.FilePath);
+                    OpenNotificationFolder(args);
                     break;
                 default:
                     NavigateToHome();
@@ -139,8 +144,9 @@ namespace OmniDown
             NavigateTo("Home");
         }
 
-        private void OpenNotificationFile(string? filePath)
+        private void OpenNotificationFile(TaskNotificationInvokedEventArgs args)
         {
+            string? filePath = ResolveNotificationFilePath(args);
             if (!string.IsNullOrWhiteSpace(filePath) && (File.Exists(filePath) || Directory.Exists(filePath)))
             {
                 OpenShellTarget(filePath);
@@ -148,11 +154,14 @@ namespace OmniDown
             }
 
             NavigateToHome();
+            ShowAndActivate();
             ShowMessage(Strings.Get("TaskFileNotFoundMessage"), InfoBarSeverity.Warning);
         }
 
-        private void OpenNotificationFolder(string? folderPath, string? filePath)
+        private void OpenNotificationFolder(TaskNotificationInvokedEventArgs args)
         {
+            string? filePath = ResolveNotificationFilePath(args);
+            string? folderPath = ResolveNotificationFolderPath(args, filePath);
             string? resolvedFolderPath = !string.IsNullOrWhiteSpace(folderPath)
                 ? folderPath
                 : string.IsNullOrWhiteSpace(filePath)
@@ -166,7 +175,52 @@ namespace OmniDown
             }
 
             NavigateToHome();
+            ShowAndActivate();
             ShowMessage(Strings.Get("TaskFolderNotFoundMessage"), InfoBarSeverity.Warning);
+        }
+
+        private string? ResolveNotificationFilePath(TaskNotificationInvokedEventArgs args)
+        {
+            if (!string.IsNullOrWhiteSpace(args.Gid) &&
+                Tasks.FirstOrDefault(task => task.Gid.Equals(args.Gid, StringComparison.OrdinalIgnoreCase)) is DownloadTask task)
+            {
+                string taskFilePath = ResolveTaskFilePath(task);
+                if (!string.IsNullOrWhiteSpace(taskFilePath))
+                {
+                    return taskFilePath;
+                }
+            }
+
+            return args.FilePath;
+        }
+
+        private string? ResolveNotificationFolderPath(TaskNotificationInvokedEventArgs args, string? resolvedFilePath)
+        {
+            if (!string.IsNullOrWhiteSpace(args.Gid) &&
+                Tasks.FirstOrDefault(task => task.Gid.Equals(args.Gid, StringComparison.OrdinalIgnoreCase)) is DownloadTask task)
+            {
+                string taskFolderPath = ResolveTaskFolderPath(task);
+                if (!string.IsNullOrWhiteSpace(taskFolderPath))
+                {
+                    return taskFolderPath;
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(resolvedFilePath))
+            {
+                if (Directory.Exists(resolvedFilePath))
+                {
+                    return resolvedFilePath;
+                }
+
+                string? fileDirectory = Path.GetDirectoryName(resolvedFilePath);
+                if (!string.IsNullOrWhiteSpace(fileDirectory))
+                {
+                    return fileDirectory;
+                }
+            }
+
+            return args.FolderPath;
         }
 
         private void TrayIcon_ExitRequested(object? sender, EventArgs e)

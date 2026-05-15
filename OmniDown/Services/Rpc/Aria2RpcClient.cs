@@ -195,7 +195,15 @@ public sealed class Aria2RpcClient : IDisposable
 
         using (response)
         {
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                string responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                string detail = string.IsNullOrWhiteSpace(responseBody)
+                    ? response.ReasonPhrase ?? "No response body."
+                    : TruncateResponseBody(responseBody);
+                throw new InvalidOperationException(
+                    $"aria2 RPC method {method} returned HTTP {(int)response.StatusCode} ({response.ReasonPhrase}): {detail}");
+            }
 
             await using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
             using JsonDocument rpcResponse = await JsonDocument.ParseAsync(responseStream, cancellationToken: cancellationToken);
@@ -404,6 +412,19 @@ public sealed class Aria2RpcClient : IDisposable
         }
 
         return exception.InnerException?.Message ?? exception.Message;
+    }
+
+    private static string TruncateResponseBody(string responseBody)
+    {
+        string normalized = responseBody
+            .Replace("\r", " ", StringComparison.Ordinal)
+            .Replace("\n", " ", StringComparison.Ordinal)
+            .Trim();
+
+        const int maxLength = 500;
+        return normalized.Length <= maxLength
+            ? normalized
+            : normalized[..maxLength] + "...";
     }
 
     private static readonly string[] TaskKeys =

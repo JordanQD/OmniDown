@@ -893,6 +893,10 @@ namespace OmniDown
             SetToggleSwitch(ClipboardMagnetToggleSwitch, settings.ClipboardMagnetEnabled);
             SetToggleSwitch(ClipboardThunderToggleSwitch, settings.ClipboardThunderEnabled);
             SetToggleSwitch(ClipboardBtHashToggleSwitch, settings.ClipboardBtHashEnabled);
+            ProtocolAssociationService.Synchronize(
+                settings.ProtocolMagnetEnabled,
+                settings.ProtocolThunderEnabled,
+                settings.ProtocolOmniDownEnabled);
             RefreshProtocolDefaultToggles();
             AdvancedPathsSummaryText.Text = $"会话文件：{Path.GetFileName(GetAriaSessionPath())}";
             _rpcSecret = settings.RpcSecret;
@@ -914,7 +918,7 @@ namespace OmniDown
                     ReferenceEquals(toggleSwitch, ProtocolOmniDownToggleSwitch)))
             {
                 _ = Launcher.LaunchUriAsync(new Uri("ms-settings:defaultapps"));
-                ShowMessage("已保存协议开关。请在 Windows 默认应用中确认 OmniDown 的协议关联。", InfoBarSeverity.Informational);
+                ShowMessage("已注册协议入口。若浏览器仍未打开 OmniDown，请在 Windows 默认应用中把该协议设为 OmniDown。", InfoBarSeverity.Informational);
             }
         }
 
@@ -1037,6 +1041,10 @@ namespace OmniDown
                 ProtocolOmniDownToggleSwitch?.IsOn == true);
 
             _settingsPageViewModel.SaveAdvancedSettings(settings);
+            ProtocolAssociationService.Synchronize(
+                settings.ProtocolMagnetEnabled,
+                settings.ProtocolThunderEnabled,
+                settings.ProtocolOmniDownEnabled);
             _rpcSecret = _settingsPageViewModel.AdvancedSettings.RpcSecret;
             _aria2RpcClient.Configure(_settingsPageViewModel.AdvancedSettings.RpcPort, _rpcSecret);
             RestartBrowserExtensionApiServer();
@@ -1095,9 +1103,19 @@ namespace OmniDown
 
         private void RefreshProtocolDefaultToggles()
         {
-            SetToggleSwitch(ProtocolMagnetToggleSwitch, IsOmniDownDefaultProtocol("magnet"));
-            SetToggleSwitch(ProtocolThunderToggleSwitch, IsOmniDownDefaultProtocol("thunder"));
-            SetToggleSwitch(ProtocolOmniDownToggleSwitch, IsOmniDownDefaultProtocol("omnidown"));
+            AdvancedSettings settings = _settingsPageViewModel.AdvancedSettings;
+            SetToggleSwitch(ProtocolMagnetToggleSwitch,
+                settings.ProtocolMagnetEnabled ||
+                ProtocolAssociationService.IsRegistered("magnet") ||
+                IsOmniDownDefaultProtocol("magnet"));
+            SetToggleSwitch(ProtocolThunderToggleSwitch,
+                settings.ProtocolThunderEnabled ||
+                ProtocolAssociationService.IsRegistered("thunder") ||
+                IsOmniDownDefaultProtocol("thunder"));
+            SetToggleSwitch(ProtocolOmniDownToggleSwitch,
+                settings.ProtocolOmniDownEnabled ||
+                ProtocolAssociationService.IsRegistered("omnidown") ||
+                IsOmniDownDefaultProtocol("omnidown"));
         }
 
         private static bool IsOmniDownDefaultProtocol(string protocol)

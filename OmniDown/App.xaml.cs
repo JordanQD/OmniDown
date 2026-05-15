@@ -45,6 +45,10 @@ namespace OmniDown
 
         public SystemNotificationService Notifications { get; } = new();
 
+        private sealed record PendingActivation(
+            string? DownloadText,
+            TaskNotificationInvokedEventArgs? Notification);
+
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
@@ -60,18 +64,18 @@ namespace OmniDown
         /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            string? activationText = GetActivationText(args.Arguments);
+            PendingActivation activation = GetActivation(args.Arguments);
             if (!TryAcquireSingleInstance())
             {
-                SignalExistingInstance(activationText);
+                SignalExistingInstance(activation);
                 Exit();
                 return;
             }
 
-            CreateAndActivateMainWindow(activationText);
+            CreateAndActivateMainWindow(activation);
         }
 
-        private static string? GetActivationText(string launchArguments)
+        private static PendingActivation GetActivation(string launchArguments)
         {
             try
             {
@@ -79,27 +83,62 @@ namespace OmniDown
                 if (activatedEventArgs.Kind == ExtendedActivationKind.Protocol &&
                     activatedEventArgs.Data is ProtocolActivatedEventArgs protocolArgs)
                 {
-                    return protocolArgs.Uri?.ToString();
+                    string? protocolText = protocolArgs.Uri?.ToString();
+                    if (SystemNotificationService.TryParseActivationArguments(protocolText, out TaskNotificationInvokedEventArgs protocolNotificationArgs))
+                    {
+                        return new PendingActivation(null, protocolNotificationArgs);
+                    }
+
+                    return new PendingActivation(protocolText, null);
                 }
             }
             catch
             {
             }
 
-            return string.IsNullOrWhiteSpace(launchArguments) ? null : launchArguments;
+            string? activationText = NormalizeActivationText(launchArguments);
+            if (SystemNotificationService.TryParseActivationArguments(activationText, out TaskNotificationInvokedEventArgs parsedNotificationArgs))
+            {
+                return new PendingActivation(null, parsedNotificationArgs);
+            }
+
+            return new PendingActivation(activationText, null);
         }
 
-        private void CreateAndActivateMainWindow(string? activationText)
+        private static string? NormalizeActivationText(string activationText)
+        {
+            if (string.IsNullOrWhiteSpace(activationText))
+            {
+                return null;
+            }
+
+            return activationText.Trim().Trim('"');
+        }
+
+        private void CreateAndActivateMainWindow(PendingActivation activation)
         {
             _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
             StartActivationListener();
             _window = new MainWindow();
             _window.Closed += MainWindow_Closed;
             Notifications.Register();
-            _window.Activate();
-            if (_window is MainWindow mainWindow && !string.IsNullOrWhiteSpace(activationText))
+            bool shouldActivate = activation.Notification is null ||
+                !SystemNotificationService.IsOpenDownloadedAction(activation.Notification.Action);
+            if (shouldActivate)
             {
-                _ = mainWindow.HandleExternalDownloadTextAsync(activationText);
+                _window.Activate();
+            }
+
+            if (_window is MainWindow mainWindow)
+            {
+                if (activation.Notification is not null)
+                {
+                    mainWindow.HandleNotificationActivation(activation.Notification);
+                }
+                else if (!string.IsNullOrWhiteSpace(activation.DownloadText))
+                {
+                    _ = mainWindow.HandleExternalDownloadTextAsync(activation.DownloadText);
+                }
             }
         }
 
@@ -117,14 +156,15 @@ namespace OmniDown
             return true;
         }
 
-        private static void SignalExistingInstance(string? activationText)
+        private static void SignalExistingInstance(PendingActivation activation)
         {
             try
             {
-                if (!string.IsNullOrWhiteSpace(activationText))
+                string? pendingActivationText = SerializePendingActivation(activation);
+                if (!string.IsNullOrWhiteSpace(pendingActivationText))
                 {
                     Directory.CreateDirectory(AppPaths.LocalDataDirectory);
-                    File.WriteAllText(PendingActivationPath, activationText);
+                    File.WriteAllText(PendingActivationPath, pendingActivationText);
                 }
 
                 using EventWaitHandle activationEvent = EventWaitHandle.OpenExisting(ActivationEventName);
@@ -133,6 +173,20 @@ namespace OmniDown
             catch (WaitHandleCannotBeOpenedException)
             {
             }
+        }
+
+        private static string? SerializePendingActivation(PendingActivation activation)
+        {
+            if (activation.Notification is not null)
+            {
+                return SystemNotificationService.CreateActivationArguments(
+                    activation.Notification.Action,
+                    activation.Notification.Gid,
+                    activation.Notification.FilePath,
+                    activation.Notification.FolderPath);
+            }
+
+            return NormalizeActivationText(activation.DownloadText ?? string.Empty);
         }
 
         private void StartActivationListener()
@@ -162,10 +216,24 @@ namespace OmniDown
         {
             if (_window is MainWindow mainWindow)
             {
-                mainWindow.ShowAndActivate();
-                if (TryReadPendingActivation(out string activationText))
+                if (TryReadPendingActivation(out PendingActivation activation))
                 {
-                    _ = mainWindow.HandleExternalDownloadTextAsync(activationText);
+                    if (activation.Notification is not null)
+                    {
+                        mainWindow.HandleNotificationActivation(activation.Notification);
+                    }
+                    else
+                    {
+                        mainWindow.ShowAndActivate();
+                        if (!string.IsNullOrWhiteSpace(activation.DownloadText))
+                        {
+                            _ = mainWindow.HandleExternalDownloadTextAsync(activation.DownloadText);
+                        }
+                    }
+                }
+                else
+                {
+                    mainWindow.ShowAndActivate();
                 }
 
                 return;
@@ -174,9 +242,9 @@ namespace OmniDown
             _window?.Activate();
         }
 
-        private static bool TryReadPendingActivation(out string activationText)
+        private static bool TryReadPendingActivation(out PendingActivation activation)
         {
-            activationText = string.Empty;
+            activation = new PendingActivation(null, null);
             try
             {
                 if (!File.Exists(PendingActivationPath))
@@ -184,9 +252,21 @@ namespace OmniDown
                     return false;
                 }
 
-                activationText = File.ReadAllText(PendingActivationPath);
+                string activationText = File.ReadAllText(PendingActivationPath);
                 File.Delete(PendingActivationPath);
-                return !string.IsNullOrWhiteSpace(activationText);
+                if (string.IsNullOrWhiteSpace(activationText))
+                {
+                    return false;
+                }
+
+                if (SystemNotificationService.TryParseActivationArguments(activationText, out TaskNotificationInvokedEventArgs notificationArgs))
+                {
+                    activation = new PendingActivation(null, notificationArgs);
+                    return true;
+                }
+
+                activation = new PendingActivation(activationText, null);
+                return true;
             }
             catch
             {
