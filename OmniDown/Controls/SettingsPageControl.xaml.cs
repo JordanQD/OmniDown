@@ -1,7 +1,10 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
+using OmniDown.Models.Settings;
+using OmniDown.Services.Localization;
 using System;
+using System.Collections.Generic;
 
 namespace OmniDown.Controls;
 
@@ -10,103 +13,18 @@ public sealed partial class SettingsPageControl : UserControl
     public SettingsPageControl()
     {
         InitializeComponent();
+        GeneralSettingsContent.GeneralSettingChanged += (_, args) => GeneralSettingChanged?.Invoke(this, args);
+        GeneralSettingsContent.CloseBehaviorSettingChanged += (_, args) => CloseBehaviorSettingChanged?.Invoke(this, args);
     }
 
     internal ListView SettingsSectionListViewControl => SettingsSectionListView;
     internal ScrollViewer SettingsContentScrollViewerControl => SettingsContentScrollViewer;
-    internal StackPanel GeneralSettingsContentControl => GeneralSettingsContent;
+    internal GeneralSettingsSectionControl GeneralSettingsContentControl => GeneralSettingsContent;
     internal StackPanel DownloadSettingsContentControl => DownloadSettingsContent;
     internal StackPanel BitTorrentSettingsContentControl => BitTorrentSettingsContent;
     internal StackPanel NetworkSettingsContentControl => NetworkSettingsContent;
     internal StackPanel AdvancedSettingsContentControl => AdvancedSettingsContent;
     internal StackPanel AboutSettingsContentControl => AboutSettingsContent;
-    internal Border StartupSettingCardControl => StartupSettingCard;
-    internal Border RestoreWindowSettingCardControl => RestoreWindowSettingCard;
-    internal Border ResumeOnLaunchSettingCardControl => ResumeOnLaunchSettingCard;
-    internal Border ExitCleanupSettingCardControl => ExitCleanupSettingCard;
-    internal Border PauseActiveOnExitSettingCardControl => PauseActiveOnExitSettingCard;
-    internal Border CloseBehaviorSettingCardControl => CloseBehaviorSettingCard;
-    internal Border TaskbarProgressSettingCardControl => TaskbarProgressSettingCard;
-    internal Border ThemeSettingCardControl => ThemeSettingCard;
-    internal Border NotificationsSettingCardControl => NotificationsSettingCard;
-    internal Border DownloadStartNotificationSettingCardControl => DownloadStartNotificationSettingCard;
-    internal Border DownloadCompleteNotificationSettingCardControl => DownloadCompleteNotificationSettingCard;
-    internal Border AutoShutdownSettingCardControl => AutoShutdownSettingCard;
-    internal Border PreventSleepSettingCardControl => PreventSleepSettingCard;
-    internal Border DefaultDirectorySettingCardControl => DefaultDirectorySettingCard;
-    internal Border MaxConcurrentDownloadsSettingCardControl => MaxConcurrentDownloadsSettingCard;
-    internal Border SplitCountSettingCardControl => SplitCountSettingCard;
-    internal Border MaxConnectionPerServerSettingCardControl => MaxConnectionPerServerSettingCard;
-    internal Border ContinueDownloadSettingCardControl => ContinueDownloadSettingCard;
-    internal Border RemoteTimeSettingCardControl => RemoteTimeSettingCard;
-    internal Border MaxTriesSettingCardControl => MaxTriesSettingCard;
-    internal Border RetryWaitSettingCardControl => RetryWaitSettingCard;
-    internal Border DownloadCleanupSettingCardControl => DownloadCleanupSettingCard;
-    internal Border TorrentCleanupSettingCardControl => TorrentCleanupSettingCard;
-    internal Border BtAutoDownloadSettingCardControl => BtAutoDownloadSettingCard;
-    internal Border BtForceEncryptionSettingCardControl => BtForceEncryptionSettingCard;
-    internal Border BtKeepSeedingSettingCardControl => BtKeepSeedingSettingCard;
-    internal Border BtMaxPeersSettingCardControl => BtMaxPeersSettingCard;
-    internal Border BtTrackerSourceSettingCardControl => BtTrackerSourceSettingCard;
-    internal Border BtTrackerCustomSourceSettingCardControl => BtTrackerCustomSourceSettingCard;
-    internal Border BtTrackerListSettingCardControl => BtTrackerListSettingCard;
-    internal Border BtAutoSyncTrackerSettingCardControl => BtAutoSyncTrackerSettingCard;
-    internal Border UseSystemProxySettingCardControl => UseSystemProxySettingCard;
-    internal Border CustomProxySettingCardControl => CustomProxySettingCard;
-    internal Border UpnpSettingCardControl => UpnpSettingCard;
-    internal Border BtPortSettingCardControl => BtPortSettingCard;
-    internal Border DhtPortSettingCardControl => DhtPortSettingCard;
-    internal Border UserAgentSettingCardControl => UserAgentSettingCard;
-    internal Border ConnectTimeoutSettingCardControl => ConnectTimeoutSettingCard;
-    internal Border TimeoutSettingCardControl => TimeoutSettingCard;
-    internal Border FileAllocationSettingCardControl => FileAllocationSettingCard;
-    internal Border AriaPathSettingCardControl => AriaPathSettingCard;
-    internal Border RpcPortSettingCardControl => RpcPortSettingCard;
-    internal Border RpcSecretSettingCardControl => RpcSecretSettingCard;
-    internal Border ProcessStatusSettingCardControl => ProcessStatusSettingCard;
-    internal Border ExtensionAutoSubmitSettingCardControl => ExtensionAutoSubmitSettingCard;
-    internal Border ExtensionApiPortSettingCardControl => ExtensionApiPortSettingCard;
-    internal Border ExtensionApiSecretSettingCardControl => ExtensionApiSecretSettingCard;
-    internal Border LogLevelSettingCardControl => LogLevelSettingCard;
-    internal Border AdvancedPathsSettingCardControl => AdvancedPathsSettingCard;
-    internal Border SessionResetSettingCardControl => SessionResetSettingCard;
-    internal Border ClipboardDetectionSettingCardControl => ClipboardDetectionSettingCard;
-    internal Border ClipboardTypesSettingCardControl => ClipboardTypesSettingCard;
-    internal Border ProtocolMagnetSettingCardControl => ProtocolMagnetSettingCard;
-    internal Border ProtocolThunderSettingCardControl => ProtocolThunderSettingCard;
-    internal Border ProtocolOmniDownSettingCardControl => ProtocolOmniDownSettingCard;
-    internal Border TerminalSettingCardControl => TerminalSettingCard;
-    internal Border AboutAppCardControl => AboutAppCard;
-    internal Border AboutCloneCardControl => AboutCloneCard;
-    internal Border AboutIssueCardControl => AboutIssueCard;
-    internal Border AboutReferencesCardControl => AboutReferencesCard;
-    internal Border AboutTrackerSourcesCardControl => AboutTrackerSourcesCard;
-    internal Border AboutLicenseCardControl => AboutLicenseCard;
-    internal ToggleSwitch AutoStartToggleSwitchControl => AutoStartToggleSwitch;
-    internal TextBlock AutoStartStateTextControl => AutoStartStateText;
-    internal ToggleSwitch RestoreWindowPlacementToggleSwitchControl => RestoreWindowPlacementToggleSwitch;
-    internal TextBlock RestoreWindowPlacementStateTextControl => RestoreWindowPlacementStateText;
-    internal ToggleSwitch ResumeDownloadsOnLaunchToggleSwitchControl => ResumeDownloadsOnLaunchToggleSwitch;
-    internal TextBlock ResumeDownloadsOnLaunchStateTextControl => ResumeDownloadsOnLaunchStateText;
-    internal ToggleSwitch AutoClearCompletedOnExitToggleSwitchControl => AutoClearCompletedOnExitToggleSwitch;
-    internal TextBlock AutoClearCompletedOnExitStateTextControl => AutoClearCompletedOnExitStateText;
-    internal ToggleSwitch PauseActiveOnExitToggleSwitchControl => PauseActiveOnExitToggleSwitch;
-    internal TextBlock PauseActiveOnExitStateTextControl => PauseActiveOnExitStateText;
-    internal ToggleSwitch CloseToTrayToggleSwitchControl => CloseToTrayToggleSwitch;
-    internal TextBlock CloseToTrayStateTextControl => CloseToTrayStateText;
-    internal ToggleSwitch ShowTaskbarProgressToggleSwitchControl => ShowTaskbarProgressToggleSwitch;
-    internal TextBlock ShowTaskbarProgressStateTextControl => ShowTaskbarProgressStateText;
-    internal ComboBox ThemeComboBoxControl => ThemeComboBox;
-    internal ToggleSwitch SystemNotificationsToggleSwitchControl => SystemNotificationsToggleSwitch;
-    internal TextBlock SystemNotificationsStateTextControl => SystemNotificationsStateText;
-    internal ToggleSwitch DownloadStartNotificationsToggleSwitchControl => DownloadStartNotificationsToggleSwitch;
-    internal TextBlock DownloadStartNotificationsStateTextControl => DownloadStartNotificationsStateText;
-    internal ToggleSwitch DownloadCompleteNotificationsToggleSwitchControl => DownloadCompleteNotificationsToggleSwitch;
-    internal TextBlock DownloadCompleteNotificationsStateTextControl => DownloadCompleteNotificationsStateText;
-    internal ToggleSwitch AutoShutdownWhenCompleteToggleSwitchControl => AutoShutdownWhenCompleteToggleSwitch;
-    internal TextBlock AutoShutdownWhenCompleteStateTextControl => AutoShutdownWhenCompleteStateText;
-    internal ToggleSwitch PreventSleepWhileDownloadingToggleSwitchControl => PreventSleepWhileDownloadingToggleSwitch;
-    internal TextBlock PreventSleepWhileDownloadingStateTextControl => PreventSleepWhileDownloadingStateText;
     internal TextBox DownloadDirectoryTextBoxControl => DownloadDirectoryTextBox;
     internal NumberBox MaxConcurrentDownloadsNumberBoxControl => MaxConcurrentDownloadsNumberBox;
     internal NumberBox SplitCountNumberBoxControl => SplitCountNumberBox;
@@ -203,7 +121,8 @@ public sealed partial class SettingsPageControl : UserControl
 
     internal event SelectionChangedEventHandler? SectionSelectionChanged;
     internal event RoutedEventHandler? SettingToggleSwitchToggled;
-    internal event SelectionChangedEventHandler? ThemeSelectionChanged;
+    internal event EventHandler<GeneralSettingChangedEventArgs>? GeneralSettingChanged;
+    internal event EventHandler<CloseBehaviorSettingChangedEventArgs>? CloseBehaviorSettingChanged;
     internal event RoutedEventHandler? BrowseDownloadDirectoryRequested;
     internal event RoutedEventHandler? DownloadSettingChanged;
     internal event RoutedEventHandler? BitTorrentSettingChanged;
@@ -228,6 +147,98 @@ public sealed partial class SettingsPageControl : UserControl
     internal event RoutedEventHandler? CopyCloneCommandRequested;
     internal event RoutedEventHandler? OpenAboutLinkRequested;
 
+    internal void ApplySearchFilter(string query)
+    {
+        foreach (SettingSearchEntry entry in GetSearchEntries())
+        {
+            entry.ApplyFilter(query);
+        }
+    }
+
+    private IEnumerable<SettingSearchEntry> GetSearchEntries()
+    {
+        foreach (SettingSearchEntry entry in GeneralSettingsContent.SearchEntries)
+        {
+            yield return entry;
+        }
+
+        yield return new(DefaultDirectorySettingCard, "default", "directory", "download", "folder", Strings.Get("DefaultDirectoryLabel.Text"), "目录", "保存");
+        yield return new(MaxConcurrentDownloadsSettingCard, "concurrent", "download", "task", "同时", "下载", "任务");
+        yield return new(SplitCountSettingCard, "split", "segment", "connection", "thread", "分片", "连接数");
+        yield return new(MaxConnectionPerServerSettingCard, "connection", "server", "thread", "服务器", "连接数");
+        yield return new(ContinueDownloadSettingCard, "continue", "resume", "download", "断点", "续传");
+        yield return new(RemoteTimeSettingCard, "remote", "time", "timestamp", "server", "时间戳", "服务器");
+        yield return new(MaxTriesSettingCard, "retry", "tries", "network", "重试");
+        yield return new(RetryWaitSettingCard, "retry", "wait", "seconds", "等待", "重试");
+        yield return new(DownloadCleanupSettingCard, "cleanup", "stale", "record", "清理", "记录");
+        yield return new(TorrentCleanupSettingCard, "torrent", "cleanup", "delete", "种子", "清理", "删除");
+
+        yield return new(BtAutoDownloadSettingCard, "bittorrent", "torrent", "metalink", "magnet", "auto", "内容", "自动");
+        yield return new(BtForceEncryptionSettingCard, "bittorrent", "encryption", "crypto", "加密");
+        yield return new(BtKeepSeedingSettingCard, "bittorrent", "seed", "keep", "ratio", "time", "bt", "做种", "分享率", "时间");
+        yield return new(BtMaxPeersSettingCard, "bittorrent", "peer", "max", "bt", "连接");
+        yield return new(BtTrackerSourceSettingCard, "bittorrent", "tracker", "source", "sync", "bt", "同步");
+        yield return new(BtTrackerCustomSourceSettingCard, "bittorrent", "tracker", "custom", "url", "bt", "自定义");
+        yield return new(BtTrackerListSettingCard, "bittorrent", "tracker", "list", "bt");
+        yield return new(BtAutoSyncTrackerSettingCard, "bittorrent", "tracker", "auto sync", "bt", "自动同步");
+
+        yield return new(UseSystemProxySettingCard, "proxy", "system proxy", Strings.Get("ProxyLabel.Text"), "Use Windows system proxy when aria2 starts", "代理");
+        yield return new(CustomProxySettingCard, "proxy", "http", "https", "socks", "custom", "代理");
+        yield return new(UpnpSettingCard, "upnp", "nat", "pmp", "port", "端口", "映射");
+        yield return new(BtPortSettingCard, "bt", "bittorrent", "listen", "port", "监听", "端口");
+        yield return new(DhtPortSettingCard, "dht", "listen", "port", "监听", "端口");
+        yield return new(UserAgentSettingCard, "user-agent", "ua", "browser", "transmission", "浏览器");
+        yield return new(ConnectTimeoutSettingCard, "connect", "timeout", "seconds", "连接", "超时");
+        yield return new(TimeoutSettingCard, "timeout", "seconds", "transfer", "传输", "超时");
+        yield return new(FileAllocationSettingCard, "file", "allocation", "disk", "prealloc", "文件", "预分配");
+
+        yield return new(AriaPathSettingCard, "aria2c", "path", Strings.Get("AriaPathLabel.Text"), Strings.Get("AriaPathTextBox.PlaceholderText"), "路径");
+        yield return new(RpcPortSettingCard, "rpc", "port", Strings.Get("RpcPortLabel.Text"), "端口");
+        yield return new(RpcSecretSettingCard, "rpc", "secret", "token", "密钥", "令牌");
+        yield return new(ProcessStatusSettingCard, "process", "status", "aria2", Strings.Get("ProcessStatusLabel.Text"), "状态");
+        yield return new(ExtensionAutoSubmitSettingCard, "extension", "browser", "auto submit", "扩展", "浏览器", "自动提交");
+        yield return new(ExtensionApiPortSettingCard, "extension", "api", "port", "browser", "扩展", "端口");
+        yield return new(ExtensionApiSecretSettingCard, "extension", "api", "secret", "browser", "扩展", "密钥");
+        yield return new(LogLevelSettingCard, "log", "level", "debug", "日志", "级别");
+        yield return new(AdvancedPathsSettingCard, "config", "session", "folder", "path", "配置", "会话", "目录");
+        yield return new(SessionResetSettingCard, "session", "reset", "clear", "aria2", "会话", "清空");
+        yield return new(ClipboardDetectionSettingCard, "clipboard", "detect", "paste", "剪贴板", "检测", "粘贴");
+        yield return new(ClipboardTypesSettingCard, "clipboard", "http", "ftp", "magnet", "thunder", "hash", "剪贴板", "磁力", "迅雷");
+        yield return new(ProtocolMagnetSettingCard, "default", "program", "protocol", "magnet", "默认程序", "协议", "磁力");
+        yield return new(ProtocolThunderSettingCard, "default", "program", "protocol", "thunder", "默认程序", "协议", "迅雷");
+        yield return new(ProtocolOmniDownSettingCard, "default", "program", "protocol", "omnidown", "extension", "默认程序", "协议", "扩展");
+        yield return new(TerminalSettingCard, "terminal", "log", "debug", "aria2", "终端", "日志");
+
+        yield return new(AboutAppCard, "about", "version", "omnidown", "关于", "版本");
+        yield return new(AboutCloneCard, "clone", "repository", "github", "克隆", "仓库");
+        yield return new(AboutIssueCard, "bug", "issue", "feature", "github", "问题", "建议");
+        yield return new(AboutReferencesCard, "dependencies", "references", "license", "files", "motrix", "aria2", "unigetui", "winui", "依赖", "参考", "许可证");
+        yield return new(AboutTrackerSourcesCard, "tracker", "trackers", "trackerslist", "TrackersListCollection", "ngosang", "xiu2", "bittorrent", "追踪器", "服务器");
+        yield return new(AboutLicenseCard, "license", "third-party", "notice", "warranty", "mit", "gpl", "许可证", "第三方", "声明");
+    }
+
+    internal void ApplyGeneralSettings(GeneralSettings settings, bool isAutoStartEnabled)
+    {
+        GeneralSettingsContent.ApplyGeneralSettings(settings, isAutoStartEnabled);
+    }
+
+    internal GeneralSettings GetGeneralSettings(GeneralSettings currentSettings)
+    {
+        return GeneralSettingsContent.GetGeneralSettings(currentSettings);
+    }
+
+    internal void ApplyCloseBehaviorSettings(CloseBehaviorSettings settings)
+    {
+        GeneralSettingsContent.ApplyCloseBehaviorSettings(settings);
+    }
+
+    internal void SetAutoStartEnabled(bool isEnabled)
+    {
+        GeneralSettingsContent.SetAutoStartEnabled(isEnabled);
+    }
+
+    internal bool IsAutoStartEnabled => GeneralSettingsContent.IsAutoStartEnabled;
+
     private void SettingsSectionListView_SelectionChanged(object sender, SelectionChangedEventArgs args)
     {
         SectionSelectionChanged?.Invoke(sender, args);
@@ -235,12 +246,58 @@ public sealed partial class SettingsPageControl : UserControl
 
     private void SettingToggleSwitch_Toggled(object sender, RoutedEventArgs args)
     {
+        if (sender is ToggleSwitch toggleSwitch)
+        {
+            UpdateToggleStateText(toggleSwitch);
+        }
+
         SettingToggleSwitchToggled?.Invoke(sender, args);
     }
 
-    private void ThemeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs args)
+    private void SetToggleSwitch(ToggleSwitch? toggleSwitch, bool isOn)
     {
-        ThemeSelectionChanged?.Invoke(sender, args);
+        if (toggleSwitch is null)
+        {
+            return;
+        }
+
+        toggleSwitch.IsOn = isOn;
+        UpdateToggleStateText(toggleSwitch);
+    }
+
+    private void UpdateToggleStateText(ToggleSwitch? toggleSwitch)
+    {
+        if (toggleSwitch is null)
+        {
+            return;
+        }
+
+        TextBlock? stateText = GetToggleStateText(toggleSwitch);
+        if (stateText is not null)
+        {
+            stateText.Text = toggleSwitch.IsOn ? "开" : "关";
+        }
+    }
+
+    private TextBlock? GetToggleStateText(ToggleSwitch toggleSwitch)
+    {
+        if (ReferenceEquals(toggleSwitch, ContinueDownloadToggleSwitch)) return ContinueDownloadStateText;
+        if (ReferenceEquals(toggleSwitch, AutoDeleteStaleRecordsToggleSwitch)) return AutoDeleteStaleRecordsStateText;
+        if (ReferenceEquals(toggleSwitch, DeleteTorrentAfterCompleteToggleSwitch)) return DeleteTorrentAfterCompleteStateText;
+        if (ReferenceEquals(toggleSwitch, BtAutoDownloadToggleSwitch)) return BtAutoDownloadStateText;
+        if (ReferenceEquals(toggleSwitch, BtForceEncryptionToggleSwitch)) return BtForceEncryptionStateText;
+        if (ReferenceEquals(toggleSwitch, BtAutoSyncTrackerToggleSwitch)) return BtAutoSyncTrackerStateText;
+        if (ReferenceEquals(toggleSwitch, UseSystemProxyCheckBox)) return UseSystemProxyStateText;
+        if (ReferenceEquals(toggleSwitch, CustomProxyToggleSwitch)) return CustomProxyStateText;
+        if (ReferenceEquals(toggleSwitch, EnableUpnpToggleSwitch)) return EnableUpnpStateText;
+        if (ReferenceEquals(toggleSwitch, ExtensionAutoSubmitToggleSwitch)) return ExtensionAutoSubmitStateText;
+        if (ReferenceEquals(toggleSwitch, ClipboardDetectionToggleSwitch)) return ClipboardDetectionStateText;
+        if (ReferenceEquals(toggleSwitch, ProtocolMagnetToggleSwitch)) return ProtocolMagnetStateText;
+        if (ReferenceEquals(toggleSwitch, ProtocolThunderToggleSwitch)) return ProtocolThunderStateText;
+        if (ReferenceEquals(toggleSwitch, ProtocolOmniDownToggleSwitch)) return ProtocolOmniDownStateText;
+        if (ReferenceEquals(toggleSwitch, TerminalOutputToggleSwitch)) return TerminalOutputStateText;
+
+        return null;
     }
 
     private void AdvancedSettingTextBox_TextChanged(object sender, TextChangedEventArgs args)

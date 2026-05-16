@@ -590,7 +590,7 @@ namespace OmniDown
                 }
 
                 _settingsPageViewModel.UpdateCloseBehavior(minimizeToTray.Value);
-                ApplyCloseBehaviorSettingsToUi();
+                SettingsPage.ApplyCloseBehaviorSettings(_settingsPageViewModel.CloseBehaviorSettings);
                 SaveCloseBehaviorSettings();
             }
 

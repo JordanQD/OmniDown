@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.Win32;
+using OmniDown.Controls;
 using OmniDown.Models;
 using OmniDown.Models.Settings;
 using OmniDown.Services.Downloads;
@@ -46,99 +47,12 @@ namespace OmniDown
     {
         private ListView SettingsSectionListView => SettingsPage.SettingsSectionListViewControl;
         private ScrollViewer SettingsContentScrollViewer => SettingsPage.SettingsContentScrollViewerControl;
-        private StackPanel GeneralSettingsContent => SettingsPage.GeneralSettingsContentControl;
-        private StackPanel DownloadSettingsContent => SettingsPage.DownloadSettingsContentControl;
-        private StackPanel BitTorrentSettingsContent => SettingsPage.BitTorrentSettingsContentControl;
-        private StackPanel NetworkSettingsContent => SettingsPage.NetworkSettingsContentControl;
-        private StackPanel AdvancedSettingsContent => SettingsPage.AdvancedSettingsContentControl;
-        private StackPanel AboutSettingsContent => SettingsPage.AboutSettingsContentControl;
-        private Border StartupSettingCard => SettingsPage.StartupSettingCardControl;
-        private Border RestoreWindowSettingCard => SettingsPage.RestoreWindowSettingCardControl;
-        private Border ResumeOnLaunchSettingCard => SettingsPage.ResumeOnLaunchSettingCardControl;
-        private Border ExitCleanupSettingCard => SettingsPage.ExitCleanupSettingCardControl;
-        private Border PauseActiveOnExitSettingCard => SettingsPage.PauseActiveOnExitSettingCardControl;
-        private Border CloseBehaviorSettingCard => SettingsPage.CloseBehaviorSettingCardControl;
-        private Border TaskbarProgressSettingCard => SettingsPage.TaskbarProgressSettingCardControl;
-        private Border ThemeSettingCard => SettingsPage.ThemeSettingCardControl;
-        private Border NotificationsSettingCard => SettingsPage.NotificationsSettingCardControl;
-        private Border DownloadStartNotificationSettingCard => SettingsPage.DownloadStartNotificationSettingCardControl;
-        private Border DownloadCompleteNotificationSettingCard => SettingsPage.DownloadCompleteNotificationSettingCardControl;
-        private Border AutoShutdownSettingCard => SettingsPage.AutoShutdownSettingCardControl;
-        private Border PreventSleepSettingCard => SettingsPage.PreventSleepSettingCardControl;
-        private Border DefaultDirectorySettingCard => SettingsPage.DefaultDirectorySettingCardControl;
-        private Border MaxConcurrentDownloadsSettingCard => SettingsPage.MaxConcurrentDownloadsSettingCardControl;
-        private Border SplitCountSettingCard => SettingsPage.SplitCountSettingCardControl;
-        private Border MaxConnectionPerServerSettingCard => SettingsPage.MaxConnectionPerServerSettingCardControl;
-        private Border ContinueDownloadSettingCard => SettingsPage.ContinueDownloadSettingCardControl;
-        private Border RemoteTimeSettingCard => SettingsPage.RemoteTimeSettingCardControl;
-        private Border MaxTriesSettingCard => SettingsPage.MaxTriesSettingCardControl;
-        private Border RetryWaitSettingCard => SettingsPage.RetryWaitSettingCardControl;
-        private Border DownloadCleanupSettingCard => SettingsPage.DownloadCleanupSettingCardControl;
-        private Border TorrentCleanupSettingCard => SettingsPage.TorrentCleanupSettingCardControl;
-        private Border BtAutoDownloadSettingCard => SettingsPage.BtAutoDownloadSettingCardControl;
-        private Border BtForceEncryptionSettingCard => SettingsPage.BtForceEncryptionSettingCardControl;
-        private Border BtKeepSeedingSettingCard => SettingsPage.BtKeepSeedingSettingCardControl;
-        private Border BtMaxPeersSettingCard => SettingsPage.BtMaxPeersSettingCardControl;
-        private Border BtTrackerSourceSettingCard => SettingsPage.BtTrackerSourceSettingCardControl;
-        private Border BtTrackerCustomSourceSettingCard => SettingsPage.BtTrackerCustomSourceSettingCardControl;
-        private Border BtTrackerListSettingCard => SettingsPage.BtTrackerListSettingCardControl;
-        private Border BtAutoSyncTrackerSettingCard => SettingsPage.BtAutoSyncTrackerSettingCardControl;
-        private Border UseSystemProxySettingCard => SettingsPage.UseSystemProxySettingCardControl;
-        private Border CustomProxySettingCard => SettingsPage.CustomProxySettingCardControl;
-        private Border UpnpSettingCard => SettingsPage.UpnpSettingCardControl;
-        private Border BtPortSettingCard => SettingsPage.BtPortSettingCardControl;
-        private Border DhtPortSettingCard => SettingsPage.DhtPortSettingCardControl;
-        private Border UserAgentSettingCard => SettingsPage.UserAgentSettingCardControl;
-        private Border ConnectTimeoutSettingCard => SettingsPage.ConnectTimeoutSettingCardControl;
-        private Border TimeoutSettingCard => SettingsPage.TimeoutSettingCardControl;
-        private Border FileAllocationSettingCard => SettingsPage.FileAllocationSettingCardControl;
-        private Border AriaPathSettingCard => SettingsPage.AriaPathSettingCardControl;
-        private Border RpcPortSettingCard => SettingsPage.RpcPortSettingCardControl;
-        private Border RpcSecretSettingCard => SettingsPage.RpcSecretSettingCardControl;
-        private Border ProcessStatusSettingCard => SettingsPage.ProcessStatusSettingCardControl;
-        private Border ExtensionAutoSubmitSettingCard => SettingsPage.ExtensionAutoSubmitSettingCardControl;
-        private Border ExtensionApiPortSettingCard => SettingsPage.ExtensionApiPortSettingCardControl;
-        private Border ExtensionApiSecretSettingCard => SettingsPage.ExtensionApiSecretSettingCardControl;
-        private Border LogLevelSettingCard => SettingsPage.LogLevelSettingCardControl;
-        private Border AdvancedPathsSettingCard => SettingsPage.AdvancedPathsSettingCardControl;
-        private Border SessionResetSettingCard => SettingsPage.SessionResetSettingCardControl;
-        private Border ClipboardDetectionSettingCard => SettingsPage.ClipboardDetectionSettingCardControl;
-        private Border ClipboardTypesSettingCard => SettingsPage.ClipboardTypesSettingCardControl;
-        private Border ProtocolMagnetSettingCard => SettingsPage.ProtocolMagnetSettingCardControl;
-        private Border ProtocolThunderSettingCard => SettingsPage.ProtocolThunderSettingCardControl;
-        private Border ProtocolOmniDownSettingCard => SettingsPage.ProtocolOmniDownSettingCardControl;
-        private Border TerminalSettingCard => SettingsPage.TerminalSettingCardControl;
-        private Border AboutAppCard => SettingsPage.AboutAppCardControl;
-        private Border AboutCloneCard => SettingsPage.AboutCloneCardControl;
-        private Border AboutIssueCard => SettingsPage.AboutIssueCardControl;
-        private Border AboutReferencesCard => SettingsPage.AboutReferencesCardControl;
-        private Border AboutTrackerSourcesCard => SettingsPage.AboutTrackerSourcesCardControl;
-        private Border AboutLicenseCard => SettingsPage.AboutLicenseCardControl;
-        private ToggleSwitch AutoStartToggleSwitch => SettingsPage.AutoStartToggleSwitchControl;
-        private TextBlock AutoStartStateText => SettingsPage.AutoStartStateTextControl;
-        private ToggleSwitch RestoreWindowPlacementToggleSwitch => SettingsPage.RestoreWindowPlacementToggleSwitchControl;
-        private TextBlock RestoreWindowPlacementStateText => SettingsPage.RestoreWindowPlacementStateTextControl;
-        private ToggleSwitch ResumeDownloadsOnLaunchToggleSwitch => SettingsPage.ResumeDownloadsOnLaunchToggleSwitchControl;
-        private TextBlock ResumeDownloadsOnLaunchStateText => SettingsPage.ResumeDownloadsOnLaunchStateTextControl;
-        private ToggleSwitch AutoClearCompletedOnExitToggleSwitch => SettingsPage.AutoClearCompletedOnExitToggleSwitchControl;
-        private TextBlock AutoClearCompletedOnExitStateText => SettingsPage.AutoClearCompletedOnExitStateTextControl;
-        private ToggleSwitch PauseActiveOnExitToggleSwitch => SettingsPage.PauseActiveOnExitToggleSwitchControl;
-        private TextBlock PauseActiveOnExitStateText => SettingsPage.PauseActiveOnExitStateTextControl;
-        private ToggleSwitch CloseToTrayToggleSwitch => SettingsPage.CloseToTrayToggleSwitchControl;
-        private TextBlock CloseToTrayStateText => SettingsPage.CloseToTrayStateTextControl;
-        private ToggleSwitch ShowTaskbarProgressToggleSwitch => SettingsPage.ShowTaskbarProgressToggleSwitchControl;
-        private TextBlock ShowTaskbarProgressStateText => SettingsPage.ShowTaskbarProgressStateTextControl;
-        private ComboBox ThemeComboBox => SettingsPage.ThemeComboBoxControl;
-        private ToggleSwitch SystemNotificationsToggleSwitch => SettingsPage.SystemNotificationsToggleSwitchControl;
-        private TextBlock SystemNotificationsStateText => SettingsPage.SystemNotificationsStateTextControl;
-        private ToggleSwitch DownloadStartNotificationsToggleSwitch => SettingsPage.DownloadStartNotificationsToggleSwitchControl;
-        private TextBlock DownloadStartNotificationsStateText => SettingsPage.DownloadStartNotificationsStateTextControl;
-        private ToggleSwitch DownloadCompleteNotificationsToggleSwitch => SettingsPage.DownloadCompleteNotificationsToggleSwitchControl;
-        private TextBlock DownloadCompleteNotificationsStateText => SettingsPage.DownloadCompleteNotificationsStateTextControl;
-        private ToggleSwitch AutoShutdownWhenCompleteToggleSwitch => SettingsPage.AutoShutdownWhenCompleteToggleSwitchControl;
-        private TextBlock AutoShutdownWhenCompleteStateText => SettingsPage.AutoShutdownWhenCompleteStateTextControl;
-        private ToggleSwitch PreventSleepWhileDownloadingToggleSwitch => SettingsPage.PreventSleepWhileDownloadingToggleSwitchControl;
-        private TextBlock PreventSleepWhileDownloadingStateText => SettingsPage.PreventSleepWhileDownloadingStateTextControl;
+        private FrameworkElement GeneralSettingsContent => SettingsPage.GeneralSettingsContentControl;
+        private FrameworkElement DownloadSettingsContent => SettingsPage.DownloadSettingsContentControl;
+        private FrameworkElement BitTorrentSettingsContent => SettingsPage.BitTorrentSettingsContentControl;
+        private FrameworkElement NetworkSettingsContent => SettingsPage.NetworkSettingsContentControl;
+        private FrameworkElement AdvancedSettingsContent => SettingsPage.AdvancedSettingsContentControl;
+        private FrameworkElement AboutSettingsContent => SettingsPage.AboutSettingsContentControl;
         private TextBox DownloadDirectoryTextBox => SettingsPage.DownloadDirectoryTextBoxControl;
         private NumberBox MaxConcurrentDownloadsNumberBox => SettingsPage.MaxConcurrentDownloadsNumberBoxControl;
         private NumberBox SplitCountNumberBox => SettingsPage.SplitCountNumberBoxControl;
@@ -237,7 +151,8 @@ namespace OmniDown
         {
             SettingsPage.SectionSelectionChanged += SettingsSectionListView_SelectionChanged;
             SettingsPage.SettingToggleSwitchToggled += SettingToggleSwitch_Toggled;
-            SettingsPage.ThemeSelectionChanged += ThemeComboBox_SelectionChanged;
+            SettingsPage.GeneralSettingChanged += SettingsPage_GeneralSettingChanged;
+            SettingsPage.CloseBehaviorSettingChanged += SettingsPage_CloseBehaviorSettingChanged;
             SettingsPage.BrowseDownloadDirectoryRequested += BrowseDownloadDirectoryButton_Click;
             SettingsPage.DownloadSettingChanged += DownloadSetting_Changed;
             SettingsPage.BitTorrentSettingChanged += BitTorrentSetting_Changed;
@@ -342,29 +257,6 @@ namespace OmniDown
             {
                 SaveAdvancedSettings();
                 return;
-            }
-
-            if (ReferenceEquals(toggleSwitch, CloseToTrayToggleSwitch))
-            {
-                if (_isLoadingCloseBehaviorSettings)
-                {
-                    return;
-                }
-
-                _settingsPageViewModel.UpdateCloseBehavior(toggleSwitch.IsOn);
-                SaveCloseBehaviorSettings();
-            }
-
-            if (_isLoadingGeneralSettings)
-            {
-                return;
-            }
-
-            if (IsGeneralSettingsToggle(toggleSwitch))
-            {
-                UpdateGeneralSettingsFromUi();
-                SaveGeneralSettings();
-                ApplyGeneralSettingsSideEffects(toggleSwitch);
             }
         }
 
@@ -499,7 +391,7 @@ namespace OmniDown
             _isLoadingCloseBehaviorSettings = true;
             try
             {
-                ApplyCloseBehaviorSettingsToUi();
+                SettingsPage.ApplyCloseBehaviorSettings(_settingsPageViewModel.CloseBehaviorSettings);
             }
             finally
             {
@@ -513,7 +405,7 @@ namespace OmniDown
             _isLoadingGeneralSettings = true;
             try
             {
-                ApplyGeneralSettingsToUi();
+                SettingsPage.ApplyGeneralSettings(_settingsPageViewModel.GeneralSettings, _autoStartService.IsEnabled());
                 ApplyThemeSetting(_settingsPageViewModel.GeneralSettings.Theme);
             }
             finally
@@ -522,71 +414,44 @@ namespace OmniDown
             }
         }
 
-        private void ApplyGeneralSettingsToUi()
-        {
-            GeneralSettings settings = _settingsPageViewModel.GeneralSettings;
-            SetToggleSwitch(AutoStartToggleSwitch, _autoStartService.IsEnabled());
-            SetToggleSwitch(RestoreWindowPlacementToggleSwitch, settings.RestoreWindowPlacement);
-            SetToggleSwitch(ResumeDownloadsOnLaunchToggleSwitch, settings.ResumeDownloadsOnLaunch);
-            SetToggleSwitch(AutoClearCompletedOnExitToggleSwitch, settings.AutoClearCompletedOnExit);
-            SetToggleSwitch(PauseActiveOnExitToggleSwitch, settings.PauseActiveOnExit);
-            SetToggleSwitch(ShowTaskbarProgressToggleSwitch, settings.ShowTaskbarProgress);
-            SetToggleSwitch(SystemNotificationsToggleSwitch, settings.SystemNotificationsEnabled);
-            SetToggleSwitch(DownloadStartNotificationsToggleSwitch, settings.DownloadStartNotificationsEnabled);
-            SetToggleSwitch(DownloadCompleteNotificationsToggleSwitch, settings.DownloadCompleteNotificationsEnabled);
-            SetToggleSwitch(AutoShutdownWhenCompleteToggleSwitch, settings.AutoShutdownWhenComplete);
-            SetToggleSwitch(PreventSleepWhileDownloadingToggleSwitch, settings.PreventSleepWhileDownloading);
-            SetThemeComboBoxSelection(settings.Theme);
-        }
-
         private void UpdateGeneralSettingsFromUi()
         {
-            _settingsPageViewModel.UpdateGeneralSettings(
-                RestoreWindowPlacementToggleSwitch?.IsOn == true,
-                ResumeDownloadsOnLaunchToggleSwitch?.IsOn == true,
-                AutoClearCompletedOnExitToggleSwitch?.IsOn == true,
-                PauseActiveOnExitToggleSwitch?.IsOn == true,
-                ShowTaskbarProgressToggleSwitch?.IsOn == true,
-                SystemNotificationsToggleSwitch?.IsOn == true,
-                DownloadStartNotificationsToggleSwitch?.IsOn == true,
-                DownloadCompleteNotificationsToggleSwitch?.IsOn == true,
-                AutoShutdownWhenCompleteToggleSwitch?.IsOn == true,
-                PreventSleepWhileDownloadingToggleSwitch?.IsOn == true,
-                GetSelectedTheme());
+            _settingsPageViewModel.UpdateGeneralSettings(SettingsPage.GetGeneralSettings(_settingsPageViewModel.GeneralSettings));
         }
 
-        private void ApplyGeneralSettingsSideEffects(ToggleSwitch changedToggleSwitch)
+        private void ApplyGeneralSettingsSideEffects(GeneralSettingChangeKind changeKind)
         {
-            if (ReferenceEquals(changedToggleSwitch, AutoStartToggleSwitch))
+            if (changeKind == GeneralSettingChangeKind.AutoStart)
             {
-                _ = SetAutoStartEnabledAsync(AutoStartToggleSwitch.IsOn);
+                _ = SetAutoStartEnabledAsync(SettingsPage.IsAutoStartEnabled);
             }
 
-            if (ReferenceEquals(changedToggleSwitch, ShowTaskbarProgressToggleSwitch))
+            if (changeKind == GeneralSettingChangeKind.ShowTaskbarProgress)
             {
                 UpdateTaskbarProgressFromTasks();
             }
 
-            if (ReferenceEquals(changedToggleSwitch, PreventSleepWhileDownloadingToggleSwitch))
+            if (changeKind == GeneralSettingChangeKind.PreventSleepWhileDownloading)
             {
                 UpdateSystemSleepOverride();
             }
         }
 
-        private static bool IsGeneralSettingsToggle(ToggleSwitch toggleSwitch)
+        private void SettingsPage_GeneralSettingChanged(object? sender, GeneralSettingChangedEventArgs args)
         {
-            return toggleSwitch.Name is
-                "AutoStartToggleSwitch" or
-                "RestoreWindowPlacementToggleSwitch" or
-                "ResumeDownloadsOnLaunchToggleSwitch" or
-                "AutoClearCompletedOnExitToggleSwitch" or
-                "PauseActiveOnExitToggleSwitch" or
-                "ShowTaskbarProgressToggleSwitch" or
-                "SystemNotificationsToggleSwitch" or
-                "DownloadStartNotificationsToggleSwitch" or
-                "DownloadCompleteNotificationsToggleSwitch" or
-                "AutoShutdownWhenCompleteToggleSwitch" or
-                "PreventSleepWhileDownloadingToggleSwitch";
+            if (_isLoadingGeneralSettings)
+            {
+                return;
+            }
+
+            UpdateGeneralSettingsFromUi();
+            if (args.Kind == GeneralSettingChangeKind.Theme)
+            {
+                ApplyThemeSetting(_settingsPageViewModel.GeneralSettings.Theme);
+            }
+
+            SaveGeneralSettings();
+            ApplyGeneralSettingsSideEffects(args.Kind);
         }
 
         private void SetToggleSwitch(ToggleSwitch? toggleSwitch, bool isOn)
@@ -600,15 +465,15 @@ namespace OmniDown
             UpdateToggleStateText(toggleSwitch);
         }
 
-        private void ApplyCloseBehaviorSettingsToUi()
+        private void SettingsPage_CloseBehaviorSettingChanged(object? sender, CloseBehaviorSettingChangedEventArgs args)
         {
-            if (CloseToTrayToggleSwitch is null)
+            if (_isLoadingCloseBehaviorSettings)
             {
                 return;
             }
 
-            CloseToTrayToggleSwitch.IsOn = _settingsPageViewModel.CloseBehaviorSettings.MinimizeToTrayOnClose == true;
-            UpdateToggleStateText(CloseToTrayToggleSwitch);
+            _settingsPageViewModel.UpdateCloseBehavior(args.MinimizeToTrayOnClose);
+            SaveCloseBehaviorSettings();
         }
 
         private void UpdateToggleStateText(ToggleSwitch? toggleSwitch)
@@ -632,18 +497,6 @@ namespace OmniDown
 
         private TextBlock? GetToggleStateText(ToggleSwitch toggleSwitch)
         {
-            if (ReferenceEquals(toggleSwitch, AutoStartToggleSwitch)) return AutoStartStateText;
-            if (ReferenceEquals(toggleSwitch, RestoreWindowPlacementToggleSwitch)) return RestoreWindowPlacementStateText;
-            if (ReferenceEquals(toggleSwitch, ResumeDownloadsOnLaunchToggleSwitch)) return ResumeDownloadsOnLaunchStateText;
-            if (ReferenceEquals(toggleSwitch, AutoClearCompletedOnExitToggleSwitch)) return AutoClearCompletedOnExitStateText;
-            if (ReferenceEquals(toggleSwitch, PauseActiveOnExitToggleSwitch)) return PauseActiveOnExitStateText;
-            if (ReferenceEquals(toggleSwitch, CloseToTrayToggleSwitch)) return CloseToTrayStateText;
-            if (ReferenceEquals(toggleSwitch, ShowTaskbarProgressToggleSwitch)) return ShowTaskbarProgressStateText;
-            if (ReferenceEquals(toggleSwitch, SystemNotificationsToggleSwitch)) return SystemNotificationsStateText;
-            if (ReferenceEquals(toggleSwitch, DownloadStartNotificationsToggleSwitch)) return DownloadStartNotificationsStateText;
-            if (ReferenceEquals(toggleSwitch, DownloadCompleteNotificationsToggleSwitch)) return DownloadCompleteNotificationsStateText;
-            if (ReferenceEquals(toggleSwitch, AutoShutdownWhenCompleteToggleSwitch)) return AutoShutdownWhenCompleteStateText;
-            if (ReferenceEquals(toggleSwitch, PreventSleepWhileDownloadingToggleSwitch)) return PreventSleepWhileDownloadingStateText;
             if (ReferenceEquals(toggleSwitch, ContinueDownloadToggleSwitch)) return ContinueDownloadStateText;
             if (ReferenceEquals(toggleSwitch, AutoDeleteStaleRecordsToggleSwitch)) return AutoDeleteStaleRecordsStateText;
             if (ReferenceEquals(toggleSwitch, DeleteTorrentAfterCompleteToggleSwitch)) return DeleteTorrentAfterCompleteStateText;
@@ -661,47 +514,6 @@ namespace OmniDown
             if (ReferenceEquals(toggleSwitch, TerminalOutputToggleSwitch)) return TerminalOutputStateText;
 
             return null;
-        }
-
-        private void ThemeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (_isLoadingGeneralSettings)
-            {
-                return;
-            }
-
-            UpdateGeneralSettingsFromUi();
-            ApplyThemeSetting(_settingsPageViewModel.GeneralSettings.Theme);
-            SaveGeneralSettings();
-        }
-
-        private string GetSelectedTheme()
-        {
-            return ThemeComboBox?.SelectedItem is ComboBoxItem item &&
-                item.Tag?.ToString() is string theme &&
-                !string.IsNullOrWhiteSpace(theme)
-                ? theme
-                : "Default";
-        }
-
-        private void SetThemeComboBoxSelection(string theme)
-        {
-            if (ThemeComboBox is null)
-            {
-                return;
-            }
-
-            for (int index = 0; index < ThemeComboBox.Items.Count; index++)
-            {
-                if (ThemeComboBox.Items[index] is ComboBoxItem item &&
-                    item.Tag?.ToString()?.Equals(theme, StringComparison.OrdinalIgnoreCase) == true)
-                {
-                    ThemeComboBox.SelectedIndex = index;
-                    return;
-                }
-            }
-
-            ThemeComboBox.SelectedIndex = 0;
         }
 
         private void ApplyThemeSetting(string theme)
@@ -723,11 +535,11 @@ namespace OmniDown
         {
             try
             {
-                SetToggleSwitch(AutoStartToggleSwitch, _autoStartService.IsEnabled());
+                SettingsPage.SetAutoStartEnabled(_autoStartService.IsEnabled());
             }
             catch
             {
-                SetToggleSwitch(AutoStartToggleSwitch, false);
+                SettingsPage.SetAutoStartEnabled(false);
             }
         }
 
@@ -1826,7 +1638,7 @@ namespace OmniDown
         private async Task SetAutoStartEnabledAsync(bool isEnabled)
         {
             AutoStartUpdateResult result = await _autoStartService.SetEnabledAsync(isEnabled);
-            SetToggleSwitch(AutoStartToggleSwitch, result.IsEnabled);
+            SettingsPage.SetAutoStartEnabled(result.IsEnabled);
             if (result.RequiresUserPermission)
             {
                 ShowMessage("自动启动未启用，请在 Windows 启动应用设置中允许 OmniDown。", InfoBarSeverity.Warning);

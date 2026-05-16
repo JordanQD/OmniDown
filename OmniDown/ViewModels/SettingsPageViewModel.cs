@@ -152,6 +152,11 @@ internal sealed class SettingsPageViewModel
         };
     }
 
+    public void UpdateGeneralSettings(GeneralSettings settings)
+    {
+        GeneralSettings = NormalizeGeneralSettings(settings);
+    }
+
     private static GeneralSettings NormalizeGeneralSettings(GeneralSettings settings)
     {
         return settings with
