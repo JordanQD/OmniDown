@@ -8,7 +8,7 @@
         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
         BorderThickness="1"
-        CornerRadius="{ThemeResource OverlayCornerRadius}">
+        CornerRadius="{ThemeResource ControlCornerRadius}">
         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16">
             <FontIcon
                 Width="24"

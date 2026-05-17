@@ -3,16 +3,27 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:OmniDown.Controls">
+    <UserControl.Resources>
+        <x:Double x:Key="SettingsCardSpacing">4</x:Double>
+        <Style
+            x:Key="SettingsSectionHeaderTextBlockStyle"
+            BasedOn="{StaticResource BodyStrongTextBlockStyle}"
+            TargetType="TextBlock">
+            <Setter Property="Margin" Value="1,30,0,6" />
+        </Style>
+    </UserControl.Resources>
                                     <StackPanel
                                         x:Name="GeneralSettingsContent"
-                                        Spacing="0">
+                                        Spacing="{StaticResource SettingsCardSpacing}">
+                                        <StackPanel.ChildrenTransitions>
+                                            <RepositionThemeTransition />
+                                        </StackPanel.ChildrenTransitions>
                                         <TextBlock
-                                            Margin="4,0,4,20"
+                                            AutomationProperties.HeadingLevel="Level1"
                                             Style="{StaticResource TitleTextBlockStyle}"
                                             Text="通用" />
                                         <TextBlock
-                                            Margin="4,0,4,8"
-                                            Style="{StaticResource BodyStrongTextBlockStyle}"
+                                            Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                                             Text="启动" />
                                         <local:SettingCardControl
                                             x:Name="StartupSettingCard"
@@ -44,7 +55,6 @@
 
                                         <local:SettingCardControl
                                             x:Name="RestoreWindowSettingCard"
-                                            Margin="0,8,0,0"
                                             Description="记住上次大小和位置。"
                                             Header="恢复窗口位置"
                                             IconGlyph="&#xE740;">
@@ -73,7 +83,6 @@
 
                                         <local:SettingCardControl
                                             x:Name="ResumeOnLaunchSettingCard"
-                                            Margin="0,8,0,0"
                                             Description="继续上次暂停的未完成任务。"
                                             Header="启动时恢复下载任务"
                                             IconGlyph="&#xE768;">
@@ -102,7 +111,6 @@
 
                                         <local:SettingCardControl
                                             x:Name="ExitCleanupSettingCard"
-                                            Margin="0,8,0,0"
                                             Description="仅清除记录，不删除文件。"
                                             Header="退出时清理已完成"
                                             IconGlyph="&#xE74D;">
@@ -131,7 +139,6 @@
 
                                         <local:SettingCardControl
                                             x:Name="PauseActiveOnExitSettingCard"
-                                            Margin="0,8,0,0"
                                             Description="退出前暂停正在传输的任务。"
                                             Header="退出时暂停下载"
                                             IconGlyph="&#xE769;">
@@ -161,7 +168,6 @@
 
                                         <local:SettingCardControl
                                             x:Name="CloseBehaviorSettingCard"
-                                            Margin="0,8,0,0"
                                             Description="关闭窗口后继续后台运行。"
                                             Header="关闭到托盘"
                                             IconGlyph="&#xE7E8;">
@@ -190,7 +196,6 @@
 
                                         <local:SettingCardControl
                                             x:Name="TaskbarProgressSettingCard"
-                                            Margin="0,8,0,0"
                                             Description="显示整体下载进度。"
                                             Header="任务栏进度"
                                             IconGlyph="&#xE9D9;">
@@ -219,8 +224,7 @@
                                         </local:SettingCardControl>
 
                                         <TextBlock
-                                            Margin="4,32,4,8"
-                                            Style="{StaticResource BodyStrongTextBlockStyle}"
+                                            Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                                             Text="外观" />
                                         <local:SettingCardControl
                                             x:Name="ThemeSettingCard"
@@ -242,8 +246,7 @@
                                         </local:SettingCardControl>
 
                                         <TextBlock
-                                            Margin="4,32,4,8"
-                                            Style="{StaticResource BodyStrongTextBlockStyle}"
+                                            Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                                             Text="通知" />
                                         <local:SettingCardControl
                                             x:Name="NotificationsSettingCard"
@@ -275,7 +278,6 @@
                                         </local:SettingCardControl>
                                         <local:SettingCardControl
                                             x:Name="DownloadStartNotificationSettingCard"
-                                            Margin="0,8,0,0"
                                             Description="添加任务并开始交给 aria2 处理时显示通知。"
                                             Header="下载开始时通知"
                                             IconGlyph="&#xE768;">
@@ -303,7 +305,6 @@
                                         </local:SettingCardControl>
                                         <local:SettingCardControl
                                             x:Name="DownloadCompleteNotificationSettingCard"
-                                            Margin="0,8,0,0"
                                             Description="任务完成或失败时显示通知。"
                                             Header="下载完成时通知"
                                             IconGlyph="&#xE930;">
@@ -332,8 +333,7 @@
                                         </local:SettingCardControl>
 
                                         <TextBlock
-                                            Margin="4,32,4,8"
-                                            Style="{StaticResource BodyStrongTextBlockStyle}"
+                                            Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                                             Text="下载" />
                                         <local:SettingCardControl
                                             x:Name="AutoShutdownSettingCard"
@@ -364,7 +364,6 @@
                                         </local:SettingCardControl>
                                         <local:SettingCardControl
                                             x:Name="PreventSleepSettingCard"
-                                            Margin="0,8,0,0"
                                             Description="有任务正在下载时保持系统唤醒，下载结束后自动恢复。"
                                             Header="下载时阻止系统休眠"
                                             IconGlyph="&#xE708;">
