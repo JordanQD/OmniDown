@@ -76,7 +76,6 @@
   <data name="TrayShowMenuItemText" xml:space="preserve"><value>Show OmniDown</value></data>
   <data name="TrayExitMenuItemText" xml:space="preserve"><value>Exit</value></data>
   <data name="DebugEngineText.Text" xml:space="preserve"><value>aria2 stopped</value></data>
-  <data name="TerminalSummaryText.Text" xml:space="preserve"><value>Diagnostic logs</value></data>
   <data name="NotificationHistoryButtonLabel.Text" xml:space="preserve"><value>Notifications</value></data>
   <data name="NotificationHistoryTitleText.Text" xml:space="preserve"><value>Notifications</value></data>
   <data name="NotificationSeveritySuccess" xml:space="preserve"><value>Success</value></data>
@@ -87,9 +86,6 @@
   <data name="StatusBarSelectedItemCountText" xml:space="preserve"><value>{0} selected</value></data>
   <data name="StatusBarSpeedLimitText" xml:space="preserve"><value>limit {0}</value></data>
   <data name="StatusToastCopyButtonLabel.Text" xml:space="preserve"><value>Copy</value></data>
-  <data name="ClearTerminalButtonLabel.Text" xml:space="preserve"><value>Clear</value></data>
-  <data name="TerminalToggleButtonLabel.Text" xml:space="preserve"><value>Terminal</value></data>
-  <data name="TerminalTextBlock.Text" xml:space="preserve"><value>Application and aria2 logs will appear here.</value></data>
   <data name="NewDownloadDialogTitle" xml:space="preserve"><value>New download</value></data>
   <data name="LinkTaskTabHeader" xml:space="preserve"><value>Link task</value></data>
   <data name="TorrentTaskTabHeader" xml:space="preserve"><value>Torrent task</value></data>

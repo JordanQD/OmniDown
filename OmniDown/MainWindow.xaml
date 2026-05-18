@@ -1206,32 +1206,7 @@
 
                             <Grid Visibility="Collapsed">
                                 <TextBlock x:Name="DebugEngineText" />
-                                <TextBlock x:Name="TerminalSummaryText" />
-                                <Button x:Name="ClearTerminalButton" />
-                                <ToggleButton x:Name="TerminalToggleButton" />
                             </Grid>
-
-                        <Border
-                            x:Name="TerminalPanel"
-                            Grid.Row="1"
-                            Height="180"
-                            Padding="12"
-                            Background="#FF1E1E1E"
-                            Visibility="Collapsed">
-                            <ScrollViewer
-                                x:Name="TerminalScrollViewer"
-                                HorizontalScrollBarVisibility="Auto"
-                                VerticalScrollBarVisibility="Auto">
-                                <TextBlock
-                                    x:Name="TerminalTextBlock"
-                                    FontFamily="Cascadia Mono, Consolas"
-                                    FontSize="12"
-                                    Foreground="#FFD4D4D4"
-                                    x:Uid="TerminalTextBlock"
-                                    Text="Application and aria2 logs will appear here."
-                                    TextWrapping="NoWrap" />
-                            </ScrollViewer>
-                        </Border>
                         </Grid>
                     </Border>
                 </Grid>

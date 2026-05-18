@@ -784,7 +784,6 @@ namespace OmniDown
         private void UpdateDebugStatus()
         {
             if (DebugEngineText is null ||
-                TerminalTextBlock is null ||
                 UseSystemProxyCheckBox is null)
             {
                 return;
@@ -795,8 +794,6 @@ namespace OmniDown
                 : Strings.Get("DebugAriaStoppedStatus");
 
             DebugEngineText.Text = engineStatus;
-            TerminalTextBlock.Text = AppLogger.RecentText;
-            TerminalScrollViewer?.ChangeView(null, double.MaxValue, null);
         }
 
         private static AppLogLevel ToLogLevel(InfoBarSeverity severity)

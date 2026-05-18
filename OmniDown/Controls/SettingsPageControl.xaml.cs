@@ -87,8 +87,6 @@ public sealed partial class SettingsPageControl : UserControl
     internal NumberBox ConnectTimeoutNumberBoxControl => ConnectTimeoutNumberBox;
     internal NumberBox TimeoutNumberBoxControl => TimeoutNumberBox;
     internal ComboBox FileAllocationComboBoxControl => FileAllocationComboBox;
-    internal ToggleSwitch TerminalOutputToggleSwitchControl => TerminalOutputToggleSwitch;
-    internal TextBlock TerminalOutputStateTextControl => TerminalOutputStateText;
     internal TextBox AriaPathTextBoxControl => AriaPathTextBox;
     internal NumberBox RpcPortNumberBoxControl => RpcPortNumberBox;
     internal PasswordBox RpcSecretPasswordBoxControl => RpcSecretPasswordBox;
@@ -98,6 +96,7 @@ public sealed partial class SettingsPageControl : UserControl
     internal PasswordBox ExtensionApiSecretPasswordBoxControl => ExtensionApiSecretPasswordBox;
     internal ComboBox LogLevelComboBoxControl => LogLevelComboBox;
     internal TextBlock AdvancedPathsSummaryTextControl => AdvancedPathsSummaryText;
+    internal TextBlock LogPathsSummaryTextControl => LogPathsSummaryText;
     internal ToggleSwitch ClipboardDetectionToggleSwitchControl => ClipboardDetectionToggleSwitch;
     internal TextBlock ClipboardDetectionStateTextControl => ClipboardDetectionStateText;
     internal ToggleSwitch ClipboardHttpToggleSwitchControl => ClipboardHttpToggleSwitch;
@@ -138,7 +137,7 @@ public sealed partial class SettingsPageControl : UserControl
     internal event RoutedEventHandler? CopyExtensionApiSecretRequested;
     internal event RoutedEventHandler? GenerateExtensionApiSecretRequested;
     internal event RoutedEventHandler? OpenConfigFolderRequested;
-    internal event RoutedEventHandler? CopySessionPathRequested;
+    internal event RoutedEventHandler? OpenLogFolderRequested;
     internal event RoutedEventHandler? ClearSessionRequested;
     internal event RoutedEventHandler? AddBtCustomTrackerRequested;
     internal event RoutedEventHandler? SyncBtTrackerRequested;
@@ -201,14 +200,13 @@ public sealed partial class SettingsPageControl : UserControl
         yield return new(ExtensionApiSecretSettingCard, "extension", "api", "secret", "browser", "扩展", "密钥");
         yield return new(LogLevelSettingCard, "log", "level", "debug", "日志", "级别");
         yield return new(AdvancedPathsSettingCard, "config", "session", "folder", "path", "配置", "会话", "目录");
+        yield return new(LogPathsSettingCard, "log", "file", "folder", "diagnostic", "日志", "文件", "目录");
         yield return new(SessionResetSettingCard, "session", "reset", "clear", "aria2", "会话", "清空");
         yield return new(ClipboardDetectionSettingCard, "clipboard", "detect", "paste", "剪贴板", "检测", "粘贴");
         yield return new(ClipboardTypesSettingCard, "clipboard", "http", "ftp", "magnet", "thunder", "hash", "剪贴板", "磁力", "迅雷");
         yield return new(ProtocolMagnetSettingCard, "default", "program", "protocol", "magnet", "默认程序", "协议", "磁力");
         yield return new(ProtocolThunderSettingCard, "default", "program", "protocol", "thunder", "默认程序", "协议", "迅雷");
         yield return new(ProtocolOmniDownSettingCard, "default", "program", "protocol", "omnidown", "extension", "默认程序", "协议", "扩展");
-        yield return new(TerminalSettingCard, "terminal", "log", "debug", "aria2", "终端", "日志");
-
         yield return new(AboutAppCard, "about", "version", "omnidown", "关于", "版本");
         yield return new(AboutCloneCard, "clone", "repository", "github", "克隆", "仓库");
         yield return new(AboutIssueCard, "bug", "issue", "feature", "github", "问题", "建议");
@@ -295,8 +293,6 @@ public sealed partial class SettingsPageControl : UserControl
         if (ReferenceEquals(toggleSwitch, ProtocolMagnetToggleSwitch)) return ProtocolMagnetStateText;
         if (ReferenceEquals(toggleSwitch, ProtocolThunderToggleSwitch)) return ProtocolThunderStateText;
         if (ReferenceEquals(toggleSwitch, ProtocolOmniDownToggleSwitch)) return ProtocolOmniDownStateText;
-        if (ReferenceEquals(toggleSwitch, TerminalOutputToggleSwitch)) return TerminalOutputStateText;
-
         return null;
     }
 
@@ -356,9 +352,9 @@ public sealed partial class SettingsPageControl : UserControl
         OpenConfigFolderRequested?.Invoke(sender, args);
     }
 
-    private void CopySessionPathButton_Click(object sender, RoutedEventArgs args)
+    private void OpenLogFolderButton_Click(object sender, RoutedEventArgs args)
     {
-        CopySessionPathRequested?.Invoke(sender, args);
+        OpenLogFolderRequested?.Invoke(sender, args);
     }
 
     private void ClearSessionButton_Click(object sender, RoutedEventArgs args)

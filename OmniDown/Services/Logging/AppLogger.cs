@@ -1,6 +1,5 @@
 using OmniDown.Services.Storage;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -18,21 +17,18 @@ public enum AppLogLevel
 public static class AppLogger
 {
     private const long MaxLogFileBytes = 10 * 1024 * 1024;
-    private const int MaxRecentLines = 500;
     private static readonly object SyncRoot = new();
-    private static readonly Queue<string> RecentLines = new();
+    private static AppLogLevel _minimumLevel = AppLogLevel.Info;
 
-    public static string RecentText
+    public static void Configure(string? logLevel)
     {
-        get
+        _minimumLevel = logLevel?.Trim().ToLowerInvariant() switch
         {
-            lock (SyncRoot)
-            {
-                return RecentLines.Count == 0
-                    ? "Application and aria2 logs will appear here."
-                    : string.Join(Environment.NewLine, RecentLines);
-            }
-        }
+            "debug" => AppLogLevel.Debug,
+            "warn" => AppLogLevel.Warning,
+            "error" => AppLogLevel.Error,
+            _ => AppLogLevel.Info
+        };
     }
 
     public static void Debug(string context, string message)
@@ -67,27 +63,31 @@ public static class AppLogger
             return;
         }
 
-        AppLogLevel level = line.Contains("[ERROR]", StringComparison.OrdinalIgnoreCase)
-            ? AppLogLevel.Error
-            : line.Contains("[WARN]", StringComparison.OrdinalIgnoreCase)
-                ? AppLogLevel.Warning
-                : line.Contains("[NOTICE]", StringComparison.OrdinalIgnoreCase)
-                    ? AppLogLevel.Info
-                    : AppLogLevel.Debug;
-
-        Write(level, $"aria2c.{streamName}", StripAnsi(line).Trim());
-    }
-
-    public static void ClearRecent()
-    {
-        lock (SyncRoot)
+        string cleanLine = StripAnsi(line).Trim();
+        if (string.IsNullOrWhiteSpace(cleanLine))
         {
-            RecentLines.Clear();
+            return;
         }
+
+        AppLogLevel? level = streamName.Equals("stderr", StringComparison.OrdinalIgnoreCase)
+            ? AppLogLevel.Warning
+            : GetAria2SemanticLevel(cleanLine);
+
+        if (level is null)
+        {
+            return;
+        }
+
+        Write(level.Value, $"aria2c.{streamName}", cleanLine);
     }
 
     public static void Write(AppLogLevel level, string context, string message)
     {
+        if (level < _minimumLevel)
+        {
+            return;
+        }
+
         string normalizedMessage = NormalizeMessage(message);
         string line = string.Format(
             CultureInfo.InvariantCulture,
@@ -99,13 +99,23 @@ public static class AppLogger
 
         lock (SyncRoot)
         {
-            RecentLines.Enqueue(line);
-            while (RecentLines.Count > MaxRecentLines)
-            {
-                RecentLines.Dequeue();
-            }
-
             AppendLine(AppPaths.AppLogPath, line);
+        }
+    }
+
+    public static void PrepareLogFile(string path)
+    {
+        lock (SyncRoot)
+        {
+            try
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(path) ?? AppPaths.LogDirectory);
+                RotateIfNeeded(path);
+            }
+            catch
+            {
+                // Logging setup must never block startup.
+            }
         }
     }
 
@@ -138,6 +148,26 @@ public static class AppLogger
         }
 
         File.Move(path, oldPath);
+    }
+
+    private static AppLogLevel? GetAria2SemanticLevel(string line)
+    {
+        if (line.Contains("[ERROR]", StringComparison.OrdinalIgnoreCase))
+        {
+            return AppLogLevel.Error;
+        }
+
+        if (line.Contains("[WARN]", StringComparison.OrdinalIgnoreCase))
+        {
+            return AppLogLevel.Warning;
+        }
+
+        if (line.Contains("[NOTICE]", StringComparison.OrdinalIgnoreCase))
+        {
+            return AppLogLevel.Info;
+        }
+
+        return null;
     }
 
     private static string NormalizeMessage(string message)

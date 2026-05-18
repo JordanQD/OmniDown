@@ -109,7 +109,7 @@ public sealed class DownloadTask : INotifyPropertyChanged
         }
     }
 
-    public string ProgressText => $"{Progress:0}%";
+    public string ProgressText => $"{Math.Floor(Math.Clamp(Progress, 0, 100)):0}%";
 
     public string StatusBrushKey => Status.ToLowerInvariant() switch
     {

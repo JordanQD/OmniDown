@@ -228,7 +228,7 @@ public sealed class DownloadCoordinator
             }
             catch
             {
-                // Terminal aria2 records may already be gone; the local list can still forget them.
+                // Completed aria2 records may already be gone; the local list can still forget them.
                 return;
             }
         }
@@ -297,7 +297,9 @@ public sealed class DownloadCoordinator
         Dictionary<string, string> options = new()
         {
             ["max-overall-download-limit"] = FormatAria2SpeedLimit(downloadLimitBytesPerSecond),
-            ["max-overall-upload-limit"] = FormatAria2SpeedLimit(uploadLimitBytesPerSecond)
+            ["max-download-limit"] = FormatAria2SpeedLimit(downloadLimitBytesPerSecond),
+            ["max-overall-upload-limit"] = FormatAria2SpeedLimit(uploadLimitBytesPerSecond),
+            ["max-upload-limit"] = FormatAria2SpeedLimit(uploadLimitBytesPerSecond)
         };
 
         return _rpcClient.ChangeGlobalOptionAsync(options, cancellationToken);

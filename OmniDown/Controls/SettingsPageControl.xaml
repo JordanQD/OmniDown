@@ -263,7 +263,7 @@
                                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1"
-                                            CornerRadius="8,8,0,0">
+                                            CornerRadius="8">
                                             <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
                                                 <FontIcon
                                                     Width="24"
@@ -2068,24 +2068,63 @@
                                                     Spacing="3">
                                                     <TextBlock
                                                         FontWeight="SemiBold"
-                                                        Text="配置与会话目录" />
+                                                        Text="配置与会话文件" />
                                                     <TextBlock
                                                         x:Name="AdvancedPathsSummaryText"
                                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                         TextWrapping="WrapWholeWords" />
                                                 </StackPanel>
-                                                <StackPanel
+                                                <Button
                                                     Grid.Column="2"
                                                     HorizontalAlignment="Right"
-                                                    Orientation="Horizontal"
-                                                    Spacing="8">
-                                                    <Button
-                                                        Click="OpenConfigFolderButton_Click"
-                                                        Content="打开目录" />
-                                                    <Button
-                                                        Click="CopySessionPathButton_Click"
-                                                        Content="复制会话路径" />
+                                                    Width="40"
+                                                    Height="32"
+                                                    MinWidth="40"
+                                                    Padding="0"
+                                                    Click="OpenConfigFolderButton_Click"
+                                                    ToolTipService.ToolTip="打开配置目录">
+                                                    <FontIcon
+                                                        FontSize="14"
+                                                        Glyph="&#xE8DA;" />
+                                                </Button>
+                                            </Grid>
+                                        </Border>
+                                        <Border
+                                            x:Name="LogPathsSettingCard"
+                                            Margin="0,-1,0,0"
+                                            Padding="16"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1">
+                                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                                                <FontIcon
+                                                    Width="24"
+                                                    VerticalAlignment="Center"
+                                                    Glyph="&#xE8A5;" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Spacing="3">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="日志文件" />
+                                                    <TextBlock
+                                                        x:Name="LogPathsSummaryText"
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        TextWrapping="WrapWholeWords" />
                                                 </StackPanel>
+                                                <Button
+                                                    Grid.Column="2"
+                                                    HorizontalAlignment="Right"
+                                                    Width="40"
+                                                    Height="32"
+                                                    MinWidth="40"
+                                                    Padding="0"
+                                                    Click="OpenLogFolderButton_Click"
+                                                    ToolTipService.ToolTip="打开日志目录">
+                                                    <FontIcon
+                                                        FontSize="14"
+                                                        Glyph="&#xE8DA;" />
+                                                </Button>
                                             </Grid>
                                         </Border>
                                         <Border
@@ -2504,51 +2543,6 @@
                                                             FontSize="14"
                                                             Glyph="&#xE72C;" />
                                                     </Button>
-                                                </StackPanel>
-                                            </Grid>
-                                        </Border>
-                                        <Border
-                                            x:Name="TerminalSettingCard"
-                                            Margin="0,-1,0,0"
-                                            Padding="16"
-                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                            BorderThickness="1"
-                                            CornerRadius="0,0,8,8">
-                                            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
-                                                <FontIcon
-                                                    Width="24"
-                                                    VerticalAlignment="Center"
-                                                    Glyph="&#xE756;" />
-                                                <StackPanel
-                                                    Grid.Column="1"
-                                                    Spacing="3">
-                                                    <TextBlock
-                                                        FontWeight="SemiBold"
-                                                        Text="显示诊断日志" />
-                                                    <TextBlock
-                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                        Text="显示应用事件、aria2 输出、RPC 连接和下载异常。"
-                                                        TextWrapping="WrapWholeWords" />
-                                                </StackPanel>
-                                                <StackPanel
-                                                    Grid.Column="2"
-                                                    HorizontalAlignment="Right"
-                                                    VerticalAlignment="Center"
-                                                    Orientation="Horizontal"
-                                                    Spacing="8">
-                                                    <TextBlock
-                                                        x:Name="TerminalOutputStateText"
-                                                        VerticalAlignment="Center"
-                                                        Text="关" />
-                                                    <ToggleSwitch
-                                                        x:Name="TerminalOutputToggleSwitch"
-                                                        Width="48"
-                                                        MinWidth="0"
-                                                        Padding="0"
-                                                        OffContent=""
-                                                        OnContent=""
-                                                        Toggled="SettingToggleSwitch_Toggled" />
                                                 </StackPanel>
                                             </Grid>
                                         </Border>

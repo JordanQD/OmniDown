@@ -12,6 +12,7 @@ using OmniDown.Models.Settings;
 using OmniDown.Services.Downloads;
 using OmniDown.Services.Engine;
 using OmniDown.Services.Localization;
+using OmniDown.Services.Logging;
 using OmniDown.Services.Notifications;
 using OmniDown.Services.Rpc;
 using OmniDown.Services.Settings;
@@ -115,8 +116,6 @@ namespace OmniDown
         private NumberBox ConnectTimeoutNumberBox => SettingsPage.ConnectTimeoutNumberBoxControl;
         private NumberBox TimeoutNumberBox => SettingsPage.TimeoutNumberBoxControl;
         private ComboBox FileAllocationComboBox => SettingsPage.FileAllocationComboBoxControl;
-        private ToggleSwitch TerminalOutputToggleSwitch => SettingsPage.TerminalOutputToggleSwitchControl;
-        private TextBlock TerminalOutputStateText => SettingsPage.TerminalOutputStateTextControl;
         private TextBox AriaPathTextBox => SettingsPage.AriaPathTextBoxControl;
         private NumberBox RpcPortNumberBox => SettingsPage.RpcPortNumberBoxControl;
         private PasswordBox RpcSecretPasswordBox => SettingsPage.RpcSecretPasswordBoxControl;
@@ -126,6 +125,7 @@ namespace OmniDown
         private PasswordBox ExtensionApiSecretPasswordBox => SettingsPage.ExtensionApiSecretPasswordBoxControl;
         private ComboBox LogLevelComboBox => SettingsPage.LogLevelComboBoxControl;
         private TextBlock AdvancedPathsSummaryText => SettingsPage.AdvancedPathsSummaryTextControl;
+        private TextBlock LogPathsSummaryText => SettingsPage.LogPathsSummaryTextControl;
         private ToggleSwitch ClipboardDetectionToggleSwitch => SettingsPage.ClipboardDetectionToggleSwitchControl;
         private TextBlock ClipboardDetectionStateText => SettingsPage.ClipboardDetectionStateTextControl;
         private ToggleSwitch ClipboardHttpToggleSwitch => SettingsPage.ClipboardHttpToggleSwitchControl;
@@ -168,7 +168,7 @@ namespace OmniDown
             SettingsPage.CopyExtensionApiSecretRequested += CopyExtensionApiSecretButton_Click;
             SettingsPage.GenerateExtensionApiSecretRequested += GenerateExtensionApiSecretButton_Click;
             SettingsPage.OpenConfigFolderRequested += OpenConfigFolderButton_Click;
-            SettingsPage.CopySessionPathRequested += CopySessionPathButton_Click;
+            SettingsPage.OpenLogFolderRequested += OpenLogFolderButton_Click;
             SettingsPage.ClearSessionRequested += ClearSessionButton_Click;
             SettingsPage.AddBtCustomTrackerRequested += AddBtCustomTrackerButton_Click;
             SettingsPage.SyncBtTrackerRequested += SyncBtTrackerButton_Click;
@@ -511,8 +511,6 @@ namespace OmniDown
             if (ReferenceEquals(toggleSwitch, ProtocolMagnetToggleSwitch)) return ProtocolMagnetStateText;
             if (ReferenceEquals(toggleSwitch, ProtocolThunderToggleSwitch)) return ProtocolThunderStateText;
             if (ReferenceEquals(toggleSwitch, ProtocolOmniDownToggleSwitch)) return ProtocolOmniDownStateText;
-            if (ReferenceEquals(toggleSwitch, TerminalOutputToggleSwitch)) return TerminalOutputStateText;
-
             return null;
         }
 
@@ -677,6 +675,7 @@ namespace OmniDown
         private void LoadAdvancedSettings()
         {
             _settingsPageViewModel.LoadAdvancedSettings();
+            AppLogger.Configure(_settingsPageViewModel.AdvancedSettings.LogLevel);
             _isLoadingAdvancedSettings = true;
             try
             {
@@ -698,7 +697,6 @@ namespace OmniDown
             ExtensionApiPortNumberBox.Value = settings.ExtensionApiPort;
             ExtensionApiSecretPasswordBox.Password = settings.ExtensionApiSecret;
             SetLogLevelSelection(settings.LogLevel);
-            SetToggleSwitch(TerminalOutputToggleSwitch, settings.ShowTerminalOutput);
             SetToggleSwitch(ClipboardDetectionToggleSwitch, settings.ClipboardDetectionEnabled);
             SetToggleSwitch(ClipboardHttpToggleSwitch, settings.ClipboardHttpEnabled);
             SetToggleSwitch(ClipboardFtpToggleSwitch, settings.ClipboardFtpEnabled);
@@ -710,7 +708,8 @@ namespace OmniDown
                 settings.ProtocolThunderEnabled,
                 settings.ProtocolOmniDownEnabled);
             RefreshProtocolDefaultToggles();
-            AdvancedPathsSummaryText.Text = $"会话文件：{Path.GetFileName(GetAriaSessionPath())}；日志：{Path.GetFileName(AppPaths.AppLogPath)}, {Path.GetFileName(AppPaths.Aria2LogPath)}";
+            AdvancedPathsSummaryText.Text = $"保存设置、任务缓存和 {Path.GetFileName(GetAriaSessionPath())}。";
+            LogPathsSummaryText.Text = $"保存 {Path.GetFileName(AppPaths.AppLogPath)} 和 {Path.GetFileName(AppPaths.Aria2LogPath)}。";
             _rpcSecret = settings.RpcSecret;
             UpdateClipboardTypeControls();
         }
@@ -783,10 +782,10 @@ namespace OmniDown
             await Launcher.LaunchFolderPathAsync(AppPaths.LocalDataDirectory);
         }
 
-        private void CopySessionPathButton_Click(object sender, RoutedEventArgs e)
+        private async void OpenLogFolderButton_Click(object sender, RoutedEventArgs e)
         {
-            CopyTextToClipboard(GetAriaSessionPath());
-            ShowMessage("会话文件路径已复制。", InfoBarSeverity.Success);
+            Directory.CreateDirectory(AppPaths.LogDirectory);
+            await Launcher.LaunchFolderPathAsync(AppPaths.LogDirectory);
         }
 
         private async void ClearSessionButton_Click(object sender, RoutedEventArgs e)
@@ -841,7 +840,6 @@ namespace OmniDown
                     ? AdvancedSettings.GenerateSecret()
                     : ExtensionApiSecretPasswordBox.Password.Trim(),
                 GetSelectedLogLevel(),
-                TerminalOutputToggleSwitch?.IsOn == true,
                 ClipboardDetectionToggleSwitch?.IsOn == true,
                 ClipboardHttpToggleSwitch?.IsOn == true,
                 ClipboardFtpToggleSwitch?.IsOn == true,
@@ -853,6 +851,7 @@ namespace OmniDown
                 ProtocolOmniDownToggleSwitch?.IsOn == true);
 
             _settingsPageViewModel.SaveAdvancedSettings(settings);
+            AppLogger.Configure(_settingsPageViewModel.AdvancedSettings.LogLevel);
             ProtocolAssociationService.Synchronize(
                 settings.ProtocolMagnetEnabled,
                 settings.ProtocolThunderEnabled,
@@ -860,8 +859,6 @@ namespace OmniDown
             _rpcSecret = _settingsPageViewModel.AdvancedSettings.RpcSecret;
             _aria2RpcClient.Configure(_settingsPageViewModel.AdvancedSettings.RpcPort, _rpcSecret);
             RestartBrowserExtensionApiServer();
-            TerminalToggleButton.IsChecked = settings.ShowTerminalOutput;
-            TerminalPanel.Visibility = settings.ShowTerminalOutput ? Visibility.Visible : Visibility.Collapsed;
             UpdateClipboardTypeControls();
         }
 
@@ -891,7 +888,6 @@ namespace OmniDown
         private static bool IsAdvancedSettingsToggle(ToggleSwitch toggleSwitch)
         {
             return toggleSwitch.Name is "ExtensionAutoSubmitToggleSwitch"
-                or "TerminalOutputToggleSwitch"
                 or "ClipboardDetectionToggleSwitch"
                 or "ClipboardHttpToggleSwitch"
                 or "ClipboardFtpToggleSwitch"

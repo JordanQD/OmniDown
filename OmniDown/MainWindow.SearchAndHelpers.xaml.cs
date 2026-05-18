@@ -63,25 +63,6 @@ namespace OmniDown
             ApplySettingsFilter();
         }
 
-        private void TerminalToggleButton_Changed(object sender, RoutedEventArgs e)
-        {
-            if (TerminalPanel is null || TerminalToggleButton is null)
-            {
-                return;
-            }
-
-            TerminalPanel.Visibility = TerminalToggleButton.IsChecked == true
-                ? Visibility.Visible
-                : Visibility.Collapsed;
-            UpdateDebugStatus();
-        }
-
-        private void ClearTerminalButton_Click(object sender, RoutedEventArgs e)
-        {
-            _aria2EngineHost.ClearTerminal();
-            UpdateDebugStatus();
-        }
-
         private async System.Threading.Tasks.Task RunSelectedTaskOperationAsync(
             Func<IReadOnlyList<DownloadTask>, System.Threading.Tasks.Task> operation,
             string successMessage)
