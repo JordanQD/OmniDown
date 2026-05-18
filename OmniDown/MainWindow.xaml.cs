@@ -12,6 +12,7 @@ using OmniDown.Services.BrowserExtension;
 using OmniDown.Services.Downloads;
 using OmniDown.Services.Engine;
 using OmniDown.Services.Localization;
+using OmniDown.Services.Logging;
 using OmniDown.Services.Notifications;
 using OmniDown.Services.Rpc;
 using OmniDown.Services.Settings;
@@ -154,6 +155,7 @@ namespace OmniDown
             UpdateDebugStatus();
             UpdateTaskDetailsPane();
             ApplyToolbarTooltips();
+            AppLogger.Info("App", "MainWindow initialized");
         }
     }
 }

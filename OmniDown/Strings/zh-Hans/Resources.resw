@@ -76,7 +76,7 @@
   <data name="TrayShowMenuItemText" xml:space="preserve"><value>显示 OmniDown</value></data>
   <data name="TrayExitMenuItemText" xml:space="preserve"><value>退出</value></data>
   <data name="DebugEngineText.Text" xml:space="preserve"><value>aria2 已停止</value></data>
-  <data name="TerminalSummaryText.Text" xml:space="preserve"><value>aria2 终端输出</value></data>
+  <data name="TerminalSummaryText.Text" xml:space="preserve"><value>诊断日志</value></data>
   <data name="NotificationHistoryButtonLabel.Text" xml:space="preserve"><value>通知</value></data>
   <data name="NotificationHistoryTitleText.Text" xml:space="preserve"><value>历史通知</value></data>
   <data name="NotificationSeveritySuccess" xml:space="preserve"><value>成功</value></data>
@@ -89,7 +89,7 @@
   <data name="StatusToastCopyButtonLabel.Text" xml:space="preserve"><value>复制</value></data>
   <data name="ClearTerminalButtonLabel.Text" xml:space="preserve"><value>清空</value></data>
   <data name="TerminalToggleButtonLabel.Text" xml:space="preserve"><value>终端</value></data>
-  <data name="TerminalTextBlock.Text" xml:space="preserve"><value>aria2 终端输出会显示在这里。</value></data>
+  <data name="TerminalTextBlock.Text" xml:space="preserve"><value>应用和 aria2 日志会显示在这里。</value></data>
   <data name="NewDownloadDialogTitle" xml:space="preserve"><value>新建下载</value></data>
   <data name="LinkTaskTabHeader" xml:space="preserve"><value>链接任务</value></data>
   <data name="TorrentTaskTabHeader" xml:space="preserve"><value>种子任务</value></data>

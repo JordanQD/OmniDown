@@ -26,6 +26,12 @@ public static class AppPaths
         }
     }
 
+    public static string LogDirectory => Path.Combine(LocalDataDirectory, "logs");
+
+    public static string AppLogPath => Path.Combine(LogDirectory, "omnidown.log");
+
+    public static string Aria2LogPath => Path.Combine(LogDirectory, "aria2c.log");
+
     public static string DefaultDownloadDirectory
     {
         get

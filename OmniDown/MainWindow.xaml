@@ -14,6 +14,7 @@
     </Window.SystemBackdrop>
 
     <Grid
+        KeyboardAcceleratorPlacementMode="Hidden"
         Loaded="RootGrid_Loaded"
         RowDefinitions="Auto,*">
         <Grid.Resources>
@@ -1227,7 +1228,7 @@
                                     FontSize="12"
                                     Foreground="#FFD4D4D4"
                                     x:Uid="TerminalTextBlock"
-                                    Text="aria2 terminal output will appear here."
+                                    Text="Application and aria2 logs will appear here."
                                     TextWrapping="NoWrap" />
                             </ScrollViewer>
                         </Border>

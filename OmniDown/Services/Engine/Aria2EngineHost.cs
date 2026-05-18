@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading.Tasks;
+using OmniDown.Services.Logging;
 using OmniDown.Services.Storage;
 
 namespace OmniDown.Services.Engine;
@@ -32,6 +33,7 @@ public sealed class Aria2EngineHost : IDisposable
     public void ClearTerminal()
     {
         _terminalOutput.Clear();
+        AppLogger.ClearRecent();
         DiagnosticText = IsRunning ? "aria2 terminal cleared." : DiagnosticText;
     }
 
@@ -55,6 +57,8 @@ public sealed class Aria2EngineHost : IDisposable
         Directory.CreateDirectory(options.DownloadDirectory);
         string appDataDirectory = AppPaths.LocalDataDirectory;
         Directory.CreateDirectory(appDataDirectory);
+        Directory.CreateDirectory(AppPaths.LogDirectory);
+        AppLogger.Info("Aria2Engine", $"starting executable={resolvedPath} rpcPort={options.RpcPort} downloadDir={options.DownloadDirectory}");
         RemoveStaleTasksFromSession(appDataDirectory);
         await CleanupRpcPortAsync(options.RpcPort);
 
@@ -82,12 +86,13 @@ public sealed class Aria2EngineHost : IDisposable
             if (_process is null)
             {
                 DiagnosticText = "Process.Start returned null.";
+                AppLogger.Error("Aria2Engine", DiagnosticText);
                 return Aria2EngineStartResult.Failure("aria2 failed to start.");
             }
 
             _process.EnableRaisingEvents = true;
-            _process.OutputDataReceived += Process_OutputDataReceived;
-            _process.ErrorDataReceived += Process_OutputDataReceived;
+            _process.OutputDataReceived += (_, e) => Process_OutputDataReceived("stdout", e);
+            _process.ErrorDataReceived += (_, e) => Process_OutputDataReceived("stderr", e);
             _process.Exited += Process_Exited;
             _process.BeginOutputReadLine();
             _process.BeginErrorReadLine();
@@ -98,12 +103,14 @@ public sealed class Aria2EngineHost : IDisposable
                 string exitMessage = _process.HasExited
                     ? $" aria2 exited with code {_process.ExitCode}. {DiagnosticText}"
                     : string.Empty;
+                AppLogger.Warning("Aria2Engine", $"RPC port {options.RpcPort} did not become ready.{exitMessage}");
                 Stop();
                 return Aria2EngineStartResult.Failure($"aria2 RPC port did not become ready.{exitMessage}");
             }
 
             DiagnosticText = $"aria2 RPC is listening on 127.0.0.1:{options.RpcPort}.";
             AppendTerminalLine($"[{DateTime.Now:T}] RPC listening on 127.0.0.1:{options.RpcPort}");
+            AppLogger.Info("Aria2Engine", $"started pid={_process.Id} rpcPort={options.RpcPort}");
             return Aria2EngineStartResult.Success($"aria2 started, PID {_process.Id}.", resolvedPath, _process.Id);
         }
         catch (Exception ex)
@@ -111,6 +118,7 @@ public sealed class Aria2EngineHost : IDisposable
             _process = null;
             DiagnosticText = ex.Message;
             AppendTerminalLine($"[{DateTime.Now:T}] Start failed: {ex.Message}");
+            AppLogger.Error("Aria2Engine", ex);
             return Aria2EngineStartResult.Failure($"aria2 failed to start: {ex.Message}");
         }
     }
@@ -126,10 +134,12 @@ public sealed class Aria2EngineHost : IDisposable
         {
             if (!_process.HasExited)
             {
+                AppLogger.Info("Aria2Engine", $"stopping pid={_process.Id}");
                 _process.Kill(entireProcessTree: true);
             }
 
             _process.Dispose();
+            AppLogger.Info("Aria2Engine", "stopped");
         }
         finally
         {
@@ -137,7 +147,7 @@ public sealed class Aria2EngineHost : IDisposable
         }
     }
 
-    private void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)
+    private void Process_OutputDataReceived(string streamName, DataReceivedEventArgs e)
     {
         if (string.IsNullOrWhiteSpace(e.Data))
         {
@@ -151,6 +161,7 @@ public sealed class Aria2EngineHost : IDisposable
         }
 
         AppendTerminalLine(e.Data);
+        AppLogger.Aria2Output(streamName, e.Data);
         DiagnosticText = string.Join(" | ", _recentOutput);
     }
 
@@ -164,6 +175,7 @@ public sealed class Aria2EngineHost : IDisposable
         string message = $"aria2 exited with code {_process.ExitCode}. {string.Join(" | ", _recentOutput)}";
         DiagnosticText = message;
         AppendTerminalLine($"[{DateTime.Now:T}] {message}");
+        AppLogger.Warning("Aria2Engine", message);
     }
 
     private void AppendTerminalLine(string line)
@@ -249,6 +261,7 @@ public sealed class Aria2EngineHost : IDisposable
             $"--retry-wait={Math.Clamp(options.RetryWaitSeconds, 0, 600)}",
             $"--user-agent={options.NetworkSettings.UserAgent ?? string.Empty}",
             $"--log-level={NormalizeLogLevel(options.AdvancedSettings.LogLevel)}",
+            $"--log={AppPaths.Aria2LogPath}",
             $"--connect-timeout={Math.Clamp(options.NetworkSettings.ConnectTimeoutSeconds, 1, 600)}",
             $"--timeout={Math.Clamp(options.NetworkSettings.TimeoutSeconds, 1, 600)}",
             $"--file-allocation={NormalizeFileAllocation(options.NetworkSettings.FileAllocation)}",

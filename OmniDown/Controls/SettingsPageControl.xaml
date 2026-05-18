@@ -2525,10 +2525,10 @@
                                                     Spacing="3">
                                                     <TextBlock
                                                         FontWeight="SemiBold"
-                                                        Text="显示 aria2 终端输出" />
+                                                        Text="显示诊断日志" />
                                                     <TextBlock
                                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                        Text="用于排查引擎启动、RPC 和下载异常。"
+                                                        Text="显示应用事件、aria2 输出、RPC 连接和下载异常。"
                                                         TextWrapping="WrapWholeWords" />
                                                 </StackPanel>
                                                 <StackPanel

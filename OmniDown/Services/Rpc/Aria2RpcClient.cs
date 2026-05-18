@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using OmniDown.Services.Logging;
 
 namespace OmniDown.Services.Rpc;
 
@@ -30,6 +31,7 @@ public sealed class Aria2RpcClient : IDisposable
     {
         _endpoint = new Uri($"http://127.0.0.1:{rpcPort}/jsonrpc");
         _secret = rpcSecret;
+        AppLogger.Info("Aria2Rpc", $"configured endpoint={_endpoint} secretSet={!string.IsNullOrWhiteSpace(_secret)}");
     }
 
     public Task PingAsync(CancellationToken cancellationToken = default)
@@ -180,16 +182,24 @@ public sealed class Aria2RpcClient : IDisposable
             parameters);
         using StringContent content = new(payload, Encoding.UTF8, "application/json");
         HttpResponseMessage response;
+        bool noisyPollingMethod = IsNoisyPollingMethod(method);
+        if (!noisyPollingMethod)
+        {
+            AppLogger.Debug("Aria2Rpc", $"request method={method} endpoint={_endpoint}");
+        }
+
         try
         {
             response = await _httpClient.PostAsync(_endpoint, content, cancellationToken);
         }
         catch (TaskCanceledException ex) when (!cancellationToken.IsCancellationRequested)
         {
+            AppLogger.Warning("Aria2Rpc", $"timeout method={method} seconds={_httpClient.Timeout.TotalSeconds:0}");
             throw new TimeoutException($"aria2 RPC method {method} timed out after {_httpClient.Timeout.TotalSeconds:0} seconds.", ex);
         }
         catch (HttpRequestException ex)
         {
+            AppLogger.Warning("Aria2Rpc", $"unreachable method={method} endpoint={_endpoint} reason={FormatRequestError(ex)}");
             throw new InvalidOperationException($"aria2 RPC method {method} could not reach {_endpoint}: {FormatRequestError(ex)}", ex);
         }
 
@@ -201,6 +211,7 @@ public sealed class Aria2RpcClient : IDisposable
                 string detail = string.IsNullOrWhiteSpace(responseBody)
                     ? response.ReasonPhrase ?? "No response body."
                     : TruncateResponseBody(responseBody);
+                AppLogger.Warning("Aria2Rpc", $"http-error method={method} status={(int)response.StatusCode} detail={detail}");
                 throw new InvalidOperationException(
                     $"aria2 RPC method {method} returned HTTP {(int)response.StatusCode} ({response.ReasonPhrase}): {detail}");
             }
@@ -218,6 +229,7 @@ public sealed class Aria2RpcClient : IDisposable
             {
                 int code = TryGetInt32(error, "code");
                 string message = TryGetString(error, "message");
+                AppLogger.Warning("Aria2Rpc", $"rpc-error method={method} code={code} message={message}");
                 throw new InvalidOperationException($"aria2 RPC error {code}: {message}");
             }
 
@@ -226,8 +238,19 @@ public sealed class Aria2RpcClient : IDisposable
                 throw new InvalidOperationException("aria2 RPC response did not include a result.");
             }
 
-            return ReadResult<T>(result);
+            T value = ReadResult<T>(result);
+            if (!noisyPollingMethod)
+            {
+                AppLogger.Debug("Aria2Rpc", $"success method={method}");
+            }
+
+            return value;
         }
+    }
+
+    private static bool IsNoisyPollingMethod(string method)
+    {
+        return method is "aria2.tellActive" or "aria2.tellWaiting" or "aria2.tellStopped" or "aria2.getGlobalStat";
     }
 
     private static string BuildPayload(string id, string method, IReadOnlyList<object> parameters)

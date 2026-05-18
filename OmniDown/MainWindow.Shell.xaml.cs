@@ -11,6 +11,7 @@ using OmniDown.Models.Settings;
 using OmniDown.Services.Downloads;
 using OmniDown.Services.Engine;
 using OmniDown.Services.Localization;
+using OmniDown.Services.Logging;
 using OmniDown.Services.Notifications;
 using OmniDown.Services.Rpc;
 using OmniDown.Services.Settings;
@@ -61,6 +62,7 @@ namespace OmniDown
 
         private async Task StartAriaAsync()
         {
+            AppLogger.Info("Aria2Command", "start requested");
             Aria2EngineStartResult result = await EnsureAria2StartedAsync();
             UpdateAriaStatus();
             ShowMessage(result.Message, result.Started ? InfoBarSeverity.Success : InfoBarSeverity.Error);
@@ -68,6 +70,7 @@ namespace OmniDown
 
         private async Task StopAriaAsync(bool showMessage = true)
         {
+            AppLogger.Info("Aria2Command", "stop requested");
             _refreshTimer.Stop();
             await SaveAriaSessionIfRunningAsync();
             _aria2EngineHost.Stop();
@@ -554,6 +557,7 @@ namespace OmniDown
 
         private async void MainWindow_Closed(object sender, WindowEventArgs args)
         {
+            AppLogger.Info("App", "MainWindow closing");
             _refreshTimer.Stop();
             Clipboard.ContentChanged -= Clipboard_ContentChanged;
             ReleaseSystemSleepOverride();
@@ -569,6 +573,7 @@ namespace OmniDown
             _browserExtensionApiServer.Dispose();
             _aria2RpcClient.Dispose();
             _aria2EngineHost.Dispose();
+            AppLogger.Info("App", "MainWindow closed");
         }
 
         private async void MainWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)

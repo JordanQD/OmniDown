@@ -11,6 +11,7 @@ using OmniDown.Models.Settings;
 using OmniDown.Services.Downloads;
 using OmniDown.Services.Engine;
 using OmniDown.Services.Localization;
+using OmniDown.Services.Logging;
 using OmniDown.Services.Notifications;
 using OmniDown.Services.Rpc;
 using OmniDown.Services.Settings;
@@ -75,6 +76,7 @@ namespace OmniDown
             int rpcPort = advancedSettings.RpcPort;
             _rpcSecret = advancedSettings.RpcSecret;
             DownloadSettings downloadSettings = _settingsPageViewModel.DownloadSettings;
+            AppLogger.Info("Aria2Startup", $"ensure-start rpcPort={rpcPort} downloadDir={downloadSettings.DownloadDirectory}");
             _aria2RpcClient.Configure(rpcPort, _rpcSecret);
 
             Aria2EngineStartResult result = await _aria2EngineHost.StartAsync(new Aria2EngineOptions(
@@ -102,6 +104,7 @@ namespace OmniDown
             try
             {
                 await _aria2RpcClient.PingAsync();
+                AppLogger.Info("Aria2Startup", "RPC ping succeeded");
                 await ApplyConfiguredSpeedLimitsAsync();
                 _refreshTimer.Start();
                 await _downloadCoordinator.RemoveCompletedDownloadResultsAsync();
@@ -109,6 +112,7 @@ namespace OmniDown
             }
             catch (Exception ex)
             {
+                AppLogger.Error("Aria2Startup", ex);
                 _aria2EngineHost.Stop();
                 UpdateDebugStatus();
                 return Aria2EngineStartResult.Failure($"aria2 started but RPC is not reachable: {ex.Message}");
@@ -126,11 +130,13 @@ namespace OmniDown
 
             try
             {
+                AppLogger.Info("Aria2Shutdown", "saving aria2 session");
                 await _downloadCoordinator.RemoveCompletedDownloadResultsAsync();
                 await _aria2RpcClient.SaveSessionAsync();
             }
-            catch
+            catch (Exception ex)
             {
+                AppLogger.Warning("Aria2Shutdown", $"save session failed: {ex.Message}");
                 // Best-effort: Stop/close must continue even if aria2 is no longer reachable.
             }
         }
@@ -163,6 +169,7 @@ namespace OmniDown
             }
             catch (Exception ex)
             {
+                AppLogger.Warning("Aria2Refresh", ex.Message);
                 UpdateDebugStatus();
                 ShowMessage(Strings.Format("RpcRefreshFailedMessage", ex.Message), InfoBarSeverity.Warning);
             }
@@ -575,6 +582,7 @@ namespace OmniDown
             StatusToastCopyButton.Visibility = IsCopyableStatusMessage(severity) ? Visibility.Visible : Visibility.Collapsed;
             StatusToastInfoBar.Visibility = Visibility.Visible;
             StatusToastInfoBar.IsOpen = true;
+            AppLogger.Write(ToLogLevel(severity), "UI", message);
             _statusMessageTimer.Stop();
             _statusMessageTimer.Start();
         }
@@ -787,8 +795,19 @@ namespace OmniDown
                 : Strings.Get("DebugAriaStoppedStatus");
 
             DebugEngineText.Text = engineStatus;
-            TerminalTextBlock.Text = _aria2EngineHost.TerminalText;
+            TerminalTextBlock.Text = AppLogger.RecentText;
             TerminalScrollViewer?.ChangeView(null, double.MaxValue, null);
+        }
+
+        private static AppLogLevel ToLogLevel(InfoBarSeverity severity)
+        {
+            return severity switch
+            {
+                InfoBarSeverity.Error => AppLogLevel.Error,
+                InfoBarSeverity.Warning => AppLogLevel.Warning,
+                InfoBarSeverity.Success => AppLogLevel.Info,
+                _ => AppLogLevel.Info
+            };
         }
     }
 }

@@ -710,7 +710,7 @@ namespace OmniDown
                 settings.ProtocolThunderEnabled,
                 settings.ProtocolOmniDownEnabled);
             RefreshProtocolDefaultToggles();
-            AdvancedPathsSummaryText.Text = $"会话文件：{Path.GetFileName(GetAriaSessionPath())}";
+            AdvancedPathsSummaryText.Text = $"会话文件：{Path.GetFileName(GetAriaSessionPath())}；日志：{Path.GetFileName(AppPaths.AppLogPath)}, {Path.GetFileName(AppPaths.Aria2LogPath)}";
             _rpcSecret = settings.RpcSecret;
             UpdateClipboardTypeControls();
         }
