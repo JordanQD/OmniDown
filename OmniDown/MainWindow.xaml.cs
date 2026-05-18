@@ -49,6 +49,12 @@ namespace OmniDown
             byte[] Bytes,
             TorrentMetadata Metadata);
 
+        private sealed record AriaRelatedSettingsSnapshot(
+            DownloadSettings Download,
+            BitTorrentSettings BitTorrent,
+            NetworkSettings Network,
+            AdvancedSettings Advanced);
+
         private const string CloneCommand = "git clone https://github.com/JordanQD/OmniDown.git";
         private readonly Aria2EngineHost _aria2EngineHost = new();
         private readonly Aria2RpcClient _aria2RpcClient = new();
@@ -90,6 +96,13 @@ namespace OmniDown
         private bool _hasTriggeredAutoShutdown;
         private bool _hasSeenActiveDownloadsForAutoShutdown;
         private bool _isShutdownPrepared;
+        private string _runningAriaSettingsSignature = string.Empty;
+        private int _runningAriaRpcPort;
+        private string _runningAriaRpcSecret = string.Empty;
+        private AriaRelatedSettingsSnapshot? _pendingAriaSettingsRollback;
+        private AriaRelatedSettingsSnapshot? _restartAriaSettingsRollback;
+        private bool _isSavingAriaSettings;
+        private bool _statusToastActionRestartsAria;
         private string _lastClipboardDownloadText = string.Empty;
         private readonly Dictionary<string, bool> _observedTaskDownloadCompletions = new(StringComparer.OrdinalIgnoreCase);
 

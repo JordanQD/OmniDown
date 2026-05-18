@@ -182,7 +182,7 @@ namespace OmniDown
         {
             if (!_isLoadingNetworkSettings)
             {
-                SaveNetworkSettings();
+                ShowSettingsSaveTeachingTip();
             }
 
             UpdateDebugStatus();
@@ -204,7 +204,7 @@ namespace OmniDown
             }
 
             DownloadDirectoryTextBox.Text = folder.Path;
-            SaveDownloadSettings();
+            ShowSettingsSaveTeachingTip();
         }
 
         private void DownloadSetting_Changed(object sender, RoutedEventArgs e)
@@ -214,7 +214,7 @@ namespace OmniDown
                 return;
             }
 
-            SaveDownloadSettings();
+            ShowSettingsSaveTeachingTip();
         }
 
         private void BitTorrentSetting_Changed(object sender, RoutedEventArgs e)
@@ -226,7 +226,7 @@ namespace OmniDown
 
             UpdateBitTorrentDependentUi();
             UpdateTrackerSourceSummary();
-            SaveBitTorrentSettings();
+            ShowSettingsSaveTeachingTip();
         }
 
         private void AddBtCustomTrackerButton_Click(object sender, RoutedEventArgs e)
@@ -255,7 +255,13 @@ namespace OmniDown
 
             if (IsAdvancedSettingsToggle(toggleSwitch))
             {
-                SaveAdvancedSettings();
+                if (_isLoadingAdvancedSettings)
+                {
+                    return;
+                }
+
+                UpdateClipboardTypeControls();
+                ShowSettingsSaveTeachingTip();
                 return;
             }
         }
@@ -299,6 +305,23 @@ namespace OmniDown
             return _downloadCoordinator.SetGlobalSpeedLimitsAsync(
                 _isDownloadSpeedLimitEnabled ? _downloadLimitBytesPerSecond : 0,
                 _isUploadSpeedLimitEnabled ? _uploadLimitBytesPerSecond : 0);
+        }
+
+        private async Task ApplyRuntimeDownloadSettingsAsync(DownloadSettings settings)
+        {
+            if (!_aria2EngineHost.IsRunning)
+            {
+                return;
+            }
+
+            try
+            {
+                await _downloadCoordinator.SetGlobalDownloadSettingsAsync(settings.MaxConcurrentDownloads);
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"同步下载设置到 aria2 失败：{ex.Message}", InfoBarSeverity.Warning);
+            }
         }
 
         private static long GetSpeedLimitBytesPerSecond(NumberBox numberBox, string unit)
@@ -622,7 +645,7 @@ namespace OmniDown
             }
 
             UpdateNetworkDependentUi();
-            SaveNetworkSettings();
+            ShowSettingsSaveTeachingTip();
         }
 
         private void DetectSystemProxyButton_Click(object sender, RoutedEventArgs e)
@@ -637,20 +660,20 @@ namespace OmniDown
             ProxyServerTextBox.Text = proxySettings.AllProxy ?? string.Empty;
             ProxyBypassTextBox.Text = proxySettings.NoProxy ?? string.Empty;
             SetToggleSwitch(CustomProxyToggleSwitch, true);
-            SaveNetworkSettings();
+            ShowSettingsSaveTeachingTip();
             ShowMessage("已填入系统代理。", InfoBarSeverity.Success);
         }
 
         private void RandomBtPortButton_Click(object sender, RoutedEventArgs e)
         {
             BtListenPortNumberBox.Value = Random.Shared.Next(20000, 25000);
-            SaveNetworkSettings();
+            ShowSettingsSaveTeachingTip();
         }
 
         private void RandomDhtPortButton_Click(object sender, RoutedEventArgs e)
         {
             DhtListenPortNumberBox.Value = Random.Shared.Next(25000, 30000);
-            SaveNetworkSettings();
+            ShowSettingsSaveTeachingTip();
         }
 
         private void UserAgentPresetButton_Click(object sender, RoutedEventArgs e)
@@ -669,7 +692,7 @@ namespace OmniDown
                 "Transmission" => "Transmission/3.00",
                 _ => string.Empty
             };
-            SaveNetworkSettings();
+            ShowSettingsSaveTeachingTip();
         }
 
         private void LoadAdvancedSettings()
@@ -721,7 +744,7 @@ namespace OmniDown
                 return;
             }
 
-            SaveAdvancedSettings();
+            ShowSettingsSaveTeachingTip();
             if (sender is ToggleSwitch toggleSwitch &&
                 toggleSwitch.IsOn &&
                 (ReferenceEquals(toggleSwitch, ProtocolMagnetToggleSwitch) ||
@@ -749,7 +772,7 @@ namespace OmniDown
             }
 
             AriaPathTextBox.Text = file.Path;
-            SaveAdvancedSettings();
+            ShowSettingsSaveTeachingTip();
         }
 
         private void CopyRpcSecretButton_Click(object sender, RoutedEventArgs e)
@@ -761,7 +784,7 @@ namespace OmniDown
         private void GenerateRpcSecretButton_Click(object sender, RoutedEventArgs e)
         {
             RpcSecretPasswordBox.Password = AdvancedSettings.GenerateSecret();
-            SaveAdvancedSettings();
+            ShowSettingsSaveTeachingTip();
         }
 
         private void CopyExtensionApiSecretButton_Click(object sender, RoutedEventArgs e)
@@ -773,7 +796,7 @@ namespace OmniDown
         private void GenerateExtensionApiSecretButton_Click(object sender, RoutedEventArgs e)
         {
             ExtensionApiSecretPasswordBox.Password = AdvancedSettings.GenerateSecret();
-            SaveAdvancedSettings();
+            ShowSettingsSaveTeachingTip();
         }
 
         private async void OpenConfigFolderButton_Click(object sender, RoutedEventArgs e)
@@ -828,7 +851,24 @@ namespace OmniDown
                 return;
             }
 
-            AdvancedSettings settings = new(
+            AdvancedSettings settings = GetAdvancedSettingsFromUi();
+
+            _settingsPageViewModel.SaveAdvancedSettings(settings);
+            AppLogger.Configure(_settingsPageViewModel.AdvancedSettings.LogLevel);
+            ProtocolAssociationService.Synchronize(
+                settings.ProtocolMagnetEnabled,
+                settings.ProtocolThunderEnabled,
+                settings.ProtocolOmniDownEnabled);
+            _rpcSecret = _settingsPageViewModel.AdvancedSettings.RpcSecret;
+            _aria2RpcClient.Configure(_settingsPageViewModel.AdvancedSettings.RpcPort, _rpcSecret);
+            RestartBrowserExtensionApiServer();
+            UpdateClipboardTypeControls();
+            UpdateAriaRestartNotification();
+        }
+
+        private AdvancedSettings GetAdvancedSettingsFromUi()
+        {
+            return new AdvancedSettings(
                 AriaPathTextBox.Text.Trim(),
                 GetValidIntNumberBoxValue(RpcPortNumberBox, 1024, 65535, AdvancedSettings.Default.RpcPort),
                 string.IsNullOrWhiteSpace(RpcSecretPasswordBox.Password)
@@ -849,17 +889,311 @@ namespace OmniDown
                 ProtocolMagnetToggleSwitch?.IsOn == true,
                 ProtocolThunderToggleSwitch?.IsOn == true,
                 ProtocolOmniDownToggleSwitch?.IsOn == true);
+        }
 
-            _settingsPageViewModel.SaveAdvancedSettings(settings);
-            AppLogger.Configure(_settingsPageViewModel.AdvancedSettings.LogLevel);
-            ProtocolAssociationService.Synchronize(
-                settings.ProtocolMagnetEnabled,
-                settings.ProtocolThunderEnabled,
-                settings.ProtocolOmniDownEnabled);
-            _rpcSecret = _settingsPageViewModel.AdvancedSettings.RpcSecret;
-            _aria2RpcClient.Configure(_settingsPageViewModel.AdvancedSettings.RpcPort, _rpcSecret);
-            RestartBrowserExtensionApiServer();
-            UpdateClipboardTypeControls();
+        private void ShowSettingsSaveTeachingTip()
+        {
+            if (_pendingAriaSettingsRollback is null)
+            {
+                _pendingAriaSettingsRollback = CaptureCurrentAriaSettings();
+            }
+
+            if (!HasPendingAriaSettingsChanges())
+            {
+                _pendingAriaSettingsRollback = null;
+                SettingsSaveTeachingTip.IsOpen = false;
+                return;
+            }
+
+            AriaRestartTeachingTip.IsOpen = false;
+            SettingsSaveTeachingTip.Title = Strings.Get("SettingsSaveTeachingTipTitle");
+            bool requiresRestart = PendingAriaSettingsRequireRestart();
+            SettingsSaveTeachingTip.Subtitle = requiresRestart
+                ? Strings.Get("SettingsSaveRestartTeachingTipSubtitle")
+                : Strings.Get("SettingsSaveTeachingTipSubtitle");
+            SettingsSaveTeachingTip.ActionButtonContent = requiresRestart
+                ? Strings.Get("SettingsSaveRestartTeachingTipActionButtonContent")
+                : Strings.Get("SettingsSaveTeachingTipActionButtonContent");
+            SettingsSaveTeachingTip.CloseButtonContent = Strings.Get("TeachingTipCancelButtonContent");
+            SettingsSaveTeachingTip.IsOpen = true;
+        }
+
+        private async void SettingsSaveTeachingTip_ActionButtonClick(TeachingTip sender, object args)
+        {
+            AriaRelatedSettingsSnapshot rollback = _pendingAriaSettingsRollback ?? CaptureCurrentAriaSettings();
+            bool requiresRestart = PendingAriaSettingsRequireRestart();
+            _isSavingAriaSettings = true;
+            try
+            {
+                if (!SaveNetworkSettings())
+                {
+                    SettingsSaveTeachingTip.IsOpen = true;
+                    return;
+                }
+
+                SaveDownloadSettings();
+                SaveBitTorrentSettings();
+                SaveAdvancedSettings();
+            }
+            finally
+            {
+                _isSavingAriaSettings = false;
+            }
+
+            _restartAriaSettingsRollback = rollback;
+            _pendingAriaSettingsRollback = null;
+            SettingsSaveTeachingTip.IsOpen = false;
+            if (requiresRestart && _aria2EngineHost.IsRunning)
+            {
+                _restartAriaSettingsRollback = null;
+                await StopAriaAsync(showMessage: false);
+                await StartAriaAsync();
+            }
+            else
+            {
+                UpdateAriaRestartNotification();
+            }
+        }
+
+        private void SettingsSaveTeachingTip_CloseButtonClick(TeachingTip sender, object args)
+        {
+            CancelPendingAriaSettingsChanges();
+        }
+
+        private async void AriaRestartTeachingTip_ActionButtonClick(TeachingTip sender, object args)
+        {
+            AriaRestartTeachingTip.IsOpen = false;
+            _restartAriaSettingsRollback = null;
+            await StopAriaAsync(showMessage: false);
+            await StartAriaAsync();
+        }
+
+        private void AriaRestartTeachingTip_CloseButtonClick(TeachingTip sender, object args)
+        {
+            if (_restartAriaSettingsRollback is not null)
+            {
+                RestoreAriaSettingsSnapshot(_restartAriaSettingsRollback, save: true);
+            }
+
+            _restartAriaSettingsRollback = null;
+            AriaRestartTeachingTip.IsOpen = false;
+        }
+
+        private void CancelPendingAriaSettingsChanges()
+        {
+            if (_pendingAriaSettingsRollback is not null)
+            {
+                RestoreAriaSettingsSnapshot(_pendingAriaSettingsRollback, save: false);
+            }
+
+            _pendingAriaSettingsRollback = null;
+            SettingsSaveTeachingTip.IsOpen = false;
+        }
+
+        private void DismissSettingsTeachingTips()
+        {
+            CancelPendingAriaSettingsChanges();
+            AriaRestartTeachingTip.IsOpen = false;
+        }
+
+        private AriaRelatedSettingsSnapshot CaptureCurrentAriaSettings()
+        {
+            return new AriaRelatedSettingsSnapshot(
+                _settingsPageViewModel.DownloadSettings,
+                _settingsPageViewModel.BitTorrentSettings,
+                _settingsPageViewModel.NetworkSettings,
+                _settingsPageViewModel.AdvancedSettings);
+        }
+
+        private bool PendingAriaSettingsRequireRestart()
+        {
+            if (!_aria2EngineHost.IsRunning)
+            {
+                return false;
+            }
+
+            string pendingSignature = CreateAriaRestartSettingsSignature(
+                GetDownloadSettingsFromUi(),
+                GetBitTorrentSettingsFromUi(),
+                GetNetworkSettingsFromUi(),
+                GetAdvancedSettingsFromUi());
+
+            return !string.Equals(pendingSignature, _runningAriaSettingsSignature, StringComparison.Ordinal);
+        }
+
+        private bool HasPendingAriaSettingsChanges()
+        {
+            if (_pendingAriaSettingsRollback is null)
+            {
+                return false;
+            }
+
+            return GetDownloadSettingsFromUi() != _pendingAriaSettingsRollback.Download ||
+                !BitTorrentSettingsEqual(GetBitTorrentSettingsFromUi(), _pendingAriaSettingsRollback.BitTorrent) ||
+                GetNetworkSettingsFromUi() != _pendingAriaSettingsRollback.Network ||
+                GetAdvancedSettingsFromUi() != _pendingAriaSettingsRollback.Advanced;
+        }
+
+        private static bool BitTorrentSettingsEqual(BitTorrentSettings left, BitTorrentSettings right)
+        {
+            return left.IsEnabled == right.IsEnabled &&
+                left.AutoDownloadContent == right.AutoDownloadContent &&
+                left.ForceEncryption == right.ForceEncryption &&
+                left.KeepSeeding == right.KeepSeeding &&
+                Math.Abs(left.SeedRatio - right.SeedRatio) < 0.0001 &&
+                left.SeedTimeMinutes == right.SeedTimeMinutes &&
+                left.MaxPeers == right.MaxPeers &&
+                string.Equals(left.ListenPort, right.ListenPort, StringComparison.Ordinal) &&
+                string.Equals(left.TrackerSourceUrl, right.TrackerSourceUrl, StringComparison.Ordinal) &&
+                left.SelectedTrackerSourceUrls.SequenceEqual(right.SelectedTrackerSourceUrls, StringComparer.OrdinalIgnoreCase) &&
+                left.CustomTrackerUrls.SequenceEqual(right.CustomTrackerUrls, StringComparer.OrdinalIgnoreCase) &&
+                string.Equals(NormalizeTrackerList(left.TrackerList), NormalizeTrackerList(right.TrackerList), StringComparison.Ordinal) &&
+                left.AutoSyncTracker == right.AutoSyncTracker &&
+                left.LastSyncTrackerTime == right.LastSyncTrackerTime;
+        }
+
+        private void RestoreAriaSettingsSnapshot(AriaRelatedSettingsSnapshot snapshot, bool save)
+        {
+            if (save)
+            {
+                _settingsPageViewModel.SaveDownloadSettings(snapshot.Download);
+                _settingsPageViewModel.SaveBitTorrentSettings(snapshot.BitTorrent);
+                _settingsPageViewModel.SaveNetworkSettings(snapshot.Network);
+                _settingsPageViewModel.SaveAdvancedSettings(snapshot.Advanced);
+            }
+
+            _isLoadingDownloadSettings = true;
+            _isLoadingBitTorrentSettings = true;
+            _isLoadingNetworkSettings = true;
+            _isLoadingAdvancedSettings = true;
+            try
+            {
+                if (!save)
+                {
+                    _settingsPageViewModel.SaveDownloadSettings(snapshot.Download);
+                    _settingsPageViewModel.SaveBitTorrentSettings(snapshot.BitTorrent);
+                    _settingsPageViewModel.SaveNetworkSettings(snapshot.Network);
+                    _settingsPageViewModel.SaveAdvancedSettings(snapshot.Advanced);
+                }
+
+                ApplyDownloadSettingsToUi();
+                ApplyBitTorrentSettingsToUi();
+                ApplyNetworkSettingsToUi();
+                ApplyAdvancedSettingsToUi();
+            }
+            finally
+            {
+                _isLoadingDownloadSettings = false;
+                _isLoadingBitTorrentSettings = false;
+                _isLoadingNetworkSettings = false;
+                _isLoadingAdvancedSettings = false;
+            }
+
+            _aria2RpcClient.Configure(_settingsPageViewModel.AdvancedSettings.RpcPort, _settingsPageViewModel.AdvancedSettings.RpcSecret);
+            UpdateAriaRestartNotification();
+        }
+
+        private void UpdateAriaRestartNotification()
+        {
+            if (_isSavingAriaSettings ||
+                !_aria2EngineHost.IsRunning ||
+                string.IsNullOrWhiteSpace(_runningAriaSettingsSignature))
+            {
+                return;
+            }
+
+            string currentSignature = CreateAriaRestartSettingsSignature();
+            if (string.Equals(currentSignature, _runningAriaSettingsSignature, StringComparison.Ordinal))
+            {
+                if (_statusToastActionRestartsAria)
+                {
+                    StatusToastInfoBar.IsOpen = false;
+                    StatusToastInfoBar.Visibility = Visibility.Collapsed;
+                    StatusToastActionButton.Visibility = Visibility.Collapsed;
+                    _statusToastActionRestartsAria = false;
+                }
+
+                AriaRestartTeachingTip.IsOpen = false;
+                _restartAriaSettingsRollback = null;
+                return;
+            }
+
+            ShowAriaRestartNotification();
+        }
+
+        private void ShowAriaRestartNotification()
+        {
+            string message = Strings.Get("AriaRestartRequiredMessage");
+            if (AriaRestartTeachingTip.IsOpen)
+            {
+                return;
+            }
+
+            _statusMessages.Insert(0, new AppStatusMessage(
+                message,
+                FormatStatusMessageDetail(DateTimeOffset.Now),
+                GetSeverityText(InfoBarSeverity.Warning),
+                GetSeverityGlyph(InfoBarSeverity.Warning),
+                GetSeverityBrush(InfoBarSeverity.Warning)));
+            AriaRestartTeachingTip.Title = Strings.Get("AriaRestartRequiredTitle");
+            AriaRestartTeachingTip.Subtitle = message;
+            AriaRestartTeachingTip.ActionButtonContent = Strings.Get("AriaRestartTeachingTipActionButtonContent");
+            AriaRestartTeachingTip.CloseButtonContent = Strings.Get("TeachingTipCancelButtonContent");
+            SettingsSaveTeachingTip.IsOpen = false;
+            AriaRestartTeachingTip.IsOpen = true;
+            AppLogger.Warning("UI", message);
+        }
+
+        private string CreateAriaRestartSettingsSignature()
+        {
+            return CreateAriaRestartSettingsSignature(
+                _settingsPageViewModel.DownloadSettings,
+                _settingsPageViewModel.BitTorrentSettings,
+                _settingsPageViewModel.NetworkSettings,
+                _settingsPageViewModel.AdvancedSettings);
+        }
+
+        private string CreateAriaRestartSettingsSignature(
+            DownloadSettings download,
+            BitTorrentSettings bitTorrent,
+            NetworkSettings network,
+            AdvancedSettings advanced)
+        {
+
+            string[] values =
+            [
+                download.DownloadDirectory,
+                download.SplitCount.ToString(CultureInfo.InvariantCulture),
+                download.MaxConnectionPerServer.ToString(CultureInfo.InvariantCulture),
+                download.ContinueDownloads.ToString(CultureInfo.InvariantCulture),
+                download.RemoteTime.ToString(CultureInfo.InvariantCulture),
+                download.MaxTries.ToString(CultureInfo.InvariantCulture),
+                download.RetryWaitSeconds.ToString(CultureInfo.InvariantCulture),
+                network.UseSystemProxy.ToString(CultureInfo.InvariantCulture),
+                network.CustomProxyEnabled.ToString(CultureInfo.InvariantCulture),
+                network.ProxyServer,
+                network.ProxyBypass,
+                network.ProxyDownloads.ToString(CultureInfo.InvariantCulture),
+                network.ListenPort.ToString(CultureInfo.InvariantCulture),
+                network.DhtListenPort.ToString(CultureInfo.InvariantCulture),
+                network.UserAgent,
+                network.ConnectTimeoutSeconds.ToString(CultureInfo.InvariantCulture),
+                network.TimeoutSeconds.ToString(CultureInfo.InvariantCulture),
+                network.FileAllocation,
+                bitTorrent.AutoDownloadContent.ToString(CultureInfo.InvariantCulture),
+                bitTorrent.ForceEncryption.ToString(CultureInfo.InvariantCulture),
+                bitTorrent.KeepSeeding.ToString(CultureInfo.InvariantCulture),
+                bitTorrent.SeedRatio.ToString("0.###", CultureInfo.InvariantCulture),
+                bitTorrent.SeedTimeMinutes.ToString(CultureInfo.InvariantCulture),
+                bitTorrent.MaxPeers.ToString(CultureInfo.InvariantCulture),
+                NormalizeTrackerList(bitTorrent.TrackerList),
+                advanced.Aria2Path,
+                advanced.RpcPort.ToString(CultureInfo.InvariantCulture),
+                advanced.RpcSecret,
+                advanced.LogLevel
+            ];
+
+            return string.Join('\u001F', values.Select(value => value.Replace('\u001F', ' ')));
         }
 
         private void SetLogLevelSelection(string logLevel)
@@ -984,14 +1318,38 @@ namespace OmniDown
             Clipboard.SetContent(package);
         }
 
-        private void SaveNetworkSettings()
+        private bool SaveNetworkSettings()
         {
             if (_isLoadingNetworkSettings)
             {
-                return;
+                return false;
             }
 
-            NetworkSettings settings = NormalizeNetworkSettings(new NetworkSettings(
+            NetworkSettings settings = GetNetworkSettingsFromUi();
+
+            if (settings.CustomProxyEnabled &&
+                !string.IsNullOrWhiteSpace(settings.ProxyServer) &&
+                !IsValidProxyUrl(settings.ProxyServer))
+            {
+                ShowMessage("代理地址格式不正确，请使用 http:// 或 https://。", InfoBarSeverity.Warning);
+                return false;
+            }
+
+            if (UserAgentTextBox.Text != settings.UserAgent)
+            {
+                int selectionStart = UserAgentTextBox.SelectionStart;
+                UserAgentTextBox.Text = settings.UserAgent;
+                UserAgentTextBox.SelectionStart = Math.Min(selectionStart, settings.UserAgent.Length);
+            }
+
+            _settingsPageViewModel.SaveNetworkSettings(settings);
+            UpdateAriaRestartNotification();
+            return true;
+        }
+
+        private NetworkSettings GetNetworkSettingsFromUi()
+        {
+            return NormalizeNetworkSettings(new NetworkSettings(
                 UseSystemProxyCheckBox?.IsOn == true,
                 CustomProxyToggleSwitch?.IsOn == true,
                 ProxyServerTextBox.Text.Trim(),
@@ -1005,23 +1363,6 @@ namespace OmniDown
                 GetValidIntNumberBoxValue(ConnectTimeoutNumberBox, 1, 600, NetworkSettings.Default.ConnectTimeoutSeconds),
                 GetValidIntNumberBoxValue(TimeoutNumberBox, 1, 600, NetworkSettings.Default.TimeoutSeconds),
                 GetSelectedFileAllocation()));
-
-            if (settings.CustomProxyEnabled &&
-                !string.IsNullOrWhiteSpace(settings.ProxyServer) &&
-                !IsValidProxyUrl(settings.ProxyServer))
-            {
-                ShowMessage("代理地址格式不正确，请使用 http:// 或 https://。", InfoBarSeverity.Warning);
-                return;
-            }
-
-            if (UserAgentTextBox.Text != settings.UserAgent)
-            {
-                int selectionStart = UserAgentTextBox.SelectionStart;
-                UserAgentTextBox.Text = settings.UserAgent;
-                UserAgentTextBox.SelectionStart = Math.Min(selectionStart, settings.UserAgent.Length);
-            }
-
-            _settingsPageViewModel.SaveNetworkSettings(settings);
         }
 
         private void UpdateNetworkDependentUi()
@@ -1168,8 +1509,17 @@ namespace OmniDown
 
         private void SaveBitTorrentSettings()
         {
+            BitTorrentSettings settings = GetBitTorrentSettingsFromUi();
+
+            _settingsPageViewModel.SaveBitTorrentSettings(settings);
+            UpdateTrackerSyncTimeText(settings.LastSyncTrackerTime);
+            UpdateAriaRestartNotification();
+        }
+
+        private BitTorrentSettings GetBitTorrentSettingsFromUi()
+        {
             string[] selectedSources = GetSelectedTrackerSourceUrls();
-            BitTorrentSettings settings = NormalizeBitTorrentSettings(new BitTorrentSettings(
+            return NormalizeBitTorrentSettings(new BitTorrentSettings(
                 true,
                 BtAutoDownloadToggleSwitch?.IsOn == true,
                 BtForceEncryptionToggleSwitch?.IsOn == true,
@@ -1184,9 +1534,6 @@ namespace OmniDown
                 NormalizeTrackerList(BtTrackerListTextBox.Text),
                 BtAutoSyncTrackerToggleSwitch?.IsOn == true,
                 _settingsPageViewModel.BitTorrentSettings.LastSyncTrackerTime));
-
-            _settingsPageViewModel.SaveBitTorrentSettings(settings);
-            UpdateTrackerSyncTimeText(settings.LastSyncTrackerTime);
         }
 
         private async Task SyncBitTorrentTrackersAsync()
@@ -1325,7 +1672,7 @@ namespace OmniDown
             BtCustomTrackerSourceListView.SelectedItems.Add(url);
             BtCustomTrackerSourceTextBox.Text = string.Empty;
             UpdateTrackerSourceSummary();
-            SaveBitTorrentSettings();
+            ShowSettingsSaveTeachingTip();
         }
 
         private void ApplyTrackerSourceSelectionToUi(BitTorrentSettings settings)
@@ -1673,7 +2020,21 @@ namespace OmniDown
 
         private void SaveDownloadSettings()
         {
-            DownloadSettings settings = NormalizeDownloadSettings(new DownloadSettings(
+            DownloadSettings settings = GetDownloadSettingsFromUi();
+
+            _settingsPageViewModel.SaveDownloadSettings(settings);
+            if (_downloadCoordinator is not null)
+            {
+                _downloadCoordinator.DeleteTorrentAfterComplete = settings.DeleteTorrentAfterComplete;
+                _ = ApplyRuntimeDownloadSettingsAsync(settings);
+            }
+
+            UpdateAriaRestartNotification();
+        }
+
+        private DownloadSettings GetDownloadSettingsFromUi()
+        {
+            return NormalizeDownloadSettings(new DownloadSettings(
                 string.IsNullOrWhiteSpace(DownloadDirectoryTextBox.Text) ? AppPaths.DefaultDownloadDirectory : DownloadDirectoryTextBox.Text.Trim(),
                 GetValidIntNumberBoxValue(MaxConcurrentDownloadsNumberBox, 1, 10, 5),
                 GetValidIntNumberBoxValue(SplitCountNumberBox, 1, 256, 64),
@@ -1685,12 +2046,6 @@ namespace OmniDown
                 GetValidIntNumberBoxValue(RetryWaitNumberBox, 0, 600, 10),
                 AutoDeleteStaleRecordsToggleSwitch?.IsOn == true,
                 DeleteTorrentAfterCompleteToggleSwitch?.IsOn == true));
-
-            _settingsPageViewModel.SaveDownloadSettings(settings);
-            if (_downloadCoordinator is not null)
-            {
-                _downloadCoordinator.DeleteTorrentAfterComplete = settings.DeleteTorrentAfterComplete;
-            }
         }
 
         private void SaveCloseBehaviorSettings()

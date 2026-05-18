@@ -1226,19 +1226,49 @@
                     Visibility="Collapsed">
                     <InfoBar.ActionButton>
                         <Button
-                            x:Name="StatusToastCopyButton"
-                            AutomationProperties.AutomationId="StatusToastCopyButton"
-                            Click="StatusToastCopyButton_Click"
+                            x:Name="StatusToastActionButton"
+                            AutomationProperties.AutomationId="StatusToastActionButton"
+                            Click="StatusToastActionButton_Click"
                             Visibility="Collapsed">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <FontIcon FontSize="14" Glyph="&#xE8C8;" />
+                                <FontIcon
+                                    x:Name="StatusToastActionIcon"
+                                    FontSize="14"
+                                    Glyph="&#xE8C8;" />
                                 <TextBlock
+                                    x:Name="StatusToastActionText"
                                     x:Uid="StatusToastCopyButtonLabel"
                                     Text="Copy" />
                             </StackPanel>
                         </Button>
                     </InfoBar.ActionButton>
                 </InfoBar>
+
+                <TeachingTip
+                    x:Name="SettingsSaveTeachingTip"
+                    Grid.Row="1"
+                    Title="保存设置？"
+                    Subtitle="设置已修改。保存后才会写入配置；取消会恢复原来的值。"
+                    ActionButtonContent="保存"
+                    CloseButtonContent="取消"
+                    ActionButtonClick="SettingsSaveTeachingTip_ActionButtonClick"
+                    CloseButtonClick="SettingsSaveTeachingTip_CloseButtonClick"
+                    IsLightDismissEnabled="False"
+                    PlacementMargin="20"
+                    PreferredPlacement="Auto" />
+
+                <TeachingTip
+                    x:Name="AriaRestartTeachingTip"
+                    Grid.Row="1"
+                    Title="重启 aria2？"
+                    Subtitle="这些设置需要重启 aria2 后生效。取消会恢复到重启前的设置。"
+                    ActionButtonContent="重启"
+                    CloseButtonContent="取消"
+                    ActionButtonClick="AriaRestartTeachingTip_ActionButtonClick"
+                    CloseButtonClick="AriaRestartTeachingTip_CloseButtonClick"
+                    IsLightDismissEnabled="False"
+                    PlacementMargin="20"
+                    PreferredPlacement="Auto" />
             </Grid>
             </Grid>
         </NavigationView>

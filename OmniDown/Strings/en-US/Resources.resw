@@ -85,6 +85,16 @@
   <data name="StatusBarItemCountText" xml:space="preserve"><value>{0} items</value></data>
   <data name="StatusBarSelectedItemCountText" xml:space="preserve"><value>{0} selected</value></data>
   <data name="StatusBarSpeedLimitText" xml:space="preserve"><value>limit {0}</value></data>
+  <data name="SettingsSaveTeachingTipTitle" xml:space="preserve"><value>Save settings?</value></data>
+  <data name="SettingsSaveTeachingTipSubtitle" xml:space="preserve"><value>Save changes, or cancel.</value></data>
+  <data name="SettingsSaveTeachingTipActionButtonContent" xml:space="preserve"><value>Save</value></data>
+  <data name="SettingsSaveRestartTeachingTipSubtitle" xml:space="preserve"><value>Save and restart aria2 to apply.</value></data>
+  <data name="SettingsSaveRestartTeachingTipActionButtonContent" xml:space="preserve"><value>Save and restart</value></data>
+  <data name="TeachingTipCancelButtonContent" xml:space="preserve"><value>Cancel</value></data>
+  <data name="AriaRestartRequiredTitle" xml:space="preserve"><value>Restart aria2 required</value></data>
+  <data name="AriaRestartRequiredMessage" xml:space="preserve"><value>Restart to apply.</value></data>
+  <data name="AriaRestartTeachingTipActionButtonContent" xml:space="preserve"><value>Restart</value></data>
+  <data name="StatusToastRestartAriaButtonLabel.Text" xml:space="preserve"><value>Restart aria2</value></data>
   <data name="StatusToastCopyButtonLabel.Text" xml:space="preserve"><value>Copy</value></data>
   <data name="NewDownloadDialogTitle" xml:space="preserve"><value>New download</value></data>
   <data name="LinkTaskTabHeader" xml:space="preserve"><value>Link task</value></data>

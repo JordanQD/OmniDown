@@ -305,6 +305,18 @@ public sealed class DownloadCoordinator
         return _rpcClient.ChangeGlobalOptionAsync(options, cancellationToken);
     }
 
+    public Task SetGlobalDownloadSettingsAsync(
+        int maxConcurrentDownloads,
+        CancellationToken cancellationToken = default)
+    {
+        Dictionary<string, string> options = new()
+        {
+            ["max-concurrent-downloads"] = Math.Clamp(maxConcurrentDownloads, 1, 10).ToString(CultureInfo.InvariantCulture)
+        };
+
+        return _rpcClient.ChangeGlobalOptionAsync(options, cancellationToken);
+    }
+
     private void UpsertTask(Aria2TaskStatus remoteTask)
     {
         if (NormalizeStatus(remoteTask.Status).Equals("Removed", StringComparison.OrdinalIgnoreCase))

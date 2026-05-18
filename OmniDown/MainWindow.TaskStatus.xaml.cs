@@ -84,7 +84,7 @@ namespace OmniDown
                 rpcPort,
                 downloadSettings.DownloadDirectory,
                 _rpcSecret,
-                UseSystemProxyCheckBox.IsOn,
+                _settingsPageViewModel.NetworkSettings.UseSystemProxy,
                 downloadSettings.MaxConcurrentDownloads,
                 downloadSettings.SplitCount,
                 downloadSettings.MaxConnectionPerServer,
@@ -118,6 +118,10 @@ namespace OmniDown
                 return Aria2EngineStartResult.Failure($"aria2 started but RPC is not reachable: {ex.Message}");
             }
 
+            _runningAriaSettingsSignature = CreateAriaRestartSettingsSignature();
+            _runningAriaRpcPort = rpcPort;
+            _runningAriaRpcSecret = _rpcSecret;
+            UpdateAriaRestartNotification();
             return result;
         }
 
@@ -131,6 +135,11 @@ namespace OmniDown
             try
             {
                 AppLogger.Info("Aria2Shutdown", "saving aria2 session");
+                if (_runningAriaRpcPort > 0 && !string.IsNullOrWhiteSpace(_runningAriaRpcSecret))
+                {
+                    _aria2RpcClient.Configure(_runningAriaRpcPort, _runningAriaRpcSecret);
+                }
+
                 await _downloadCoordinator.RemoveCompletedDownloadResultsAsync();
                 await _aria2RpcClient.SaveSessionAsync();
             }
@@ -138,6 +147,12 @@ namespace OmniDown
             {
                 AppLogger.Warning("Aria2Shutdown", $"save session failed: {ex.Message}");
                 // Best-effort: Stop/close must continue even if aria2 is no longer reachable.
+            }
+            finally
+            {
+                AdvancedSettings advancedSettings = _settingsPageViewModel.AdvancedSettings;
+                _rpcSecret = advancedSettings.RpcSecret;
+                _aria2RpcClient.Configure(advancedSettings.RpcPort, _rpcSecret);
             }
         }
 
@@ -579,7 +594,10 @@ namespace OmniDown
             StatusToastInfoBar.Title = GetSeverityText(severity);
             StatusToastInfoBar.Message = message;
             StatusToastInfoBar.Severity = severity;
-            StatusToastCopyButton.Visibility = IsCopyableStatusMessage(severity) ? Visibility.Visible : Visibility.Collapsed;
+            _statusToastActionRestartsAria = false;
+            StatusToastActionIcon.Glyph = "\uE8C8";
+            StatusToastActionText.Text = Strings.Get("StatusToastCopyButtonLabel.Text");
+            StatusToastActionButton.Visibility = IsCopyableStatusMessage(severity) ? Visibility.Visible : Visibility.Collapsed;
             StatusToastInfoBar.Visibility = Visibility.Visible;
             StatusToastInfoBar.IsOpen = true;
             AppLogger.Write(ToLogLevel(severity), "UI", message);
@@ -592,17 +610,30 @@ namespace OmniDown
             _statusMessageTimer.Stop();
             StatusToastInfoBar.IsOpen = false;
             StatusToastInfoBar.Visibility = Visibility.Collapsed;
-            StatusToastCopyButton.Visibility = Visibility.Collapsed;
+            StatusToastActionButton.Visibility = Visibility.Collapsed;
+            _statusToastActionRestartsAria = false;
         }
 
         private void StatusToastInfoBar_Closed(InfoBar sender, InfoBarClosedEventArgs args)
         {
             StatusToastInfoBar.Visibility = Visibility.Collapsed;
-            StatusToastCopyButton.Visibility = Visibility.Collapsed;
+            StatusToastActionButton.Visibility = Visibility.Collapsed;
+            _statusToastActionRestartsAria = false;
         }
 
-        private void StatusToastCopyButton_Click(object sender, RoutedEventArgs e)
+        private async void StatusToastActionButton_Click(object sender, RoutedEventArgs e)
         {
+            if (_statusToastActionRestartsAria)
+            {
+                StatusToastInfoBar.IsOpen = false;
+                StatusToastInfoBar.Visibility = Visibility.Collapsed;
+                StatusToastActionButton.Visibility = Visibility.Collapsed;
+                _statusToastActionRestartsAria = false;
+                await StopAriaAsync(showMessage: false);
+                await StartAriaAsync();
+                return;
+            }
+
             DataPackage package = new()
             {
                 RequestedOperation = DataPackageOperation.Copy

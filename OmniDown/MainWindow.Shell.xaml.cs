@@ -74,6 +74,9 @@ namespace OmniDown
             _refreshTimer.Stop();
             await SaveAriaSessionIfRunningAsync();
             _aria2EngineHost.Stop();
+            _runningAriaSettingsSignature = string.Empty;
+            _runningAriaRpcPort = 0;
+            _runningAriaRpcSecret = string.Empty;
             UpdateGlobalSpeeds(0, 0);
             _taskbarProgress.Clear();
             UpdateGlobalSpeedLimitText();
@@ -264,8 +267,14 @@ namespace OmniDown
                 return;
             }
 
-            _currentTaskFilter = tag;
+            bool wasSettings = _currentTaskFilter == "Settings";
             bool isSettings = tag == "Settings";
+            if (wasSettings && !isSettings)
+            {
+                DismissSettingsTeachingTips();
+            }
+
+            _currentTaskFilter = tag;
             TasksHeaderPanel.Visibility = isSettings ? Visibility.Collapsed : Visibility.Visible;
             SettingsPage.Visibility = isSettings ? Visibility.Visible : Visibility.Collapsed;
             TasksPage.Visibility = isSettings ? Visibility.Collapsed : Visibility.Visible;
@@ -315,6 +324,11 @@ namespace OmniDown
             }
 
             string tag = item.Tag?.ToString() ?? "General";
+            if (SettingsPage.Visibility == Visibility.Visible)
+            {
+                DismissSettingsTeachingTips();
+            }
+
             ShowSettingsSection(tag);
             ApplySettingsFilter();
             ResetSettingsSectionViewport();
@@ -355,7 +369,15 @@ namespace OmniDown
             AboutSettingsContent.Visibility = tag == "About" ? Visibility.Visible : Visibility.Collapsed;
             if (tag == "Advanced")
             {
-                RefreshProtocolDefaultToggles();
+                _isLoadingAdvancedSettings = true;
+                try
+                {
+                    RefreshProtocolDefaultToggles();
+                }
+                finally
+                {
+                    _isLoadingAdvancedSettings = false;
+                }
             }
         }
 

@@ -85,6 +85,16 @@
   <data name="StatusBarItemCountText" xml:space="preserve"><value>{0} 个项目</value></data>
   <data name="StatusBarSelectedItemCountText" xml:space="preserve"><value>已选择 {0} 个项目</value></data>
   <data name="StatusBarSpeedLimitText" xml:space="preserve"><value>限速 {0}</value></data>
+  <data name="SettingsSaveTeachingTipTitle" xml:space="preserve"><value>保存设置？</value></data>
+  <data name="SettingsSaveTeachingTipSubtitle" xml:space="preserve"><value>保存更改，或取消</value></data>
+  <data name="SettingsSaveTeachingTipActionButtonContent" xml:space="preserve"><value>保存</value></data>
+  <data name="SettingsSaveRestartTeachingTipSubtitle" xml:space="preserve"><value>保存后重启 aria2 生效。</value></data>
+  <data name="SettingsSaveRestartTeachingTipActionButtonContent" xml:space="preserve"><value>保存并重启</value></data>
+  <data name="TeachingTipCancelButtonContent" xml:space="preserve"><value>取消</value></data>
+  <data name="AriaRestartRequiredTitle" xml:space="preserve"><value>需要重启 aria2</value></data>
+  <data name="AriaRestartRequiredMessage" xml:space="preserve"><value>重启后生效。</value></data>
+  <data name="AriaRestartTeachingTipActionButtonContent" xml:space="preserve"><value>重启</value></data>
+  <data name="StatusToastRestartAriaButtonLabel.Text" xml:space="preserve"><value>重启 aria2</value></data>
   <data name="StatusToastCopyButtonLabel.Text" xml:space="preserve"><value>复制</value></data>
   <data name="NewDownloadDialogTitle" xml:space="preserve"><value>新建下载</value></data>
   <data name="LinkTaskTabHeader" xml:space="preserve"><value>链接任务</value></data>
