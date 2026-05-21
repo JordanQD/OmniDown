@@ -205,4 +205,38 @@
   <data name="AboutLicenseLink.Content" xml:space="preserve"><value>OmniDown license</value></data>
   <data name="AboutThirdPartyLink.Content" xml:space="preserve"><value>Third-party notices</value></data>
   <data name="CloneCommandCopiedMessage" xml:space="preserve"><value>Clone command copied.</value></data>
+
+  <data name="GeneralSettingsTitle.Text" xml:space="preserve"><value>General</value></data>
+  <data name="GeneralStartupSectionHeader.Text" xml:space="preserve"><value>Startup</value></data>
+  <data name="GeneralAppearanceSectionHeader.Text" xml:space="preserve"><value>Appearance</value></data>
+  <data name="GeneralNotificationsSectionHeader.Text" xml:space="preserve"><value>Notifications</value></data>
+  <data name="GeneralDownloadSectionHeader.Text" xml:space="preserve"><value>Download</value></data>
+
+  <data name="StartupSettingCard.Header" xml:space="preserve"><value>Launch at login</value></data>
+  <data name="StartupSettingCard.Description" xml:space="preserve"><value>Open OmniDown after signing in to Windows.</value></data>
+  <data name="RestoreWindowSettingCard.Header" xml:space="preserve"><value>Restore window position</value></data>
+  <data name="RestoreWindowSettingCard.Description" xml:space="preserve"><value>Remember the last window size and placement.</value></data>
+  <data name="ResumeOnLaunchSettingCard.Header" xml:space="preserve"><value>Resume downloads on launch</value></data>
+  <data name="ResumeOnLaunchSettingCard.Description" xml:space="preserve"><value>Continue unfinished tasks that were paused last time.</value></data>
+  <data name="ExitCleanupSettingCard.Header" xml:space="preserve"><value>Clear completed on exit</value></data>
+  <data name="ExitCleanupSettingCard.Description" xml:space="preserve"><value>Only clear records, not files.</value></data>
+  <data name="PauseActiveOnExitSettingCard.Header" xml:space="preserve"><value>Pause downloads on exit</value></data>
+  <data name="PauseActiveOnExitSettingCard.Description" xml:space="preserve"><value>Pause actively transferring tasks before quitting.</value></data>
+  <data name="CloseBehaviorSettingCard.Header" xml:space="preserve"><value>Close to tray</value></data>
+  <data name="CloseBehaviorSettingCard.Description" xml:space="preserve"><value>Keep running in the background after closing the window.</value></data>
+  <data name="TaskbarProgressSettingCard.Header" xml:space="preserve"><value>Taskbar progress</value></data>
+  <data name="TaskbarProgressSettingCard.Description" xml:space="preserve"><value>Show overall download progress on the taskbar.</value></data>
+  <data name="ThemeSettingCard.Header" xml:space="preserve"><value>App theme</value></data>
+  <data name="ThemeSettingCard.Description" xml:space="preserve"><value>Follow the Windows theme, or pin to light or dark.</value></data>
+  <data name="NotificationsSettingCard.Header" xml:space="preserve"><value>Enable system notifications</value></data>
+  <data name="NotificationsSettingCard.Description" xml:space="preserve"><value>Allow OmniDown to show download events through Windows notifications.</value></data>
+  <data name="DownloadStartNotificationSettingCard.Header" xml:space="preserve"><value>Notify on download start</value></data>
+  <data name="DownloadStartNotificationSettingCard.Description" xml:space="preserve"><value>Show a notification when a task is submitted to aria2.</value></data>
+  <data name="DownloadCompleteNotificationSettingCard.Header" xml:space="preserve"><value>Notify on download complete</value></data>
+  <data name="DownloadCompleteNotificationSettingCard.Description" xml:space="preserve"><value>Show a notification when a task finishes or fails.</value></data>
+  <data name="AutoShutdownSettingCard.Header" xml:space="preserve"><value>Auto shutdown when complete</value></data>
+  <data name="AutoShutdownSettingCard.Description" xml:space="preserve"><value>Shut down Windows after all active transfers finish.</value></data>
+  <data name="PreventSleepSettingCard.Header" xml:space="preserve"><value>Prevent sleep while downloading</value></data>
+  <data name="PreventSleepSettingCard.Description" xml:space="preserve"><value>Keep the system awake while tasks are downloading, then resume normal sleep.</value></data>
+
 </root>

@@ -67,8 +67,8 @@
                 HorizontalScrollBarVisibility="Disabled"
                 VerticalScrollBarVisibility="Auto">
                 <Grid
-                    Width="820"
-                    HorizontalAlignment="Center">
+                    MaxWidth="820"
+                    HorizontalAlignment="Stretch">
                     <local:GeneralSettingsSectionControl x:Name="GeneralSettingsContent" />
                     <local:DownloadSettingsSectionControl
                         x:Name="DownloadSettingsContent"

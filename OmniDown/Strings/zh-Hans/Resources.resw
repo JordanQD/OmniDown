@@ -205,4 +205,38 @@
   <data name="AboutLicenseLink.Content" xml:space="preserve"><value>OmniDown 许可证</value></data>
   <data name="AboutThirdPartyLink.Content" xml:space="preserve"><value>第三方声明</value></data>
   <data name="CloneCommandCopiedMessage" xml:space="preserve"><value>已复制克隆命令。</value></data>
+
+  <data name="GeneralSettingsTitle.Text" xml:space="preserve"><value>通用</value></data>
+  <data name="GeneralStartupSectionHeader.Text" xml:space="preserve"><value>启动</value></data>
+  <data name="GeneralAppearanceSectionHeader.Text" xml:space="preserve"><value>外观</value></data>
+  <data name="GeneralNotificationsSectionHeader.Text" xml:space="preserve"><value>通知</value></data>
+  <data name="GeneralDownloadSectionHeader.Text" xml:space="preserve"><value>下载</value></data>
+
+  <data name="StartupSettingCard.Header" xml:space="preserve"><value>登录时自动启动</value></data>
+  <data name="StartupSettingCard.Description" xml:space="preserve"><value>开机登录后打开 OmniDown。</value></data>
+  <data name="RestoreWindowSettingCard.Header" xml:space="preserve"><value>恢复窗口位置</value></data>
+  <data name="RestoreWindowSettingCard.Description" xml:space="preserve"><value>记住上次大小和位置。</value></data>
+  <data name="ResumeOnLaunchSettingCard.Header" xml:space="preserve"><value>启动时恢复下载任务</value></data>
+  <data name="ResumeOnLaunchSettingCard.Description" xml:space="preserve"><value>继续上次暂停的未完成任务。</value></data>
+  <data name="ExitCleanupSettingCard.Header" xml:space="preserve"><value>退出时清理已完成</value></data>
+  <data name="ExitCleanupSettingCard.Description" xml:space="preserve"><value>仅清除记录，不删除文件。</value></data>
+  <data name="PauseActiveOnExitSettingCard.Header" xml:space="preserve"><value>退出时暂停下载</value></data>
+  <data name="PauseActiveOnExitSettingCard.Description" xml:space="preserve"><value>退出前暂停正在传输的任务。</value></data>
+  <data name="CloseBehaviorSettingCard.Header" xml:space="preserve"><value>关闭到托盘</value></data>
+  <data name="CloseBehaviorSettingCard.Description" xml:space="preserve"><value>关闭窗口后继续后台运行。</value></data>
+  <data name="TaskbarProgressSettingCard.Header" xml:space="preserve"><value>任务栏进度</value></data>
+  <data name="TaskbarProgressSettingCard.Description" xml:space="preserve"><value>显示整体下载进度。</value></data>
+  <data name="ThemeSettingCard.Header" xml:space="preserve"><value>外观主题</value></data>
+  <data name="ThemeSettingCard.Description" xml:space="preserve"><value>跟随 Windows 主题，或固定为浅色/深色。</value></data>
+  <data name="NotificationsSettingCard.Header" xml:space="preserve"><value>启用系统通知</value></data>
+  <data name="NotificationsSettingCard.Description" xml:space="preserve"><value>允许 OmniDown 通过 Windows 通知显示下载事件。</value></data>
+  <data name="DownloadStartNotificationSettingCard.Header" xml:space="preserve"><value>下载开始时通知</value></data>
+  <data name="DownloadStartNotificationSettingCard.Description" xml:space="preserve"><value>添加任务并开始交给 aria2 处理时显示通知。</value></data>
+  <data name="DownloadCompleteNotificationSettingCard.Header" xml:space="preserve"><value>下载完成时通知</value></data>
+  <data name="DownloadCompleteNotificationSettingCard.Description" xml:space="preserve"><value>任务完成或失败时显示通知。</value></data>
+  <data name="AutoShutdownSettingCard.Header" xml:space="preserve"><value>所有下载完成后自动关机</value></data>
+  <data name="AutoShutdownSettingCard.Description" xml:space="preserve"><value>当前传输全部完成后执行 Windows 关机。</value></data>
+  <data name="PreventSleepSettingCard.Header" xml:space="preserve"><value>下载时阻止系统休眠</value></data>
+  <data name="PreventSleepSettingCard.Description" xml:space="preserve"><value>有任务正在下载时保持系统唤醒，下载结束后自动恢复。</value></data>
+
 </root>

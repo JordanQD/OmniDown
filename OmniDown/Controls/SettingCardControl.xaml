@@ -27,7 +27,7 @@
             </StackPanel>
             <ContentPresenter
                 Grid.Column="2"
-                MinWidth="160"
+                MinWidth="120"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Center"
                 Content="{x:Bind ActionContent, Mode=OneWay}" />
