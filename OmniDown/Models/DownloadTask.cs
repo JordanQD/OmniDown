@@ -29,6 +29,7 @@ public sealed class DownloadTask : INotifyPropertyChanged
     private long _uploadSpeed;
     private bool _isPeerTransfer;
     private bool _isMetadataTransfer;
+    private bool _isAria2SessionAttached;
     private DateTimeOffset _createdAt = DateTimeOffset.Now;
     private bool _isSelected;
 
@@ -261,6 +262,12 @@ public sealed class DownloadTask : INotifyPropertyChanged
     {
         get => _isMetadataTransfer;
         set => SetProperty(ref _isMetadataTransfer, value);
+    }
+
+    public bool IsAria2SessionAttached
+    {
+        get => _isAria2SessionAttached;
+        set => SetProperty(ref _isAria2SessionAttached, value);
     }
 
     public Visibility NormalSpeedVisibility => IsPeerTransfer ? Visibility.Collapsed : Visibility.Visible;

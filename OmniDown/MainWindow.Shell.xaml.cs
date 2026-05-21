@@ -524,11 +524,15 @@ namespace OmniDown
                 UpdateAriaStatus();
                 if (!result.Started)
                 {
+                    ApplyTaskFilter(_currentTaskFilter);
+                    UpdateDashboard();
                     ShowMessage(result.Message, InfoBarSeverity.Warning);
                 }
                 else
                 {
                     await ResumeDownloadsOnLaunchAsync();
+                    ApplyTaskFilter(_currentTaskFilter);
+                    UpdateDashboard();
                 }
             }
             finally
@@ -545,21 +549,51 @@ namespace OmniDown
             }
 
             DownloadTask[] pausedTasks = Tasks
-                .Where(task => IsPausedTask(task) && IsDownloadingTask(task))
+                .Where(task => task.IsAria2SessionAttached && IsPausedTask(task) && IsDownloadingTask(task))
                 .ToArray();
             if (pausedTasks.Length == 0)
             {
                 return;
             }
 
+            HashSet<string> tasksAwaitingProgress = pausedTasks
+                .Where(task => task.CompletedLength > 0)
+                .Select(task => task.Gid)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
             try
             {
                 await _downloadCoordinator.ResumeAsync(pausedTasks);
                 await RefreshDownloadsAsync();
+                await WaitForResumedTaskProgressAsync(tasksAwaitingProgress);
             }
             catch (Exception ex)
             {
                 ShowMessage($"恢复下载任务失败：{ex.Message}", InfoBarSeverity.Warning);
+            }
+        }
+
+        private async Task WaitForResumedTaskProgressAsync(HashSet<string> taskGids)
+        {
+            if (taskGids.Count == 0)
+            {
+                return;
+            }
+
+            DateTimeOffset deadline = DateTimeOffset.Now.AddSeconds(8);
+            while (DateTimeOffset.Now < deadline)
+            {
+                if (taskGids.All(gid =>
+                    Tasks.FirstOrDefault(task => string.Equals(task.Gid, gid, StringComparison.OrdinalIgnoreCase)) is not { } task ||
+                    task.CompletedLength > 0 ||
+                    IsCompletedTask(task) ||
+                    IsIssueTask(task)))
+                {
+                    return;
+                }
+
+                await Task.Delay(250);
+                await RefreshDownloadsAsync();
             }
         }
 

@@ -2148,7 +2148,7 @@
                                                         Text="清空 aria2 会话" />
                                                     <TextBlock
                                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                        Text="删除本地 download.session，下次启动不再恢复 aria2 会话中的遗留任务。"
+                                                        Text="删除本地 download.session 和 tasks.json，下次启动不再恢复 aria2 会话中的遗留任务。"
                                                         TextWrapping="WrapWholeWords" />
                                                 </StackPanel>
                                                 <Button

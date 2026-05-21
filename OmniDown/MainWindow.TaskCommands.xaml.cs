@@ -544,6 +544,10 @@ namespace OmniDown
             }
             catch (Exception ex)
             {
+                ApplyTaskFilter(_currentTaskFilter);
+                UpdateDashboard();
+                UpdateGlobalSpeedsFromTasks();
+                UpdateSelectionCommands();
                 ShowMessage(Strings.Format("TaskOperationFailedMessage", ex.Message), InfoBarSeverity.Error);
             }
         }

@@ -121,6 +121,7 @@ namespace OmniDown
             HookSettingsPageEvents();
             TasksListView.ItemsSource = _visibleTasks;
             NotificationHistoryListView.ItemsSource = _statusMessages;
+            SetTaskListLoading(true);
             _windowHandle = WindowNative.GetWindowHandle(this);
             SetWindowIcon();
             LoadGeneralSettings();
@@ -158,9 +159,7 @@ namespace OmniDown
             UpdateSearchPlaceholder();
             UpdateDownloadsHeader("Home");
             UpdateStatsVisibility("Home");
-            ApplyTaskFilter("Home");
             ApplySettingsFilter();
-            SetTaskListLoading(true);
             UpdateDashboard();
             UpdateGlobalSpeeds(0, 0);
             UpdateGlobalSpeedLimitText();

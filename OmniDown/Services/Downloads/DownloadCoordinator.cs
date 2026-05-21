@@ -52,6 +52,7 @@ public sealed class DownloadCoordinator
             Status = "Waiting",
             IsPeerTransfer = IsPeerTransfer(sourceUri),
             IsMetadataTransfer = IsMetadataTransfer(sourceUri),
+            IsAria2SessionAttached = true,
             Progress = 0
         };
 
@@ -84,6 +85,7 @@ public sealed class DownloadCoordinator
             Status = "Waiting",
             IsPeerTransfer = true,
             IsMetadataTransfer = false,
+            IsAria2SessionAttached = true,
             TotalLength = metadata.Files
                 .Where(file => selectedFileIndexes.Count == 0 || selectedFileIndexes.Contains(file.Index))
                 .Sum(file => file.Length),
@@ -95,6 +97,16 @@ public sealed class DownloadCoordinator
         return task;
     }
 
+    public void ClearTaskCache()
+    {
+        if (File.Exists(_taskCachePath))
+        {
+            File.Delete(_taskCachePath);
+        }
+
+        _tasks.Clear();
+    }
+
     public async Task<DownloadSnapshot> RefreshAsync(CancellationToken cancellationToken = default)
     {
         RemoveRemovedTasks();
@@ -103,6 +115,10 @@ public sealed class DownloadCoordinator
         remoteTasks.AddRange(await _rpcClient.TellActiveAsync(cancellationToken));
         remoteTasks.AddRange(await _rpcClient.TellWaitingAsync(cancellationToken));
         remoteTasks.AddRange(await _rpcClient.TellStoppedAsync(cancellationToken));
+        HashSet<string> remoteGids = remoteTasks
+            .Select(task => task.Gid)
+            .Where(gid => !string.IsNullOrWhiteSpace(gid))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         foreach (Aria2TaskStatus remoteTask in remoteTasks)
         {
@@ -113,6 +129,8 @@ public sealed class DownloadCoordinator
             }
         }
 
+        ReconcileDetachedTasks(remoteGids);
+
         Aria2GlobalStat stat = await _rpcClient.GetGlobalStatAsync(cancellationToken);
         return new DownloadSnapshot(
             ActiveCount: ParseLong(stat.NumActive),
@@ -122,22 +140,64 @@ public sealed class DownloadCoordinator
 
     public async Task PauseAsync(IEnumerable<DownloadTask> tasks, CancellationToken cancellationToken = default)
     {
+        int detachedCount = 0;
+        int operatedCount = 0;
         foreach (DownloadTask task in tasks.Where(task => !string.IsNullOrWhiteSpace(task.Gid)))
         {
-            await _rpcClient.PauseAsync(task.Gid, cancellationToken);
+            if (!task.IsAria2SessionAttached)
+            {
+                detachedCount++;
+                continue;
+            }
+
+            try
+            {
+                await _rpcClient.PauseAsync(task.Gid, cancellationToken);
+            }
+            catch (Exception ex) when (IsGidNotFoundException(ex))
+            {
+                MarkTaskDetached(task);
+                detachedCount++;
+                continue;
+            }
+
+            operatedCount++;
             task.Status = "Paused";
             task.DownloadSpeed = 0;
             task.UploadSpeed = 0;
         }
+
+        ThrowIfOnlyDetachedTasks(operatedCount, detachedCount);
     }
 
     public async Task ResumeAsync(IEnumerable<DownloadTask> tasks, CancellationToken cancellationToken = default)
     {
+        int detachedCount = 0;
+        int operatedCount = 0;
         foreach (DownloadTask task in tasks.Where(task => !string.IsNullOrWhiteSpace(task.Gid)))
         {
-            await _rpcClient.UnpauseAsync(task.Gid, cancellationToken);
+            if (!task.IsAria2SessionAttached)
+            {
+                detachedCount++;
+                continue;
+            }
+
+            try
+            {
+                await _rpcClient.UnpauseAsync(task.Gid, cancellationToken);
+            }
+            catch (Exception ex) when (IsGidNotFoundException(ex))
+            {
+                MarkTaskDetached(task);
+                detachedCount++;
+                continue;
+            }
+
+            operatedCount++;
             task.Status = "Waiting";
         }
+
+        ThrowIfOnlyDetachedTasks(operatedCount, detachedCount);
     }
 
     public async Task RecoverAsync(IEnumerable<DownloadTask> tasks, int splitCount = 16, CancellationToken cancellationToken = default)
@@ -170,6 +230,7 @@ public sealed class DownloadCoordinator
             task.SaveDirectory = saveDirectory;
             task.LocalFilePath = string.IsNullOrWhiteSpace(task.Name) ? string.Empty : Path.Combine(saveDirectory, task.Name);
             task.Status = "Waiting";
+            task.IsAria2SessionAttached = true;
             task.Progress = 0;
             task.CompletedLength = 0;
             task.DownloadSpeed = 0;
@@ -219,6 +280,11 @@ public sealed class DownloadCoordinator
 
     private async Task RemoveTaskFromAria2Async(DownloadTask task, CancellationToken cancellationToken)
     {
+        if (!task.IsAria2SessionAttached)
+        {
+            return;
+        }
+
         if (IsResultOnlyStatus(task.Status))
         {
             try
@@ -345,6 +411,7 @@ public sealed class DownloadCoordinator
             _tasks.Add(task);
         }
 
+        task.IsAria2SessionAttached = true;
         long totalLength = ParseLong(remoteTask.TotalLength);
         long completedLength = ParseLong(remoteTask.CompletedLength);
         string normalizedStatus = NormalizeStatus(remoteTask.Status);
@@ -409,6 +476,57 @@ public sealed class DownloadCoordinator
         }
 
         SaveTaskCache();
+    }
+
+    private void ReconcileDetachedTasks(HashSet<string> remoteGids)
+    {
+        bool changed = false;
+        foreach (DownloadTask task in _tasks)
+        {
+            if (string.IsNullOrWhiteSpace(task.Gid))
+            {
+                continue;
+            }
+
+            bool isAttached = remoteGids.Contains(task.Gid);
+            if (task.IsAria2SessionAttached != isAttached)
+            {
+                task.IsAria2SessionAttached = isAttached;
+                changed = true;
+            }
+
+            if (!isAttached)
+            {
+                task.DownloadSpeed = 0;
+                task.UploadSpeed = 0;
+            }
+        }
+
+        if (changed)
+        {
+            SaveTaskCache();
+        }
+    }
+
+    private static void MarkTaskDetached(DownloadTask task)
+    {
+        task.IsAria2SessionAttached = false;
+        task.DownloadSpeed = 0;
+        task.UploadSpeed = 0;
+    }
+
+    private static void ThrowIfOnlyDetachedTasks(int operatedCount, int detachedCount)
+    {
+        if (operatedCount == 0 && detachedCount > 0)
+        {
+            throw new InvalidOperationException("选中的任务已不在 aria2 会话中，任务记录已保留。");
+        }
+    }
+
+    private static bool IsGidNotFoundException(Exception ex)
+    {
+        return ex.Message.Contains("GID", StringComparison.OrdinalIgnoreCase) &&
+            ex.Message.Contains("is not found", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string ResolveTaskName(string sourceUri, string requestedName)
@@ -735,6 +853,7 @@ public sealed class DownloadCoordinator
                     TotalLength = cachedTask.TotalLength,
                     IsPeerTransfer = cachedTask.IsPeerTransfer,
                     IsMetadataTransfer = cachedTask.IsMetadataTransfer,
+                    IsAria2SessionAttached = false,
                     CreatedAt = cachedTask.CreatedAt
                 });
             }

@@ -817,7 +817,7 @@ namespace OmniDown
             {
                 XamlRoot = Content.XamlRoot,
                 Title = "清空 aria2 会话？",
-                Content = "这会删除本地 download.session。正在运行的下载不会被删除，但建议先停止 aria2 后再清空。",
+                Content = "这会删除本地 download.session 和 tasks.json。正在运行的下载不会被删除，但建议先停止 aria2 后再清空。",
                 PrimaryButtonText = "清空",
                 CloseButtonText = "取消",
                 DefaultButton = ContentDialogButton.Close
@@ -836,7 +836,14 @@ namespace OmniDown
                     File.Delete(sessionPath);
                 }
 
-                ShowMessage("aria2 会话已清空。", InfoBarSeverity.Success);
+                _downloadCoordinator.ClearTaskCache();
+                ApplyTaskFilter(_currentTaskFilter);
+                UpdateDashboard();
+                UpdateTaskDetailsPane();
+                UpdateTaskbarProgressFromTasks();
+                UpdateSystemSleepOverride();
+
+                ShowMessage("aria2 会话和任务缓存已清空。", InfoBarSeverity.Success);
             }
             catch (Exception ex)
             {
