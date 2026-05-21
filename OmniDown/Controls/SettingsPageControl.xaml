@@ -31,7 +31,6 @@
                 x:Name="SettingsContentScrollViewer"
                 Grid.Row="1"
                 Padding="0,0,8,0"
-                HorizontalContentAlignment="Center"
                 HorizontalScrollBarVisibility="Disabled"
                 VerticalScrollBarVisibility="Auto">
                 <Grid
