@@ -234,7 +234,6 @@
                                             <local:SettingCardControl.ActionContent>
                                                 <ComboBox
                                                     x:Name="ThemeComboBox"
-                                                    Width="160"
                                                     HorizontalAlignment="Right"
                                                     AutomationProperties.AutomationId="ThemeComboBox"
                                                     SelectionChanged="ThemeComboBox_SelectionChanged">

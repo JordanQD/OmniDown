@@ -1,0 +1,228 @@
+<UserControl
+    x:Class="OmniDown.Controls.AboutSettingsSectionControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <StackPanel
+        x:Name="AboutSettingsContent"
+        Spacing="0">
+        <TextBlock
+            Margin="4,0,4,20"
+            FontSize="28"
+            FontWeight="SemiBold"
+            Text="关于" />
+        <Border
+            x:Name="AboutAppCard"
+            Padding="16"
+            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="8,8,0,0">
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                <Image
+                    Width="32"
+                    Height="32"
+                    VerticalAlignment="Center"
+                    Source="/Assets/Square44x44Logo.targetsize-256_altform-unplated.png" />
+                <StackPanel
+                    Grid.Column="1"
+                    Spacing="2">
+                    <TextBlock
+                        FontSize="18"
+                        FontWeight="SemiBold"
+                        Text="OmniDown" />
+                    <TextBlock
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="A WinUI download manager powered by aria2."
+                        TextWrapping="WrapWholeWords"
+                        x:Uid="AboutAppDescriptionText" />
+                </StackPanel>
+                <TextBlock
+                    x:Name="AboutVersionText"
+                    Grid.Column="2"
+                    VerticalAlignment="Center"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Text="1.0.0" />
+            </Grid>
+        </Border>
+
+        <Border
+            x:Name="AboutCloneCard"
+            Margin="0,-1,0,0"
+            Padding="16"
+            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1">
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                <FontIcon
+                    Width="24"
+                    VerticalAlignment="Center"
+                    Glyph="&#xE943;" />
+                <StackPanel
+                    Grid.Column="1"
+                    Spacing="3">
+                    <TextBlock
+                        FontWeight="SemiBold"
+                        Text="To clone this repository"
+                        x:Uid="AboutCloneTitleText" />
+                    <TextBlock
+                        x:Name="AboutCloneCommandText"
+                        FontFamily="Cascadia Mono, Consolas"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="git clone https://github.com/JordanQD/OmniDown.git"
+                        TextWrapping="WrapWholeWords" />
+                </StackPanel>
+                <Button
+                    Grid.Column="2"
+                    Width="40"
+                    Height="40"
+                    MinWidth="40"
+                    Padding="0"
+                    Click="CopyCloneCommandButton_Click"
+                    ToolTipService.ToolTip="Copy">
+                    <FontIcon Glyph="&#xE8C8;" />
+                </Button>
+            </Grid>
+        </Border>
+
+        <Border
+            x:Name="AboutIssueCard"
+            Margin="0,-1,0,0"
+            Padding="16"
+            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1">
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                <FontIcon
+                    Width="24"
+                    VerticalAlignment="Center"
+                    Glyph="&#xE7BA;" />
+                <TextBlock
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    FontWeight="SemiBold"
+                    Text="File a bug or request a feature"
+                    x:Uid="AboutIssueTitleText" />
+                <Button
+                    Grid.Column="2"
+                    Width="40"
+                    Height="40"
+                    MinWidth="40"
+                    Padding="0"
+                    Click="OpenAboutLinkButton_Click"
+                    Tag="https://github.com/JordanQD/OmniDown/issues"
+                    ToolTipService.ToolTip="Open">
+                    <FontIcon Glyph="&#xE8A7;" />
+                </Button>
+            </Grid>
+        </Border>
+
+        <Border
+            x:Name="AboutReferencesCard"
+            Margin="0,-1,0,0"
+            Padding="16"
+            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="0">
+            <StackPanel Spacing="12">
+                <TextBlock
+                    FontWeight="SemiBold"
+                    Text="Dependencies &amp; references"
+                    x:Uid="AboutReferencesTitleText" />
+                <ItemsControl>
+                    <HyperlinkButton
+                        Click="OpenAboutLinkButton_Click"
+                        Content="files-community/Files"
+                        Tag="https://github.com/files-community/Files" />
+                    <HyperlinkButton
+                        Click="OpenAboutLinkButton_Click"
+                        Content="AnInsomniacy/motrix-next"
+                        Tag="https://github.com/AnInsomniacy/motrix-next" />
+                    <HyperlinkButton
+                        Click="OpenAboutLinkButton_Click"
+                        Content="aria2/aria2"
+                        Tag="https://github.com/aria2/aria2" />
+                    <HyperlinkButton
+                        Click="OpenAboutLinkButton_Click"
+                        Content="Devolutions/UniGetUI"
+                        Tag="https://github.com/Devolutions/UniGetUI" />
+                    <HyperlinkButton
+                        Click="OpenAboutLinkButton_Click"
+                        Content="microsoft/WinUI-Gallery"
+                        Tag="https://github.com/microsoft/WinUI-Gallery" />
+                    <HyperlinkButton
+                        Click="OpenAboutLinkButton_Click"
+                        Content="microsoft/WindowsAppSDK"
+                        Tag="https://github.com/microsoft/WindowsAppSDK" />
+                    <HyperlinkButton
+                        Click="OpenAboutLinkButton_Click"
+                        Content="microsoft/microsoft-ui-xaml"
+                        Tag="https://github.com/microsoft/microsoft-ui-xaml" />
+                </ItemsControl>
+            </StackPanel>
+        </Border>
+
+        <Border
+            x:Name="AboutTrackerSourcesCard"
+            Margin="0,-1,0,0"
+            Padding="16"
+            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="0,0,8,8">
+            <StackPanel Spacing="12">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        FontWeight="SemiBold"
+                        Text="Tracker sources"
+                        x:Uid="AboutTrackerSourcesHeaderText" />
+                    <TextBlock
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="OmniDown can sync BitTorrent tracker lists from these public projects."
+                        TextTrimming="CharacterEllipsis"
+                        TextWrapping="NoWrap"
+                        x:Uid="AboutTrackerSourcesDescriptionText" />
+                </Grid>
+                <ItemsControl>
+                    <HyperlinkButton
+                        Click="OpenAboutLinkButton_Click"
+                        Content="XIU2/TrackersListCollection"
+                        Tag="https://github.com/XIU2/TrackersListCollection" />
+                    <HyperlinkButton
+                        Click="OpenAboutLinkButton_Click"
+                        Content="ngosang/trackerslist"
+                        Tag="https://github.com/ngosang/trackerslist" />
+                </ItemsControl>
+            </StackPanel>
+        </Border>
+
+        <Border
+            x:Name="AboutLicenseCard"
+            Margin="0,18,0,0"
+            Padding="16"
+            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="8">
+            <StackPanel Spacing="12">
+                <TextBlock
+                    Text="THIS SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND. THIRD-PARTY COMPONENTS ARE LICENSED BY THEIR RESPECTIVE OWNERS."
+                    TextWrapping="WrapWholeWords"
+                    x:Uid="AboutWarrantyText" />
+                <HyperlinkButton
+                    Click="OpenAboutLinkButton_Click"
+                    Content="OmniDown license"
+                    Tag="https://github.com/JordanQD/OmniDown/blob/main/LICENSE"
+                    x:Uid="AboutLicenseLink" />
+                <HyperlinkButton
+                    Click="OpenAboutLinkButton_Click"
+                    Content="Third-party notices"
+                    Tag="https://github.com/JordanQD/OmniDown/blob/main/THIRD_PARTY_NOTICES.md"
+                    x:Uid="AboutThirdPartyLink" />
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>

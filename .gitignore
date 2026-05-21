@@ -17,6 +17,7 @@
 
 ## Build output and intermediate files
 [Bb]in/
+.write-test/
 [Oo]bj/
 [Oo]ut/
 [Dd]ebug/
@@ -120,6 +121,9 @@ OpenCover/
 _NCrunch_*
 .*crunch*.local.xml
 nCrunchTemp_*
+
+## AI / coding assistant local state
+.claude/
 
 ## Tooling add-ins and local caches
 _ReSharper*/

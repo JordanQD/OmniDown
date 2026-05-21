@@ -150,7 +150,6 @@ namespace OmniDown
         private void HookSettingsPageEvents()
         {
             SettingsPage.SectionSelectionChanged += SettingsSectionListView_SelectionChanged;
-            SettingsPage.SettingToggleSwitchToggled += SettingToggleSwitch_Toggled;
             SettingsPage.GeneralSettingChanged += SettingsPage_GeneralSettingChanged;
             SettingsPage.CloseBehaviorSettingChanged += SettingsPage_CloseBehaviorSettingChanged;
             SettingsPage.BrowseDownloadDirectoryRequested += BrowseDownloadDirectoryButton_Click;
@@ -237,33 +236,6 @@ namespace OmniDown
         private async void SyncBtTrackerButton_Click(object sender, RoutedEventArgs e)
         {
             await SyncBitTorrentTrackersAsync();
-        }
-
-        private void SettingToggleSwitch_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (sender is not ToggleSwitch toggleSwitch)
-            {
-                return;
-            }
-
-            UpdateToggleStateText(toggleSwitch);
-
-            if (ReferenceEquals(toggleSwitch, UseSystemProxyCheckBox))
-            {
-                UseSystemProxyCheckBox_Changed(sender, e);
-            }
-
-            if (IsAdvancedSettingsToggle(toggleSwitch))
-            {
-                if (_isLoadingAdvancedSettings)
-                {
-                    return;
-                }
-
-                UpdateClipboardTypeControls();
-                ShowSettingsSaveTeachingTip();
-                return;
-            }
         }
 
         private async void ApplySpeedLimitButton_Click(object sender, RoutedEventArgs e)
@@ -485,7 +457,6 @@ namespace OmniDown
             }
 
             toggleSwitch.IsOn = isOn;
-            UpdateToggleStateText(toggleSwitch);
         }
 
         private void SettingsPage_CloseBehaviorSettingChanged(object? sender, CloseBehaviorSettingChangedEventArgs args)
@@ -497,44 +468,6 @@ namespace OmniDown
 
             _settingsPageViewModel.UpdateCloseBehavior(args.MinimizeToTrayOnClose);
             SaveCloseBehaviorSettings();
-        }
-
-        private void UpdateToggleStateText(ToggleSwitch? toggleSwitch)
-        {
-            if (toggleSwitch is null)
-            {
-                return;
-            }
-
-            TextBlock? stateText = GetToggleStateText(toggleSwitch);
-            if (stateText is not null)
-            {
-                SetToggleStateText(stateText, toggleSwitch.IsOn);
-            }
-        }
-
-        private static void SetToggleStateText(TextBlock stateText, bool isOn)
-        {
-            stateText.Text = isOn ? "开" : "关";
-        }
-
-        private TextBlock? GetToggleStateText(ToggleSwitch toggleSwitch)
-        {
-            if (ReferenceEquals(toggleSwitch, ContinueDownloadToggleSwitch)) return ContinueDownloadStateText;
-            if (ReferenceEquals(toggleSwitch, AutoDeleteStaleRecordsToggleSwitch)) return AutoDeleteStaleRecordsStateText;
-            if (ReferenceEquals(toggleSwitch, DeleteTorrentAfterCompleteToggleSwitch)) return DeleteTorrentAfterCompleteStateText;
-            if (ReferenceEquals(toggleSwitch, BtAutoDownloadToggleSwitch)) return BtAutoDownloadStateText;
-            if (ReferenceEquals(toggleSwitch, BtForceEncryptionToggleSwitch)) return BtForceEncryptionStateText;
-            if (ReferenceEquals(toggleSwitch, BtAutoSyncTrackerToggleSwitch)) return BtAutoSyncTrackerStateText;
-            if (ReferenceEquals(toggleSwitch, UseSystemProxyCheckBox)) return UseSystemProxyStateText;
-            if (ReferenceEquals(toggleSwitch, CustomProxyToggleSwitch)) return CustomProxyStateText;
-            if (ReferenceEquals(toggleSwitch, EnableUpnpToggleSwitch)) return EnableUpnpStateText;
-            if (ReferenceEquals(toggleSwitch, ExtensionAutoSubmitToggleSwitch)) return ExtensionAutoSubmitStateText;
-            if (ReferenceEquals(toggleSwitch, ClipboardDetectionToggleSwitch)) return ClipboardDetectionStateText;
-            if (ReferenceEquals(toggleSwitch, ProtocolMagnetToggleSwitch)) return ProtocolMagnetStateText;
-            if (ReferenceEquals(toggleSwitch, ProtocolThunderToggleSwitch)) return ProtocolThunderStateText;
-            if (ReferenceEquals(toggleSwitch, ProtocolOmniDownToggleSwitch)) return ProtocolOmniDownStateText;
-            return null;
         }
 
         private void ApplyThemeSetting(string theme)
@@ -646,6 +579,11 @@ namespace OmniDown
 
             UpdateNetworkDependentUi();
             ShowSettingsSaveTeachingTip();
+
+            if (ReferenceEquals(sender, UseSystemProxyCheckBox))
+            {
+                UpdateDebugStatus();
+            }
         }
 
         private void DetectSystemProxyButton_Click(object sender, RoutedEventArgs e)
@@ -745,6 +683,8 @@ namespace OmniDown
             }
 
             ShowSettingsSaveTeachingTip();
+            UpdateClipboardTypeControls();
+
             if (sender is ToggleSwitch toggleSwitch &&
                 toggleSwitch.IsOn &&
                 (ReferenceEquals(toggleSwitch, ProtocolMagnetToggleSwitch) ||
@@ -1224,20 +1164,6 @@ namespace OmniDown
             return LogLevelComboBox?.SelectedItem is ComboBoxItem item
                 ? item.Tag?.ToString() ?? AdvancedSettings.Default.LogLevel
                 : AdvancedSettings.Default.LogLevel;
-        }
-
-        private static bool IsAdvancedSettingsToggle(ToggleSwitch toggleSwitch)
-        {
-            return toggleSwitch.Name is "ExtensionAutoSubmitToggleSwitch"
-                or "ClipboardDetectionToggleSwitch"
-                or "ClipboardHttpToggleSwitch"
-                or "ClipboardFtpToggleSwitch"
-                or "ClipboardMagnetToggleSwitch"
-                or "ClipboardThunderToggleSwitch"
-                or "ClipboardBtHashToggleSwitch"
-                or "ProtocolMagnetToggleSwitch"
-                or "ProtocolThunderToggleSwitch"
-                or "ProtocolOmniDownToggleSwitch";
         }
 
         private void UpdateClipboardTypeControls()
