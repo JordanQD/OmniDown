@@ -46,7 +46,6 @@ namespace OmniDown
 {
     public sealed partial class MainWindow
     {
-        private ListView SettingsSectionListView => SettingsPage.SettingsSectionListViewControl;
         private ScrollViewer SettingsContentScrollViewer => SettingsPage.SettingsContentScrollViewerControl;
         private FrameworkElement GeneralSettingsContent => SettingsPage.GeneralSettingsContentControl;
         private FrameworkElement DownloadSettingsContent => SettingsPage.DownloadSettingsContentControl;
@@ -149,7 +148,7 @@ namespace OmniDown
 
         private void HookSettingsPageEvents()
         {
-            SettingsPage.SectionSelectionChanged += SettingsSectionListView_SelectionChanged;
+            SettingsPage.SectionNavigationRequested += SettingsPage_SectionNavigationRequested;
             SettingsPage.GeneralSettingChanged += SettingsPage_GeneralSettingChanged;
             SettingsPage.CloseBehaviorSettingChanged += SettingsPage_CloseBehaviorSettingChanged;
             SettingsPage.BrowseDownloadDirectoryRequested += BrowseDownloadDirectoryButton_Click;

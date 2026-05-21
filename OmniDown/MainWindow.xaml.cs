@@ -143,7 +143,6 @@ namespace OmniDown
             _statusMessageTimer.Interval = TimeSpan.FromSeconds(3);
             _statusMessageTimer.Tick += StatusMessageTimer_Tick;
 
-            SettingsSectionListView.SelectedIndex = 0;
             ShowSettingsSection("General");
             InitializeAboutSection();
 

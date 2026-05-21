@@ -3,65 +3,33 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:OmniDown.Controls">
-    <Grid
-        x:Name="SettingsPageRoot"
-        RowDefinitions="*">
+
+    <Grid x:Name="SettingsPageRoot" RowDefinitions="*">
+        <!-- Home page -->
+        <local:SettingsHomePageControl
+            x:Name="SettingsHomePage"
+            Visibility="Visible" />
+
+        <!-- Sub-page: breadcrumb + section content -->
         <Grid
-            ColumnDefinitions="220,*"
-            ColumnSpacing="24">
-            <ListView
-                x:Name="SettingsSectionListView"
-                Padding="0"
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="1"
-                CornerRadius="8"
-                SelectionChanged="SettingsSectionListView_SelectionChanged"
-                SelectionMode="Single">
-                <ListViewItem Tag="General">
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <SymbolIcon Symbol="Setting" />
-                        <TextBlock Text="通用" />
-                    </StackPanel>
-                </ListViewItem>
-                <ListViewItem Tag="Download">
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <SymbolIcon Symbol="Download" />
-                        <TextBlock Text="下载" />
-                    </StackPanel>
-                </ListViewItem>
-                <ListViewItem Tag="BitTorrent">
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon Glyph="&#xE968;" />
-                        <TextBlock Text="BitTorrent" />
-                    </StackPanel>
-                </ListViewItem>
-                <ListViewItem Tag="Network">
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon Glyph="&#xE774;" />
-                        <TextBlock Text="网络" />
-                    </StackPanel>
-                </ListViewItem>
-                <ListViewItem Tag="Advanced">
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon Glyph="&#xE713;" />
-                        <TextBlock Text="高级" />
-                    </StackPanel>
-                </ListViewItem>
-                <ListViewItem Tag="About">
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon Glyph="&#xE946;" />
-                        <TextBlock
-                            Text="About"
-                            x:Uid="AboutSettingsNavText" />
-                    </StackPanel>
-                </ListViewItem>
-            </ListView>
+            x:Name="SettingsSectionPanel"
+            RowDefinitions="Auto,*"
+            RowSpacing="12"
+            Visibility="Collapsed">
+            <Button
+                x:Name="SettingsBackButton"
+                HorizontalAlignment="Left"
+                Click="SettingsBackButton_Click"
+                Style="{StaticResource DefaultButtonStyle}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon FontSize="14" Glyph="&#xE76B;" />
+                    <TextBlock Text="设置" />
+                </StackPanel>
+            </Button>
 
             <ScrollViewer
                 x:Name="SettingsContentScrollViewer"
-                Grid.Column="1"
-                IsTabStop="True"
+                Grid.Row="1"
                 Padding="0,0,8,0"
                 HorizontalContentAlignment="Center"
                 HorizontalScrollBarVisibility="Disabled"
