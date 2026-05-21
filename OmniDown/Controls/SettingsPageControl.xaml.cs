@@ -8,9 +8,24 @@ namespace OmniDown.Controls;
 
 public sealed partial class SettingsPageControl : UserControl
 {
+    private string _currentSection = string.Empty;
+    private readonly Dictionary<string, FrameworkElement> _sectionContents;
+
     public SettingsPageControl()
     {
         InitializeComponent();
+
+        _sectionContents = new Dictionary<string, FrameworkElement>
+        {
+            ["General"] = GeneralSettingsContent,
+            ["Download"] = DownloadSettingsContent,
+            ["BitTorrent"] = BitTorrentSettingsContent,
+            ["Network"] = NetworkSettingsContent,
+            ["Advanced"] = AdvancedSettingsContent,
+            ["About"] = AboutSettingsContent
+        };
+
+        SettingsHomePage.SectionRequested += OnSectionRequested;
 
         // Forward events from section controls
         GeneralSettingsContent.GeneralSettingChanged += (_, args) => GeneralSettingChanged?.Invoke(this, args);
@@ -40,8 +55,57 @@ public sealed partial class SettingsPageControl : UserControl
         AboutSettingsContent.OpenAboutLinkRequested += (_, args) => OpenAboutLinkRequested?.Invoke(this, args);
     }
 
-    // Layout controls
-    internal ListView SettingsSectionListViewControl => SettingsSectionListView;
+    internal void NavigateTo(string tag)
+    {
+        if (string.IsNullOrWhiteSpace(tag) || tag == "Home")
+        {
+            _currentSection = string.Empty;
+            ShowHome();
+            return;
+        }
+
+        _currentSection = tag;
+        ShowSection(tag);
+    }
+
+    private void ShowHome()
+    {
+        // Hide all section contents
+        foreach (FrameworkElement content in _sectionContents.Values)
+        {
+            content.Visibility = Visibility.Collapsed;
+        }
+
+        SettingsSectionPanel.Visibility = Visibility.Collapsed;
+        SettingsHomePage.Visibility = Visibility.Visible;
+    }
+
+    private void ShowSection(string tag)
+    {
+        SettingsHomePage.Visibility = Visibility.Collapsed;
+
+        // Show only the requested section
+        foreach (KeyValuePair<string, FrameworkElement> kvp in _sectionContents)
+        {
+            kvp.Value.Visibility = kvp.Key == tag ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        SettingsSectionPanel.Visibility = Visibility.Visible;
+    }
+
+    private void OnSectionRequested(object? sender, string tag)
+    {
+        NavigateTo(tag);
+        SectionNavigationRequested?.Invoke(this, tag);
+    }
+
+    private void SettingsBackButton_Click(object sender, RoutedEventArgs e)
+    {
+        NavigateTo("Home");
+        SectionNavigationRequested?.Invoke(this, "Home");
+    }
+
+    // Layout controls (kept for MainWindow compatibility)
     internal ScrollViewer SettingsContentScrollViewerControl => SettingsContentScrollViewer;
 
     // Section content containers
@@ -155,7 +219,7 @@ public sealed partial class SettingsPageControl : UserControl
     internal TextBlock AboutCloneCommandTextControl => AboutSettingsContent.AboutCloneCommandTextControl;
 
     // Events
-    internal event SelectionChangedEventHandler? SectionSelectionChanged;
+    internal event EventHandler<string>? SectionNavigationRequested;
     internal event EventHandler<GeneralSettingChangedEventArgs>? GeneralSettingChanged;
     internal event EventHandler<CloseBehaviorSettingChangedEventArgs>? CloseBehaviorSettingChanged;
     internal event RoutedEventHandler? BrowseDownloadDirectoryRequested;
@@ -184,6 +248,7 @@ public sealed partial class SettingsPageControl : UserControl
 
     internal void ApplySearchFilter(string query)
     {
+        // When on home page or searching, apply filter to all sections
         foreach (SettingSearchEntry entry in GetSearchEntries())
         {
             entry.ApplyFilter(query);
@@ -245,8 +310,10 @@ public sealed partial class SettingsPageControl : UserControl
 
     internal bool IsAutoStartEnabled => GeneralSettingsContent.IsAutoStartEnabled;
 
-    private void SettingsSectionListView_SelectionChanged(object sender, SelectionChangedEventArgs args)
+    internal string CurrentSection => _currentSection;
+
+    internal void ResetToHome()
     {
-        SectionSelectionChanged?.Invoke(sender, args);
+        NavigateTo("Home");
     }
 }

@@ -316,57 +316,24 @@ namespace OmniDown
             return string.Empty;
         }
 
-        private void SettingsSectionListView_SelectionChanged(object sender, SelectionChangedEventArgs args)
+        private void SettingsPage_SectionNavigationRequested(object? sender, string tag)
         {
-            if (SettingsSectionListView.SelectedItem is not ListViewItem item)
-            {
-                return;
-            }
-
-            string tag = item.Tag?.ToString() ?? "General";
             if (SettingsPage.Visibility == Visibility.Visible)
             {
                 DismissSettingsTeachingTips();
             }
 
-            ShowSettingsSection(tag);
-            ApplySettingsFilter();
-            ResetSettingsSectionViewport();
-        }
-
-        private void ShowSettingsPage()
-        {
-            try
+            if (tag == "Home")
             {
-                ShowSettingsSection(GetSelectedSettingsSectionTag());
                 ApplySettingsFilter();
                 ResetSettingsSectionFocus();
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Show settings page failed: {ex}");
-                ShowSettingsSection("General");
-            }
-        }
-
-        private void ShowSettingsSection(string tag)
-        {
-            if (GeneralSettingsContent is null
-                || DownloadSettingsContent is null
-                || BitTorrentSettingsContent is null
-                || NetworkSettingsContent is null
-                || AdvancedSettingsContent is null
-                || AboutSettingsContent is null)
-            {
                 return;
             }
 
-            GeneralSettingsContent.Visibility = tag == "General" ? Visibility.Visible : Visibility.Collapsed;
-            DownloadSettingsContent.Visibility = tag == "Download" ? Visibility.Visible : Visibility.Collapsed;
-            BitTorrentSettingsContent.Visibility = tag == "BitTorrent" ? Visibility.Visible : Visibility.Collapsed;
-            NetworkSettingsContent.Visibility = tag == "Network" ? Visibility.Visible : Visibility.Collapsed;
-            AdvancedSettingsContent.Visibility = tag == "Advanced" ? Visibility.Visible : Visibility.Collapsed;
-            AboutSettingsContent.Visibility = tag == "About" ? Visibility.Visible : Visibility.Collapsed;
+            SettingsPage.NavigateTo(tag);
+            ApplySettingsFilter();
+            ResetSettingsSectionViewport();
+
             if (tag == "Advanced")
             {
                 _isLoadingAdvancedSettings = true;
@@ -379,6 +346,34 @@ namespace OmniDown
                     _isLoadingAdvancedSettings = false;
                 }
             }
+        }
+
+        private void ShowSettingsPage()
+        {
+            try
+            {
+                string tag = GetSelectedSettingsSectionTag();
+                if (string.IsNullOrWhiteSpace(tag) || tag == "Home")
+                {
+                    SettingsPage.NavigateTo("Home");
+                }
+                else
+                {
+                    SettingsPage.NavigateTo(tag);
+                }
+                ApplySettingsFilter();
+                ResetSettingsSectionFocus();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Show settings page failed: {ex}");
+                SettingsPage.NavigateTo("Home");
+            }
+        }
+
+        private void ShowSettingsSection(string tag)
+        {
+            SettingsPage.NavigateTo(tag);
         }
 
         private void ResetSettingsSectionViewport()
@@ -503,9 +498,7 @@ namespace OmniDown
 
         private string GetSelectedSettingsSectionTag()
         {
-            return SettingsSectionListView?.SelectedItem is ListViewItem item
-                ? item.Tag?.ToString() ?? "General"
-                : "General";
+            return SettingsPage?.CurrentSection ?? string.Empty;
         }
 
         private void ClearTitleSearchBox()
