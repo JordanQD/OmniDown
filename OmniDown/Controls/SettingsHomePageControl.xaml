@@ -6,7 +6,6 @@
 
     <ScrollViewer
         Padding="0,0,8,0"
-        HorizontalContentAlignment="Center"
         HorizontalScrollBarVisibility="Disabled"
         VerticalScrollBarVisibility="Auto">
         <Grid MaxWidth="820" HorizontalAlignment="Stretch">
