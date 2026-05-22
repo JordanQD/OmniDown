@@ -17,6 +17,9 @@ public sealed partial class SettingCardControl : UserControl
     public static readonly DependencyProperty ActionContentProperty =
         DependencyProperty.Register(nameof(ActionContent), typeof(object), typeof(SettingCardControl), new PropertyMetadata(null));
 
+    private const double WrapThreshold = 476;
+    private const double WrapNoIconThreshold = 286;
+
     public SettingCardControl()
     {
         InitializeComponent();
@@ -44,5 +47,16 @@ public sealed partial class SettingCardControl : UserControl
     {
         get => GetValue(ActionContentProperty);
         set => SetValue(ActionContentProperty, value);
+    }
+
+    private void SettingCardControl_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        var width = e.NewSize.Width;
+        if (width <= WrapNoIconThreshold)
+            VisualStateManager.GoToState(this, "NarrowNoIcon", true);
+        else if (width <= WrapThreshold)
+            VisualStateManager.GoToState(this, "Narrow", true);
+        else
+            VisualStateManager.GoToState(this, "Wide", true);
     }
 }

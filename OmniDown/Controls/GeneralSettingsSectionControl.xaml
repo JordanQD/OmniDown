@@ -12,399 +12,399 @@
             <Setter Property="Margin" Value="1,30,0,6" />
         </Style>
     </UserControl.Resources>
-                                    <StackPanel
-                                        x:Name="GeneralSettingsContent"
-                                        Spacing="{StaticResource SettingsCardSpacing}">
-                                        <StackPanel.ChildrenTransitions>
-                                            <RepositionThemeTransition />
-                                        </StackPanel.ChildrenTransitions>
-                                        <TextBlock
-                                            AutomationProperties.HeadingLevel="Level1"
-                                            Style="{StaticResource TitleTextBlockStyle}"
-                                            x:Uid="GeneralSettingsTitle"
-                                            Text="通用" />
-                                        <TextBlock
-                                            Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                                            x:Uid="GeneralStartupSectionHeader"
-                                            Text="启动" />
-                                        <local:SettingCardControl
-                                            x:Name="StartupSettingCard"
-                                            x:Uid="StartupSettingCard"
-                                            Description="开机登录后打开 OmniDown。"
-                                            Header="登录时自动启动"
-                                            IconGlyph="&#xE7C3;">
-                                            <local:SettingCardControl.ActionContent>
-                                                <StackPanel
-                                                    HorizontalAlignment="Right"
-                                                    VerticalAlignment="Center"
-                                                    Orientation="Horizontal"
-                                                    Spacing="8">
-                                                    <TextBlock
-                                                        x:Name="AutoStartStateText"
-                                                        VerticalAlignment="Center"
-                                                        Text="开" />
-                                                    <ToggleSwitch
-                                                        x:Name="AutoStartToggleSwitch"
-                                                        Width="48"
-                                                        MinWidth="0"
-                                                        Padding="0"
-                                                        OffContent=""
-                                                        OnContent=""
-                                                        AutomationProperties.AutomationId="AutoStartToggleSwitch"
-                                                        Toggled="SettingToggleSwitch_Toggled" />
-                                                </StackPanel>
-                                            </local:SettingCardControl.ActionContent>
-                                        </local:SettingCardControl>
+    <StackPanel
+        x:Name="GeneralSettingsContent"
+        Spacing="{StaticResource SettingsCardSpacing}">
+        <StackPanel.ChildrenTransitions>
+            <RepositionThemeTransition />
+        </StackPanel.ChildrenTransitions>
+        <TextBlock
+            AutomationProperties.HeadingLevel="Level1"
+            Style="{StaticResource TitleTextBlockStyle}"
+            x:Uid="GeneralSettingsTitle"
+            Text="通用" />
+        <TextBlock
+            Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+            x:Uid="GeneralStartupSectionHeader"
+            Text="启动" />
+        <local:SettingCardControl
+            x:Name="StartupSettingCard"
+            x:Uid="StartupSettingCard"
+            Description="开机登录后打开 OmniDown。"
+            Header="登录时自动启动"
+            IconGlyph="&#xE7C3;">
+            <local:SettingCardControl.ActionContent>
+                <StackPanel
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal"
+                    Spacing="8">
+                    <TextBlock
+                        x:Name="AutoStartStateText"
+                        VerticalAlignment="Center"
+                        Text="开" />
+                    <ToggleSwitch
+                        x:Name="AutoStartToggleSwitch"
+                        Width="48"
+                        MinWidth="0"
+                        Padding="0"
+                        OffContent=""
+                        OnContent=""
+                        AutomationProperties.AutomationId="AutoStartToggleSwitch"
+                        Toggled="SettingToggleSwitch_Toggled" />
+                </StackPanel>
+            </local:SettingCardControl.ActionContent>
+        </local:SettingCardControl>
 
-                                        <local:SettingCardControl
-                                            x:Name="RestoreWindowSettingCard"
-                                            x:Uid="RestoreWindowSettingCard"
-                                            Description="记住上次大小和位置。"
-                                            Header="恢复窗口位置"
-                                            IconGlyph="&#xE740;">
-                                            <local:SettingCardControl.ActionContent>
-                                                <StackPanel
-                                                    HorizontalAlignment="Right"
-                                                    VerticalAlignment="Center"
-                                                    Orientation="Horizontal"
-                                                    Spacing="8">
-                                                    <TextBlock
-                                                        x:Name="RestoreWindowPlacementStateText"
-                                                        VerticalAlignment="Center"
-                                                        Text="关" />
-                                                    <ToggleSwitch
-                                                        x:Name="RestoreWindowPlacementToggleSwitch"
-                                                        Width="48"
-                                                        MinWidth="0"
-                                                        Padding="0"
-                                                        OffContent=""
-                                                        OnContent=""
-                                                        AutomationProperties.AutomationId="RestoreWindowPlacementToggleSwitch"
-                                                        Toggled="SettingToggleSwitch_Toggled" />
-                                                </StackPanel>
-                                            </local:SettingCardControl.ActionContent>
-                                        </local:SettingCardControl>
+        <local:SettingCardControl
+            x:Name="RestoreWindowSettingCard"
+            x:Uid="RestoreWindowSettingCard"
+            Description="记住上次大小和位置。"
+            Header="恢复窗口位置"
+            IconGlyph="&#xE740;">
+            <local:SettingCardControl.ActionContent>
+                <StackPanel
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal"
+                    Spacing="8">
+                    <TextBlock
+                        x:Name="RestoreWindowPlacementStateText"
+                        VerticalAlignment="Center"
+                        Text="关" />
+                    <ToggleSwitch
+                        x:Name="RestoreWindowPlacementToggleSwitch"
+                        Width="48"
+                        MinWidth="0"
+                        Padding="0"
+                        OffContent=""
+                        OnContent=""
+                        AutomationProperties.AutomationId="RestoreWindowPlacementToggleSwitch"
+                        Toggled="SettingToggleSwitch_Toggled" />
+                </StackPanel>
+            </local:SettingCardControl.ActionContent>
+        </local:SettingCardControl>
 
-                                        <local:SettingCardControl
-                                            x:Name="ResumeOnLaunchSettingCard"
-                                            x:Uid="ResumeOnLaunchSettingCard"
-                                            Description="继续上次暂停的未完成任务。"
-                                            Header="启动时恢复下载任务"
-                                            IconGlyph="&#xE768;">
-                                            <local:SettingCardControl.ActionContent>
-                                                <StackPanel
-                                                    HorizontalAlignment="Right"
-                                                    VerticalAlignment="Center"
-                                                    Orientation="Horizontal"
-                                                    Spacing="8">
-                                                    <TextBlock
-                                                        x:Name="ResumeDownloadsOnLaunchStateText"
-                                                        VerticalAlignment="Center"
-                                                        Text="关" />
-                                                    <ToggleSwitch
-                                                        x:Name="ResumeDownloadsOnLaunchToggleSwitch"
-                                                        Width="48"
-                                                        MinWidth="0"
-                                                        Padding="0"
-                                                        OffContent=""
-                                                        OnContent=""
-                                                        AutomationProperties.AutomationId="ResumeDownloadsOnLaunchToggleSwitch"
-                                                        Toggled="SettingToggleSwitch_Toggled" />
-                                                </StackPanel>
-                                            </local:SettingCardControl.ActionContent>
-                                        </local:SettingCardControl>
+        <local:SettingCardControl
+            x:Name="ResumeOnLaunchSettingCard"
+            x:Uid="ResumeOnLaunchSettingCard"
+            Description="继续上次暂停的未完成任务。"
+            Header="启动时恢复下载任务"
+            IconGlyph="&#xE768;">
+            <local:SettingCardControl.ActionContent>
+                <StackPanel
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal"
+                    Spacing="8">
+                    <TextBlock
+                        x:Name="ResumeDownloadsOnLaunchStateText"
+                        VerticalAlignment="Center"
+                        Text="关" />
+                    <ToggleSwitch
+                        x:Name="ResumeDownloadsOnLaunchToggleSwitch"
+                        Width="48"
+                        MinWidth="0"
+                        Padding="0"
+                        OffContent=""
+                        OnContent=""
+                        AutomationProperties.AutomationId="ResumeDownloadsOnLaunchToggleSwitch"
+                        Toggled="SettingToggleSwitch_Toggled" />
+                </StackPanel>
+            </local:SettingCardControl.ActionContent>
+        </local:SettingCardControl>
 
-                                        <local:SettingCardControl
-                                            x:Name="ExitCleanupSettingCard"
-                                            x:Uid="ExitCleanupSettingCard"
-                                            Description="仅清除记录，不删除文件。"
-                                            Header="退出时清理已完成"
-                                            IconGlyph="&#xE74D;">
-                                            <local:SettingCardControl.ActionContent>
-                                                <StackPanel
-                                                    HorizontalAlignment="Right"
-                                                    VerticalAlignment="Center"
-                                                    Orientation="Horizontal"
-                                                    Spacing="8">
-                                                    <TextBlock
-                                                        x:Name="AutoClearCompletedOnExitStateText"
-                                                        VerticalAlignment="Center"
-                                                        Text="关" />
-                                                    <ToggleSwitch
-                                                        x:Name="AutoClearCompletedOnExitToggleSwitch"
-                                                        Width="48"
-                                                        MinWidth="0"
-                                                        Padding="0"
-                                                        OffContent=""
-                                                        OnContent=""
-                                                        AutomationProperties.AutomationId="AutoClearCompletedOnExitToggleSwitch"
-                                                        Toggled="SettingToggleSwitch_Toggled" />
-                                                </StackPanel>
-                                            </local:SettingCardControl.ActionContent>
-                                        </local:SettingCardControl>
+        <local:SettingCardControl
+            x:Name="ExitCleanupSettingCard"
+            x:Uid="ExitCleanupSettingCard"
+            Description="仅清除记录，不删除文件。"
+            Header="退出时清理已完成"
+            IconGlyph="&#xE74D;">
+            <local:SettingCardControl.ActionContent>
+                <StackPanel
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal"
+                    Spacing="8">
+                    <TextBlock
+                        x:Name="AutoClearCompletedOnExitStateText"
+                        VerticalAlignment="Center"
+                        Text="关" />
+                    <ToggleSwitch
+                        x:Name="AutoClearCompletedOnExitToggleSwitch"
+                        Width="48"
+                        MinWidth="0"
+                        Padding="0"
+                        OffContent=""
+                        OnContent=""
+                        AutomationProperties.AutomationId="AutoClearCompletedOnExitToggleSwitch"
+                        Toggled="SettingToggleSwitch_Toggled" />
+                </StackPanel>
+            </local:SettingCardControl.ActionContent>
+        </local:SettingCardControl>
 
-                                        <local:SettingCardControl
-                                            x:Name="PauseActiveOnExitSettingCard"
-                                            x:Uid="PauseActiveOnExitSettingCard"
-                                            Description="退出前暂停正在传输的任务。"
-                                            Header="退出时暂停下载"
-                                            IconGlyph="&#xE769;">
-                                            <local:SettingCardControl.ActionContent>
-                                                <StackPanel
-                                                    HorizontalAlignment="Right"
-                                                    VerticalAlignment="Center"
-                                                    Orientation="Horizontal"
-                                                    Spacing="8">
-                                                    <TextBlock
-                                                        x:Name="PauseActiveOnExitStateText"
-                                                        VerticalAlignment="Center"
-                                                        Text="开" />
-                                                    <ToggleSwitch
-                                                        x:Name="PauseActiveOnExitToggleSwitch"
-                                                        Width="48"
-                                                        MinWidth="0"
-                                                        Padding="0"
-                                                        OffContent=""
-                                                        OnContent=""
-                                                        IsOn="True"
-                                                        AutomationProperties.AutomationId="PauseActiveOnExitToggleSwitch"
-                                                        Toggled="SettingToggleSwitch_Toggled" />
-                                                </StackPanel>
-                                            </local:SettingCardControl.ActionContent>
-                                        </local:SettingCardControl>
+        <local:SettingCardControl
+            x:Name="PauseActiveOnExitSettingCard"
+            x:Uid="PauseActiveOnExitSettingCard"
+            Description="退出前暂停正在传输的任务。"
+            Header="退出时暂停下载"
+            IconGlyph="&#xE769;">
+            <local:SettingCardControl.ActionContent>
+                <StackPanel
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal"
+                    Spacing="8">
+                    <TextBlock
+                        x:Name="PauseActiveOnExitStateText"
+                        VerticalAlignment="Center"
+                        Text="开" />
+                    <ToggleSwitch
+                        x:Name="PauseActiveOnExitToggleSwitch"
+                        Width="48"
+                        MinWidth="0"
+                        Padding="0"
+                        OffContent=""
+                        OnContent=""
+                        IsOn="True"
+                        AutomationProperties.AutomationId="PauseActiveOnExitToggleSwitch"
+                        Toggled="SettingToggleSwitch_Toggled" />
+                </StackPanel>
+            </local:SettingCardControl.ActionContent>
+        </local:SettingCardControl>
 
-                                        <local:SettingCardControl
-                                            x:Name="CloseBehaviorSettingCard"
-                                            x:Uid="CloseBehaviorSettingCard"
-                                            Description="关闭窗口后继续后台运行。"
-                                            Header="关闭到托盘"
-                                            IconGlyph="&#xE7E8;">
-                                            <local:SettingCardControl.ActionContent>
-                                                <StackPanel
-                                                    HorizontalAlignment="Right"
-                                                    VerticalAlignment="Center"
-                                                    Orientation="Horizontal"
-                                                    Spacing="8">
-                                                    <TextBlock
-                                                        x:Name="CloseToTrayStateText"
-                                                        VerticalAlignment="Center"
-                                                        Text="关" />
-                                                    <ToggleSwitch
-                                                        x:Name="CloseToTrayToggleSwitch"
-                                                        Width="48"
-                                                        MinWidth="0"
-                                                        Padding="0"
-                                                        OffContent=""
-                                                        OnContent=""
-                                                        AutomationProperties.AutomationId="CloseToTrayToggleSwitch"
-                                                        Toggled="SettingToggleSwitch_Toggled" />
-                                                </StackPanel>
-                                            </local:SettingCardControl.ActionContent>
-                                        </local:SettingCardControl>
+        <local:SettingCardControl
+            x:Name="CloseBehaviorSettingCard"
+            x:Uid="CloseBehaviorSettingCard"
+            Description="关闭窗口后继续后台运行。"
+            Header="关闭到托盘"
+            IconGlyph="&#xE7E8;">
+            <local:SettingCardControl.ActionContent>
+                <StackPanel
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal"
+                    Spacing="8">
+                    <TextBlock
+                        x:Name="CloseToTrayStateText"
+                        VerticalAlignment="Center"
+                        Text="关" />
+                    <ToggleSwitch
+                        x:Name="CloseToTrayToggleSwitch"
+                        Width="48"
+                        MinWidth="0"
+                        Padding="0"
+                        OffContent=""
+                        OnContent=""
+                        AutomationProperties.AutomationId="CloseToTrayToggleSwitch"
+                        Toggled="SettingToggleSwitch_Toggled" />
+                </StackPanel>
+            </local:SettingCardControl.ActionContent>
+        </local:SettingCardControl>
 
-                                        <local:SettingCardControl
-                                            x:Name="TaskbarProgressSettingCard"
-                                            x:Uid="TaskbarProgressSettingCard"
-                                            Description="显示整体下载进度。"
-                                            Header="任务栏进度"
-                                            IconGlyph="&#xE9D9;">
-                                            <local:SettingCardControl.ActionContent>
-                                                <StackPanel
-                                                    HorizontalAlignment="Right"
-                                                    VerticalAlignment="Center"
-                                                    Orientation="Horizontal"
-                                                    Spacing="8">
-                                                    <TextBlock
-                                                        x:Name="ShowTaskbarProgressStateText"
-                                                        VerticalAlignment="Center"
-                                                        Text="开" />
-                                                    <ToggleSwitch
-                                                        x:Name="ShowTaskbarProgressToggleSwitch"
-                                                        Width="48"
-                                                        MinWidth="0"
-                                                        Padding="0"
-                                                        OffContent=""
-                                                        OnContent=""
-                                                        IsOn="True"
-                                                        AutomationProperties.AutomationId="ShowTaskbarProgressToggleSwitch"
-                                                        Toggled="SettingToggleSwitch_Toggled" />
-                                                </StackPanel>
-                                            </local:SettingCardControl.ActionContent>
-                                        </local:SettingCardControl>
+        <local:SettingCardControl
+            x:Name="TaskbarProgressSettingCard"
+            x:Uid="TaskbarProgressSettingCard"
+            Description="显示整体下载进度。"
+            Header="任务栏进度"
+            IconGlyph="&#xE9D9;">
+            <local:SettingCardControl.ActionContent>
+                <StackPanel
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal"
+                    Spacing="8">
+                    <TextBlock
+                        x:Name="ShowTaskbarProgressStateText"
+                        VerticalAlignment="Center"
+                        Text="开" />
+                    <ToggleSwitch
+                        x:Name="ShowTaskbarProgressToggleSwitch"
+                        Width="48"
+                        MinWidth="0"
+                        Padding="0"
+                        OffContent=""
+                        OnContent=""
+                        IsOn="True"
+                        AutomationProperties.AutomationId="ShowTaskbarProgressToggleSwitch"
+                        Toggled="SettingToggleSwitch_Toggled" />
+                </StackPanel>
+            </local:SettingCardControl.ActionContent>
+        </local:SettingCardControl>
 
-                                        <TextBlock
-                                            Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                                            x:Uid="GeneralAppearanceSectionHeader"
-                                            Text="外观" />
-                                        <local:SettingCardControl
-                                            x:Name="ThemeSettingCard"
-                                            x:Uid="ThemeSettingCard"
-                                            Description="跟随 Windows 主题，或固定为浅色/深色。"
-                                            Header="外观主题"
-                                            IconGlyph="&#xE771;">
-                                            <local:SettingCardControl.ActionContent>
-                                                <ComboBox
-                                                    x:Name="ThemeComboBox"
-                                                    HorizontalAlignment="Right"
-                                                    AutomationProperties.AutomationId="ThemeComboBox"
-                                                    SelectionChanged="ThemeComboBox_SelectionChanged">
-                                                    <ComboBoxItem Content="跟随系统" Tag="Default" />
-                                                    <ComboBoxItem Content="浅色" Tag="Light" />
-                                                    <ComboBoxItem Content="深色" Tag="Dark" />
-                                                </ComboBox>
-                                            </local:SettingCardControl.ActionContent>
-                                        </local:SettingCardControl>
+        <TextBlock
+            Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+            x:Uid="GeneralAppearanceSectionHeader"
+            Text="外观" />
+        <local:SettingCardControl
+            x:Name="ThemeSettingCard"
+            x:Uid="ThemeSettingCard"
+            Description="跟随 Windows 主题，或固定为浅色/深色。"
+            Header="外观主题"
+            IconGlyph="&#xE771;">
+            <local:SettingCardControl.ActionContent>
+                <ComboBox
+                    x:Name="ThemeComboBox"
+                    HorizontalAlignment="Right"
+                    AutomationProperties.AutomationId="ThemeComboBox"
+                    SelectionChanged="ThemeComboBox_SelectionChanged">
+                    <ComboBoxItem Content="跟随系统" Tag="Default" />
+                    <ComboBoxItem Content="浅色" Tag="Light" />
+                    <ComboBoxItem Content="深色" Tag="Dark" />
+                </ComboBox>
+            </local:SettingCardControl.ActionContent>
+        </local:SettingCardControl>
 
-                                        <TextBlock
-                                            Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                                            x:Uid="GeneralNotificationsSectionHeader"
-                                            Text="通知" />
-                                        <local:SettingCardControl
-                                            x:Name="NotificationsSettingCard"
-                                            x:Uid="NotificationsSettingCard"
-                                            Description="允许 OmniDown 通过 Windows 通知显示下载事件。"
-                                            Header="启用系统通知"
-                                            IconGlyph="&#xE7F4;">
-                                            <local:SettingCardControl.ActionContent>
-                                                <StackPanel
-                                                    HorizontalAlignment="Right"
-                                                    VerticalAlignment="Center"
-                                                    Orientation="Horizontal"
-                                                    Spacing="8">
-                                                    <TextBlock
-                                                        x:Name="SystemNotificationsStateText"
-                                                        VerticalAlignment="Center"
-                                                        Text="开" />
-                                                    <ToggleSwitch
-                                                        x:Name="SystemNotificationsToggleSwitch"
-                                                        Width="48"
-                                                        MinWidth="0"
-                                                        Padding="0"
-                                                        OffContent=""
-                                                        OnContent=""
-                                                        IsOn="True"
-                                                        AutomationProperties.AutomationId="SystemNotificationsToggleSwitch"
-                                                        Toggled="SettingToggleSwitch_Toggled" />
-                                                </StackPanel>
-                                            </local:SettingCardControl.ActionContent>
-                                        </local:SettingCardControl>
-                                        <local:SettingCardControl
-                                            x:Name="DownloadStartNotificationSettingCard"
-                                            x:Uid="DownloadStartNotificationSettingCard"
-                                            Description="添加任务并开始交给 aria2 处理时显示通知。"
-                                            Header="下载开始时通知"
-                                            IconGlyph="&#xE768;">
-                                            <local:SettingCardControl.ActionContent>
-                                                <StackPanel
-                                                    HorizontalAlignment="Right"
-                                                    VerticalAlignment="Center"
-                                                    Orientation="Horizontal"
-                                                    Spacing="8">
-                                                    <TextBlock
-                                                        x:Name="DownloadStartNotificationsStateText"
-                                                        VerticalAlignment="Center"
-                                                        Text="关" />
-                                                    <ToggleSwitch
-                                                        x:Name="DownloadStartNotificationsToggleSwitch"
-                                                        Width="48"
-                                                        MinWidth="0"
-                                                        Padding="0"
-                                                        OffContent=""
-                                                        OnContent=""
-                                                        AutomationProperties.AutomationId="DownloadStartNotificationsToggleSwitch"
-                                                        Toggled="SettingToggleSwitch_Toggled" />
-                                                </StackPanel>
-                                            </local:SettingCardControl.ActionContent>
-                                        </local:SettingCardControl>
-                                        <local:SettingCardControl
-                                            x:Name="DownloadCompleteNotificationSettingCard"
-                                            x:Uid="DownloadCompleteNotificationSettingCard"
-                                            Description="任务完成或失败时显示通知。"
-                                            Header="下载完成时通知"
-                                            IconGlyph="&#xE930;">
-                                            <local:SettingCardControl.ActionContent>
-                                                <StackPanel
-                                                    HorizontalAlignment="Right"
-                                                    VerticalAlignment="Center"
-                                                    Orientation="Horizontal"
-                                                    Spacing="8">
-                                                    <TextBlock
-                                                        x:Name="DownloadCompleteNotificationsStateText"
-                                                        VerticalAlignment="Center"
-                                                        Text="开" />
-                                                    <ToggleSwitch
-                                                        x:Name="DownloadCompleteNotificationsToggleSwitch"
-                                                        Width="48"
-                                                        MinWidth="0"
-                                                        Padding="0"
-                                                        OffContent=""
-                                                        OnContent=""
-                                                        IsOn="True"
-                                                        AutomationProperties.AutomationId="DownloadCompleteNotificationsToggleSwitch"
-                                                        Toggled="SettingToggleSwitch_Toggled" />
-                                                </StackPanel>
-                                            </local:SettingCardControl.ActionContent>
-                                        </local:SettingCardControl>
+        <TextBlock
+            Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+            x:Uid="GeneralNotificationsSectionHeader"
+            Text="通知" />
+        <local:SettingCardControl
+            x:Name="NotificationsSettingCard"
+            x:Uid="NotificationsSettingCard"
+            Description="允许 OmniDown 通过 Windows 通知显示下载事件。"
+            Header="启用系统通知"
+            IconGlyph="&#xE7F4;">
+            <local:SettingCardControl.ActionContent>
+                <StackPanel
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal"
+                    Spacing="8">
+                    <TextBlock
+                        x:Name="SystemNotificationsStateText"
+                        VerticalAlignment="Center"
+                        Text="开" />
+                    <ToggleSwitch
+                        x:Name="SystemNotificationsToggleSwitch"
+                        Width="48"
+                        MinWidth="0"
+                        Padding="0"
+                        OffContent=""
+                        OnContent=""
+                        IsOn="True"
+                        AutomationProperties.AutomationId="SystemNotificationsToggleSwitch"
+                        Toggled="SettingToggleSwitch_Toggled" />
+                </StackPanel>
+            </local:SettingCardControl.ActionContent>
+        </local:SettingCardControl>
+        <local:SettingCardControl
+            x:Name="DownloadStartNotificationSettingCard"
+            x:Uid="DownloadStartNotificationSettingCard"
+            Description="添加任务并开始交给 aria2 处理时显示通知。"
+            Header="下载开始时通知"
+            IconGlyph="&#xE768;">
+            <local:SettingCardControl.ActionContent>
+                <StackPanel
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal"
+                    Spacing="8">
+                    <TextBlock
+                        x:Name="DownloadStartNotificationsStateText"
+                        VerticalAlignment="Center"
+                        Text="关" />
+                    <ToggleSwitch
+                        x:Name="DownloadStartNotificationsToggleSwitch"
+                        Width="48"
+                        MinWidth="0"
+                        Padding="0"
+                        OffContent=""
+                        OnContent=""
+                        AutomationProperties.AutomationId="DownloadStartNotificationsToggleSwitch"
+                        Toggled="SettingToggleSwitch_Toggled" />
+                </StackPanel>
+            </local:SettingCardControl.ActionContent>
+        </local:SettingCardControl>
+        <local:SettingCardControl
+            x:Name="DownloadCompleteNotificationSettingCard"
+            x:Uid="DownloadCompleteNotificationSettingCard"
+            Description="任务完成或失败时显示通知。"
+            Header="下载完成时通知"
+            IconGlyph="&#xE930;">
+            <local:SettingCardControl.ActionContent>
+                <StackPanel
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal"
+                    Spacing="8">
+                    <TextBlock
+                        x:Name="DownloadCompleteNotificationsStateText"
+                        VerticalAlignment="Center"
+                        Text="开" />
+                    <ToggleSwitch
+                        x:Name="DownloadCompleteNotificationsToggleSwitch"
+                        Width="48"
+                        MinWidth="0"
+                        Padding="0"
+                        OffContent=""
+                        OnContent=""
+                        IsOn="True"
+                        AutomationProperties.AutomationId="DownloadCompleteNotificationsToggleSwitch"
+                        Toggled="SettingToggleSwitch_Toggled" />
+                </StackPanel>
+            </local:SettingCardControl.ActionContent>
+        </local:SettingCardControl>
 
-                                        <TextBlock
-                                            Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                                            x:Uid="GeneralDownloadSectionHeader"
-                                            Text="下载" />
-                                        <local:SettingCardControl
-                                            x:Name="AutoShutdownSettingCard"
-                                            x:Uid="AutoShutdownSettingCard"
-                                            Description="当前传输全部完成后执行 Windows 关机。"
-                                            Header="所有下载完成后自动关机"
-                                            IconGlyph="&#xE7E8;">
-                                            <local:SettingCardControl.ActionContent>
-                                                <StackPanel
-                                                    HorizontalAlignment="Right"
-                                                    VerticalAlignment="Center"
-                                                    Orientation="Horizontal"
-                                                    Spacing="8">
-                                                    <TextBlock
-                                                        x:Name="AutoShutdownWhenCompleteStateText"
-                                                        VerticalAlignment="Center"
-                                                        Text="关" />
-                                                    <ToggleSwitch
-                                                        x:Name="AutoShutdownWhenCompleteToggleSwitch"
-                                                        Width="48"
-                                                        MinWidth="0"
-                                                        Padding="0"
-                                                        OffContent=""
-                                                        OnContent=""
-                                                        AutomationProperties.AutomationId="AutoShutdownWhenCompleteToggleSwitch"
-                                                        Toggled="SettingToggleSwitch_Toggled" />
-                                                </StackPanel>
-                                            </local:SettingCardControl.ActionContent>
-                                        </local:SettingCardControl>
-                                        <local:SettingCardControl
-                                            x:Name="PreventSleepSettingCard"
-                                            x:Uid="PreventSleepSettingCard"
-                                            Description="有任务正在下载时保持系统唤醒，下载结束后自动恢复。"
-                                            Header="下载时阻止系统休眠"
-                                            IconGlyph="&#xE708;">
-                                            <local:SettingCardControl.ActionContent>
-                                                <StackPanel
-                                                    HorizontalAlignment="Right"
-                                                    VerticalAlignment="Center"
-                                                    Orientation="Horizontal"
-                                                    Spacing="8">
-                                                    <TextBlock
-                                                        x:Name="PreventSleepWhileDownloadingStateText"
-                                                        VerticalAlignment="Center"
-                                                        Text="关" />
-                                                    <ToggleSwitch
-                                                        x:Name="PreventSleepWhileDownloadingToggleSwitch"
-                                                        Width="48"
-                                                        MinWidth="0"
-                                                        Padding="0"
-                                                        OffContent=""
-                                                        OnContent=""
-                                                        AutomationProperties.AutomationId="PreventSleepWhileDownloadingToggleSwitch"
-                                                        Toggled="SettingToggleSwitch_Toggled" />
-                                                </StackPanel>
-                                            </local:SettingCardControl.ActionContent>
-                                        </local:SettingCardControl>
-                                    </StackPanel>
+        <TextBlock
+            Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+            x:Uid="GeneralDownloadSectionHeader"
+            Text="下载" />
+        <local:SettingCardControl
+            x:Name="AutoShutdownSettingCard"
+            x:Uid="AutoShutdownSettingCard"
+            Description="当前传输全部完成后执行 Windows 关机。"
+            Header="所有下载完成后自动关机"
+            IconGlyph="&#xE7E8;">
+            <local:SettingCardControl.ActionContent>
+                <StackPanel
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal"
+                    Spacing="8">
+                    <TextBlock
+                        x:Name="AutoShutdownWhenCompleteStateText"
+                        VerticalAlignment="Center"
+                        Text="关" />
+                    <ToggleSwitch
+                        x:Name="AutoShutdownWhenCompleteToggleSwitch"
+                        Width="48"
+                        MinWidth="0"
+                        Padding="0"
+                        OffContent=""
+                        OnContent=""
+                        AutomationProperties.AutomationId="AutoShutdownWhenCompleteToggleSwitch"
+                        Toggled="SettingToggleSwitch_Toggled" />
+                </StackPanel>
+            </local:SettingCardControl.ActionContent>
+        </local:SettingCardControl>
+        <local:SettingCardControl
+            x:Name="PreventSleepSettingCard"
+            x:Uid="PreventSleepSettingCard"
+            Description="有任务正在下载时保持系统唤醒，下载结束后自动恢复。"
+            Header="下载时阻止系统休眠"
+            IconGlyph="&#xE708;">
+            <local:SettingCardControl.ActionContent>
+                <StackPanel
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal"
+                    Spacing="8">
+                    <TextBlock
+                        x:Name="PreventSleepWhileDownloadingStateText"
+                        VerticalAlignment="Center"
+                        Text="关" />
+                    <ToggleSwitch
+                        x:Name="PreventSleepWhileDownloadingToggleSwitch"
+                        Width="48"
+                        MinWidth="0"
+                        Padding="0"
+                        OffContent=""
+                        OnContent=""
+                        AutomationProperties.AutomationId="PreventSleepWhileDownloadingToggleSwitch"
+                        Toggled="SettingToggleSwitch_Toggled" />
+                </StackPanel>
+            </local:SettingCardControl.ActionContent>
+        </local:SettingCardControl>
+    </StackPanel>
 </UserControl>
