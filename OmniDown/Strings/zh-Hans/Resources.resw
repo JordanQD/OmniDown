@@ -238,4 +238,157 @@
   <data name="PreventSleepSettingCard.Header" xml:space="preserve"><value>下载时阻止系统休眠</value></data>
   <data name="PreventSleepSettingCard.Description" xml:space="preserve"><value>有任务正在下载时保持系统唤醒，下载结束后自动恢复。</value></data>
 
+  <data name="SettingsHomeTitle.Text" xml:space="preserve"><value>设置</value></data>
+  <data name="GeneralSettingsHomeCard.Header" xml:space="preserve"><value>通用</value></data>
+  <data name="GeneralSettingsHomeCard.Description" xml:space="preserve"><value>启动、外观、通知等</value></data>
+  <data name="DownloadSettingsHomeCard.Header" xml:space="preserve"><value>下载</value></data>
+  <data name="DownloadSettingsHomeCard.Description" xml:space="preserve"><value>下载目录、并发、重试等</value></data>
+  <data name="BitTorrentSettingsHomeCard.Header" xml:space="preserve"><value>BitTorrent</value></data>
+  <data name="BitTorrentSettingsHomeCard.Description" xml:space="preserve"><value>Tracker、做种、加密等</value></data>
+  <data name="NetworkSettingsHomeCard.Header" xml:space="preserve"><value>网络</value></data>
+  <data name="NetworkSettingsHomeCard.Description" xml:space="preserve"><value>代理、端口、超时等</value></data>
+  <data name="AdvancedSettingsHomeCard.Header" xml:space="preserve"><value>高级</value></data>
+  <data name="AdvancedSettingsHomeCard.Description" xml:space="preserve"><value>aria2、RPC、协议等</value></data>
+  <data name="AboutSettingsHomeCard.Header" xml:space="preserve"><value>关于</value></data>
+  <data name="AboutSettingsHomeCard.Description" xml:space="preserve"><value>版本信息、克隆命令</value></data>
+  <data name="ExampleSettingsHomeCard.Header" xml:space="preserve"><value>示例</value></data>
+  <data name="ExampleSettingsHomeCard.Description" xml:space="preserve"><value>WinUI Gallery 的设置页面</value></data>
+
+  <data name="ToggleOnState.Text" xml:space="preserve"><value>开</value></data>
+  <data name="ToggleOffState.Text" xml:space="preserve"><value>关</value></data>
+
+  <data name="ThemeDefaultItem.Content" xml:space="preserve"><value>跟随系统</value></data>
+  <data name="ThemeLightItem.Content" xml:space="preserve"><value>浅色</value></data>
+  <data name="ThemeDarkItem.Content" xml:space="preserve"><value>深色</value></data>
+
+  <data name="DefaultDirectorySettingCard.Header" xml:space="preserve"><value>默认目录</value></data>
+  <data name="DefaultDirectorySettingCard.Description" xml:space="preserve"><value>新建任务的默认保存位置。</value></data>
+  <data name="MaxConcurrentDownloadsSettingCard.Header" xml:space="preserve"><value>最大同时下载数</value></data>
+  <data name="MaxConcurrentDownloadsSettingCard.Description" xml:space="preserve"><value>同时运行的任务上限。</value></data>
+  <data name="SplitCountSettingCard.Header" xml:space="preserve"><value>默认分片数</value></data>
+  <data name="SplitCountSettingCard.Description" xml:space="preserve"><value>单个任务的并行分片数。</value></data>
+  <data name="MaxConnectionPerServerSettingCard.Header" xml:space="preserve"><value>单服务器最大连接数</value></data>
+  <data name="MaxConnectionPerServerSettingCard.Description" xml:space="preserve"><value>同一服务器的连接上限，范围 1-16。</value></data>
+  <data name="ContinueDownloadSettingCard.Header" xml:space="preserve"><value>断点续传</value></data>
+  <data name="ContinueDownloadSettingCard.Description" xml:space="preserve"><value>继续未完成的可恢复任务。</value></data>
+  <data name="RemoteTimeSettingCard.Header" xml:space="preserve"><value>文件时间戳</value></data>
+  <data name="RemoteTimeSettingCard.Description" xml:space="preserve"><value>保存完成时间或服务器时间。</value></data>
+  <data name="MaxTriesSettingCard.Header" xml:space="preserve"><value>最大重试次数</value></data>
+  <data name="MaxTriesSettingCard.Description" xml:space="preserve"><value>0 表示不限次数。</value></data>
+  <data name="RetryWaitSettingCard.Header" xml:space="preserve"><value>重试等待时间</value></data>
+  <data name="RetryWaitSettingCard.Description" xml:space="preserve"><value>失败后再次尝试的间隔。</value></data>
+  <data name="DownloadCleanupSettingCard.Header" xml:space="preserve"><value>自动移除陈旧记录</value></data>
+  <data name="DownloadCleanupSettingCard.Description" xml:space="preserve"><value>清理已脱离 aria2 会话的记录。</value></data>
+  <data name="TorrentCleanupSettingCard.Header" xml:space="preserve"><value>完成后删除 .torrent 源文件</value></data>
+  <data name="TorrentCleanupSettingCard.Description" xml:space="preserve"><value>仅删除本地种子源文件。</value></data>
+  <data name="DownloadDirectoryTextBox.PlaceholderText" xml:space="preserve"><value>下载文件夹</value></data>
+  <data name="BrowseDownloadDirectoryButton.ToolTipService.ToolTip" xml:space="preserve"><value>选择文件夹</value></data>
+  <data name="RemoteTimeDownloadItem.Content" xml:space="preserve"><value>下载完成时间</value></data>
+  <data name="RemoteTimeServerItem.Content" xml:space="preserve"><value>服务器时间</value></data>
+
+  <data name="BitTorrentSettingsTitle.Text" xml:space="preserve"><value>BitTorrent</value></data>
+  <data name="BitTorrentBasicOptionsHeader.Text" xml:space="preserve"><value>基础选项</value></data>
+  <data name="BtAutoDownloadSettingCard.Header" xml:space="preserve"><value>自动下载种子内容</value></data>
+  <data name="BtAutoDownloadSettingCard.Description" xml:space="preserve"><value>添加 .torrent、metalink 或磁力链接后自动获取真实文件内容。</value></data>
+  <data name="BtForceEncryptionSettingCard.Header" xml:space="preserve"><value>强制加密</value></data>
+  <data name="BtForceEncryptionSettingCard.Description" xml:space="preserve"><value>要求 BitTorrent 消息负载加密，部分旧 Peer 可能无法连接。</value></data>
+  <data name="BtKeepSeedingSettingCard.Header" xml:space="preserve"><value>做种策略</value></data>
+  <data name="BtKeepSeedingSettingCard.Description" xml:space="preserve"><value>选择持续做种，或按分享率与时间自动停止。</value></data>
+  <data name="BtSeedingModeCard.Header" xml:space="preserve"><value>做种方式</value></data>
+  <data name="BtSeedingModeLimitedItem.Content" xml:space="preserve"><value>按条件停止</value></data>
+  <data name="BtSeedingModeAlwaysItem.Content" xml:space="preserve"><value>持续做种</value></data>
+  <data name="BtSeedRatioCard.Header" xml:space="preserve"><value>分享率</value></data>
+  <data name="BtSeedTimeCard.Header" xml:space="preserve"><value>分享时间</value></data>
+  <data name="BtMaxPeersSettingCard.Header" xml:space="preserve"><value>最大 Peer 数</value></data>
+  <data name="BtMaxPeersSettingCard.Description" xml:space="preserve"><value>每个种子最多连接的 Peer 数量。</value></data>
+  <data name="BitTorrentTrackerServerHeader.Text" xml:space="preserve"><value>Tracker 服务器</value></data>
+  <data name="BtTrackerSourceSettingCard.Header" xml:space="preserve"><value>Tracker 源</value></data>
+  <data name="BtTrackerSourceSettingCard.Description" xml:space="preserve"><value>从 HTTP/HTTPS 文本源同步 Tracker 列表。</value></data>
+  <data name="CdnBadgeText.Text" xml:space="preserve"><value>CDN</value></data>
+  <data name="BtTrackerCustomSourceSettingCard.Header" xml:space="preserve"><value>自定义来源</value></data>
+  <data name="BtTrackerCustomSourceSettingCard.Description" xml:space="preserve"><value>添加自己的 Tracker 列表 URL，可多选后一起同步。</value></data>
+  <data name="BtCustomTrackerSourceTextBox.PlaceholderText" xml:space="preserve"><value>输入自定义 Tracker 列表 URL</value></data>
+  <data name="BtSyncTrackerButton.ToolTipService.ToolTip" xml:space="preserve"><value>同步 Tracker</value></data>
+  <data name="BtTrackerListSettingCard.Header" xml:space="preserve"><value>Tracker 列表</value></data>
+  <data name="BtTrackerListSettingCard.Description" xml:space="preserve"><value>每行一个 Tracker，启动 aria2 时会转为逗号分隔配置。</value></data>
+  <data name="BtTrackerListTextBox.PlaceholderText" xml:space="preserve"><value>udp://tracker.example:6969/announce</value></data>
+  <data name="BtAutoSyncTrackerSettingCard.Header" xml:space="preserve"><value>自动同步 Tracker</value></data>
+  <data name="BtLastTrackerSyncText.Text" xml:space="preserve"><value>启动设置页时保留上次同步时间。</value></data>
+
+  <data name="NetworkSettingsTitle.Text" xml:space="preserve"><value>网络</value></data>
+  <data name="NetworkProxySectionHeader.Text" xml:space="preserve"><value>代理</value></data>
+  <data name="UseSystemProxySettingCard.Header" xml:space="preserve"><value>系统代理</value></data>
+  <data name="UseSystemProxySettingCard.Description" xml:space="preserve"><value>启动 aria2 时读取 Windows 当前系统代理。</value></data>
+  <data name="CustomProxySettingCard.Header" xml:space="preserve"><value>自定义代理</value></data>
+  <data name="CustomProxyDescriptionText.Text" xml:space="preserve"><value>为 aria2 设置 HTTP 或 HTTPS 代理；自定义代理会优先于系统代理。</value></data>
+  <data name="ProxyServerTextBox.PlaceholderText" xml:space="preserve"><value>代理地址</value></data>
+  <data name="DetectSystemProxyButton.ToolTipService.ToolTip" xml:space="preserve"><value>检测系统代理</value></data>
+  <data name="ProxyExampleText.Text" xml:space="preserve"><value>示例：http://127.0.0.1:7890 或 127.0.0.1:7890。当前 aria2 版本不支持 SOCKS 代理。</value></data>
+  <data name="ProxyBypassTextBox.PlaceholderText" xml:space="preserve"><value>不使用代理的地址</value></data>
+  <data name="ProxyScopeHeader.Text" xml:space="preserve"><value>代理范围</value></data>
+  <data name="ProxyDownloadsCheckBox.Content" xml:space="preserve"><value>下载任务</value></data>
+  <data name="ProxyTrackersCheckBox.Content" xml:space="preserve"><value>Tracker 同步</value></data>
+  <data name="NetworkPortSectionHeader.Text" xml:space="preserve"><value>端口</value></data>
+  <data name="UpnpSettingCard.Header" xml:space="preserve"><value>UPnP/NAT-PMP</value></data>
+  <data name="UpnpSettingCard.Description" xml:space="preserve"><value>保存端口映射偏好；当前 Windows 版 aria2 启动参数会使用下方端口。</value></data>
+  <data name="BtPortSettingCard.Header" xml:space="preserve"><value>BT 监听端口</value></data>
+  <data name="BtPortSettingCard.Description" xml:space="preserve"><value>用于接收 BitTorrent 对等连接。修改后需重启 aria2 生效。</value></data>
+  <data name="RandomBtPortButton.ToolTipService.ToolTip" xml:space="preserve"><value>随机端口</value></data>
+  <data name="DhtPortSettingCard.Header" xml:space="preserve"><value>DHT 监听端口</value></data>
+  <data name="DhtPortSettingCard.Description" xml:space="preserve"><value>用于 DHT 节点发现。修改后需重启 aria2 生效。</value></data>
+  <data name="RandomDhtPortButton.ToolTipService.ToolTip" xml:space="preserve"><value>随机端口</value></data>
+  <data name="NetworkUserAgentSectionHeader.Text" xml:space="preserve"><value>User-Agent</value></data>
+  <data name="UserAgentSettingCard.Header" xml:space="preserve"><value>User-Agent</value></data>
+  <data name="UserAgentTextBox.PlaceholderText" xml:space="preserve"><value>User-Agent</value></data>
+  <data name="UserAgentResetButton.Content" xml:space="preserve"><value>重置</value></data>
+  <data name="NetworkTransferParamsSectionHeader.Text" xml:space="preserve"><value>传输参数</value></data>
+  <data name="ConnectTimeoutSettingCard.Header" xml:space="preserve"><value>连接超时</value></data>
+  <data name="ConnectTimeoutSettingCard.Description" xml:space="preserve"><value>建立连接时最多等待的秒数。</value></data>
+  <data name="TimeoutSettingCard.Header" xml:space="preserve"><value>传输超时</value></data>
+  <data name="TimeoutSettingCard.Description" xml:space="preserve"><value>传输空闲超过该秒数后视为超时。</value></data>
+  <data name="FileAllocationSettingCard.Header" xml:space="preserve"><value>文件预分配</value></data>
+  <data name="FileAllocationSettingCard.Description" xml:space="preserve"><value>控制下载开始时如何预留磁盘空间。</value></data>
+
+  <data name="AdvancedSettingsTitle.Text" xml:space="preserve"><value>高级</value></data>
+  <data name="AdvancedAria2EngineSectionHeader.Text" xml:space="preserve"><value>aria2 引擎</value></data>
+  <data name="AriaPathSettingCard.Header" xml:space="preserve"><value>aria2c 路径</value></data>
+  <data name="AriaPathSettingCard.Description" xml:space="preserve"><value>留空时从应用内置引擎或 PATH 解析 aria2c.exe。</value></data>
+  <data name="RpcPortSettingCard.Header" xml:space="preserve"><value>RPC 端口</value></data>
+  <data name="RpcPortSettingCard.Description" xml:space="preserve"><value>OmniDown 与本地 aria2 通讯使用的 JSON-RPC 端口。</value></data>
+  <data name="RpcSecretSettingCard.Header" xml:space="preserve"><value>RPC 密钥</value></data>
+  <data name="RpcSecretSettingCard.Description" xml:space="preserve"><value>用于保护本地 JSON-RPC 连接；修改后需要重启 aria2。</value></data>
+  <data name="AdvancedBrowserExtensionSectionHeader.Text" xml:space="preserve"><value>浏览器扩展</value></data>
+  <data name="ExtensionAutoSubmitSettingCard.Header" xml:space="preserve"><value>扩展捕获后自动提交</value></data>
+  <data name="ExtensionAutoSubmitSettingCard.Description" xml:space="preserve"><value>浏览器扩展传入链接时，自动使用当前默认下载设置创建任务。</value></data>
+  <data name="ExtensionApiPortSettingCard.Header" xml:space="preserve"><value>扩展 API 端口</value></data>
+  <data name="ExtensionApiPortSettingCard.Description" xml:space="preserve"><value>预留给浏览器扩展连接 OmniDown 的本地端口。</value></data>
+  <data name="ExtensionApiSecretSettingCard.Header" xml:space="preserve"><value>扩展 API 密钥</value></data>
+  <data name="ExtensionApiSecretSettingCard.Description" xml:space="preserve"><value>在浏览器扩展设置中填写此密钥，用于验证扩展请求。</value></data>
+  <data name="AdvancedLogDiagnosticSectionHeader.Text" xml:space="preserve"><value>日志与诊断</value></data>
+  <data name="LogLevelSettingCard.Header" xml:space="preserve"><value>日志级别</value></data>
+  <data name="LogLevelSettingCard.Description" xml:space="preserve"><value>控制 aria2 输出日志的详细程度；重启 aria2 后生效。</value></data>
+  <data name="AdvancedPathsSettingCard.Header" xml:space="preserve"><value>配置与会话文件</value></data>
+  <data name="OpenConfigFolderButton.ToolTipService.ToolTip" xml:space="preserve"><value>打开配置目录</value></data>
+  <data name="LogPathsSettingCard.Header" xml:space="preserve"><value>日志文件</value></data>
+  <data name="OpenLogFolderButton.ToolTipService.ToolTip" xml:space="preserve"><value>打开日志目录</value></data>
+  <data name="SessionResetSettingCard.Header" xml:space="preserve"><value>清空 aria2 会话</value></data>
+  <data name="SessionResetSettingCard.Description" xml:space="preserve"><value>删除本地 download.session 和 tasks.json，下次启动不再恢复 aria2 会话中的遗留任务。</value></data>
+  <data name="ClearSessionButton.Content" xml:space="preserve"><value>清空会话</value></data>
+  <data name="AdvancedClipboardDetectionSectionHeader.Text" xml:space="preserve"><value>剪贴板检测</value></data>
+  <data name="ClipboardDetectionSettingCard.Header" xml:space="preserve"><value>自动检测剪贴板链接</value></data>
+  <data name="ClipboardDetectionSettingCard.Description" xml:space="preserve"><value>复制下载链接后自动打开新建下载窗口。</value></data>
+  <data name="ClipboardTypesSettingCard.Header" xml:space="preserve"><value>检测类型</value></data>
+  <data name="ClipboardTypesSettingCard.Description" xml:space="preserve"><value>选择剪贴板中哪些内容会触发新建下载。</value></data>
+  <data name="AdvancedDefaultProgramsSectionHeader.Text" xml:space="preserve"><value>默认程序</value></data>
+  <data name="ProtocolMagnetSettingCard.Header" xml:space="preserve"><value>magnet:// 链接</value></data>
+  <data name="ProtocolMagnetSettingCard.Description" xml:space="preserve"><value>将磁力链接交给 OmniDown 打开。</value></data>
+  <data name="ProtocolThunderSettingCard.Header" xml:space="preserve"><value>thunder:// 链接</value></data>
+  <data name="ProtocolThunderSettingCard.Description" xml:space="preserve"><value>将迅雷链接交给 OmniDown 打开。</value></data>
+  <data name="ProtocolOmniDownSettingCard.Header" xml:space="preserve"><value>omnidown:// 扩展链接</value></data>
+  <data name="ProtocolOmniDownSettingCard.Description" xml:space="preserve"><value>用于浏览器扩展或其他应用唤起 OmniDown。</value></data>
+  <data name="AdvancedDeveloperOptionsSectionHeader.Text" xml:space="preserve"><value>开发者选项</value></data>
+  <data name="ProcessStatusSettingCard.Header" xml:space="preserve"><value>进程状态</value></data>
+  <data name="AriaStartStopButton.ToolTipService.ToolTip" xml:space="preserve"><value>启动</value></data>
+  <data name="AriaRestartButton.ToolTipService.ToolTip" xml:space="preserve"><value>重启</value></data>
+
 </root>

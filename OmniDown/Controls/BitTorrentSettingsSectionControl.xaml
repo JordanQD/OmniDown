@@ -14,16 +14,19 @@
         <TextBlock
             AutomationProperties.HeadingLevel="Level1"
             Style="{StaticResource TitleTextBlockStyle}"
+            x:Uid="BitTorrentSettingsTitle"
             Text="BitTorrent" />
 
         <!--  基础选项  -->
         <TextBlock
             Margin="1,30,0,6"
             Style="{StaticResource BodyStrongTextBlockStyle}"
+            x:Uid="BitTorrentBasicOptionsHeader"
             Text="基础选项" />
 
         <controls:SettingsCard
             x:Name="BtAutoDownloadSettingCard"
+            x:Uid="BtAutoDownloadSettingCard"
             Description="添加 .torrent、metalink 或磁力链接后自动获取真实文件内容。"
             Header="自动下载种子内容">
             <controls:SettingsCard.HeaderIcon>
@@ -52,6 +55,7 @@
 
         <controls:SettingsCard
             x:Name="BtForceEncryptionSettingCard"
+            x:Uid="BtForceEncryptionSettingCard"
             Description="要求 BitTorrent 消息负载加密，部分旧 Peer 可能无法连接。"
             Header="强制加密">
             <controls:SettingsCard.HeaderIcon>
@@ -79,23 +83,34 @@
 
         <controls:SettingsExpander
             x:Name="BtKeepSeedingSettingCard"
+            x:Uid="BtKeepSeedingSettingCard"
             Description="选择持续做种，或按分享率与时间自动停止。"
             Header="做种策略">
             <controls:SettingsExpander.HeaderIcon>
                 <FontIcon Glyph="&#xE8EE;" />
             </controls:SettingsExpander.HeaderIcon>
             <controls:SettingsExpander.Items>
-                <controls:SettingsCard Header="做种方式">
+                <controls:SettingsCard
+                    x:Uid="BtSeedingModeCard"
+                    Header="做种方式">
                     <ComboBox
                         x:Name="BtSeedingModeComboBox"
                         Width="168"
                         HorizontalAlignment="Right"
                         SelectionChanged="BitTorrentSettingComboBox_SelectionChanged">
-                        <ComboBoxItem Content="按条件停止" Tag="Limited" />
-                        <ComboBoxItem Content="持续做种" Tag="Always" />
+                        <ComboBoxItem
+                            x:Uid="BtSeedingModeLimitedItem"
+                            Content="按条件停止"
+                            Tag="Limited" />
+                        <ComboBoxItem
+                            x:Uid="BtSeedingModeAlwaysItem"
+                            Content="持续做种"
+                            Tag="Always" />
                     </ComboBox>
                 </controls:SettingsCard>
-                <controls:SettingsCard Header="分享率">
+                <controls:SettingsCard
+                    x:Uid="BtSeedRatioCard"
+                    Header="分享率">
                     <NumberBox
                         x:Name="BtSeedRatioNumberBox"
                         Width="168"
@@ -106,7 +121,9 @@
                         SpinButtonPlacementMode="Inline"
                         ValueChanged="BitTorrentSettingNumberBox_ValueChanged" />
                 </controls:SettingsCard>
-                <controls:SettingsCard Header="分享时间">
+                <controls:SettingsCard
+                    x:Uid="BtSeedTimeCard"
+                    Header="分享时间">
                     <NumberBox
                         x:Name="BtSeedTimeNumberBox"
                         Width="168"
@@ -122,6 +139,7 @@
 
         <controls:SettingsCard
             x:Name="BtMaxPeersSettingCard"
+            x:Uid="BtMaxPeersSettingCard"
             Description="每个种子最多连接的 Peer 数量。"
             Header="最大 Peer 数">
             <controls:SettingsCard.HeaderIcon>
@@ -143,10 +161,12 @@
         <TextBlock
             Margin="1,30,0,6"
             Style="{StaticResource BodyStrongTextBlockStyle}"
+            x:Uid="BitTorrentTrackerServerHeader"
             Text="Tracker 服务器" />
 
         <controls:SettingsCard
             x:Name="BtTrackerSourceSettingCard"
+            x:Uid="BtTrackerSourceSettingCard"
             Description="从 HTTP/HTTPS 文本源同步 Tracker 列表。"
             Header="Tracker 源">
             <controls:SettingsCard.HeaderIcon>
@@ -220,6 +240,7 @@
                                                     CornerRadius="3">
                                                     <TextBlock
                                                         FontSize="11"
+                                                        x:Uid="CdnBadgeText"
                                                         Text="CDN" />
                                                 </Border>
                                             </StackPanel>
@@ -237,6 +258,7 @@
                                                     CornerRadius="3">
                                                     <TextBlock
                                                         FontSize="11"
+                                                        x:Uid="CdnBadgeText"
                                                         Text="CDN" />
                                                 </Border>
                                             </StackPanel>
@@ -254,6 +276,7 @@
                                                     CornerRadius="3">
                                                     <TextBlock
                                                         FontSize="11"
+                                                        x:Uid="CdnBadgeText"
                                                         Text="CDN" />
                                                 </Border>
                                             </StackPanel>
@@ -271,6 +294,7 @@
                                                     CornerRadius="3">
                                                     <TextBlock
                                                         FontSize="11"
+                                                        x:Uid="CdnBadgeText"
                                                         Text="CDN" />
                                                 </Border>
                                             </StackPanel>
@@ -313,6 +337,7 @@
                                                     CornerRadius="3">
                                                     <TextBlock
                                                         FontSize="11"
+                                                        x:Uid="CdnBadgeText"
                                                         Text="CDN" />
                                                 </Border>
                                             </StackPanel>
@@ -330,6 +355,7 @@
                                                     CornerRadius="3">
                                                     <TextBlock
                                                         FontSize="11"
+                                                        x:Uid="CdnBadgeText"
                                                         Text="CDN" />
                                                 </Border>
                                             </StackPanel>
@@ -347,6 +373,7 @@
                                                     CornerRadius="3">
                                                     <TextBlock
                                                         FontSize="11"
+                                                        x:Uid="CdnBadgeText"
                                                         Text="CDN" />
                                                 </Border>
                                             </StackPanel>
@@ -362,6 +389,7 @@
 
         <controls:SettingsCard
             x:Name="BtTrackerCustomSourceSettingCard"
+            x:Uid="BtTrackerCustomSourceSettingCard"
             Description="添加自己的 Tracker 列表 URL，可多选后一起同步。"
             Header="自定义来源">
             <controls:SettingsCard.HeaderIcon>
@@ -371,6 +399,7 @@
                 <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6">
                     <TextBox
                         x:Name="BtCustomTrackerSourceTextBox"
+                        x:Uid="BtCustomTrackerSourceTextBox"
                         PlaceholderText="输入自定义 Tracker 列表 URL" />
                     <Button
                         Grid.Column="1"
@@ -386,6 +415,7 @@
                         Grid.Column="2"
                         Width="38"
                         Height="32"
+                        x:Uid="BtSyncTrackerButton"
                         Click="SyncBtTrackerButton_Click"
                         ToolTipService.ToolTip="同步 Tracker">
                         <FontIcon
@@ -408,6 +438,7 @@
 
         <controls:SettingsExpander
             x:Name="BtTrackerListSettingCard"
+            x:Uid="BtTrackerListSettingCard"
             Description="每行一个 Tracker，启动 aria2 时会转为逗号分隔配置。"
             Header="Tracker 列表">
             <controls:SettingsExpander.HeaderIcon>
@@ -417,6 +448,7 @@
                 <controls:SettingsCard>
                     <TextBox
                         x:Name="BtTrackerListTextBox"
+                        x:Uid="BtTrackerListTextBox"
                         Height="220"
                         AcceptsReturn="True"
                         ScrollViewer.VerticalScrollBarVisibility="Auto"
@@ -430,6 +462,7 @@
 
         <controls:SettingsCard
             x:Name="BtAutoSyncTrackerSettingCard"
+            x:Uid="BtAutoSyncTrackerSettingCard"
             Header="自动同步 Tracker">
             <controls:SettingsCard.HeaderIcon>
                 <FontIcon Glyph="&#xE895;" />
@@ -455,6 +488,7 @@
             <controls:SettingsCard.Description>
                 <TextBlock
                     x:Name="BtLastTrackerSyncText"
+                    x:Uid="BtLastTrackerSyncText"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     Text="启动设置页时保留上次同步时间。"
                     TextWrapping="WrapWholeWords" />

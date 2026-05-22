@@ -250,9 +250,18 @@
                     HorizontalAlignment="Right"
                     AutomationProperties.AutomationId="ThemeComboBox"
                     SelectionChanged="ThemeComboBox_SelectionChanged">
-                    <ComboBoxItem Content="跟随系统" Tag="Default" />
-                    <ComboBoxItem Content="浅色" Tag="Light" />
-                    <ComboBoxItem Content="深色" Tag="Dark" />
+                    <ComboBoxItem
+                        x:Uid="ThemeDefaultItem"
+                        Content="跟随系统"
+                        Tag="Default" />
+                    <ComboBoxItem
+                        x:Uid="ThemeLightItem"
+                        Content="浅色"
+                        Tag="Light" />
+                    <ComboBoxItem
+                        x:Uid="ThemeDarkItem"
+                        Content="深色"
+                        Tag="Dark" />
                 </ComboBox>
             </local:SettingCardControl.ActionContent>
         </local:SettingCardControl>

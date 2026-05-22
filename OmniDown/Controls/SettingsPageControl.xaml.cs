@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using OmniDown.Models.Settings;
 using System;
 using System.Collections.Generic;
@@ -79,6 +80,7 @@ public sealed partial class SettingsPageControl : UserControl
 
         SettingsSectionPanel.Visibility = Visibility.Collapsed;
         SettingsHomePage.Visibility = Visibility.Visible;
+        ReplayEntranceTransition(SettingsHomePage);
     }
 
     private void ShowSection(string tag)
@@ -93,6 +95,50 @@ public sealed partial class SettingsPageControl : UserControl
         }
 
         SettingsSectionPanel.Visibility = Visibility.Visible;
+
+        if (_sectionContents.TryGetValue(tag, out FrameworkElement? target))
+        {
+            ReplayEntranceTransition(target);
+        }
+    }
+
+    private static void ReplayEntranceTransition(UIElement element)
+    {
+        Panel? panel = FindFirstPanelWithTransitions(element);
+        if (panel?.ChildrenTransitions is not { Count: > 0 })
+        {
+            return;
+        }
+
+        // EntranceThemeTransition only fires when children are added to the tree.
+        // Detach and re-attach to force a replay.
+        UIElement[] children = [.. panel.Children];
+        panel.Children.Clear();
+        foreach (UIElement child in children)
+        {
+            panel.Children.Add(child);
+        }
+    }
+
+    private static Panel? FindFirstPanelWithTransitions(DependencyObject parent)
+    {
+        if (parent is Panel panel && panel.ChildrenTransitions.Count > 0)
+        {
+            return panel;
+        }
+
+        int count = VisualTreeHelper.GetChildrenCount(parent);
+        for (int i = 0; i < count; i++)
+        {
+            DependencyObject child = VisualTreeHelper.GetChild(parent, i);
+            Panel? found = FindFirstPanelWithTransitions(child);
+            if (found is not null)
+            {
+                return found;
+            }
+        }
+
+        return null;
     }
 
     private void OnSectionRequested(object? sender, string tag)

@@ -238,4 +238,157 @@
   <data name="PreventSleepSettingCard.Header" xml:space="preserve"><value>Prevent sleep while downloading</value></data>
   <data name="PreventSleepSettingCard.Description" xml:space="preserve"><value>Keep the system awake while tasks are downloading, then resume normal sleep.</value></data>
 
+  <data name="SettingsHomeTitle.Text" xml:space="preserve"><value>Settings</value></data>
+  <data name="GeneralSettingsHomeCard.Header" xml:space="preserve"><value>General</value></data>
+  <data name="GeneralSettingsHomeCard.Description" xml:space="preserve"><value>Startup, appearance, notifications, and more</value></data>
+  <data name="DownloadSettingsHomeCard.Header" xml:space="preserve"><value>Download</value></data>
+  <data name="DownloadSettingsHomeCard.Description" xml:space="preserve"><value>Download directory, concurrency, retry, and more</value></data>
+  <data name="BitTorrentSettingsHomeCard.Header" xml:space="preserve"><value>BitTorrent</value></data>
+  <data name="BitTorrentSettingsHomeCard.Description" xml:space="preserve"><value>Tracker, seeding, encryption, and more</value></data>
+  <data name="NetworkSettingsHomeCard.Header" xml:space="preserve"><value>Network</value></data>
+  <data name="NetworkSettingsHomeCard.Description" xml:space="preserve"><value>Proxy, port, timeout, and more</value></data>
+  <data name="AdvancedSettingsHomeCard.Header" xml:space="preserve"><value>Advanced</value></data>
+  <data name="AdvancedSettingsHomeCard.Description" xml:space="preserve"><value>aria2, RPC, protocol, and more</value></data>
+  <data name="AboutSettingsHomeCard.Header" xml:space="preserve"><value>About</value></data>
+  <data name="AboutSettingsHomeCard.Description" xml:space="preserve"><value>Version info, clone command</value></data>
+  <data name="ExampleSettingsHomeCard.Header" xml:space="preserve"><value>Example</value></data>
+  <data name="ExampleSettingsHomeCard.Description" xml:space="preserve"><value>WinUI Gallery settings page</value></data>
+
+  <data name="ToggleOnState.Text" xml:space="preserve"><value>On</value></data>
+  <data name="ToggleOffState.Text" xml:space="preserve"><value>Off</value></data>
+
+  <data name="ThemeDefaultItem.Content" xml:space="preserve"><value>Follow system</value></data>
+  <data name="ThemeLightItem.Content" xml:space="preserve"><value>Light</value></data>
+  <data name="ThemeDarkItem.Content" xml:space="preserve"><value>Dark</value></data>
+
+  <data name="DefaultDirectorySettingCard.Header" xml:space="preserve"><value>Default directory</value></data>
+  <data name="DefaultDirectorySettingCard.Description" xml:space="preserve"><value>Default save location for new tasks.</value></data>
+  <data name="MaxConcurrentDownloadsSettingCard.Header" xml:space="preserve"><value>Max concurrent downloads</value></data>
+  <data name="MaxConcurrentDownloadsSettingCard.Description" xml:space="preserve"><value>Maximum number of tasks running at once.</value></data>
+  <data name="SplitCountSettingCard.Header" xml:space="preserve"><value>Default split count</value></data>
+  <data name="SplitCountSettingCard.Description" xml:space="preserve"><value>Number of parallel segments per task.</value></data>
+  <data name="MaxConnectionPerServerSettingCard.Header" xml:space="preserve"><value>Max connections per server</value></data>
+  <data name="MaxConnectionPerServerSettingCard.Description" xml:space="preserve"><value>Connection limit per server, range 1-16.</value></data>
+  <data name="ContinueDownloadSettingCard.Header" xml:space="preserve"><value>Resume download</value></data>
+  <data name="ContinueDownloadSettingCard.Description" xml:space="preserve"><value>Continue unfinished resumable tasks.</value></data>
+  <data name="RemoteTimeSettingCard.Header" xml:space="preserve"><value>File timestamp</value></data>
+  <data name="RemoteTimeSettingCard.Description" xml:space="preserve"><value>Use download completion time or server time.</value></data>
+  <data name="MaxTriesSettingCard.Header" xml:space="preserve"><value>Max retry count</value></data>
+  <data name="MaxTriesSettingCard.Description" xml:space="preserve"><value>0 means unlimited.</value></data>
+  <data name="RetryWaitSettingCard.Header" xml:space="preserve"><value>Retry wait time</value></data>
+  <data name="RetryWaitSettingCard.Description" xml:space="preserve"><value>Interval between retry attempts.</value></data>
+  <data name="DownloadCleanupSettingCard.Header" xml:space="preserve"><value>Auto remove stale records</value></data>
+  <data name="DownloadCleanupSettingCard.Description" xml:space="preserve"><value>Clean up records detached from the aria2 session.</value></data>
+  <data name="TorrentCleanupSettingCard.Header" xml:space="preserve"><value>Delete .torrent source after complete</value></data>
+  <data name="TorrentCleanupSettingCard.Description" xml:space="preserve"><value>Only delete local torrent source files.</value></data>
+  <data name="DownloadDirectoryTextBox.PlaceholderText" xml:space="preserve"><value>Download folder</value></data>
+  <data name="BrowseDownloadDirectoryButton.ToolTipService.ToolTip" xml:space="preserve"><value>Choose folder</value></data>
+  <data name="RemoteTimeDownloadItem.Content" xml:space="preserve"><value>Download time</value></data>
+  <data name="RemoteTimeServerItem.Content" xml:space="preserve"><value>Server time</value></data>
+
+  <data name="BitTorrentSettingsTitle.Text" xml:space="preserve"><value>BitTorrent</value></data>
+  <data name="BitTorrentBasicOptionsHeader.Text" xml:space="preserve"><value>Basic options</value></data>
+  <data name="BtAutoDownloadSettingCard.Header" xml:space="preserve"><value>Auto download torrent content</value></data>
+  <data name="BtAutoDownloadSettingCard.Description" xml:space="preserve"><value>Automatically fetch real file content after adding a .torrent, metalink, or magnet link.</value></data>
+  <data name="BtForceEncryptionSettingCard.Header" xml:space="preserve"><value>Force encryption</value></data>
+  <data name="BtForceEncryptionSettingCard.Description" xml:space="preserve"><value>Require BitTorrent message payload encryption. Some older peers may not connect.</value></data>
+  <data name="BtKeepSeedingSettingCard.Header" xml:space="preserve"><value>Seeding strategy</value></data>
+  <data name="BtKeepSeedingSettingCard.Description" xml:space="preserve"><value>Choose continuous seeding, or stop automatically by share ratio and time.</value></data>
+  <data name="BtSeedingModeCard.Header" xml:space="preserve"><value>Seeding mode</value></data>
+  <data name="BtSeedingModeLimitedItem.Content" xml:space="preserve"><value>Stop by condition</value></data>
+  <data name="BtSeedingModeAlwaysItem.Content" xml:space="preserve"><value>Always seed</value></data>
+  <data name="BtSeedRatioCard.Header" xml:space="preserve"><value>Share ratio</value></data>
+  <data name="BtSeedTimeCard.Header" xml:space="preserve"><value>Share time</value></data>
+  <data name="BtMaxPeersSettingCard.Header" xml:space="preserve"><value>Max peers</value></data>
+  <data name="BtMaxPeersSettingCard.Description" xml:space="preserve"><value>Maximum number of peers per torrent.</value></data>
+  <data name="BitTorrentTrackerServerHeader.Text" xml:space="preserve"><value>Tracker server</value></data>
+  <data name="BtTrackerSourceSettingCard.Header" xml:space="preserve"><value>Tracker source</value></data>
+  <data name="BtTrackerSourceSettingCard.Description" xml:space="preserve"><value>Sync Tracker list from HTTP/HTTPS text sources.</value></data>
+  <data name="CdnBadgeText.Text" xml:space="preserve"><value>CDN</value></data>
+  <data name="BtTrackerCustomSourceSettingCard.Header" xml:space="preserve"><value>Custom source</value></data>
+  <data name="BtTrackerCustomSourceSettingCard.Description" xml:space="preserve"><value>Add your own Tracker list URL. Multi-select to sync together.</value></data>
+  <data name="BtCustomTrackerSourceTextBox.PlaceholderText" xml:space="preserve"><value>Enter custom Tracker list URL</value></data>
+  <data name="BtSyncTrackerButton.ToolTipService.ToolTip" xml:space="preserve"><value>Sync Tracker</value></data>
+  <data name="BtTrackerListSettingCard.Header" xml:space="preserve"><value>Tracker list</value></data>
+  <data name="BtTrackerListSettingCard.Description" xml:space="preserve"><value>One Tracker per line. Converted to comma-separated config when starting aria2.</value></data>
+  <data name="BtTrackerListTextBox.PlaceholderText" xml:space="preserve"><value>udp://tracker.example:6969/announce</value></data>
+  <data name="BtAutoSyncTrackerSettingCard.Header" xml:space="preserve"><value>Auto sync Tracker</value></data>
+  <data name="BtLastTrackerSyncText.Text" xml:space="preserve"><value>Last sync time is retained when opening settings page.</value></data>
+
+  <data name="NetworkSettingsTitle.Text" xml:space="preserve"><value>Network</value></data>
+  <data name="NetworkProxySectionHeader.Text" xml:space="preserve"><value>Proxy</value></data>
+  <data name="UseSystemProxySettingCard.Header" xml:space="preserve"><value>System proxy</value></data>
+  <data name="UseSystemProxySettingCard.Description" xml:space="preserve"><value>Read Windows current system proxy when starting aria2.</value></data>
+  <data name="CustomProxySettingCard.Header" xml:space="preserve"><value>Custom proxy</value></data>
+  <data name="CustomProxyDescriptionText.Text" xml:space="preserve"><value>Set HTTP or HTTPS proxy for aria2. Custom proxy takes priority over system proxy.</value></data>
+  <data name="ProxyServerTextBox.PlaceholderText" xml:space="preserve"><value>Proxy address</value></data>
+  <data name="DetectSystemProxyButton.ToolTipService.ToolTip" xml:space="preserve"><value>Detect system proxy</value></data>
+  <data name="ProxyExampleText.Text" xml:space="preserve"><value>Example: http://127.0.0.1:7890 or 127.0.0.1:7890. Current aria2 version does not support SOCKS proxy.</value></data>
+  <data name="ProxyBypassTextBox.PlaceholderText" xml:space="preserve"><value>Addresses to bypass proxy</value></data>
+  <data name="ProxyScopeHeader.Text" xml:space="preserve"><value>Proxy scope</value></data>
+  <data name="ProxyDownloadsCheckBox.Content" xml:space="preserve"><value>Download tasks</value></data>
+  <data name="ProxyTrackersCheckBox.Content" xml:space="preserve"><value>Tracker sync</value></data>
+  <data name="NetworkPortSectionHeader.Text" xml:space="preserve"><value>Port</value></data>
+  <data name="UpnpSettingCard.Header" xml:space="preserve"><value>UPnP/NAT-PMP</value></data>
+  <data name="UpnpSettingCard.Description" xml:space="preserve"><value>Save port mapping preference. Current Windows aria2 startup uses the ports below.</value></data>
+  <data name="BtPortSettingCard.Header" xml:space="preserve"><value>BT listen port</value></data>
+  <data name="BtPortSettingCard.Description" xml:space="preserve"><value>Used to receive BitTorrent peer connections. Requires aria2 restart to apply.</value></data>
+  <data name="RandomBtPortButton.ToolTipService.ToolTip" xml:space="preserve"><value>Random port</value></data>
+  <data name="DhtPortSettingCard.Header" xml:space="preserve"><value>DHT listen port</value></data>
+  <data name="DhtPortSettingCard.Description" xml:space="preserve"><value>Used for DHT node discovery. Requires aria2 restart to apply.</value></data>
+  <data name="RandomDhtPortButton.ToolTipService.ToolTip" xml:space="preserve"><value>Random port</value></data>
+  <data name="NetworkUserAgentSectionHeader.Text" xml:space="preserve"><value>User-Agent</value></data>
+  <data name="UserAgentSettingCard.Header" xml:space="preserve"><value>User-Agent</value></data>
+  <data name="UserAgentTextBox.PlaceholderText" xml:space="preserve"><value>User-Agent</value></data>
+  <data name="UserAgentResetButton.Content" xml:space="preserve"><value>Reset</value></data>
+  <data name="NetworkTransferParamsSectionHeader.Text" xml:space="preserve"><value>Transfer parameters</value></data>
+  <data name="ConnectTimeoutSettingCard.Header" xml:space="preserve"><value>Connect timeout</value></data>
+  <data name="ConnectTimeoutSettingCard.Description" xml:space="preserve"><value>Maximum seconds to wait when establishing a connection.</value></data>
+  <data name="TimeoutSettingCard.Header" xml:space="preserve"><value>Transfer timeout</value></data>
+  <data name="TimeoutSettingCard.Description" xml:space="preserve"><value>Transfer is considered timed out after being idle for this many seconds.</value></data>
+  <data name="FileAllocationSettingCard.Header" xml:space="preserve"><value>File allocation</value></data>
+  <data name="FileAllocationSettingCard.Description" xml:space="preserve"><value>Controls how disk space is reserved when a download starts.</value></data>
+
+  <data name="AdvancedSettingsTitle.Text" xml:space="preserve"><value>Advanced</value></data>
+  <data name="AdvancedAria2EngineSectionHeader.Text" xml:space="preserve"><value>aria2 engine</value></data>
+  <data name="AriaPathSettingCard.Header" xml:space="preserve"><value>aria2c path</value></data>
+  <data name="AriaPathSettingCard.Description" xml:space="preserve"><value>Leave empty to resolve aria2c.exe from the built-in engine or PATH.</value></data>
+  <data name="RpcPortSettingCard.Header" xml:space="preserve"><value>RPC port</value></data>
+  <data name="RpcPortSettingCard.Description" xml:space="preserve"><value>JSON-RPC port used for communication between OmniDown and local aria2.</value></data>
+  <data name="RpcSecretSettingCard.Header" xml:space="preserve"><value>RPC secret</value></data>
+  <data name="RpcSecretSettingCard.Description" xml:space="preserve"><value>Used to protect local JSON-RPC connections. Requires aria2 restart after change.</value></data>
+  <data name="AdvancedBrowserExtensionSectionHeader.Text" xml:space="preserve"><value>Browser extension</value></data>
+  <data name="ExtensionAutoSubmitSettingCard.Header" xml:space="preserve"><value>Auto submit after extension capture</value></data>
+  <data name="ExtensionAutoSubmitSettingCard.Description" xml:space="preserve"><value>When the browser extension sends a link, automatically create a task with current default download settings.</value></data>
+  <data name="ExtensionApiPortSettingCard.Header" xml:space="preserve"><value>Extension API port</value></data>
+  <data name="ExtensionApiPortSettingCard.Description" xml:space="preserve"><value>Local port reserved for browser extension to connect to OmniDown.</value></data>
+  <data name="ExtensionApiSecretSettingCard.Header" xml:space="preserve"><value>Extension API secret</value></data>
+  <data name="ExtensionApiSecretSettingCard.Description" xml:space="preserve"><value>Fill in this secret in browser extension settings to authenticate extension requests.</value></data>
+  <data name="AdvancedLogDiagnosticSectionHeader.Text" xml:space="preserve"><value>Log &amp; diagnostics</value></data>
+  <data name="LogLevelSettingCard.Header" xml:space="preserve"><value>Log level</value></data>
+  <data name="LogLevelSettingCard.Description" xml:space="preserve"><value>Controls the verbosity of aria2 output log. Takes effect after restarting aria2.</value></data>
+  <data name="AdvancedPathsSettingCard.Header" xml:space="preserve"><value>Config &amp; session files</value></data>
+  <data name="OpenConfigFolderButton.ToolTipService.ToolTip" xml:space="preserve"><value>Open config directory</value></data>
+  <data name="LogPathsSettingCard.Header" xml:space="preserve"><value>Log files</value></data>
+  <data name="OpenLogFolderButton.ToolTipService.ToolTip" xml:space="preserve"><value>Open log directory</value></data>
+  <data name="SessionResetSettingCard.Header" xml:space="preserve"><value>Clear aria2 session</value></data>
+  <data name="SessionResetSettingCard.Description" xml:space="preserve"><value>Delete local download.session and tasks.json. On next launch, leftover tasks from the aria2 session won't be restored.</value></data>
+  <data name="ClearSessionButton.Content" xml:space="preserve"><value>Clear session</value></data>
+  <data name="AdvancedClipboardDetectionSectionHeader.Text" xml:space="preserve"><value>Clipboard detection</value></data>
+  <data name="ClipboardDetectionSettingCard.Header" xml:space="preserve"><value>Auto detect clipboard links</value></data>
+  <data name="ClipboardDetectionSettingCard.Description" xml:space="preserve"><value>Auto open the New Download window after copying a download link.</value></data>
+  <data name="ClipboardTypesSettingCard.Header" xml:space="preserve"><value>Detection types</value></data>
+  <data name="ClipboardTypesSettingCard.Description" xml:space="preserve"><value>Choose which clipboard content triggers the New Download dialog.</value></data>
+  <data name="AdvancedDefaultProgramsSectionHeader.Text" xml:space="preserve"><value>Default programs</value></data>
+  <data name="ProtocolMagnetSettingCard.Header" xml:space="preserve"><value>magnet:// links</value></data>
+  <data name="ProtocolMagnetSettingCard.Description" xml:space="preserve"><value>Open magnet links with OmniDown.</value></data>
+  <data name="ProtocolThunderSettingCard.Header" xml:space="preserve"><value>thunder:// links</value></data>
+  <data name="ProtocolThunderSettingCard.Description" xml:space="preserve"><value>Open Xunlei links with OmniDown.</value></data>
+  <data name="ProtocolOmniDownSettingCard.Header" xml:space="preserve"><value>omnidown:// extension links</value></data>
+  <data name="ProtocolOmniDownSettingCard.Description" xml:space="preserve"><value>Used by browser extensions or other apps to invoke OmniDown.</value></data>
+  <data name="AdvancedDeveloperOptionsSectionHeader.Text" xml:space="preserve"><value>Developer options</value></data>
+  <data name="ProcessStatusSettingCard.Header" xml:space="preserve"><value>Process status</value></data>
+  <data name="AriaStartStopButton.ToolTipService.ToolTip" xml:space="preserve"><value>Start</value></data>
+  <data name="AriaRestartButton.ToolTipService.ToolTip" xml:space="preserve"><value>Restart</value></data>
+
 </root>

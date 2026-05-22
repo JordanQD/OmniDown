@@ -50,6 +50,7 @@
                     ColumnSpacing="8">
                     <TextBox
                         x:Name="DownloadDirectoryTextBox"
+                        x:Uid="DownloadDirectoryTextBox"
                         Height="32"
                         VerticalAlignment="Center"
                         PlaceholderText="下载文件夹"
@@ -61,6 +62,7 @@
                         MinWidth="40"
                         Padding="0"
                         VerticalAlignment="Center"
+                        x:Uid="BrowseDownloadDirectoryButton"
                         Click="BrowseDownloadDirectoryButton_Click"
                         ToolTipService.ToolTip="选择文件夹">
                         <FontIcon Glyph="&#xE8B7;" />
@@ -71,6 +73,7 @@
 
         <local:SettingCardControl
             x:Name="MaxConcurrentDownloadsSettingCard"
+            x:Uid="MaxConcurrentDownloadsSettingCard"
             Description="同时运行的任务上限。"
             Header="最大同时下载数"
             IconGlyph="&#xE8EF;">
@@ -91,6 +94,7 @@
 
         <local:SettingCardControl
             x:Name="SplitCountSettingCard"
+            x:Uid="SplitCountSettingCard"
             Description="单个任务的并行分片数。"
             Header="默认分片数"
             IconGlyph="&#xE8FD;">
@@ -111,6 +115,7 @@
 
         <local:SettingCardControl
             x:Name="MaxConnectionPerServerSettingCard"
+            x:Uid="MaxConnectionPerServerSettingCard"
             Description="同一服务器的连接上限，范围 1-16。"
             Header="单服务器最大连接数"
             IconGlyph="&#xE839;">
@@ -136,6 +141,7 @@
 
         <local:SettingCardControl
             x:Name="ContinueDownloadSettingCard"
+            x:Uid="ContinueDownloadSettingCard"
             Description="继续未完成的可恢复任务。"
             Header="断点续传"
             IconGlyph="&#xE768;">
@@ -164,6 +170,7 @@
 
         <local:SettingCardControl
             x:Name="RemoteTimeSettingCard"
+            x:Uid="RemoteTimeSettingCard"
             Description="保存完成时间或服务器时间。"
             Header="文件时间戳"
             IconGlyph="&#xE823;">
@@ -174,9 +181,11 @@
                     HorizontalAlignment="Right"
                     SelectionChanged="DownloadSettingComboBox_SelectionChanged">
                     <ComboBoxItem
+                        x:Uid="RemoteTimeDownloadItem"
                         Content="下载完成时间"
                         Tag="Download" />
                     <ComboBoxItem
+                        x:Uid="RemoteTimeServerItem"
                         Content="服务器时间"
                         Tag="Server" />
                 </ComboBox>
@@ -185,6 +194,7 @@
 
         <local:SettingCardControl
             x:Name="MaxTriesSettingCard"
+            x:Uid="MaxTriesSettingCard"
             Description="0 表示不限次数。"
             Header="最大重试次数"
             IconGlyph="&#xE8BB;">
@@ -205,6 +215,7 @@
 
         <local:SettingCardControl
             x:Name="RetryWaitSettingCard"
+            x:Uid="RetryWaitSettingCard"
             Description="失败后再次尝试的间隔。"
             Header="重试等待时间"
             IconGlyph="&#xE916;">
@@ -230,6 +241,7 @@
 
         <local:SettingCardControl
             x:Name="DownloadCleanupSettingCard"
+            x:Uid="DownloadCleanupSettingCard"
             Description="清理已脱离 aria2 会话的记录。"
             Header="自动移除陈旧记录"
             IconGlyph="&#xE74D;">
@@ -257,6 +269,7 @@
 
         <local:SettingCardControl
             x:Name="TorrentCleanupSettingCard"
+            x:Uid="TorrentCleanupSettingCard"
             Description="仅删除本地种子源文件。"
             Header="完成后删除 .torrent 源文件"
             IconGlyph="&#xE9AC;">

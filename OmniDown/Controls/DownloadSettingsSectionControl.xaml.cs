@@ -77,7 +77,7 @@ public sealed partial class DownloadSettingsSectionControl : UserControl
         TextBlock? stateText = GetToggleStateText(toggleSwitch);
         if (stateText is not null)
         {
-            stateText.Text = toggleSwitch.IsOn ? "开" : "关";
+            stateText.Text = toggleSwitch.IsOn ? Strings.Get("ToggleOnState.Text") : Strings.Get("ToggleOffState.Text");
         }
     }
 

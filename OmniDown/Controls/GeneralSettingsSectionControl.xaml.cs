@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using OmniDown.Models.Settings;
+using OmniDown.Services.Localization;
 using System;
 using System.Collections.Generic;
 
@@ -161,7 +162,7 @@ public sealed partial class GeneralSettingsSectionControl : UserControl
         TextBlock? stateText = GetToggleStateText(toggleSwitch);
         if (stateText is not null)
         {
-            stateText.Text = toggleSwitch.IsOn ? "开" : "关";
+            stateText.Text = toggleSwitch.IsOn ? Strings.Get("ToggleOnState.Text") : Strings.Get("ToggleOffState.Text");
         }
     }
 

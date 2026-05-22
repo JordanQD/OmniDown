@@ -14,16 +14,19 @@
         <TextBlock
             AutomationProperties.HeadingLevel="Level1"
             Style="{StaticResource TitleTextBlockStyle}"
+            x:Uid="AdvancedSettingsTitle"
             Text="高级" />
 
         <!--  aria2 引擎  -->
         <TextBlock
             Margin="1,30,0,6"
             Style="{StaticResource BodyStrongTextBlockStyle}"
+            x:Uid="AdvancedAria2EngineSectionHeader"
             Text="aria2 引擎" />
 
         <controls:SettingsCard
             x:Name="AriaPathSettingCard"
+            x:Uid="AriaPathSettingCard"
             Description="留空时从应用内置引擎或 PATH 解析 aria2c.exe。"
             Header="aria2c path">
             <controls:SettingsCard.HeaderIcon>
@@ -56,8 +59,9 @@
 
         <controls:SettingsCard
             x:Name="RpcPortSettingCard"
+            x:Uid="RpcPortSettingCard"
             Description="OmniDown 与本地 aria2 通讯使用的 JSON-RPC 端口。"
-            Header="RPC port">
+            Header="RPC 端口">
             <controls:SettingsCard.HeaderIcon>
                 <FontIcon Glyph="&#xE8A7;" />
             </controls:SettingsCard.HeaderIcon>
@@ -75,6 +79,7 @@
 
         <controls:SettingsCard
             x:Name="RpcSecretSettingCard"
+            x:Uid="RpcSecretSettingCard"
             Description="用于保护本地 JSON-RPC 连接；修改后需要重启 aria2。"
             Header="RPC 密钥">
             <controls:SettingsCard.HeaderIcon>
@@ -122,10 +127,12 @@
         <TextBlock
             Margin="1,30,0,6"
             Style="{StaticResource BodyStrongTextBlockStyle}"
+            x:Uid="AdvancedBrowserExtensionSectionHeader"
             Text="浏览器扩展" />
 
         <controls:SettingsCard
             x:Name="ExtensionAutoSubmitSettingCard"
+            x:Uid="ExtensionAutoSubmitSettingCard"
             Description="浏览器扩展传入链接时，自动使用当前默认下载设置创建任务。"
             Header="扩展捕获后自动提交">
             <controls:SettingsCard.HeaderIcon>
@@ -153,6 +160,7 @@
 
         <controls:SettingsCard
             x:Name="ExtensionApiPortSettingCard"
+            x:Uid="ExtensionApiPortSettingCard"
             Description="预留给浏览器扩展连接 OmniDown 的本地端口。"
             Header="扩展 API 端口">
             <controls:SettingsCard.HeaderIcon>
@@ -172,6 +180,7 @@
 
         <controls:SettingsCard
             x:Name="ExtensionApiSecretSettingCard"
+            x:Uid="ExtensionApiSecretSettingCard"
             Description="在浏览器扩展设置中填写此密钥，用于验证扩展请求。"
             Header="扩展 API 密钥">
             <controls:SettingsCard.HeaderIcon>
@@ -219,10 +228,12 @@
         <TextBlock
             Margin="1,30,0,6"
             Style="{StaticResource BodyStrongTextBlockStyle}"
+            x:Uid="AdvancedLogDiagnosticSectionHeader"
             Text="日志与诊断" />
 
         <controls:SettingsCard
             x:Name="LogLevelSettingCard"
+            x:Uid="LogLevelSettingCard"
             Description="控制 aria2 输出日志的详细程度；重启 aria2 后生效。"
             Header="日志级别">
             <controls:SettingsCard.HeaderIcon>
@@ -244,6 +255,7 @@
 
         <controls:SettingsCard
             x:Name="AdvancedPathsSettingCard"
+            x:Uid="AdvancedPathsSettingCard"
             Header="配置与会话文件">
             <controls:SettingsCard.HeaderIcon>
                 <FontIcon Glyph="&#xE8B7;" />
@@ -255,6 +267,7 @@
                 Padding="0"
                 HorizontalAlignment="Right"
                 Click="OpenConfigFolderButton_Click"
+                x:Uid="OpenConfigFolderButton"
                 ToolTipService.ToolTip="打开配置目录">
                 <FontIcon
                     FontSize="14"
@@ -270,6 +283,7 @@
 
         <controls:SettingsCard
             x:Name="LogPathsSettingCard"
+            x:Uid="LogPathsSettingCard"
             Header="日志文件">
             <controls:SettingsCard.HeaderIcon>
                 <FontIcon Glyph="&#xE8A5;" />
@@ -281,6 +295,7 @@
                 Padding="0"
                 HorizontalAlignment="Right"
                 Click="OpenLogFolderButton_Click"
+                x:Uid="OpenLogFolderButton"
                 ToolTipService.ToolTip="打开日志目录">
                 <FontIcon
                     FontSize="14"
@@ -296,6 +311,7 @@
 
         <controls:SettingsCard
             x:Name="SessionResetSettingCard"
+            x:Uid="SessionResetSettingCard"
             Description="删除本地 download.session 和 tasks.json，下次启动不再恢复 aria2 会话中的遗留任务。"
             Header="清空 aria2 会话">
             <controls:SettingsCard.HeaderIcon>
@@ -303,6 +319,7 @@
             </controls:SettingsCard.HeaderIcon>
             <Button
                 HorizontalAlignment="Right"
+                x:Uid="ClearSessionButton"
                 Click="ClearSessionButton_Click"
                 Content="清空会话" />
         </controls:SettingsCard>
@@ -311,10 +328,12 @@
         <TextBlock
             Margin="1,30,0,6"
             Style="{StaticResource BodyStrongTextBlockStyle}"
+            x:Uid="AdvancedClipboardDetectionSectionHeader"
             Text="剪贴板检测" />
 
         <controls:SettingsCard
             x:Name="ClipboardDetectionSettingCard"
+            x:Uid="ClipboardDetectionSettingCard"
             Description="复制下载链接后自动打开新建下载窗口。"
             Header="自动检测剪贴板链接">
             <controls:SettingsCard.HeaderIcon>
@@ -342,6 +361,7 @@
 
         <controls:SettingsExpander
             x:Name="ClipboardTypesSettingCard"
+            x:Uid="ClipboardTypesSettingCard"
             Description="选择剪贴板中哪些内容会触发新建下载。"
             Header="检测类型">
             <controls:SettingsExpander.HeaderIcon>
@@ -405,10 +425,12 @@
         <TextBlock
             Margin="1,30,0,6"
             Style="{StaticResource BodyStrongTextBlockStyle}"
+            x:Uid="AdvancedDefaultProgramsSectionHeader"
             Text="默认程序" />
 
         <controls:SettingsCard
             x:Name="ProtocolMagnetSettingCard"
+            x:Uid="ProtocolMagnetSettingCard"
             Description="将磁力链接交给 OmniDown 打开。"
             Header="magnet:// 链接">
             <controls:SettingsCard.HeaderIcon>
@@ -436,6 +458,7 @@
 
         <controls:SettingsCard
             x:Name="ProtocolThunderSettingCard"
+            x:Uid="ProtocolThunderSettingCard"
             Description="将迅雷链接交给 OmniDown 打开。"
             Header="thunder:// 链接">
             <controls:SettingsCard.HeaderIcon>
@@ -463,6 +486,7 @@
 
         <controls:SettingsCard
             x:Name="ProtocolOmniDownSettingCard"
+            x:Uid="ProtocolOmniDownSettingCard"
             Description="用于浏览器扩展或其他应用唤起 OmniDown。"
             Header="omnidown:// 扩展链接">
             <controls:SettingsCard.HeaderIcon>
@@ -493,11 +517,13 @@
         <TextBlock
             Margin="1,30,0,6"
             Style="{StaticResource BodyStrongTextBlockStyle}"
+            x:Uid="AdvancedDeveloperOptionsSectionHeader"
             Text="开发者选项" />
 
         <controls:SettingsCard
             x:Name="ProcessStatusSettingCard"
-            Header="Process status">
+            x:Uid="ProcessStatusSettingCard"
+            Header="进程状态">
             <controls:SettingsCard.HeaderIcon>
                 <FontIcon Glyph="&#xE7C1;" />
             </controls:SettingsCard.HeaderIcon>
@@ -511,6 +537,7 @@
                     Height="32"
                     MinWidth="40"
                     Padding="0"
+                    x:Uid="AriaStartStopButton"
                     Click="StartStopAriaButton_Click"
                     ToolTipService.ToolTip="启动">
                     <FontIcon
@@ -524,6 +551,7 @@
                     Height="32"
                     MinWidth="40"
                     Padding="0"
+                    x:Uid="AriaRestartButton"
                     Click="RestartAriaButton_Click"
                     ToolTipService.ToolTip="重启">
                     <FontIcon
@@ -534,8 +562,9 @@
             <controls:SettingsCard.Description>
                 <TextBlock
                     x:Name="SettingsAriaStatusText"
+                    x:Uid="SettingsAriaStatusText"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Text="Stopped" />
+                    Text="已停止" />
             </controls:SettingsCard.Description>
         </controls:SettingsCard>
     </StackPanel>
