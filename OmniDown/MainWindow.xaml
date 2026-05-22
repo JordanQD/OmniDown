@@ -82,7 +82,8 @@
             IsSettingsVisible="False"
             CompactPaneLength="48"
             OpenPaneLength="220"
-            PaneDisplayMode="Left"
+            PaneDisplayMode="Auto"
+            DisplayModeChanged="RootNavigation_DisplayModeChanged"
             ItemInvoked="RootNavigation_ItemInvoked"
             SelectionChanged="RootNavigation_SelectionChanged">
             <NavigationView.MenuItems>

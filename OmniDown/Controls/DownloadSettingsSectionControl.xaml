@@ -16,6 +16,7 @@
 
     <StackPanel
         x:Name="DownloadSettingsContent"
+        Margin="0,24,0,36"
         Spacing="{StaticResource SettingsCardSpacing}">
         <StackPanel.ChildrenTransitions>
             <RepositionThemeTransition />

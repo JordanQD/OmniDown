@@ -440,6 +440,11 @@ namespace OmniDown
             RootNavigation.IsPaneOpen = !RootNavigation.IsPaneOpen;
         }
 
+        private void RootNavigation_DisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs args)
+        {
+            AppTitleBar.IsPaneToggleButtonVisible = sender.PaneDisplayMode != NavigationViewPaneDisplayMode.Top;
+        }
+
         private void ApplyToolbarTooltips()
         {
             SetToolbarText(NewDownloadButton, Strings.Get("NewDownloadButton.Label"));

@@ -14,6 +14,7 @@
     </UserControl.Resources>
     <StackPanel
         x:Name="GeneralSettingsContent"
+        Margin="0,24,0,36"
         Spacing="{StaticResource SettingsCardSpacing}">
         <StackPanel.ChildrenTransitions>
             <RepositionThemeTransition />

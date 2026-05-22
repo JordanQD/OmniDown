@@ -4,14 +4,14 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <StackPanel
         x:Name="AdvancedSettingsContent"
-        Spacing="0">
+        Margin="0,24,0,36"
+        Spacing="4">
         <TextBlock
-            Margin="4,0,4,20"
-            FontSize="28"
-            FontWeight="SemiBold"
+            AutomationProperties.HeadingLevel="Level1"
+            Style="{StaticResource TitleTextBlockStyle}"
             Text="高级" />
         <TextBlock
-            Margin="4,0,4,8"
+            Margin="1,30,0,6"
             FontWeight="SemiBold"
             Text="aria2 引擎" />
         <Border
@@ -69,7 +69,7 @@
 
         <Border
             x:Name="RpcPortSettingCard"
-            Margin="0,-1,0,0"
+            Margin="0"
             Padding="16"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -107,7 +107,7 @@
 
         <Border
             x:Name="RpcSecretSettingCard"
-            Margin="0,-1,0,0"
+            Margin="0"
             Padding="16"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -172,7 +172,7 @@
         </Border>
 
         <TextBlock
-            Margin="4,32,4,8"
+            Margin="1,30,0,6"
             FontWeight="SemiBold"
             Text="浏览器扩展" />
         <Border
@@ -221,7 +221,7 @@
         </Border>
         <Border
             x:Name="ExtensionApiPortSettingCard"
-            Margin="0,-1,0,0"
+            Margin="0"
             Padding="16"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -257,7 +257,7 @@
         </Border>
         <Border
             x:Name="ExtensionApiSecretSettingCard"
-            Margin="0,-1,0,0"
+            Margin="0"
             Padding="16"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -322,7 +322,7 @@
         </Border>
 
         <TextBlock
-            Margin="4,32,4,8"
+            Margin="1,30,0,6"
             FontWeight="SemiBold"
             Text="日志与诊断" />
         <Border
@@ -365,7 +365,7 @@
         </Border>
         <Border
             x:Name="AdvancedPathsSettingCard"
-            Margin="0,-1,0,0"
+            Margin="0"
             Padding="16"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -403,7 +403,7 @@
         </Border>
         <Border
             x:Name="LogPathsSettingCard"
-            Margin="0,-1,0,0"
+            Margin="0"
             Padding="16"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -441,7 +441,7 @@
         </Border>
         <Border
             x:Name="SessionResetSettingCard"
-            Margin="0,-1,0,0"
+            Margin="0"
             Padding="16"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -472,7 +472,7 @@
         </Border>
 
         <TextBlock
-            Margin="4,32,4,8"
+            Margin="1,30,0,6"
             FontWeight="SemiBold"
             Text="剪贴板检测" />
         <Border
@@ -521,7 +521,7 @@
         </Border>
         <Border
             x:Name="ClipboardTypesSettingCard"
-            Margin="0,-1,0,0"
+            Margin="0"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
             BorderThickness="1"
@@ -657,7 +657,7 @@
         </Border>
 
         <TextBlock
-            Margin="4,32,4,8"
+            Margin="1,30,0,6"
             FontWeight="SemiBold"
             Text="默认程序" />
         <Border
@@ -706,7 +706,7 @@
         </Border>
         <Border
             x:Name="ProtocolThunderSettingCard"
-            Margin="0,-1,0,0"
+            Margin="0"
             Padding="16"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -750,7 +750,7 @@
         </Border>
         <Border
             x:Name="ProtocolOmniDownSettingCard"
-            Margin="0,-1,0,0"
+            Margin="0"
             Padding="16"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -796,7 +796,7 @@
         </Border>
 
         <TextBlock
-            Margin="4,32,4,8"
+            Margin="1,30,0,6"
             FontWeight="SemiBold"
             Text="开发者选项" />
         <Border

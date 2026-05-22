@@ -2,6 +2,7 @@
     x:Class="OmniDown.Controls.SettingsPageControl"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:galleryPages="using:WinUIGallery.Pages"
     xmlns:local="using:OmniDown.Controls">
 
     <Grid x:Name="SettingsPageRoot" RowDefinitions="*">
@@ -34,8 +35,9 @@
                 HorizontalScrollBarVisibility="Disabled"
                 VerticalScrollBarVisibility="Auto">
                 <Grid
-                    MaxWidth="1600"
-                    HorizontalAlignment="Stretch">
+                    Width="{Binding ActualWidth, ElementName=SettingsContentScrollViewer}"
+                    MaxWidth="1064"
+                    HorizontalAlignment="Center">
                     <local:GeneralSettingsSectionControl x:Name="GeneralSettingsContent" />
                     <local:DownloadSettingsSectionControl
                         x:Name="DownloadSettingsContent"
@@ -51,6 +53,9 @@
                         Visibility="Collapsed" />
                     <local:AboutSettingsSectionControl
                         x:Name="AboutSettingsContent"
+                        Visibility="Collapsed" />
+                    <galleryPages:SettingsPage
+                        x:Name="ExampleSettingsContent"
                         Visibility="Collapsed" />
                 </Grid>
             </ScrollViewer>

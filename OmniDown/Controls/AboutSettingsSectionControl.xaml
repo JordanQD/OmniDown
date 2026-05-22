@@ -4,11 +4,12 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <StackPanel
         x:Name="AboutSettingsContent"
-        Spacing="0">
+        Margin="0,24,0,36"
+        Spacing="4">
         <TextBlock
-            Margin="4,0,4,20"
-            FontSize="28"
-            FontWeight="SemiBold"
+            AutomationProperties.HeadingLevel="Level1"
+            Margin="0,0,0,30"
+            Style="{StaticResource TitleTextBlockStyle}"
             Text="关于" />
         <Border
             x:Name="AboutAppCard"
@@ -47,7 +48,7 @@
 
         <Border
             x:Name="AboutCloneCard"
-            Margin="0,-1,0,0"
+            Margin="0"
             Padding="16"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -86,7 +87,7 @@
 
         <Border
             x:Name="AboutIssueCard"
-            Margin="0,-1,0,0"
+            Margin="0"
             Padding="16"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -118,7 +119,7 @@
 
         <Border
             x:Name="AboutReferencesCard"
-            Margin="0,-1,0,0"
+            Margin="0"
             Padding="16"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -164,7 +165,7 @@
 
         <Border
             x:Name="AboutTrackerSourcesCard"
-            Margin="0,-1,0,0"
+            Margin="0"
             Padding="16"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -201,7 +202,7 @@
 
         <Border
             x:Name="AboutLicenseCard"
-            Margin="0,18,0,0"
+            Margin="0,30,0,0"
             Padding="16"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"

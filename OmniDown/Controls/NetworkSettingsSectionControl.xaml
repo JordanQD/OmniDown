@@ -4,14 +4,14 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <StackPanel
         x:Name="NetworkSettingsContent"
-        Spacing="0">
+        Margin="0,24,0,36"
+        Spacing="4">
         <TextBlock
-            Margin="4,0,4,20"
-            FontSize="28"
-            FontWeight="SemiBold"
+            AutomationProperties.HeadingLevel="Level1"
+            Style="{StaticResource TitleTextBlockStyle}"
             Text="网络" />
         <TextBlock
-            Margin="4,0,4,8"
+            Margin="1,30,0,6"
             FontWeight="SemiBold"
             Text="代理" />
         <Border
@@ -63,7 +63,7 @@
 
         <Border
             x:Name="CustomProxySettingCard"
-            Margin="0,-1,0,0"
+            Margin="0"
             Padding="16"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -169,7 +169,7 @@
         </Border>
 
         <TextBlock
-            Margin="4,32,4,8"
+            Margin="1,30,0,6"
             FontWeight="SemiBold"
             Text="端口" />
         <Border
@@ -218,7 +218,7 @@
         </Border>
         <Border
             x:Name="BtPortSettingCard"
-            Margin="0,-1,0,0"
+            Margin="0"
             Padding="16"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -273,7 +273,7 @@
         </Border>
         <Border
             x:Name="DhtPortSettingCard"
-            Margin="0,-1,0,0"
+            Margin="0"
             Padding="16"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -329,7 +329,7 @@
         </Border>
 
         <TextBlock
-            Margin="4,32,4,8"
+            Margin="1,30,0,6"
             FontWeight="SemiBold"
             Text="User-Agent" />
         <Border
@@ -388,7 +388,7 @@
         </Border>
 
         <TextBlock
-            Margin="4,32,4,8"
+            Margin="1,30,0,6"
             FontWeight="SemiBold"
             Text="传输参数" />
         <Border
@@ -429,7 +429,7 @@
         </Border>
         <Border
             x:Name="TimeoutSettingCard"
-            Margin="0,-1,0,0"
+            Margin="0"
             Padding="16"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -465,7 +465,7 @@
         </Border>
         <Border
             x:Name="FileAllocationSettingCard"
-            Margin="0,-1,0,0"
+            Margin="0"
             Padding="16"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"

@@ -56,20 +56,12 @@ namespace OmniDown
 
         private void ConfigureDefaultWindowSize()
         {
-            const int defaultWidth = 2000;
-            const int defaultHeight = 1000;
-            const int minWidth = 2000;
-            const int minHeight = 1000;
-
-            AppWindow.Resize(new SizeInt32(defaultWidth, defaultHeight));
-            if (AppWindow.Presenter is OverlappedPresenter presenter)
-            {
-                presenter.PreferredMinimumWidth = minWidth;
-                presenter.PreferredMinimumHeight = minHeight;
-            }
-
             DisplayArea displayArea = DisplayArea.GetFromWindowId(AppWindow.Id, DisplayAreaFallback.Primary);
             RectInt32 workArea = displayArea.WorkArea;
+            int defaultWidth = Math.Min(1200, workArea.Width);
+            int defaultHeight = Math.Min(760, workArea.Height);
+
+            AppWindow.Resize(new SizeInt32(defaultWidth, defaultHeight));
             int x = workArea.X + Math.Max(0, (workArea.Width - defaultWidth) / 2);
             int y = workArea.Y + Math.Max(0, (workArea.Height - defaultHeight) / 2);
             AppWindow.Move(new PointInt32(x, y));
@@ -88,8 +80,8 @@ namespace OmniDown
 
             DisplayArea displayArea = DisplayArea.GetFromWindowId(AppWindow.Id, DisplayAreaFallback.Primary);
             RectInt32 workArea = displayArea.WorkArea;
-            int width = Math.Clamp(settings.WindowWidth, 800, Math.Max(workArea.Width, 800));
-            int height = Math.Clamp(settings.WindowHeight, 600, Math.Max(workArea.Height, 600));
+            int width = Math.Clamp(settings.WindowWidth, 1, Math.Max(workArea.Width, 1));
+            int height = Math.Clamp(settings.WindowHeight, 1, Math.Max(workArea.Height, 1));
             int x = Math.Clamp(settings.WindowX, workArea.X, Math.Max(workArea.X, workArea.X + workArea.Width - width));
             int y = Math.Clamp(settings.WindowY, workArea.Y, Math.Max(workArea.Y, workArea.Y + workArea.Height - height));
 

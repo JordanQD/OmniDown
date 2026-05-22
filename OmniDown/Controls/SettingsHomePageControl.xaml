@@ -9,10 +9,16 @@
     </UserControl.Resources>
 
     <ScrollViewer
+        x:Name="SettingsHomeScrollViewer"
         Padding="0,0,8,0"
         HorizontalScrollBarVisibility="Disabled"
         VerticalScrollBarVisibility="Auto">
-        <StackPanel MaxWidth="1600" HorizontalAlignment="Stretch" Spacing="{StaticResource SettingsCardSpacing}">
+        <StackPanel
+            Width="{Binding ActualWidth, ElementName=SettingsHomeScrollViewer}"
+            MaxWidth="1064"
+            HorizontalAlignment="Center"
+            Margin="0,24,0,36"
+            Spacing="{StaticResource SettingsCardSpacing}">
             <StackPanel.ChildrenTransitions>
                 <EntranceThemeTransition FromVerticalOffset="50" />
                 <RepositionThemeTransition IsStaggeringEnabled="False" />
@@ -20,6 +26,7 @@
 
             <TextBlock
                 AutomationProperties.HeadingLevel="Level1"
+                Margin="0,0,0,30"
                 Style="{StaticResource TitleTextBlockStyle}"
                 Text="设置" />
 
@@ -92,6 +99,18 @@
                 Tag="About">
                 <controls:SettingsCard.HeaderIcon>
                     <FontIcon Glyph="&#xE946;" />
+                </controls:SettingsCard.HeaderIcon>
+            </controls:SettingsCard>
+
+            <controls:SettingsCard
+                x:Name="ExampleCard"
+                Click="SettingsCard_Click"
+                Description="WinUI Gallery 的设置页面"
+                Header="示例"
+                IsClickEnabled="True"
+                Tag="Example">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE7C3;" />
                 </controls:SettingsCard.HeaderIcon>
             </controls:SettingsCard>
         </StackPanel>

@@ -22,7 +22,8 @@ public sealed partial class SettingsPageControl : UserControl
             ["BitTorrent"] = BitTorrentSettingsContent,
             ["Network"] = NetworkSettingsContent,
             ["Advanced"] = AdvancedSettingsContent,
-            ["About"] = AboutSettingsContent
+            ["About"] = AboutSettingsContent,
+            ["Example"] = ExampleSettingsContent
         };
 
         SettingsHomePage.SectionRequested += OnSectionRequested;

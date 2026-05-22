@@ -118,6 +118,7 @@ namespace OmniDown
                 GetBrowserExtensionVersion);
             _settingsPageViewModel = new SettingsPageViewModel(_settingsStore);
             InitializeComponent();
+            WinUIGallery.App.MainWindow.NavigationView = RootNavigation;
             HookSettingsPageEvents();
             TasksListView.ItemsSource = _visibleTasks;
             NotificationHistoryListView.ItemsSource = _statusMessages;

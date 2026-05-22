@@ -4,14 +4,14 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <StackPanel
         x:Name="BitTorrentSettingsContent"
-        Spacing="0">
+        Margin="0,24,0,36"
+        Spacing="4">
         <TextBlock
-            Margin="4,0,4,20"
-            FontSize="28"
-            FontWeight="SemiBold"
+            AutomationProperties.HeadingLevel="Level1"
+            Style="{StaticResource TitleTextBlockStyle}"
             Text="BitTorrent" />
         <TextBlock
-            Margin="4,0,4,8"
+            Margin="1,30,0,6"
             FontWeight="SemiBold"
             Text="基础选项" />
         <Border
@@ -63,7 +63,7 @@
 
         <Border
             x:Name="BtForceEncryptionSettingCard"
-            Margin="0,-1,0,0"
+            Margin="0"
             Padding="16"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -110,7 +110,7 @@
 
         <Border
             x:Name="BtKeepSeedingSettingCard"
-            Margin="0,-1,0,0"
+            Margin="0"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
             BorderThickness="1">
@@ -220,7 +220,7 @@
 
         <Border
             x:Name="BtMaxPeersSettingCard"
-            Margin="0,-1,0,0"
+            Margin="0"
             Padding="16"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -257,7 +257,7 @@
         </Border>
 
         <TextBlock
-            Margin="4,20,4,8"
+            Margin="1,30,0,6"
             FontWeight="SemiBold"
             Text="Tracker 服务器" />
 
@@ -496,7 +496,7 @@
 
         <Border
             x:Name="BtTrackerCustomSourceSettingCard"
-            Margin="0,-1,0,0"
+            Margin="0"
             Padding="16"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -562,7 +562,7 @@
 
         <Border
             x:Name="BtTrackerListSettingCard"
-            Margin="0,-1,0,0"
+            Margin="0"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
             BorderThickness="1">
@@ -627,7 +627,7 @@
 
         <Border
             x:Name="BtAutoSyncTrackerSettingCard"
-            Margin="0,-1,0,0"
+            Margin="0"
             Padding="16"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
