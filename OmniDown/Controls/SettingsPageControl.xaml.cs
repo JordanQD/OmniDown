@@ -84,6 +84,7 @@ public sealed partial class SettingsPageControl : UserControl
     private void ShowSection(string tag)
     {
         SettingsHomePage.Visibility = Visibility.Collapsed;
+        SettingsContentScrollViewer.Visibility = tag == "Example" ? Visibility.Collapsed : Visibility.Visible;
 
         // Show only the requested section
         foreach (KeyValuePair<string, FrameworkElement> kvp in _sectionContents)
@@ -100,10 +101,15 @@ public sealed partial class SettingsPageControl : UserControl
         SectionNavigationRequested?.Invoke(this, tag);
     }
 
-    private void SettingsBackButton_Click(object sender, RoutedEventArgs e)
+    internal void NavigateBackToHome()
     {
         NavigateTo("Home");
         SectionNavigationRequested?.Invoke(this, "Home");
+    }
+
+    private void SettingsContentScrollViewer_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        SettingsContentHost.Width = Math.Min(1064, Math.Max(0, e.NewSize.Width - 72));
     }
 
     // Layout controls (kept for MainWindow compatibility)

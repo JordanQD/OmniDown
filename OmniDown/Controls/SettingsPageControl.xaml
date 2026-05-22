@@ -14,28 +14,16 @@
         <!-- Sub-page: breadcrumb + section content -->
         <Grid
             x:Name="SettingsSectionPanel"
-            RowDefinitions="Auto,*"
-            RowSpacing="12"
+            RowDefinitions="*"
             Visibility="Collapsed">
-            <Button
-                x:Name="SettingsBackButton"
-                HorizontalAlignment="Left"
-                Click="SettingsBackButton_Click"
-                Style="{StaticResource DefaultButtonStyle}">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <FontIcon FontSize="14" Glyph="&#xE76B;" />
-                    <TextBlock Text="设置" />
-                </StackPanel>
-            </Button>
-
             <ScrollViewer
                 x:Name="SettingsContentScrollViewer"
-                Grid.Row="1"
-                Padding="0,0,8,0"
+                Padding="36,0,36,0"
                 HorizontalScrollBarVisibility="Disabled"
-                VerticalScrollBarVisibility="Auto">
+                VerticalScrollBarVisibility="Auto"
+                SizeChanged="SettingsContentScrollViewer_SizeChanged">
                 <Grid
-                    Width="{Binding ActualWidth, ElementName=SettingsContentScrollViewer}"
+                    x:Name="SettingsContentHost"
                     MaxWidth="1064"
                     HorizontalAlignment="Center">
                     <local:GeneralSettingsSectionControl x:Name="GeneralSettingsContent" />
@@ -54,11 +42,11 @@
                     <local:AboutSettingsSectionControl
                         x:Name="AboutSettingsContent"
                         Visibility="Collapsed" />
-                    <galleryPages:SettingsPage
-                        x:Name="ExampleSettingsContent"
-                        Visibility="Collapsed" />
                 </Grid>
             </ScrollViewer>
+            <galleryPages:SettingsPage
+                x:Name="ExampleSettingsContent"
+                Visibility="Collapsed" />
         </Grid>
     </Grid>
 </UserControl>

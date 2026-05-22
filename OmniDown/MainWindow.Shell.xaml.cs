@@ -256,6 +256,7 @@ namespace OmniDown
 
         private void SettingsNavItem_Tapped(object sender, TappedRoutedEventArgs e)
         {
+            SettingsPage.NavigateTo("Home");
             NavigateTo("Settings");
             e.Handled = true;
         }
@@ -286,9 +287,11 @@ namespace OmniDown
                 UpdateSearchPlaceholder();
                 UpdateStatusBar();
                 ShowSettingsPage();
+                UpdateTitleBarBackButton();
                 return;
             }
 
+            UpdateTitleBarBackButton();
             UpdateTaskDetailsPaneVisibility();
             UpdateSearchPlaceholder();
             UpdateDownloadsHeader(tag);
@@ -327,6 +330,7 @@ namespace OmniDown
             {
                 ApplySettingsFilter();
                 ResetSettingsSectionFocus();
+                UpdateTitleBarBackButton();
                 return;
             }
 
@@ -346,6 +350,8 @@ namespace OmniDown
                     _isLoadingAdvancedSettings = false;
                 }
             }
+
+            UpdateTitleBarBackButton();
         }
 
         private void ShowSettingsPage()
@@ -363,17 +369,20 @@ namespace OmniDown
                 }
                 ApplySettingsFilter();
                 ResetSettingsSectionFocus();
+                UpdateTitleBarBackButton();
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Show settings page failed: {ex}");
                 SettingsPage.NavigateTo("Home");
+                UpdateTitleBarBackButton();
             }
         }
 
         private void ShowSettingsSection(string tag)
         {
             SettingsPage.NavigateTo(tag);
+            UpdateTitleBarBackButton();
         }
 
         private void ResetSettingsSectionViewport()
@@ -438,6 +447,23 @@ namespace OmniDown
         private void AppTitleBar_PaneToggleRequested(TitleBar sender, object args)
         {
             RootNavigation.IsPaneOpen = !RootNavigation.IsPaneOpen;
+        }
+
+        private void AppTitleBar_BackRequested(TitleBar sender, object args)
+        {
+            if (_currentTaskFilter == "Settings" &&
+                !string.IsNullOrWhiteSpace(SettingsPage.CurrentSection))
+            {
+                SettingsPage.NavigateBackToHome();
+                UpdateTitleBarBackButton();
+            }
+        }
+
+        private void UpdateTitleBarBackButton()
+        {
+            AppTitleBar.IsBackButtonVisible =
+                _currentTaskFilter == "Settings" &&
+                !string.IsNullOrWhiteSpace(SettingsPage.CurrentSection);
         }
 
         private void RootNavigation_DisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs args)

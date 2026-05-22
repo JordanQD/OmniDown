@@ -144,7 +144,7 @@ namespace OmniDown
             _statusMessageTimer.Interval = TimeSpan.FromSeconds(3);
             _statusMessageTimer.Tick += StatusMessageTimer_Tick;
 
-            ShowSettingsSection("General");
+            SettingsPage.NavigateTo("Home");
             InitializeAboutSection();
 
             LoadDownloadSettings();

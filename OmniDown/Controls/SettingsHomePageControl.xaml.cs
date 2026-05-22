@@ -21,4 +21,9 @@ public sealed partial class SettingsHomePageControl : UserControl
             SectionRequested?.Invoke(this, tag);
         }
     }
+
+    private void SettingsHomeScrollViewer_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        SettingsHomeContent.Width = Math.Min(1064, Math.Max(0, e.NewSize.Width - 72));
+    }
 }

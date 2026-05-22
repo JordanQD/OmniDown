@@ -54,6 +54,8 @@
             MinHeight="48"
             VerticalAlignment="Stretch"
             FontSize="13"
+            BackRequested="AppTitleBar_BackRequested"
+            IsBackButtonVisible="False"
             IsPaneToggleButtonVisible="True"
             PaneToggleRequested="AppTitleBar_PaneToggleRequested"
             Title="OmniDown">

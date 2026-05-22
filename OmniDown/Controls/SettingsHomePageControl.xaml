@@ -10,11 +10,12 @@
 
     <ScrollViewer
         x:Name="SettingsHomeScrollViewer"
-        Padding="0,0,8,0"
+        Padding="36,0,36,0"
         HorizontalScrollBarVisibility="Disabled"
-        VerticalScrollBarVisibility="Auto">
+        VerticalScrollBarVisibility="Auto"
+        SizeChanged="SettingsHomeScrollViewer_SizeChanged">
         <StackPanel
-            Width="{Binding ActualWidth, ElementName=SettingsHomeScrollViewer}"
+            x:Name="SettingsHomeContent"
             MaxWidth="1064"
             HorizontalAlignment="Center"
             Margin="0,24,0,36"
