@@ -1,675 +1,464 @@
 <UserControl
     x:Class="OmniDown.Controls.BitTorrentSettingsSectionControl"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls">
     <StackPanel
         x:Name="BitTorrentSettingsContent"
         Margin="0,24,0,36"
         Spacing="4">
+        <StackPanel.ChildrenTransitions>
+            <EntranceThemeTransition FromVerticalOffset="50" />
+            <RepositionThemeTransition />
+        </StackPanel.ChildrenTransitions>
         <TextBlock
             AutomationProperties.HeadingLevel="Level1"
             Style="{StaticResource TitleTextBlockStyle}"
             Text="BitTorrent" />
+
+        <!--  基础选项  -->
         <TextBlock
             Margin="1,30,0,6"
-            FontWeight="SemiBold"
+            Style="{StaticResource BodyStrongTextBlockStyle}"
             Text="基础选项" />
-        <Border
+
+        <controls:SettingsCard
             x:Name="BtAutoDownloadSettingCard"
-            Padding="16"
-            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-            BorderThickness="1"
-            CornerRadius="8,8,0,0">
-            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
-                <FontIcon
-                    Width="24"
+            Description="添加 .torrent、metalink 或磁力链接后自动获取真实文件内容。"
+            Header="自动下载种子内容">
+            <controls:SettingsCard.HeaderIcon>
+                <FontIcon Glyph="&#xE896;" />
+            </controls:SettingsCard.HeaderIcon>
+            <StackPanel
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Orientation="Horizontal"
+                Spacing="8">
+                <TextBlock
+                    x:Name="BtAutoDownloadStateText"
                     VerticalAlignment="Center"
-                    Glyph="&#xE896;" />
-                <StackPanel
-                    Grid.Column="1"
-                    Spacing="3">
-                    <TextBlock
-                        FontWeight="SemiBold"
-                        Text="自动下载种子内容" />
-                    <TextBlock
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        Text="添加 .torrent、metalink 或磁力链接后自动获取真实文件内容。"
-                        TextTrimming="CharacterEllipsis"
-                        TextWrapping="NoWrap" />
-                </StackPanel>
-                <StackPanel
-                    Grid.Column="2"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    Orientation="Horizontal"
-                    Spacing="8">
-                    <TextBlock
-                        x:Name="BtAutoDownloadStateText"
-                        VerticalAlignment="Center"
-                        Text="开" />
-                    <ToggleSwitch
-                        x:Name="BtAutoDownloadToggleSwitch"
-                        Width="48"
-                        MinWidth="0"
-                        Padding="0"
-                        OffContent=""
-                        OnContent=""
-                        IsOn="True"
-                        Toggled="BitTorrentSettingToggleSwitch_Toggled" />
-                </StackPanel>
-            </Grid>
-        </Border>
-
-        <Border
-            x:Name="BtForceEncryptionSettingCard"
-            Margin="0"
-            Padding="16"
-            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-            BorderThickness="1"
-            CornerRadius="0">
-            <Grid ColumnDefinitions="Auto,*,220" ColumnSpacing="14">
-                <FontIcon
-                    Width="24"
-                    VerticalAlignment="Center"
-                    Glyph="&#xE72E;" />
-                <StackPanel
-                    Grid.Column="1"
-                    Spacing="3">
-                    <TextBlock
-                        FontWeight="SemiBold"
-                        Text="强制加密" />
-                    <TextBlock
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        Text="要求 BitTorrent 消息负载加密，部分旧 Peer 可能无法连接。"
-                        TextTrimming="CharacterEllipsis"
-                        TextWrapping="NoWrap" />
-                </StackPanel>
-                <StackPanel
-                    Grid.Column="2"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    Orientation="Horizontal"
-                    Spacing="8">
-                    <TextBlock
-                        x:Name="BtForceEncryptionStateText"
-                        VerticalAlignment="Center"
-                        Text="关" />
-                    <ToggleSwitch
-                        x:Name="BtForceEncryptionToggleSwitch"
-                        Width="48"
-                        MinWidth="0"
-                        Padding="0"
-                        OffContent=""
-                        OnContent=""
-                        Toggled="BitTorrentSettingToggleSwitch_Toggled" />
-                </StackPanel>
-            </Grid>
-        </Border>
-
-        <Border
-            x:Name="BtKeepSeedingSettingCard"
-            Margin="0"
-            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-            BorderThickness="1">
-            <StackPanel>
-                <Button
+                    Text="开" />
+                <ToggleSwitch
+                    x:Name="BtAutoDownloadToggleSwitch"
+                    Width="48"
+                    MinWidth="0"
                     Padding="0"
-                    HorizontalAlignment="Stretch"
-                    HorizontalContentAlignment="Stretch"
-                    Background="Transparent"
-                    BorderThickness="0"
-                    Click="ToggleBtSeedSettingsButton_Click">
-                    <Grid
-                        Padding="16"
-                        ColumnDefinitions="Auto,*,Auto"
-                        ColumnSpacing="14">
-                        <FontIcon
-                            Width="24"
-                            VerticalAlignment="Center"
-                            Glyph="&#xE8EE;" />
-                        <StackPanel
-                            Grid.Column="1"
-                            Spacing="3">
-                            <TextBlock
-                                FontWeight="SemiBold"
-                                Text="做种策略" />
-                            <TextBlock
-                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Text="选择持续做种，或按分享率与时间自动停止。"
-                                TextWrapping="WrapWholeWords" />
-                        </StackPanel>
-                        <FontIcon
-                            x:Name="BtSeedChevronIcon"
-                            Grid.Column="2"
-                            Width="16"
-                            VerticalAlignment="Center"
-                            FontSize="12"
-                            Glyph="&#xE70D;" />
-                    </Grid>
-                </Button>
-                <Border
-                    x:Name="BtSeedLimitsBox"
-                    Padding="16,8,16,16"
-                    Background="Transparent"
-                    Opacity="0"
-                    Visibility="Collapsed">
-                    <Grid
-                        ColumnDefinitions="24,*,260"
-                        RowDefinitions="Auto,Auto,Auto"
-                        ColumnSpacing="14"
-                        RowSpacing="10">
-                        <TextBlock
-                            Grid.Column="1"
-                            VerticalAlignment="Center"
-                            Text="做种方式" />
-                        <TextBlock
-                            Grid.Row="1"
-                            Grid.Column="1"
-                            VerticalAlignment="Center"
-                            Text="分享率" />
-                        <TextBlock
-                            Grid.Row="2"
-                            Grid.Column="1"
-                            VerticalAlignment="Center"
-                            Text="分享时间" />
-                        <ComboBox
-                            x:Name="BtSeedingModeComboBox"
-                            Grid.Column="2"
-                            Width="168"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Center"
-                            SelectionChanged="BitTorrentSettingComboBox_SelectionChanged">
-                            <ComboBoxItem
-                                Content="按条件停止"
-                                Tag="Limited" />
-                            <ComboBoxItem
-                                Content="持续做种"
-                                Tag="Always" />
-                        </ComboBox>
-                        <NumberBox
-                            x:Name="BtSeedRatioNumberBox"
-                            Grid.Row="1"
-                            Grid.Column="2"
-                            Width="168"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Center"
-                            Minimum="0"
-                            Maximum="100"
-                            SmallChange="0.1"
-                            SpinButtonPlacementMode="Inline"
-                            ValueChanged="BitTorrentSettingNumberBox_ValueChanged" />
-                        <NumberBox
-                            x:Name="BtSeedTimeNumberBox"
-                            Grid.Row="2"
-                            Grid.Column="2"
-                            Width="168"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Center"
-                            Minimum="0"
-                            Maximum="525600"
-                            SmallChange="10"
-                            SpinButtonPlacementMode="Inline"
-                            ValueChanged="BitTorrentSettingNumberBox_ValueChanged" />
-                    </Grid>
-                </Border>
+                    OffContent=""
+                    OnContent=""
+                    IsOn="True"
+                    Toggled="BitTorrentSettingToggleSwitch_Toggled" />
             </StackPanel>
-        </Border>
+        </controls:SettingsCard>
 
-        <Border
-            x:Name="BtMaxPeersSettingCard"
-            Margin="0"
-            Padding="16"
-            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-            BorderThickness="1"
-            CornerRadius="0,0,8,8">
-            <Grid ColumnDefinitions="Auto,*,260" ColumnSpacing="14">
-                <FontIcon
-                    Width="24"
+        <controls:SettingsCard
+            x:Name="BtForceEncryptionSettingCard"
+            Description="要求 BitTorrent 消息负载加密，部分旧 Peer 可能无法连接。"
+            Header="强制加密">
+            <controls:SettingsCard.HeaderIcon>
+                <FontIcon Glyph="&#xE72E;" />
+            </controls:SettingsCard.HeaderIcon>
+            <StackPanel
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Orientation="Horizontal"
+                Spacing="8">
+                <TextBlock
+                    x:Name="BtForceEncryptionStateText"
                     VerticalAlignment="Center"
-                    Glyph="&#xE716;" />
-                <StackPanel
-                    Grid.Column="1"
-                    Spacing="3">
-                    <TextBlock
-                        FontWeight="SemiBold"
-                        Text="最大 Peer 数" />
-                    <TextBlock
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        Text="每个种子最多连接的 Peer 数量。"
-                        TextWrapping="WrapWholeWords" />
-                </StackPanel>
-                <NumberBox
-                    x:Name="BtMaxPeersNumberBox"
-                    Grid.Column="2"
-                    Width="168"
-                    Height="32"
-                    HorizontalAlignment="Right"
-                    Minimum="1"
-                    Maximum="1000"
-                    SmallChange="8"
-                    SpinButtonPlacementMode="Inline"
-                    ValueChanged="BitTorrentSettingNumberBox_ValueChanged" />
-            </Grid>
-        </Border>
+                    Text="关" />
+                <ToggleSwitch
+                    x:Name="BtForceEncryptionToggleSwitch"
+                    Width="48"
+                    MinWidth="0"
+                    Padding="0"
+                    OffContent=""
+                    OnContent=""
+                    Toggled="BitTorrentSettingToggleSwitch_Toggled" />
+            </StackPanel>
+        </controls:SettingsCard>
 
+        <controls:SettingsExpander
+            x:Name="BtKeepSeedingSettingCard"
+            Description="选择持续做种，或按分享率与时间自动停止。"
+            Header="做种策略">
+            <controls:SettingsExpander.HeaderIcon>
+                <FontIcon Glyph="&#xE8EE;" />
+            </controls:SettingsExpander.HeaderIcon>
+            <controls:SettingsExpander.Items>
+                <controls:SettingsCard Header="做种方式">
+                    <ComboBox
+                        x:Name="BtSeedingModeComboBox"
+                        Width="168"
+                        HorizontalAlignment="Right"
+                        SelectionChanged="BitTorrentSettingComboBox_SelectionChanged">
+                        <ComboBoxItem Content="按条件停止" Tag="Limited" />
+                        <ComboBoxItem Content="持续做种" Tag="Always" />
+                    </ComboBox>
+                </controls:SettingsCard>
+                <controls:SettingsCard Header="分享率">
+                    <NumberBox
+                        x:Name="BtSeedRatioNumberBox"
+                        Width="168"
+                        HorizontalAlignment="Right"
+                        Minimum="0"
+                        Maximum="100"
+                        SmallChange="0.1"
+                        SpinButtonPlacementMode="Inline"
+                        ValueChanged="BitTorrentSettingNumberBox_ValueChanged" />
+                </controls:SettingsCard>
+                <controls:SettingsCard Header="分享时间">
+                    <NumberBox
+                        x:Name="BtSeedTimeNumberBox"
+                        Width="168"
+                        HorizontalAlignment="Right"
+                        Minimum="0"
+                        Maximum="525600"
+                        SmallChange="10"
+                        SpinButtonPlacementMode="Inline"
+                        ValueChanged="BitTorrentSettingNumberBox_ValueChanged" />
+                </controls:SettingsCard>
+            </controls:SettingsExpander.Items>
+        </controls:SettingsExpander>
+
+        <controls:SettingsCard
+            x:Name="BtMaxPeersSettingCard"
+            Description="每个种子最多连接的 Peer 数量。"
+            Header="最大 Peer 数">
+            <controls:SettingsCard.HeaderIcon>
+                <FontIcon Glyph="&#xE716;" />
+            </controls:SettingsCard.HeaderIcon>
+            <NumberBox
+                x:Name="BtMaxPeersNumberBox"
+                Width="168"
+                Height="32"
+                HorizontalAlignment="Right"
+                Minimum="1"
+                Maximum="1000"
+                SmallChange="8"
+                SpinButtonPlacementMode="Inline"
+                ValueChanged="BitTorrentSettingNumberBox_ValueChanged" />
+        </controls:SettingsCard>
+
+        <!--  Tracker 服务器  -->
         <TextBlock
             Margin="1,30,0,6"
-            FontWeight="SemiBold"
+            Style="{StaticResource BodyStrongTextBlockStyle}"
             Text="Tracker 服务器" />
 
-        <Border
+        <controls:SettingsCard
             x:Name="BtTrackerSourceSettingCard"
-            Padding="16"
-            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-            BorderThickness="1"
-            CornerRadius="8,8,0,0">
-            <Grid ColumnDefinitions="Auto,*,260" ColumnSpacing="14">
-                <FontIcon
-                    Width="24"
-                    VerticalAlignment="Center"
-                    Glyph="&#xE774;" />
-                <StackPanel
-                    Grid.Column="1"
-                    Spacing="3">
-                    <TextBlock
-                        FontWeight="SemiBold"
-                        Text="Tracker 源" />
-                    <TextBlock
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        Text="从 HTTP/HTTPS 文本源同步 Tracker 列表。"
-                    TextWrapping="WrapWholeWords" />
-                </StackPanel>
-                <Button
-                    x:Name="BtTrackerSourceDropDownButton"
-                    Grid.Column="2"
-                    HorizontalAlignment="Stretch"
-                    HorizontalContentAlignment="Stretch">
-                    <Button.Content>
-                        <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock
-                                x:Name="BtTrackerSourceSummaryText"
-                                VerticalAlignment="Center"
-                                Text="trackers_all.txt"
-                                TextTrimming="CharacterEllipsis" />
-                            <FontIcon
-                                Grid.Column="1"
-                                Margin="8,0,0,0"
-                                FontSize="12"
-                                Glyph="&#xE70D;" />
-                        </Grid>
-                    </Button.Content>
-                    <Button.Flyout>
-                        <Flyout Placement="BottomEdgeAlignedLeft">
-                            <Border
-                                Width="360"
-                                Padding="12"
-                                CornerRadius="4">
-                                <ScrollViewer MaxHeight="360">
-                                    <StackPanel Spacing="10">
-                                        <StackPanel Spacing="4">
-                                            <TextBlock
-                                                Margin="4,0,0,2"
-                                                FontWeight="SemiBold"
-                                                Text="ngosang/trackerslist" />
-                                            <CheckBox
-                                                x:Name="BtTrackerNgosangBestCheckBox"
-                                                Content="trackers_best.txt"
-                                                Tag="https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_best.txt"
-                                                Checked="BitTorrentSettingCheckBox_Changed"
-                                                Unchecked="BitTorrentSettingCheckBox_Changed" />
-                                            <CheckBox
-                                                x:Name="BtTrackerNgosangBestIpCheckBox"
-                                                Content="trackers_best_ip.txt"
-                                                Tag="https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_best_ip.txt"
-                                                Checked="BitTorrentSettingCheckBox_Changed"
-                                                Unchecked="BitTorrentSettingCheckBox_Changed" />
-                                            <CheckBox
-                                                x:Name="BtTrackerNgosangAllCheckBox"
-                                                Content="trackers_all.txt"
-                                                Tag="https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt"
-                                                Checked="BitTorrentSettingCheckBox_Changed"
-                                                Unchecked="BitTorrentSettingCheckBox_Changed" />
-                                            <CheckBox
-                                                x:Name="BtTrackerNgosangAllIpCheckBox"
-                                                Content="trackers_all_ip.txt"
-                                                Tag="https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all_ip.txt"
-                                                Checked="BitTorrentSettingCheckBox_Changed"
-                                                Unchecked="BitTorrentSettingCheckBox_Changed" />
-                                            <CheckBox
-                                                x:Name="BtTrackerNgosangCdnBestCheckBox"
-                                                Tag="https://cdn.jsdelivr.net/gh/ngosang/trackerslist/trackers_best.txt"
-                                                Checked="BitTorrentSettingCheckBox_Changed"
-                                                Unchecked="BitTorrentSettingCheckBox_Changed">
-                                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                                    <TextBlock Text="trackers_best.txt" />
-                                                    <Border
-                                                        Padding="4,0"
-                                                        Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
-                                                        CornerRadius="3">
-                                                        <TextBlock
-                                                            FontSize="11"
-                                                            Text="CDN" />
-                                                    </Border>
-                                                </StackPanel>
-                                            </CheckBox>
-                                            <CheckBox
-                                                x:Name="BtTrackerNgosangCdnBestIpCheckBox"
-                                                Tag="https://cdn.jsdelivr.net/gh/ngosang/trackerslist/trackers_best_ip.txt"
-                                                Checked="BitTorrentSettingCheckBox_Changed"
-                                                Unchecked="BitTorrentSettingCheckBox_Changed">
-                                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                                    <TextBlock Text="trackers_best_ip.txt" />
-                                                    <Border
-                                                        Padding="4,0"
-                                                        Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
-                                                        CornerRadius="3">
-                                                        <TextBlock
-                                                            FontSize="11"
-                                                            Text="CDN" />
-                                                    </Border>
-                                                </StackPanel>
-                                            </CheckBox>
-                                            <CheckBox
-                                                x:Name="BtTrackerNgosangCdnAllCheckBox"
-                                                Tag="https://cdn.jsdelivr.net/gh/ngosang/trackerslist/trackers_all.txt"
-                                                Checked="BitTorrentSettingCheckBox_Changed"
-                                                Unchecked="BitTorrentSettingCheckBox_Changed">
-                                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                                    <TextBlock Text="trackers_all.txt" />
-                                                    <Border
-                                                        Padding="4,0"
-                                                        Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
-                                                        CornerRadius="3">
-                                                        <TextBlock
-                                                            FontSize="11"
-                                                            Text="CDN" />
-                                                    </Border>
-                                                </StackPanel>
-                                            </CheckBox>
-                                            <CheckBox
-                                                x:Name="BtTrackerNgosangCdnAllIpCheckBox"
-                                                Tag="https://cdn.jsdelivr.net/gh/ngosang/trackerslist/trackers_all_ip.txt"
-                                                Checked="BitTorrentSettingCheckBox_Changed"
-                                                Unchecked="BitTorrentSettingCheckBox_Changed">
-                                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                                    <TextBlock Text="trackers_all_ip.txt" />
-                                                    <Border
-                                                        Padding="4,0"
-                                                        Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
-                                                        CornerRadius="3">
-                                                        <TextBlock
-                                                            FontSize="11"
-                                                            Text="CDN" />
-                                                    </Border>
-                                                </StackPanel>
-                                            </CheckBox>
-                                        </StackPanel>
-
-                                        <StackPanel Spacing="4">
-                                            <TextBlock
-                                                Margin="4,2,0,2"
-                                                FontWeight="SemiBold"
-                                                Text="XIU2/TrackersListCollection" />
-                                            <CheckBox
-                                                x:Name="BtTrackerXiu2BestCheckBox"
-                                                Content="best.txt"
-                                                Tag="https://raw.githubusercontent.com/XIU2/TrackersListCollection/master/best.txt"
-                                                Checked="BitTorrentSettingCheckBox_Changed"
-                                                Unchecked="BitTorrentSettingCheckBox_Changed" />
-                                            <CheckBox
-                                                x:Name="BtTrackerXiu2AllCheckBox"
-                                                Content="all.txt"
-                                                Tag="https://raw.githubusercontent.com/XIU2/TrackersListCollection/master/all.txt"
-                                                Checked="BitTorrentSettingCheckBox_Changed"
-                                                Unchecked="BitTorrentSettingCheckBox_Changed" />
-                                            <CheckBox
-                                                x:Name="BtTrackerXiu2HttpCheckBox"
-                                                Content="http.txt"
-                                                Tag="https://raw.githubusercontent.com/XIU2/TrackersListCollection/master/http.txt"
-                                                Checked="BitTorrentSettingCheckBox_Changed"
-                                                Unchecked="BitTorrentSettingCheckBox_Changed" />
-                                            <CheckBox
-                                                x:Name="BtTrackerXiu2CdnBestCheckBox"
-                                                Tag="https://cdn.jsdelivr.net/gh/XIU2/TrackersListCollection/best.txt"
-                                                Checked="BitTorrentSettingCheckBox_Changed"
-                                                Unchecked="BitTorrentSettingCheckBox_Changed">
-                                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                                    <TextBlock Text="best.txt" />
-                                                    <Border
-                                                        Padding="4,0"
-                                                        Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
-                                                        CornerRadius="3">
-                                                        <TextBlock
-                                                            FontSize="11"
-                                                            Text="CDN" />
-                                                    </Border>
-                                                </StackPanel>
-                                            </CheckBox>
-                                            <CheckBox
-                                                x:Name="BtTrackerXiu2CdnAllCheckBox"
-                                                Tag="https://cdn.jsdelivr.net/gh/XIU2/TrackersListCollection/all.txt"
-                                                Checked="BitTorrentSettingCheckBox_Changed"
-                                                Unchecked="BitTorrentSettingCheckBox_Changed">
-                                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                                    <TextBlock Text="all.txt" />
-                                                    <Border
-                                                        Padding="4,0"
-                                                        Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
-                                                        CornerRadius="3">
-                                                        <TextBlock
-                                                            FontSize="11"
-                                                            Text="CDN" />
-                                                    </Border>
-                                                </StackPanel>
-                                            </CheckBox>
-                                            <CheckBox
-                                                x:Name="BtTrackerXiu2CdnHttpCheckBox"
-                                                Tag="https://cdn.jsdelivr.net/gh/XIU2/TrackersListCollection/http.txt"
-                                                Checked="BitTorrentSettingCheckBox_Changed"
-                                                Unchecked="BitTorrentSettingCheckBox_Changed">
-                                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                                    <TextBlock Text="http.txt" />
-                                                    <Border
-                                                        Padding="4,0"
-                                                        Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
-                                                        CornerRadius="3">
-                                                        <TextBlock
-                                                            FontSize="11"
-                                                            Text="CDN" />
-                                                    </Border>
-                                                </StackPanel>
-                                            </CheckBox>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </ScrollViewer>
-                            </Border>
-                        </Flyout>
-                    </Button.Flyout>
-                </Button>
-            </Grid>
-        </Border>
-
-        <Border
-            x:Name="BtTrackerCustomSourceSettingCard"
-            Margin="0"
-            Padding="16"
-            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-            BorderThickness="1">
-            <Grid ColumnDefinitions="Auto,*,260" ColumnSpacing="14">
-                <FontIcon
-                    Width="24"
-                    VerticalAlignment="Center"
-                    Glyph="&#xE710;" />
-                <StackPanel
-                    Grid.Column="1"
-                    Spacing="3">
-                    <TextBlock
-                        FontWeight="SemiBold"
-                        Text="自定义来源" />
-                    <TextBlock
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        Text="添加自己的 Tracker 列表 URL，可多选后一起同步。"
-                        TextWrapping="WrapWholeWords" />
-                </StackPanel>
-                <StackPanel
-                    Grid.Column="2"
-                    Spacing="8">
-                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6">
-                        <TextBox
-                            x:Name="BtCustomTrackerSourceTextBox"
-                            PlaceholderText="输入自定义 Tracker 列表 URL" />
-                        <Button
-                            Grid.Column="1"
-                            Width="38"
-                            Height="32"
-                            Click="AddBtCustomTrackerButton_Click">
-                            <FontIcon
-                                FontSize="14"
-                                Glyph="&#xE710;" />
-                        </Button>
-                        <Button
-                            x:Name="BtSyncTrackerButton"
-                            Grid.Column="2"
-                            Width="38"
-                            Height="32"
-                            Click="SyncBtTrackerButton_Click"
-                            ToolTipService.ToolTip="同步 Tracker">
-                            <FontIcon
-                                FontSize="14"
-                                Glyph="&#xE895;" />
-                        </Button>
-                    </Grid>
-                    <ListView
-                        x:Name="BtCustomTrackerSourceListView"
-                        MaxHeight="112"
-                        SelectionMode="Multiple"
-                        SelectionChanged="BitTorrentSettingListView_SelectionChanged" />
-                    <TextBox
-                        x:Name="BtTrackerSourceTextBox"
-                        Visibility="Collapsed"
-                        HorizontalAlignment="Stretch"
-                        PlaceholderText="https://example.com/trackers.txt"
-                        TextChanged="BitTorrentSettingTextBox_TextChanged" />
-                </StackPanel>
-            </Grid>
-        </Border>
-
-        <Border
-            x:Name="BtTrackerListSettingCard"
-            Margin="0"
-            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-            BorderThickness="1">
-            <StackPanel>
-                <Button
-                    Padding="0"
-                    HorizontalAlignment="Stretch"
-                    HorizontalContentAlignment="Stretch"
-                    Background="Transparent"
-                    BorderThickness="0"
-                    Click="ToggleBtTrackerListButton_Click">
-                    <Grid
-                        Padding="16"
-                        ColumnDefinitions="Auto,*,Auto"
-                        ColumnSpacing="14">
-                        <FontIcon
-                            Width="24"
+            Description="从 HTTP/HTTPS 文本源同步 Tracker 列表。"
+            Header="Tracker 源">
+            <controls:SettingsCard.HeaderIcon>
+                <FontIcon Glyph="&#xE774;" />
+            </controls:SettingsCard.HeaderIcon>
+            <Button
+                x:Name="BtTrackerSourceDropDownButton"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch">
+                <Button.Content>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock
+                            x:Name="BtTrackerSourceSummaryText"
                             VerticalAlignment="Center"
-                            Glyph="&#xE8A5;" />
-                        <StackPanel
-                            Grid.Column="1"
-                            Spacing="3">
-                            <TextBlock
-                                FontWeight="SemiBold"
-                                Text="Tracker 列表" />
-                            <TextBlock
-                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Text="每行一个 Tracker，启动 aria2 时会转为逗号分隔配置。"
-                                TextWrapping="WrapWholeWords" />
-                        </StackPanel>
+                            Text="trackers_all.txt"
+                            TextTrimming="CharacterEllipsis" />
                         <FontIcon
-                            x:Name="BtTrackerListChevronIcon"
-                            Grid.Column="2"
-                            Width="16"
-                            VerticalAlignment="Center"
+                            Grid.Column="1"
+                            Margin="8,0,0,0"
                             FontSize="12"
                             Glyph="&#xE70D;" />
                     </Grid>
-                </Button>
-                <Border
-                    x:Name="BtTrackerListBox"
-                    Padding="16,8,16,16"
-                    Background="Transparent"
-                    Opacity="0"
-                    Visibility="Collapsed">
-                    <Grid ColumnDefinitions="24,*,520" ColumnSpacing="14">
-                        <TextBox
-                            x:Name="BtTrackerListTextBox"
-                            Grid.Column="1"
-                            Grid.ColumnSpan="2"
-                            Height="220"
-                            AcceptsReturn="True"
-                            ScrollViewer.VerticalScrollBarVisibility="Auto"
-                            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                            TextWrapping="Wrap"
-                            PlaceholderText="udp://tracker.example:6969/announce"
-                            TextChanged="BitTorrentSettingTextBox_TextChanged" />
-                    </Grid>
-                </Border>
-            </StackPanel>
-        </Border>
+                </Button.Content>
+                <Button.Flyout>
+                    <Flyout Placement="BottomEdgeAlignedLeft">
+                        <Border
+                            Width="360"
+                            Padding="12"
+                            CornerRadius="4">
+                            <ScrollViewer MaxHeight="360">
+                                <StackPanel Spacing="10">
+                                    <StackPanel Spacing="4">
+                                        <TextBlock
+                                            Margin="4,0,0,2"
+                                            FontWeight="SemiBold"
+                                            Text="ngosang/trackerslist" />
+                                        <CheckBox
+                                            x:Name="BtTrackerNgosangBestCheckBox"
+                                            Content="trackers_best.txt"
+                                            Tag="https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_best.txt"
+                                            Checked="BitTorrentSettingCheckBox_Changed"
+                                            Unchecked="BitTorrentSettingCheckBox_Changed" />
+                                        <CheckBox
+                                            x:Name="BtTrackerNgosangBestIpCheckBox"
+                                            Content="trackers_best_ip.txt"
+                                            Tag="https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_best_ip.txt"
+                                            Checked="BitTorrentSettingCheckBox_Changed"
+                                            Unchecked="BitTorrentSettingCheckBox_Changed" />
+                                        <CheckBox
+                                            x:Name="BtTrackerNgosangAllCheckBox"
+                                            Content="trackers_all.txt"
+                                            Tag="https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt"
+                                            Checked="BitTorrentSettingCheckBox_Changed"
+                                            Unchecked="BitTorrentSettingCheckBox_Changed" />
+                                        <CheckBox
+                                            x:Name="BtTrackerNgosangAllIpCheckBox"
+                                            Content="trackers_all_ip.txt"
+                                            Tag="https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all_ip.txt"
+                                            Checked="BitTorrentSettingCheckBox_Changed"
+                                            Unchecked="BitTorrentSettingCheckBox_Changed" />
+                                        <CheckBox
+                                            x:Name="BtTrackerNgosangCdnBestCheckBox"
+                                            Tag="https://cdn.jsdelivr.net/gh/ngosang/trackerslist/trackers_best.txt"
+                                            Checked="BitTorrentSettingCheckBox_Changed"
+                                            Unchecked="BitTorrentSettingCheckBox_Changed">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <TextBlock Text="trackers_best.txt" />
+                                                <Border
+                                                    Padding="4,0"
+                                                    Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
+                                                    CornerRadius="3">
+                                                    <TextBlock
+                                                        FontSize="11"
+                                                        Text="CDN" />
+                                                </Border>
+                                            </StackPanel>
+                                        </CheckBox>
+                                        <CheckBox
+                                            x:Name="BtTrackerNgosangCdnBestIpCheckBox"
+                                            Tag="https://cdn.jsdelivr.net/gh/ngosang/trackerslist/trackers_best_ip.txt"
+                                            Checked="BitTorrentSettingCheckBox_Changed"
+                                            Unchecked="BitTorrentSettingCheckBox_Changed">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <TextBlock Text="trackers_best_ip.txt" />
+                                                <Border
+                                                    Padding="4,0"
+                                                    Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
+                                                    CornerRadius="3">
+                                                    <TextBlock
+                                                        FontSize="11"
+                                                        Text="CDN" />
+                                                </Border>
+                                            </StackPanel>
+                                        </CheckBox>
+                                        <CheckBox
+                                            x:Name="BtTrackerNgosangCdnAllCheckBox"
+                                            Tag="https://cdn.jsdelivr.net/gh/ngosang/trackerslist/trackers_all.txt"
+                                            Checked="BitTorrentSettingCheckBox_Changed"
+                                            Unchecked="BitTorrentSettingCheckBox_Changed">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <TextBlock Text="trackers_all.txt" />
+                                                <Border
+                                                    Padding="4,0"
+                                                    Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
+                                                    CornerRadius="3">
+                                                    <TextBlock
+                                                        FontSize="11"
+                                                        Text="CDN" />
+                                                </Border>
+                                            </StackPanel>
+                                        </CheckBox>
+                                        <CheckBox
+                                            x:Name="BtTrackerNgosangCdnAllIpCheckBox"
+                                            Tag="https://cdn.jsdelivr.net/gh/ngosang/trackerslist/trackers_all_ip.txt"
+                                            Checked="BitTorrentSettingCheckBox_Changed"
+                                            Unchecked="BitTorrentSettingCheckBox_Changed">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <TextBlock Text="trackers_all_ip.txt" />
+                                                <Border
+                                                    Padding="4,0"
+                                                    Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
+                                                    CornerRadius="3">
+                                                    <TextBlock
+                                                        FontSize="11"
+                                                        Text="CDN" />
+                                                </Border>
+                                            </StackPanel>
+                                        </CheckBox>
+                                    </StackPanel>
 
-        <Border
+                                    <StackPanel Spacing="4">
+                                        <TextBlock
+                                            Margin="4,2,0,2"
+                                            FontWeight="SemiBold"
+                                            Text="XIU2/TrackersListCollection" />
+                                        <CheckBox
+                                            x:Name="BtTrackerXiu2BestCheckBox"
+                                            Content="best.txt"
+                                            Tag="https://raw.githubusercontent.com/XIU2/TrackersListCollection/master/best.txt"
+                                            Checked="BitTorrentSettingCheckBox_Changed"
+                                            Unchecked="BitTorrentSettingCheckBox_Changed" />
+                                        <CheckBox
+                                            x:Name="BtTrackerXiu2AllCheckBox"
+                                            Content="all.txt"
+                                            Tag="https://raw.githubusercontent.com/XIU2/TrackersListCollection/master/all.txt"
+                                            Checked="BitTorrentSettingCheckBox_Changed"
+                                            Unchecked="BitTorrentSettingCheckBox_Changed" />
+                                        <CheckBox
+                                            x:Name="BtTrackerXiu2HttpCheckBox"
+                                            Content="http.txt"
+                                            Tag="https://raw.githubusercontent.com/XIU2/TrackersListCollection/master/http.txt"
+                                            Checked="BitTorrentSettingCheckBox_Changed"
+                                            Unchecked="BitTorrentSettingCheckBox_Changed" />
+                                        <CheckBox
+                                            x:Name="BtTrackerXiu2CdnBestCheckBox"
+                                            Tag="https://cdn.jsdelivr.net/gh/XIU2/TrackersListCollection/best.txt"
+                                            Checked="BitTorrentSettingCheckBox_Changed"
+                                            Unchecked="BitTorrentSettingCheckBox_Changed">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <TextBlock Text="best.txt" />
+                                                <Border
+                                                    Padding="4,0"
+                                                    Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
+                                                    CornerRadius="3">
+                                                    <TextBlock
+                                                        FontSize="11"
+                                                        Text="CDN" />
+                                                </Border>
+                                            </StackPanel>
+                                        </CheckBox>
+                                        <CheckBox
+                                            x:Name="BtTrackerXiu2CdnAllCheckBox"
+                                            Tag="https://cdn.jsdelivr.net/gh/XIU2/TrackersListCollection/all.txt"
+                                            Checked="BitTorrentSettingCheckBox_Changed"
+                                            Unchecked="BitTorrentSettingCheckBox_Changed">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <TextBlock Text="all.txt" />
+                                                <Border
+                                                    Padding="4,0"
+                                                    Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
+                                                    CornerRadius="3">
+                                                    <TextBlock
+                                                        FontSize="11"
+                                                        Text="CDN" />
+                                                </Border>
+                                            </StackPanel>
+                                        </CheckBox>
+                                        <CheckBox
+                                            x:Name="BtTrackerXiu2CdnHttpCheckBox"
+                                            Tag="https://cdn.jsdelivr.net/gh/XIU2/TrackersListCollection/http.txt"
+                                            Checked="BitTorrentSettingCheckBox_Changed"
+                                            Unchecked="BitTorrentSettingCheckBox_Changed">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <TextBlock Text="http.txt" />
+                                                <Border
+                                                    Padding="4,0"
+                                                    Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
+                                                    CornerRadius="3">
+                                                    <TextBlock
+                                                        FontSize="11"
+                                                        Text="CDN" />
+                                                </Border>
+                                            </StackPanel>
+                                        </CheckBox>
+                                    </StackPanel>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Border>
+                    </Flyout>
+                </Button.Flyout>
+            </Button>
+        </controls:SettingsCard>
+
+        <controls:SettingsCard
+            x:Name="BtTrackerCustomSourceSettingCard"
+            Description="添加自己的 Tracker 列表 URL，可多选后一起同步。"
+            Header="自定义来源">
+            <controls:SettingsCard.HeaderIcon>
+                <FontIcon Glyph="&#xE710;" />
+            </controls:SettingsCard.HeaderIcon>
+            <StackPanel Spacing="8">
+                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6">
+                    <TextBox
+                        x:Name="BtCustomTrackerSourceTextBox"
+                        PlaceholderText="输入自定义 Tracker 列表 URL" />
+                    <Button
+                        Grid.Column="1"
+                        Width="38"
+                        Height="32"
+                        Click="AddBtCustomTrackerButton_Click">
+                        <FontIcon
+                            FontSize="14"
+                            Glyph="&#xE710;" />
+                    </Button>
+                    <Button
+                        x:Name="BtSyncTrackerButton"
+                        Grid.Column="2"
+                        Width="38"
+                        Height="32"
+                        Click="SyncBtTrackerButton_Click"
+                        ToolTipService.ToolTip="同步 Tracker">
+                        <FontIcon
+                            FontSize="14"
+                            Glyph="&#xE895;" />
+                    </Button>
+                </Grid>
+                <ListView
+                    x:Name="BtCustomTrackerSourceListView"
+                    MaxHeight="112"
+                    SelectionMode="Multiple"
+                    SelectionChanged="BitTorrentSettingListView_SelectionChanged" />
+                <TextBox
+                    x:Name="BtTrackerSourceTextBox"
+                    Visibility="Collapsed"
+                    PlaceholderText="https://example.com/trackers.txt"
+                    TextChanged="BitTorrentSettingTextBox_TextChanged" />
+            </StackPanel>
+        </controls:SettingsCard>
+
+        <controls:SettingsExpander
+            x:Name="BtTrackerListSettingCard"
+            Description="每行一个 Tracker，启动 aria2 时会转为逗号分隔配置。"
+            Header="Tracker 列表">
+            <controls:SettingsExpander.HeaderIcon>
+                <FontIcon Glyph="&#xE8A5;" />
+            </controls:SettingsExpander.HeaderIcon>
+            <controls:SettingsExpander.Items>
+                <controls:SettingsCard>
+                    <TextBox
+                        x:Name="BtTrackerListTextBox"
+                        Height="220"
+                        AcceptsReturn="True"
+                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                        TextWrapping="Wrap"
+                        PlaceholderText="udp://tracker.example:6969/announce"
+                        TextChanged="BitTorrentSettingTextBox_TextChanged" />
+                </controls:SettingsCard>
+            </controls:SettingsExpander.Items>
+        </controls:SettingsExpander>
+
+        <controls:SettingsCard
             x:Name="BtAutoSyncTrackerSettingCard"
-            Margin="0"
-            Padding="16"
-            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-            BorderThickness="1"
-            CornerRadius="0,0,8,8">
-            <Grid ColumnDefinitions="Auto,*,260" ColumnSpacing="14">
-                <FontIcon
-                    Width="24"
+            Header="自动同步 Tracker">
+            <controls:SettingsCard.HeaderIcon>
+                <FontIcon Glyph="&#xE895;" />
+            </controls:SettingsCard.HeaderIcon>
+            <StackPanel
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Orientation="Horizontal"
+                Spacing="8">
+                <TextBlock
+                    x:Name="BtAutoSyncTrackerStateText"
                     VerticalAlignment="Center"
-                    Glyph="&#xE895;" />
-                <StackPanel
-                    Grid.Column="1"
-                    Spacing="3">
-                    <TextBlock
-                        FontWeight="SemiBold"
-                        Text="自动同步 Tracker" />
-                    <TextBlock
-                        x:Name="BtLastTrackerSyncText"
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        Text="启动设置页时保留上次同步时间。"
-                        TextWrapping="WrapWholeWords" />
-                </StackPanel>
-                <StackPanel
-                    Grid.Column="2"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    Orientation="Horizontal"
-                    Spacing="8">
-                    <TextBlock
-                        x:Name="BtAutoSyncTrackerStateText"
-                        VerticalAlignment="Center"
-                        Text="关" />
-                    <ToggleSwitch
-                        x:Name="BtAutoSyncTrackerToggleSwitch"
-                        Width="48"
-                        MinWidth="0"
-                        Padding="0"
-                        OffContent=""
-                        OnContent=""
-                        Toggled="BitTorrentSettingToggleSwitch_Toggled" />
-                </StackPanel>
-            </Grid>
-        </Border>
+                    Text="关" />
+                <ToggleSwitch
+                    x:Name="BtAutoSyncTrackerToggleSwitch"
+                    Width="48"
+                    MinWidth="0"
+                    Padding="0"
+                    OffContent=""
+                    OnContent=""
+                    Toggled="BitTorrentSettingToggleSwitch_Toggled" />
+            </StackPanel>
+            <controls:SettingsCard.Description>
+                <TextBlock
+                    x:Name="BtLastTrackerSyncText"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Text="启动设置页时保留上次同步时间。"
+                    TextWrapping="WrapWholeWords" />
+            </controls:SettingsCard.Description>
+        </controls:SettingsCard>
     </StackPanel>
 </UserControl>

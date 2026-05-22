@@ -1,6 +1,5 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media.Animation;
 using OmniDown.Services.Localization;
 using System;
 using System.Collections.Generic;
@@ -63,48 +62,6 @@ public sealed partial class BitTorrentSettingsSectionControl : UserControl
     internal event RoutedEventHandler? BitTorrentSettingChanged;
     internal event RoutedEventHandler? AddBtCustomTrackerRequested;
     internal event RoutedEventHandler? SyncBtTrackerRequested;
-
-    private void ToggleBtSeedSettingsButton_Click(object sender, RoutedEventArgs args)
-    {
-        bool shouldExpand = BtSeedLimitsBox.Visibility != Visibility.Visible;
-        AnimateSettingsPanel(BtSeedLimitsBox, shouldExpand);
-        BtSeedChevronIcon.Glyph = shouldExpand ? "" : "";
-    }
-
-    private void ToggleBtTrackerListButton_Click(object sender, RoutedEventArgs args)
-    {
-        bool shouldExpand = BtTrackerListBox.Visibility != Visibility.Visible;
-        AnimateSettingsPanel(BtTrackerListBox, shouldExpand);
-        BtTrackerListChevronIcon.Glyph = shouldExpand ? "" : "";
-    }
-
-    private static void AnimateSettingsPanel(UIElement panel, bool expand)
-    {
-        if (expand)
-        {
-            panel.Visibility = Visibility.Visible;
-        }
-
-        DoubleAnimation opacityAnimation = new()
-        {
-            From = expand ? 0 : 1,
-            To = expand ? 1 : 0,
-            Duration = new Duration(TimeSpan.FromMilliseconds(140)),
-            EnableDependentAnimation = true
-        };
-
-        Storyboard.SetTarget(opacityAnimation, panel);
-        Storyboard.SetTargetProperty(opacityAnimation, "Opacity");
-
-        Storyboard storyboard = new();
-        storyboard.Children.Add(opacityAnimation);
-        if (!expand)
-        {
-            storyboard.Completed += (_, _) => panel.Visibility = Visibility.Collapsed;
-        }
-
-        storyboard.Begin();
-    }
 
     private void AddBtCustomTrackerButton_Click(object sender, RoutedEventArgs args)
     {

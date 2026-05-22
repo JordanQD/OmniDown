@@ -17,6 +17,7 @@
         Margin="0,24,0,36"
         Spacing="{StaticResource SettingsCardSpacing}">
         <StackPanel.ChildrenTransitions>
+            <EntranceThemeTransition FromVerticalOffset="50" />
             <RepositionThemeTransition />
         </StackPanel.ChildrenTransitions>
         <TextBlock
