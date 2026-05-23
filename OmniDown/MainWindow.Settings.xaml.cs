@@ -1053,10 +1053,8 @@ namespace OmniDown
             {
                 if (_statusToastActionRestartsAria)
                 {
-                    StatusToastInfoBar.IsOpen = false;
-                    StatusToastInfoBar.Visibility = Visibility.Collapsed;
-                    StatusToastActionButton.Visibility = Visibility.Collapsed;
                     _statusToastActionRestartsAria = false;
+                    AnimateInfoBarHide();
                 }
 
                 AriaRestartTeachingTip.IsOpen = false;

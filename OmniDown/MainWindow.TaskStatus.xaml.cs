@@ -5,6 +5,8 @@ using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using CommunityToolkit.WinUI.Animations;
+using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.Win32;
 using OmniDown.Models;
 using OmniDown.Models.Settings;
@@ -598,24 +600,61 @@ namespace OmniDown
             StatusToastActionIcon.Glyph = "\uE8C8";
             StatusToastActionText.Text = Strings.Get("StatusToastCopyButtonLabel.Text");
             StatusToastActionButton.Visibility = IsCopyableStatusMessage(severity) ? Visibility.Visible : Visibility.Collapsed;
-            StatusToastInfoBar.Visibility = Visibility.Visible;
-            StatusToastInfoBar.IsOpen = true;
             AppLogger.Write(ToLogLevel(severity), "UI", message);
             _statusMessageTimer.Stop();
             _statusMessageTimer.Start();
+            AnimateInfoBarShow();
+        }
+
+        private void AnimateInfoBarShow()
+        {
+            _isHiding = false;
+            StatusToastInfoBar.Visibility = Visibility.Visible;
+            StatusToastInfoBar.IsOpen = true;
+
+            AnimationBuilder.Create()
+                .Opacity(to: 1, from: 0,
+                    duration: TimeSpan.FromMilliseconds(250),
+                    easingType: EasingType.Cubic, easingMode: EasingMode.EaseOut)
+                .Translation(Axis.Y, to: 0, from: 30,
+                    duration: TimeSpan.FromMilliseconds(300),
+                    easingType: EasingType.Cubic, easingMode: EasingMode.EaseOut)
+                .Start(StatusToastInfoBar);
+        }
+
+        private void AnimateInfoBarHide()
+        {
+            if (_isHiding || !StatusToastInfoBar.IsOpen)
+                return;
+            _isHiding = true;
+
+            AnimationBuilder.Create()
+                .Opacity(to: 0, from: 1,
+                    duration: TimeSpan.FromMilliseconds(150),
+                    easingType: EasingType.Cubic, easingMode: EasingMode.EaseIn)
+                .Translation(Axis.Y, to: 20, from: 0,
+                    duration: TimeSpan.FromMilliseconds(150),
+                    easingType: EasingType.Cubic, easingMode: EasingMode.EaseIn)
+                .Start(StatusToastInfoBar, () =>
+                {
+                    if (!_isHiding) return;
+                    StatusToastInfoBar.IsOpen = false;
+                    StatusToastInfoBar.Visibility = Visibility.Collapsed;
+                    StatusToastActionButton.Visibility = Visibility.Collapsed;
+                    _statusToastActionRestartsAria = false;
+                    _isHiding = false;
+                });
         }
 
         private void StatusMessageTimer_Tick(object? sender, object e)
         {
             _statusMessageTimer.Stop();
-            StatusToastInfoBar.IsOpen = false;
-            StatusToastInfoBar.Visibility = Visibility.Collapsed;
-            StatusToastActionButton.Visibility = Visibility.Collapsed;
-            _statusToastActionRestartsAria = false;
+            AnimateInfoBarHide();
         }
 
         private void StatusToastInfoBar_Closed(InfoBar sender, InfoBarClosedEventArgs args)
         {
+            _isHiding = false;
             StatusToastInfoBar.Visibility = Visibility.Collapsed;
             StatusToastActionButton.Visibility = Visibility.Collapsed;
             _statusToastActionRestartsAria = false;
@@ -625,10 +664,8 @@ namespace OmniDown
         {
             if (_statusToastActionRestartsAria)
             {
-                StatusToastInfoBar.IsOpen = false;
-                StatusToastInfoBar.Visibility = Visibility.Collapsed;
-                StatusToastActionButton.Visibility = Visibility.Collapsed;
                 _statusToastActionRestartsAria = false;
+                AnimateInfoBarHide();
                 await StopAriaAsync(showMessage: false);
                 await StartAriaAsync();
                 return;

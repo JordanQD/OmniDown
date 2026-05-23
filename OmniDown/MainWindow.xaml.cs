@@ -103,6 +103,7 @@ namespace OmniDown
         private AriaRelatedSettingsSnapshot? _restartAriaSettingsRollback;
         private bool _isSavingAriaSettings;
         private bool _statusToastActionRestartsAria;
+        private bool _isHiding;
         private string _lastClipboardDownloadText = string.Empty;
         private readonly Dictionary<string, bool> _observedTaskDownloadCompletions = new(StringComparer.OrdinalIgnoreCase);
 
