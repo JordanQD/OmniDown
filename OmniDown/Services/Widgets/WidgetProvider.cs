@@ -9,7 +9,7 @@ namespace OmniDown.Services.Widgets;
 public sealed class OmniDownWidgetProvider : IWidgetProvider
 {
     private readonly WidgetSnapshotStore _snapshotStore = new();
-    private readonly WidgetCardBuilder _cardBuilder = new();
+    private readonly WidgetUpdateService _updateService = new();
 
     public void CreateWidget(WidgetContext widgetContext)
     {
@@ -43,13 +43,6 @@ public sealed class OmniDownWidgetProvider : IWidgetProvider
     private void UpdateWidgetContent(string widgetId, WidgetSize size)
     {
         WidgetSnapshot? snapshot = _snapshotStore.Load();
-        string cardJson = _cardBuilder.BuildCard(snapshot, size);
-
-        var options = new WidgetUpdateRequestOptions(widgetId)
-        {
-            Template = cardJson
-        };
-
-        WidgetManager.GetDefault().UpdateWidget(options);
+        _updateService.UpdateWidget(widgetId, size, snapshot);
     }
 }

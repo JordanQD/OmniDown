@@ -169,6 +169,8 @@
   <data name="TaskStatusDownloading" xml:space="preserve"><value>下载</value></data>
   <data name="TaskStatusWaiting" xml:space="preserve"><value>等待</value></data>
   <data name="TaskStatusPaused" xml:space="preserve"><value>暂停</value></data>
+  <data name="TaskStatusPausing" xml:space="preserve"><value>暂停中...</value></data>
+  <data name="TaskStatusResuming" xml:space="preserve"><value>恢复中...</value></data>
   <data name="TaskStatusCompleted" xml:space="preserve"><value>完成</value></data>
   <data name="TaskStatusError" xml:space="preserve"><value>错误</value></data>
   <data name="TaskStatusRemoved" xml:space="preserve"><value>移除</value></data>

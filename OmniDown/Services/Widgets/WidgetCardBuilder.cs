@@ -37,12 +37,17 @@ public sealed class WidgetCardBuilder
             version = "1.5",
             body = new object[]
             {
-                new { type = "TextBlock", text = "OmniDown", weight = "bolder", size = "medium" },
-                new { type = "TextBlock", text = "Engine not running", isSubtle = true, wrap = true }
+                new { type = "TextBlock", text = "Engine not running", isSubtle = true, wrap = true },
+                BuildStatusRow(
+                    BuildStatItem("↑", "0 B/s"),
+                    BuildStatItem("↓", "0 B/s")),
+                BuildStatusRow(
+                    BuildStatItem("▶", "0"),
+                    BuildStatItem("✓", "0")),
+                BuildOpenActionContainer()
             },
             actions = new object[]
             {
-                new { type = "Action.OpenUrl", title = "Open OmniDown", url = "omnidown://open" }
             }
         };
 
@@ -57,13 +62,16 @@ public sealed class WidgetCardBuilder
             version = "1.5",
             body = new object[]
             {
-                new { type = "TextBlock", text = "OmniDown", weight = "bolder", size = "small" },
-                new { type = "TextBlock", text = FormatSpeed(snapshot.DownloadSpeed), size = "large", weight = "bolder", spacing = "small" },
-                new { type = "TextBlock", text = $"{snapshot.ActiveCount} active", isSubtle = true, spacing = "small", wrap = true }
+                BuildStatusRow(
+                    BuildStatItem("↑", FormatSpeed(snapshot.UploadSpeed)),
+                    BuildStatItem("↓", FormatSpeed(snapshot.DownloadSpeed))),
+                BuildStatusRow(
+                    BuildStatItem("▶", snapshot.ActiveCount.ToString()),
+                    BuildStatItem("✓", snapshot.CompletedCount.ToString())),
+                BuildOpenActionContainer()
             },
             actions = new object[]
             {
-                new { type = "Action.OpenUrl", title = "Open OmniDown", url = "omnidown://open" }
             }
         };
 
@@ -74,17 +82,12 @@ public sealed class WidgetCardBuilder
     {
         var body = new List<object>
         {
-            new { type = "TextBlock", text = "OmniDown", weight = "bolder", size = "small" },
-            new
-            {
-                type = "ColumnSet",
-                columns = new object[]
-                {
-                    BuildStatColumn("Download", FormatSpeed(snapshot.DownloadSpeed)),
-                    BuildStatColumn("Active", snapshot.ActiveCount.ToString()),
-                    BuildStatColumn("Done", snapshot.CompletedCount.ToString())
-                }
-            }
+            BuildStatusRow(
+                BuildStatItem("↑", FormatSpeed(snapshot.UploadSpeed)),
+                BuildStatItem("↓", FormatSpeed(snapshot.DownloadSpeed))),
+            BuildStatusRow(
+                BuildStatItem("▶", snapshot.ActiveCount.ToString()),
+                BuildStatItem("✓", snapshot.CompletedCount.ToString()))
         };
 
         for (int i = 0; i < snapshot.Tasks.Count && i < 2; i++)
@@ -96,10 +99,9 @@ public sealed class WidgetCardBuilder
         {
             type = "AdaptiveCard",
             version = "1.5",
-            body = body.ToArray(),
+            body = AppendOpenAction(body).ToArray(),
             actions = new object[]
             {
-                new { type = "Action.OpenUrl", title = "Open OmniDown", url = "omnidown://open" }
             }
         };
 
@@ -110,31 +112,19 @@ public sealed class WidgetCardBuilder
     {
         var body = new List<object>
         {
-            new { type = "TextBlock", text = "OmniDown", weight = "bolder", size = "medium" },
-            new
-            {
-                type = "ColumnSet",
-                columns = new object[]
-                {
-                    BuildStatColumn("Download", FormatSpeed(snapshot.DownloadSpeed)),
-                    BuildStatColumn("Upload", FormatSpeed(snapshot.UploadSpeed)),
-                    BuildStatColumn("Active", snapshot.ActiveCount.ToString()),
-                    BuildStatColumn("Done", snapshot.CompletedCount.ToString())
-                }
-            }
+            BuildStatusRow(
+                BuildStatItem("↑", FormatSpeed(snapshot.UploadSpeed)),
+                BuildStatItem("↓", FormatSpeed(snapshot.DownloadSpeed))),
+            BuildStatusRow(
+                BuildStatItem("▶", snapshot.ActiveCount.ToString()),
+                BuildStatItem("✓", snapshot.CompletedCount.ToString()))
         };
 
         if (snapshot.PausedCount > 0 || snapshot.ErrorCount > 0)
         {
-            body.Add(new
-            {
-                type = "ColumnSet",
-                columns = new object[]
-                {
-                    BuildStatColumn("Paused", snapshot.PausedCount.ToString()),
-                    BuildStatColumn("Errors", snapshot.ErrorCount.ToString())
-                }
-            });
+            body.Add(BuildStatusRow(
+                BuildStatItem("⏸", snapshot.PausedCount.ToString()),
+                BuildStatItem("!", snapshot.ErrorCount.ToString())));
         }
 
         for (int i = 0; i < snapshot.Tasks.Count; i++)
@@ -146,26 +136,86 @@ public sealed class WidgetCardBuilder
         {
             type = "AdaptiveCard",
             version = "1.5",
-            body = body.ToArray(),
+            body = AppendOpenAction(body).ToArray(),
             actions = new object[]
             {
-                new { type = "Action.OpenUrl", title = "Open OmniDown", url = "omnidown://open" }
             }
         };
 
         return JsonSerializer.Serialize(card, CardOptions);
     }
 
-    private static object BuildStatColumn(string label, string value)
+    private static object BuildStatusRow(params object[] stats)
+    {
+        return new
+        {
+            type = "ColumnSet",
+            spacing = "medium",
+            columns = stats
+        };
+    }
+
+    private static object BuildStatItem(string icon, string value)
     {
         return new
         {
             type = "Column",
-            width = "auto",
+            width = "stretch",
             items = new object[]
             {
-                new { type = "TextBlock", text = value, weight = "bolder", size = "medium", horizontalAlignment = "center" },
-                new { type = "TextBlock", text = label, isSubtle = true, size = "small", horizontalAlignment = "center", spacing = "none" }
+                new
+                {
+                    type = "ColumnSet",
+                    spacing = "none",
+                    columns = new object[]
+                    {
+                        new
+                        {
+                            type = "Column",
+                            width = "auto",
+                            items = new object[]
+                            {
+                                new { type = "TextBlock", text = icon, size = "small", weight = "bolder" }
+                            }
+                        },
+                        new
+                        {
+                            type = "Column",
+                            width = "stretch",
+                            items = new object[]
+                            {
+                                new { type = "TextBlock", text = value, weight = "bolder", size = "medium", wrap = false }
+                            }
+                        }
+                    }
+                }
+            }
+        };
+    }
+
+    private static List<object> AppendOpenAction(List<object> body)
+    {
+        body.Add(BuildOpenActionContainer());
+        return body;
+    }
+
+    private static object BuildOpenActionContainer()
+    {
+        return new
+        {
+            type = "Container",
+            spacing = "large",
+            selectAction = new { type = "Action.OpenUrl", url = "omnidown://open" },
+            items = new object[]
+            {
+                new
+                {
+                    type = "TextBlock",
+                    text = "Open OmniDown",
+                    horizontalAlignment = "center",
+                    color = "accent",
+                    wrap = false
+                }
             }
         };
     }
@@ -174,18 +224,45 @@ public sealed class WidgetCardBuilder
     {
         return new
         {
-            type = "ColumnSet",
-            spacing = "small",
-            columns = new object[]
+            type = "Container",
+            spacing = "medium",
+            separator = true,
+            minHeight = "64px",
+            items = new object[]
             {
+                new { type = "TextBlock", text = TruncateText(task.Name, 46), wrap = false, size = "small", weight = "bolder" },
                 new
                 {
-                    type = "Column",
-                    width = "stretch",
-                    items = new object[]
+                    type = "ColumnSet",
+                    spacing = "small",
+                    columns = new object[]
                     {
-                        new { type = "TextBlock", text = TruncateText(task.Name, 40), wrap = false, size = "small" },
-                        new { type = "TextBlock", text = $"{task.Progress:0}% - {FormatBytes(task.CompletedLength)}", isSubtle = true, size = "small", spacing = "none" }
+                        new
+                        {
+                            type = "Column",
+                            width = "auto",
+                            items = new object[]
+                            {
+                                new { type = "TextBlock", text = $"{task.Progress:0}%", weight = "bolder", size = "small", wrap = false }
+                            }
+                        },
+                        new
+                        {
+                            type = "Column",
+                            width = "stretch",
+                            items = new object[]
+                            {
+                                new
+                                {
+                                    type = "TextBlock",
+                                    text = FormatTaskSize(task),
+                                    isSubtle = true,
+                                    size = "small",
+                                    horizontalAlignment = "right",
+                                    wrap = false
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -218,6 +295,16 @@ public sealed class WidgetCardBuilder
         }
 
         return $"{size:0.#} {units[unitIndex]}";
+    }
+
+    private static string FormatTaskSize(WidgetTaskSummary task)
+    {
+        if (task.TotalLength > 0)
+        {
+            return $"{FormatBytes(task.CompletedLength)} / {FormatBytes(task.TotalLength)}";
+        }
+
+        return FormatBytes(task.CompletedLength);
     }
 
     private static string TruncateText(string text, int maxLength)

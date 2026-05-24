@@ -905,7 +905,10 @@
                                                     VerticalAlignment="Bottom"
                                                     Background="{ThemeResource ControlFillColorDefaultBrush}"
                                                     Foreground="{Binding ProgressBrush}"
+                                                    IsIndeterminate="{Binding IsOperationPending}"
                                                     Maximum="100"
+                                                    ShowError="{Binding ShowProgressNormal}"
+                                                    ShowPaused="{Binding ShowProgressNormal}"
                                                     Value="{Binding Progress}" />
 
                                                 <VisualStateManager.VisualStateGroups>

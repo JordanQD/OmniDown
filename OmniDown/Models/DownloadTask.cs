@@ -80,6 +80,8 @@ public sealed class DownloadTask : INotifyPropertyChanged
                 OnPropertyChanged(nameof(RemainingTimeText));
                 OnPropertyChanged(nameof(IsPaused));
                 OnPropertyChanged(nameof(IsError));
+                OnPropertyChanged(nameof(IsOperationPending));
+                OnPropertyChanged(nameof(ShowProgressNormal));
                 OnPropertyChanged(nameof(ToggleActionGlyph));
                 OnPropertyChanged(nameof(ToggleActionText));
             }
@@ -91,6 +93,8 @@ public sealed class DownloadTask : INotifyPropertyChanged
         "downloading" => Strings.Get("TaskStatusDownloading"),
         "waiting" => Strings.Get("TaskStatusWaiting"),
         "paused" => Strings.Get("TaskStatusPaused"),
+        "pausing" => Strings.Get("TaskStatusPausing"),
+        "resuming" => Strings.Get("TaskStatusResuming"),
         "completed" => Strings.Get("TaskStatusCompleted"),
         "error" => Strings.Get("TaskStatusError"),
         "removed" => Strings.Get("TaskStatusRemoved"),
@@ -277,6 +281,12 @@ public sealed class DownloadTask : INotifyPropertyChanged
     public bool IsPaused => Status.Contains("paused", StringComparison.OrdinalIgnoreCase);
 
     public bool IsError => Status.Contains("error", StringComparison.OrdinalIgnoreCase);
+
+    public bool IsOperationPending =>
+        Status.Equals("Pausing", StringComparison.OrdinalIgnoreCase) ||
+        Status.Equals("Resuming", StringComparison.OrdinalIgnoreCase);
+
+    public bool ShowProgressNormal => !IsOperationPending;
 
     public string ToggleActionGlyph => IsError
         ? "\uE72C"

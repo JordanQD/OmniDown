@@ -162,7 +162,7 @@ public sealed class DownloadCoordinator
             }
 
             operatedCount++;
-            task.Status = "Paused";
+            task.Status = "Pausing";
             task.DownloadSpeed = 0;
             task.UploadSpeed = 0;
         }
@@ -194,7 +194,7 @@ public sealed class DownloadCoordinator
             }
 
             operatedCount++;
-            task.Status = "Waiting";
+            task.Status = "Resuming";
         }
 
         ThrowIfOnlyDetachedTasks(operatedCount, detachedCount);
@@ -416,7 +416,10 @@ public sealed class DownloadCoordinator
         long completedLength = ParseLong(remoteTask.CompletedLength);
         string normalizedStatus = NormalizeStatus(remoteTask.Status);
         bool isDownloading = normalizedStatus.Contains("download", StringComparison.OrdinalIgnoreCase);
-        task.Status = normalizedStatus;
+        if (ShouldPersistPendingStatus(task.Status, normalizedStatus))
+        {
+            task.Status = normalizedStatus;
+        }
         if (totalLength > 0)
         {
             task.TotalLength = totalLength;
@@ -508,11 +511,52 @@ public sealed class DownloadCoordinator
         }
     }
 
+    private static string NormalizeCachedStatus(string status)
+    {
+        if (status.Equals("Pausing", StringComparison.OrdinalIgnoreCase) ||
+            status.Equals("Resuming", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Waiting";
+        }
+
+        return status;
+    }
+
     private static void MarkTaskDetached(DownloadTask task)
     {
         task.IsAria2SessionAttached = false;
         task.DownloadSpeed = 0;
         task.UploadSpeed = 0;
+    }
+
+    private static bool ShouldPersistPendingStatus(string currentStatus, string remoteStatus)
+    {
+        if (currentStatus.Equals("Pausing", StringComparison.OrdinalIgnoreCase))
+        {
+            // Keep "Pausing" only when aria2 still reports the pre-pause state,
+            // meaning the pause hasn't taken effect yet.
+            if (remoteStatus.Contains("download", StringComparison.OrdinalIgnoreCase) ||
+                remoteStatus.Contains("waiting", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        if (currentStatus.Equals("Resuming", StringComparison.OrdinalIgnoreCase))
+        {
+            // Keep "Resuming" only when aria2 still reports "Paused",
+            // meaning the resume hasn't taken effect yet.
+            if (remoteStatus.Contains("paus", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        return true;
     }
 
     private static void ThrowIfOnlyDetachedTasks(int operatedCount, int detachedCount)
@@ -847,7 +891,7 @@ public sealed class DownloadCoordinator
                     SourceUri = cachedTask.SourceUri,
                     SaveDirectory = cachedTask.SaveDirectory,
                     LocalFilePath = cachedTask.LocalFilePath,
-                    Status = cachedTask.Status,
+                    Status = NormalizeCachedStatus(cachedTask.Status),
                     Progress = cachedTask.Progress,
                     CompletedLength = cachedTask.CompletedLength,
                     TotalLength = cachedTask.TotalLength,

@@ -212,12 +212,9 @@ namespace OmniDown
             try
             {
                 await operation([task]);
-                ApplyTaskFilter(_currentTaskFilter);
-                UpdateDashboard();
-                UpdateGlobalSpeedsFromTasks();
-                UpdateTaskDetailsPane();
+                await Task.Delay(150);
                 await RefreshDownloadsAsync();
-                ApplyTaskFilter(_currentTaskFilter);
+                await ConfirmOperationAsync([task]);
                 UpdateSelectionCommands();
                 ShowMessage(successMessage, InfoBarSeverity.Success);
             }

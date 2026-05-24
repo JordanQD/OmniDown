@@ -184,6 +184,7 @@ namespace OmniDown
                 var widgetSnapshot = WidgetSnapshot.FromTasks(
                     Tasks, snapshot.DownloadSpeed, snapshot.UploadSpeed, _aria2EngineHost.IsRunning);
                 await _widgetSnapshotStore.SaveAsync(widgetSnapshot);
+                new WidgetUpdateService().UpdateAll(widgetSnapshot);
                 UpdateTaskbarProgressFromTasks();
                 UpdateSystemSleepOverride();
                 TryAutoShutdownWhenDownloadsComplete();

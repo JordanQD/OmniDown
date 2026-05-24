@@ -77,7 +77,7 @@
           <uap3:AppExtension
             Name="com.microsoft.windows.widgets"
             Id="OmniDownWidgets"
-            DisplayName="OmniDown Widgets"
+            DisplayName="OmniDown"
             Description="Monitor OmniDown downloads from the widgets board"
             PublicFolder="Assets\Widgets">
             <uap3:Properties>
@@ -91,7 +91,7 @@
                 <Definitions>
                   <Definition
                     Id="OmniDown_Downloads"
-                    DisplayName="OmniDown Downloads"
+                    DisplayName="OmniDown"
                     Description="Monitor OmniDown download activity"
                     AllowMultiple="false">
                     <Capabilities>

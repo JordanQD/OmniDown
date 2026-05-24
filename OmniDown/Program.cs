@@ -2,7 +2,6 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using OmniDown.Services.Widgets;
 using System;
-using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace OmniDown;
@@ -64,41 +63,31 @@ public static class Program
 
     private static void RunWidgetComServer()
     {
-        // Initialize COM on this thread
-        int hr = Ole32.CoInitializeEx(IntPtr.Zero, Ole32.COINIT_MULTITHREADED);
+        // COM already initialized as STA by [STAThread] attribute.
+        // Do NOT call CoInitializeEx — it would fail with RPC_E_CHANGED_MODE.
+        var factory = new WidgetProviderClassFactory();
+        Guid clsid = typeof(OmniDownWidgetProvider).GUID;
+
+        int hr = Ole32.CoRegisterClassObject(
+            clsid,
+            factory,
+            Ole32.CLSCTX_LOCAL_SERVER,
+            Ole32.REGCLS_MULTIPLEUSE,
+            out int cookie);
+
         if (hr < 0)
         {
             return;
         }
 
-        try
-        {
-            var factory = new WidgetProviderClassFactory();
-            Guid clsid = typeof(OmniDownWidgetProvider).GUID;
+        Ole32.CoResumeClassObjects();
 
-            hr = Ole32.CoRegisterClassObject(
-                clsid,
-                factory,
-                Ole32.CLSCTX_LOCAL_SERVER,
-                Ole32.REGCLS_MULTIPLEUSE,
-                out int cookie);
+        // ManualResetEvent (the "fat" one) uses CoWaitForMultipleHandles
+        // internally on STA threads, which pumps COM messages.
+        // ManualResetEventSlim does NOT — COM calls would deadlock.
+        using var done = new ManualResetEvent(false);
+        done.WaitOne();
 
-            if (hr < 0)
-            {
-                return;
-            }
-
-            Ole32.CoResumeClassObjects();
-
-            // Block until process is terminated
-            using var done = new ManualResetEventSlim();
-            done.Wait();
-
-            Ole32.CoRevokeClassObject(cookie);
-        }
-        finally
-        {
-            Ole32.CoUninitialize();
-        }
+        Ole32.CoRevokeClassObject(cookie);
     }
 }

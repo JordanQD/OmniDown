@@ -533,12 +533,9 @@ namespace OmniDown
             try
             {
                 await operation(taskSet);
-                ApplyTaskFilter(_currentTaskFilter);
-                UpdateDashboard();
-                UpdateGlobalSpeedsFromTasks();
-                UpdateTaskDetailsPane();
+                await Task.Delay(150);
                 await RefreshDownloadsAsync();
-                ApplyTaskFilter(_currentTaskFilter);
+                await ConfirmOperationAsync(taskSet);
                 UpdateSelectionCommands();
                 ShowMessage(successMessage, InfoBarSeverity.Success);
             }
@@ -549,6 +546,15 @@ namespace OmniDown
                 UpdateGlobalSpeedsFromTasks();
                 UpdateSelectionCommands();
                 ShowMessage(Strings.Format("TaskOperationFailedMessage", ex.Message), InfoBarSeverity.Error);
+            }
+        }
+
+        private async System.Threading.Tasks.Task ConfirmOperationAsync(IReadOnlyList<DownloadTask> tasks)
+        {
+            for (int i = 0; i < 6 && tasks.Any(t => t.IsOperationPending); i++)
+            {
+                await Task.Delay(500);
+                await RefreshDownloadsAsync();
             }
         }
 

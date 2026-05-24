@@ -169,6 +169,8 @@
   <data name="TaskStatusDownloading" xml:space="preserve"><value>Downloading</value></data>
   <data name="TaskStatusWaiting" xml:space="preserve"><value>Waiting</value></data>
   <data name="TaskStatusPaused" xml:space="preserve"><value>Paused</value></data>
+  <data name="TaskStatusPausing" xml:space="preserve"><value>Pausing...</value></data>
+  <data name="TaskStatusResuming" xml:space="preserve"><value>Resuming...</value></data>
   <data name="TaskStatusCompleted" xml:space="preserve"><value>Completed</value></data>
   <data name="TaskStatusError" xml:space="preserve"><value>Error</value></data>
   <data name="TaskStatusRemoved" xml:space="preserve"><value>Removed</value></data>
