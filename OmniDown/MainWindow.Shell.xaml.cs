@@ -73,7 +73,7 @@ namespace OmniDown
             AppLogger.Info("Aria2Command", "stop requested");
             _refreshTimer.Stop();
             await SaveAriaSessionIfRunningAsync();
-            _aria2EngineHost.Stop();
+            await _aria2EngineHost.ShutdownAsync(_aria2RpcClient);
             _runningAriaSettingsSignature = string.Empty;
             _runningAriaRpcPort = 0;
             _runningAriaRpcSecret = string.Empty;
@@ -651,6 +651,7 @@ namespace OmniDown
             _notifications.NotificationInvoked -= Notifications_NotificationInvoked;
             _trayIcon?.Dispose();
             _browserExtensionApiServer.Dispose();
+            await _aria2EngineHost.ShutdownAsync(_aria2RpcClient);
             _aria2RpcClient.Dispose();
             _aria2EngineHost.Dispose();
             AppLogger.Info("App", "MainWindow closed");

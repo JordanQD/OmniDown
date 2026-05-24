@@ -19,6 +19,7 @@ using OmniDown.Services.Rpc;
 using OmniDown.Services.Settings;
 using OmniDown.Services.Shell;
 using OmniDown.Services.Storage;
+using OmniDown.Services.Widgets;
 using OmniDown.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -144,6 +145,7 @@ namespace OmniDown
 
                 await _downloadCoordinator.RemoveCompletedDownloadResultsAsync();
                 await _aria2RpcClient.SaveSessionAsync();
+                await System.Threading.Tasks.Task.Delay(500);
             }
             catch (Exception ex)
             {
@@ -179,6 +181,9 @@ namespace OmniDown
                 ApplyTaskFilter(_currentTaskFilter);
                 UpdateDashboard();
                 UpdateGlobalSpeeds(snapshot.DownloadSpeed, snapshot.UploadSpeed);
+                var widgetSnapshot = WidgetSnapshot.FromTasks(
+                    Tasks, snapshot.DownloadSpeed, snapshot.UploadSpeed, _aria2EngineHost.IsRunning);
+                await _widgetSnapshotStore.SaveAsync(widgetSnapshot);
                 UpdateTaskbarProgressFromTasks();
                 UpdateSystemSleepOverride();
                 TryAutoShutdownWhenDownloadsComplete();

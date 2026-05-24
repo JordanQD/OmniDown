@@ -158,6 +158,11 @@ public sealed class Aria2RpcClient : IDisposable
         return SendAsync<string>("aria2.saveSession", [], cancellationToken);
     }
 
+    public Task ShutdownAsync(CancellationToken cancellationToken = default)
+    {
+        return SendAsync<string>("aria2.shutdown", [], cancellationToken);
+    }
+
     public void Dispose()
     {
         _httpClient.Dispose();

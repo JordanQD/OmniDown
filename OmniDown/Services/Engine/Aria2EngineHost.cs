@@ -8,8 +8,10 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using OmniDown.Services.Logging;
+using OmniDown.Services.Rpc;
 using OmniDown.Services.Storage;
 
 namespace OmniDown.Services.Engine;
@@ -131,6 +133,40 @@ public sealed class Aria2EngineHost : IDisposable
         finally
         {
             _process = null;
+        }
+    }
+
+    public async Task ShutdownAsync(Aria2RpcClient rpcClient)
+    {
+        if (_process is null || _process.HasExited)
+        {
+            return;
+        }
+
+        try
+        {
+            AppLogger.Info("Aria2Engine", $"graceful shutdown pid={_process.Id}");
+            await rpcClient.ShutdownAsync();
+        }
+        catch (Exception ex)
+        {
+            AppLogger.Warning("Aria2Engine", $"shutdown RPC failed, falling back to kill: {ex.Message}");
+            Stop();
+            return;
+        }
+
+        try
+        {
+            using CancellationTokenSource cts = new(TimeSpan.FromSeconds(5));
+            await _process.WaitForExitAsync(cts.Token);
+            AppLogger.Info("Aria2Engine", $"process exited gracefully pid={_process.Id} code={_process.ExitCode}");
+            _process.Dispose();
+            _process = null;
+        }
+        catch (OperationCanceledException)
+        {
+            AppLogger.Warning("Aria2Engine", $"process did not exit after shutdown RPC, killing");
+            Stop();
         }
     }
 

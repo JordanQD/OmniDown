@@ -18,6 +18,7 @@ using OmniDown.Services.Rpc;
 using OmniDown.Services.Settings;
 using OmniDown.Services.Shell;
 using OmniDown.Services.Storage;
+using OmniDown.Services.Widgets;
 using OmniDown.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -106,6 +107,7 @@ namespace OmniDown
         private bool _isHiding;
         private string _lastClipboardDownloadText = string.Empty;
         private readonly Dictionary<string, bool> _observedTaskDownloadCompletions = new(StringComparer.OrdinalIgnoreCase);
+    private readonly WidgetSnapshotStore _widgetSnapshotStore = new();
 
         public ObservableCollection<DownloadTask> Tasks { get; } = new();
 
