@@ -124,6 +124,7 @@ nCrunchTemp_*
 
 ## AI / coding assistant local state
 .claude/
+task.md
 
 ## Tooling add-ins and local caches
 _ReSharper*/
