@@ -105,6 +105,7 @@ namespace OmniDown
         private bool _isSavingAriaSettings;
         private bool _statusToastActionRestartsAria;
         private bool _isHiding;
+        private string _lastStatusMessage = string.Empty;
         private string _lastClipboardDownloadText = string.Empty;
         private readonly Dictionary<string, bool> _observedTaskDownloadCompletions = new(StringComparer.OrdinalIgnoreCase);
     private readonly WidgetSnapshotStore _widgetSnapshotStore = new();

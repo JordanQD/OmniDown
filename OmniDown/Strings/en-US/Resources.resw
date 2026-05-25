@@ -58,8 +58,8 @@
   <data name="DirectoryColumnHeader.Text" xml:space="preserve"><value>Directory</value></data>
   <data name="SettingsTitleText.Text" xml:space="preserve"><value>Settings</value></data>
   <data name="SettingsSubtitleText.Text" xml:space="preserve"><value>Manage the local aria2 process and default download behavior.</value></data>
-  <data name="AriaPathLabel.Text" xml:space="preserve"><value>aria2c path</value></data>
-  <data name="AriaPathTextBox.PlaceholderText" xml:space="preserve"><value>Leave empty to resolve aria2c.exe from PATH</value></data>
+  <data name="AriaPathLabel.Text" xml:space="preserve"><value>aria2 path</value></data>
+  <data name="AriaPathTextBox.PlaceholderText" xml:space="preserve"><value>Leave empty to use the built-in engine</value></data>
   <data name="RpcPortLabel.Text" xml:space="preserve"><value>RPC port</value></data>
   <data name="DefaultDirectoryLabel.Text" xml:space="preserve"><value>Default directory</value></data>
   <data name="ProxyLabel.Text" xml:space="preserve"><value>Proxy</value></data>
@@ -353,8 +353,10 @@
 
   <data name="AdvancedSettingsTitle.Text" xml:space="preserve"><value>Advanced</value></data>
   <data name="AdvancedAria2EngineSectionHeader.Text" xml:space="preserve"><value>aria2 engine</value></data>
-  <data name="AriaPathSettingCard.Header" xml:space="preserve"><value>aria2c path</value></data>
-  <data name="AriaPathSettingCard.Description" xml:space="preserve"><value>Leave empty to resolve aria2c.exe from the built-in engine or PATH.</value></data>
+  <data name="AriaPathSettingCard.Header" xml:space="preserve"><value>aria2 path</value></data>
+  <data name="AriaPathDescriptionPrefix.Text" xml:space="preserve"><value>Leave empty to use the built-in engine. Supports </value></data>
+  <data name="AriaPathDescriptionSeparator.Text" xml:space="preserve"><value> and </value></data>
+  <data name="AriaPathDescriptionSuffix.Text" xml:space="preserve"><value> kernels.</value></data>
   <data name="RpcPortSettingCard.Header" xml:space="preserve"><value>RPC port</value></data>
   <data name="RpcPortSettingCard.Description" xml:space="preserve"><value>JSON-RPC port used for communication between OmniDown and local aria2.</value></data>
   <data name="RpcSecretSettingCard.Header" xml:space="preserve"><value>RPC secret</value></data>

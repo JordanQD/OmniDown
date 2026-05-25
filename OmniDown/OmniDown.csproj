@@ -127,4 +127,10 @@
     <PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
     <PublishTrimmed>False</PublishTrimmed>
   </PropertyGroup>
+
+  <!-- Kill stale processes that may lock output files (e.g. resources.pri) -->
+  <Target Name="CleanupStaleProcesses" BeforeTargets="BeforeBuild">
+    <Exec Command="taskkill /F /IM OmniDown.exe /T 2&gt;nul &amp; taskkill /F /IM aria2c.exe /T 2&gt;nul &amp; exit 0"
+          ContinueOnError="true" />
+  </Target>
 </Project>

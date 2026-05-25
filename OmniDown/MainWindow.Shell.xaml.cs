@@ -563,6 +563,46 @@ namespace OmniDown
             {
                 SetTaskListLoading(false);
             }
+
+            _ = ConfirmAutoShutdownOnStartupAsync();
+        }
+
+        private async Task ConfirmAutoShutdownOnStartupAsync()
+        {
+            if (!_settingsPageViewModel.GeneralSettings.AutoShutdownWhenComplete)
+            {
+                return;
+            }
+
+            // Small delay so the main window is visible before the dialog appears.
+            await Task.Delay(500);
+
+            ContentDialog dialog = new()
+            {
+                XamlRoot = Content.XamlRoot,
+                Title = "下载完成自动关机已开启",
+                Content = "上次使用时开启了「下载完成自动关机」，是否保持此设置？\n如果忘记关闭，下次下载完成时仍会自动关机。",
+                PrimaryButtonText = "关闭自动关机",
+                SecondaryButtonText = "保持开启",
+                DefaultButton = ContentDialogButton.Primary
+            };
+
+            ContentDialogResult dialogResult = await dialog.ShowAsync();
+            if (dialogResult == ContentDialogResult.Primary)
+            {
+                _isLoadingGeneralSettings = true;
+                try
+                {
+                    _settingsPageViewModel.UpdateGeneralSettings(
+                        _settingsPageViewModel.GeneralSettings with { AutoShutdownWhenComplete = false });
+                    SaveGeneralSettings();
+                    SettingsPage.ApplyGeneralSettings(_settingsPageViewModel.GeneralSettings, _autoStartService.IsEnabled());
+                }
+                finally
+                {
+                    _isLoadingGeneralSettings = false;
+                }
+            }
         }
 
         private async Task ResumeDownloadsOnLaunchAsync()

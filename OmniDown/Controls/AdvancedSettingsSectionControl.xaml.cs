@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Documents;
 using OmniDown.Services.Localization;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,30 @@ public sealed partial class AdvancedSettingsSectionControl : UserControl
     public AdvancedSettingsSectionControl()
     {
         InitializeComponent();
+        BuildAriaPathDescription();
+    }
+
+    private void BuildAriaPathDescription()
+    {
+        var paragraph = new Paragraph();
+
+        paragraph.Inlines.Add(new Run { Text = Strings.Get("AriaPathDescriptionPrefix.Text") });
+
+        var aria2Link = new Hyperlink();
+        aria2Link.Inlines.Add(new Run { Text = "aria2" });
+        aria2Link.Click += (_, _) => _ = Windows.System.Launcher.LaunchUriAsync(new Uri("https://github.com/aria2/aria2"));
+        paragraph.Inlines.Add(aria2Link);
+
+        paragraph.Inlines.Add(new Run { Text = Strings.Get("AriaPathDescriptionSeparator.Text") });
+
+        var aria2NextLink = new Hyperlink();
+        aria2NextLink.Inlines.Add(new Run { Text = "aria2-next" });
+        aria2NextLink.Click += (_, _) => _ = Windows.System.Launcher.LaunchUriAsync(new Uri("https://github.com/AnInsomniacy/aria2-next"));
+        paragraph.Inlines.Add(aria2NextLink);
+
+        paragraph.Inlines.Add(new Run { Text = Strings.Get("AriaPathDescriptionSuffix.Text") });
+
+        AriaPathDescriptionBlock.Blocks.Add(paragraph);
     }
 
     internal IEnumerable<SettingSearchEntry> SearchEntries =>

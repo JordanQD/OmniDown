@@ -181,10 +181,7 @@ namespace OmniDown
                 ApplyTaskFilter(_currentTaskFilter);
                 UpdateDashboard();
                 UpdateGlobalSpeeds(snapshot.DownloadSpeed, snapshot.UploadSpeed);
-                var widgetSnapshot = WidgetSnapshot.FromTasks(
-                    Tasks, snapshot.DownloadSpeed, snapshot.UploadSpeed, _aria2EngineHost.IsRunning);
-                await _widgetSnapshotStore.SaveAsync(widgetSnapshot);
-                new WidgetUpdateService().UpdateAll(widgetSnapshot);
+                UpdateWidgets(snapshot);
                 UpdateTaskbarProgressFromTasks();
                 UpdateSystemSleepOverride();
                 TryAutoShutdownWhenDownloadsComplete();
@@ -194,11 +191,26 @@ namespace OmniDown
             {
                 AppLogger.Warning("Aria2Refresh", ex.Message);
                 UpdateDebugStatus();
-                ShowMessage(Strings.Format("RpcRefreshFailedMessage", ex.Message), InfoBarSeverity.Warning);
+                ShowMessageOnce(Strings.Format("RpcRefreshFailedMessage", ex.Message), InfoBarSeverity.Warning);
             }
             finally
             {
                 _isRefreshing = false;
+            }
+        }
+
+        private void UpdateWidgets(DownloadSnapshot snapshot)
+        {
+            try
+            {
+                var widgetSnapshot = WidgetSnapshot.FromTasks(
+                    Tasks, snapshot.DownloadSpeed, snapshot.UploadSpeed, _aria2EngineHost.IsRunning);
+                _ = _widgetSnapshotStore.SaveAsync(widgetSnapshot);
+                new WidgetUpdateService().UpdateAll(widgetSnapshot);
+            }
+            catch
+            {
+                // Widget updates are best-effort; failures here should not surface as RPC errors.
             }
         }
 
@@ -459,7 +471,7 @@ namespace OmniDown
             _taskbarProgress.SetProgress(progress);
         }
 
-        private void TryAutoShutdownWhenDownloadsComplete()
+        private async void TryAutoShutdownWhenDownloadsComplete()
         {
             if (!_settingsPageViewModel.GeneralSettings.AutoShutdownWhenComplete || _hasTriggeredAutoShutdown)
             {
@@ -480,6 +492,21 @@ namespace OmniDown
             }
 
             _hasTriggeredAutoShutdown = true;
+            _isShutdownPrepared = true;
+            try
+            {
+                if (_settingsPageViewModel.GeneralSettings.AutoClearCompletedOnExit)
+                {
+                    await _downloadCoordinator.ClearCompletedAsync(deleteFiles: false);
+                }
+
+                await SaveAriaSessionIfRunningAsync();
+            }
+            catch
+            {
+                // Best-effort cleanup before shutdown.
+            }
+
             try
             {
                 SystemShutdownService.ShutdownNow();
@@ -593,6 +620,7 @@ namespace OmniDown
 
         private void ShowMessage(string message, InfoBarSeverity severity)
         {
+            _lastStatusMessage = message;
             _statusMessages.Insert(0, new AppStatusMessage(
                 message,
                 FormatStatusMessageDetail(DateTimeOffset.Now),
@@ -610,6 +638,16 @@ namespace OmniDown
             _statusMessageTimer.Stop();
             _statusMessageTimer.Start();
             AnimateInfoBarShow();
+        }
+
+        private void ShowMessageOnce(string message, InfoBarSeverity severity)
+        {
+            if (message.Equals(_lastStatusMessage, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            ShowMessage(message, severity);
         }
 
         private void AnimateInfoBarShow()

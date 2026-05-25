@@ -27,11 +27,16 @@
         <controls:SettingsCard
             x:Name="AriaPathSettingCard"
             x:Uid="AriaPathSettingCard"
-            Description="留空时从应用内置引擎或 PATH 解析 aria2c.exe。"
             Header="aria2c path">
             <controls:SettingsCard.HeaderIcon>
                 <FontIcon Glyph="&#xE756;" />
             </controls:SettingsCard.HeaderIcon>
+            <controls:SettingsCard.Description>
+                <RichTextBlock
+                    x:Name="AriaPathDescriptionBlock"
+                    TextWrapping="WrapWholeWords"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            </controls:SettingsCard.Description>
             <Grid
                 Width="300"
                 Height="32"

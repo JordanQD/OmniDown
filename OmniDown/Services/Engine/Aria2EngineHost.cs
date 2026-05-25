@@ -20,6 +20,7 @@ public sealed class Aria2EngineHost : IDisposable
 {
     private Process? _process;
     private readonly Queue<string> _recentOutput = new();
+    private bool _isAria2Next;
 
     public bool IsRunning => _process is { HasExited: false };
 
@@ -44,6 +45,8 @@ public sealed class Aria2EngineHost : IDisposable
                 "aria2c.exe was not found. Set a path in Settings, add aria2c to PATH, or place it under Engines\\aria2.");
         }
 
+        _isAria2Next = await DetectAria2NextAsync(resolvedPath);
+
         Directory.CreateDirectory(options.DownloadDirectory);
         string appDataDirectory = AppPaths.LocalDataDirectory;
         Directory.CreateDirectory(appDataDirectory);
@@ -64,7 +67,7 @@ public sealed class Aria2EngineHost : IDisposable
             RedirectStandardOutput = true
         };
 
-        foreach (string argument in BuildArguments(options, appDataDirectory, resolvedPath))
+        foreach (string argument in BuildArguments(options, appDataDirectory, resolvedPath, _isAria2Next))
         {
             startInfo.ArgumentList.Add(argument);
         }
@@ -233,6 +236,33 @@ public sealed class Aria2EngineHost : IDisposable
         return string.Empty;
     }
 
+    private static async Task<bool> DetectAria2NextAsync(string executablePath)
+    {
+        try
+        {
+            using Process process = new()
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = executablePath,
+                    ArgumentList = { "--version" },
+                    CreateNoWindow = true,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                }
+            };
+            process.Start();
+            string output = await process.StandardOutput.ReadToEndAsync();
+            await process.WaitForExitAsync();
+            return output.Contains("aria2-next", StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     private static string[] GetBundledCandidates()
     {
         string architecture = RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
@@ -254,7 +284,7 @@ public sealed class Aria2EngineHost : IDisposable
         ];
     }
 
-    private static List<string> BuildArguments(Aria2EngineOptions options, string appDataDirectory, string resolvedExecutablePath)
+    private static List<string> BuildArguments(Aria2EngineOptions options, string appDataDirectory, string resolvedExecutablePath, bool isAria2Next)
     {
         string sessionPath = GetSessionPath(appDataDirectory);
         string dhtPath = Path.Combine(appDataDirectory, "dht.dat");
@@ -280,11 +310,15 @@ public sealed class Aria2EngineHost : IDisposable
             $"--dir={options.DownloadDirectory}",
             $"--save-session={sessionPath}",
             "--force-save=true",
-            $"--dht-file-path={dhtPath}",
-            $"--dht-file-path6={dht6Path}"
         ];
 
-        AddBitTorrentArguments(arguments, options);
+        AddBitTorrentArguments(arguments, options, isAria2Next);
+
+        if (!isAria2Next)
+        {
+            arguments.Add($"--dht-file-path={dhtPath}");
+            arguments.Add($"--dht-file-path6={dht6Path}");
+        }
 
         string? confPath = ResolveBundledConfigPath(resolvedExecutablePath);
         if (!string.IsNullOrWhiteSpace(confPath))
@@ -347,7 +381,7 @@ public sealed class Aria2EngineHost : IDisposable
         }
     }
 
-    private static void AddBitTorrentArguments(List<string> arguments, Aria2EngineOptions options)
+    private static void AddBitTorrentArguments(List<string> arguments, Aria2EngineOptions options, bool isAria2Next)
     {
         var settings = options.BitTorrentSettings;
         bool autoContent = settings.IsEnabled && settings.AutoDownloadContent;
@@ -356,8 +390,6 @@ public sealed class Aria2EngineHost : IDisposable
 
         arguments.AddRange(
         [
-            $"--follow-torrent={FormatAriaBool(autoContent)}",
-            $"--follow-metalink={FormatAriaBool(autoContent)}",
             $"--pause-metadata={FormatAriaBool(!autoContent)}",
             $"--bt-force-encryption={FormatAriaBool(settings.IsEnabled && settings.ForceEncryption)}",
             $"--seed-ratio={seedRatio.ToString("0.###", CultureInfo.InvariantCulture)}",
@@ -366,12 +398,21 @@ public sealed class Aria2EngineHost : IDisposable
             $"--listen-port={NormalizeListenPort(options.NetworkSettings.ListenPort)}",
             $"--dht-listen-port={NormalizeListenPort(options.NetworkSettings.DhtListenPort)}",
             "--enable-dht=true",
-            "--enable-dht6=true",
             "--enable-peer-exchange=true",
-            "--bt-enable-lpd=true",
-            "--bt-save-metadata=true",
-            "--bt-load-saved-metadata=true"
+            "--bt-enable-lpd=true"
         ]);
+
+        if (!isAria2Next)
+        {
+            arguments.AddRange(
+            [
+                $"--follow-torrent={FormatAriaBool(autoContent)}",
+                $"--follow-metalink={FormatAriaBool(autoContent)}",
+                "--enable-dht6=true",
+                "--bt-save-metadata=true",
+                "--bt-load-saved-metadata=true"
+            ]);
+        }
 
         string trackers = ToAriaTrackerList(settings.TrackerList);
         if (!string.IsNullOrWhiteSpace(trackers))
