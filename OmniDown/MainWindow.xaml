@@ -907,8 +907,6 @@
                                                     Foreground="{Binding ProgressBrush}"
                                                     IsIndeterminate="{Binding IsOperationPending}"
                                                     Maximum="100"
-                                                    ShowError="{Binding IsError}"
-                                                    ShowPaused="{Binding IsPaused}"
                                                     Value="{Binding Progress}" />
 
                                                 <VisualStateManager.VisualStateGroups>
