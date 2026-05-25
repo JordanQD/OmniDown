@@ -172,6 +172,93 @@ namespace OmniDown
             UpdateTaskDetailsPane();
             ApplyToolbarTooltips();
             AppLogger.Info("App", "MainWindow initialized");
+            _ = CheckEngineUpdateAsync();
+        }
+
+        private async Task CheckEngineUpdateAsync(bool isManual = false)
+        {
+            if (!isManual)
+            {
+                try
+                {
+                    object? value = Windows.Storage.ApplicationData.Current.LocalSettings.Values["EngineAutoUpdateEnabled"];
+                    if (value is not true) return;
+                }
+                catch { return; }
+            }
+
+            try
+            {
+                EngineUpdateService updater = new();
+                string bundledPath = updater.GetBundledEnginePath();
+
+                if (!File.Exists(bundledPath))
+                {
+                    AppLogger.Info("EngineUpdater", "no bundled engine found, skipping update check");
+                    if (isManual) ShowMessage("未找到内置引擎。", InfoBarSeverity.Error);
+                    return;
+                }
+
+                string currentVersion = await DetectEngineVersionAsync(bundledPath);
+                if (string.IsNullOrWhiteSpace(currentVersion))
+                {
+                    AppLogger.Info("EngineUpdater", "could not detect current engine version");
+                    if (isManual) ShowMessage("无法检测当前引擎版本。", InfoBarSeverity.Error);
+                    return;
+                }
+
+                EngineUpdateInfo? update = await updater.CheckForUpdateAsync(currentVersion);
+                if (update is null)
+                {
+                    if (isManual) ShowMessage($"aria2-next {currentVersion} 已是最新版本。", InfoBarSeverity.Success);
+                    return;
+                }
+
+                ShowMessage($"正在下载 aria2-next {update.Version}…", InfoBarSeverity.Informational);
+                bool installed = await updater.DownloadAndInstallAsync(update, bundledPath);
+                if (installed)
+                {
+                    ShowMessage($"aria2-next 已更新到 {update.Version}，重启 aria2 后生效。", InfoBarSeverity.Success);
+                }
+                else
+                {
+                    ShowMessage($"aria2-next {update.Version} 下载失败，请检查网络。", InfoBarSeverity.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                AppLogger.Warning("EngineUpdater", $"update check failed: {ex.Message}");
+                if (isManual) ShowMessage($"内核更新检查失败：{ex.Message}", InfoBarSeverity.Error);
+            }
+        }
+
+        private static async Task<string> DetectEngineVersionAsync(string executablePath)
+        {
+            try
+            {
+                System.Diagnostics.Process process = new()
+                {
+                    StartInfo = new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = executablePath,
+                        ArgumentList = { "--version" },
+                        CreateNoWindow = true,
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true
+                    }
+                };
+                process.Start();
+                string output = await process.StandardOutput.ReadToEndAsync();
+                await process.WaitForExitAsync();
+                string firstLine = output.Split('\n', StringSplitOptions.RemoveEmptyEntries)[0].Trim();
+                int idx = firstLine.LastIndexOf("version ", StringComparison.OrdinalIgnoreCase);
+                return idx >= 0 ? firstLine[(idx + 8)..].Trim() : string.Empty;
+            }
+            catch
+            {
+                return string.Empty;
+            }
         }
     }
 }

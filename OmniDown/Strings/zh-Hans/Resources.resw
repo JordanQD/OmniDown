@@ -352,11 +352,15 @@
   <data name="FileAllocationSettingCard.Description" xml:space="preserve"><value>控制下载开始时如何预留磁盘空间。</value></data>
 
   <data name="AdvancedSettingsTitle.Text" xml:space="preserve"><value>高级</value></data>
-  <data name="AdvancedAria2EngineSectionHeader.Text" xml:space="preserve"><value>aria2 引擎</value></data>
-  <data name="AriaPathSettingCard.Header" xml:space="preserve"><value>aria2 路径</value></data>
-  <data name="AriaPathDescriptionPrefix.Text" xml:space="preserve"><value>留空时使用应用内置引擎。支持 </value></data>
-  <data name="AriaPathDescriptionSeparator.Text" xml:space="preserve"><value>、</value></data>
-  <data name="AriaPathDescriptionSuffix.Text" xml:space="preserve"><value> 内核。</value></data>
+  <data name="AriaEngineSettingsExpander.Header" xml:space="preserve"><value>aria2 引擎</value></data>
+  <data name="AriaEngineDescriptionPart1.Text" xml:space="preserve"><value>支持 </value></data>
+  <data name="AriaEngineDescriptionPart2.Text" xml:space="preserve"><value>、</value></data>
+  <data name="AriaEngineDescriptionPart3.Text" xml:space="preserve"><value> 内核。</value></data>
+  <data name="AriaPathSettingCard.Header" xml:space="preserve"><value>可执行文件路径</value></data>
+  <data name="EngineVersionSettingCard.Header" xml:space="preserve"><value>内核版本</value></data>
+  <data name="EngineAutoUpdateSettingCard.Header" xml:space="preserve"><value>自动更新内核</value></data>
+  <data name="AriaPathDescriptionPart1.Text" xml:space="preserve"><value>留空时，使用应用内置引擎</value></data>
+  <data name="AriaPathDescriptionPart2.Text" xml:space="preserve"><value>。</value></data>
   <data name="RpcPortSettingCard.Header" xml:space="preserve"><value>RPC 端口</value></data>
   <data name="RpcPortSettingCard.Description" xml:space="preserve"><value>OmniDown 与本地 aria2 通讯使用的 JSON-RPC 端口。</value></data>
   <data name="RpcSecretSettingCard.Header" xml:space="preserve"><value>RPC 密钥</value></data>

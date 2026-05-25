@@ -116,6 +116,7 @@ namespace OmniDown
         private NumberBox TimeoutNumberBox => SettingsPage.TimeoutNumberBoxControl;
         private ComboBox FileAllocationComboBox => SettingsPage.FileAllocationComboBoxControl;
         private TextBox AriaPathTextBox => SettingsPage.AriaPathTextBoxControl;
+        private TextBlock EngineVersionText => SettingsPage.EngineVersionTextControl;
         private NumberBox RpcPortNumberBox => SettingsPage.RpcPortNumberBoxControl;
         private PasswordBox RpcSecretPasswordBox => SettingsPage.RpcSecretPasswordBoxControl;
         private ToggleSwitch ExtensionAutoSubmitToggleSwitch => SettingsPage.ExtensionAutoSubmitToggleSwitchControl;
@@ -172,6 +173,7 @@ namespace OmniDown
             SettingsPage.SyncBtTrackerRequested += SyncBtTrackerButton_Click;
             SettingsPage.StartStopAriaRequested += StartStopAriaButton_Click;
             SettingsPage.RestartAriaRequested += RestartAriaButton_Click;
+            SettingsPage.ManualUpdateRequested += ManualEngineUpdateButton_Click;
             SettingsPage.CopyCloneCommandRequested += CopyCloneCommandButton_Click;
             SettingsPage.OpenAboutLinkRequested += OpenAboutLinkButton_Click;
         }

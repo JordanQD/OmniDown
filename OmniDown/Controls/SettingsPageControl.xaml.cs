@@ -53,6 +53,7 @@ public sealed partial class SettingsPageControl : UserControl
         AdvancedSettingsContent.ClearSessionRequested += (_, args) => ClearSessionRequested?.Invoke(this, args);
         AdvancedSettingsContent.StartStopAriaRequested += (_, args) => StartStopAriaRequested?.Invoke(this, args);
         AdvancedSettingsContent.RestartAriaRequested += (_, args) => RestartAriaRequested?.Invoke(this, args);
+        AdvancedSettingsContent.ManualUpdateRequested += (_, args) => ManualUpdateRequested?.Invoke(this, args);
         AboutSettingsContent.CopyCloneCommandRequested += (_, args) => CopyCloneCommandRequested?.Invoke(this, args);
         AboutSettingsContent.OpenAboutLinkRequested += (_, args) => OpenAboutLinkRequested?.Invoke(this, args);
     }
@@ -239,6 +240,8 @@ public sealed partial class SettingsPageControl : UserControl
 
     // Advanced section controls
     internal TextBox AriaPathTextBoxControl => AdvancedSettingsContent.AriaPathTextBoxControl;
+    internal TextBlock EngineVersionTextControl => AdvancedSettingsContent.EngineVersionTextControl;
+    internal ToggleSwitch EngineAutoUpdateToggleControl => AdvancedSettingsContent.EngineAutoUpdateToggleControl;
     internal NumberBox RpcPortNumberBoxControl => AdvancedSettingsContent.RpcPortNumberBoxControl;
     internal PasswordBox RpcSecretPasswordBoxControl => AdvancedSettingsContent.RpcSecretPasswordBoxControl;
     internal ToggleSwitch ExtensionAutoSubmitToggleSwitchControl => AdvancedSettingsContent.ExtensionAutoSubmitToggleSwitchControl;
@@ -296,6 +299,7 @@ public sealed partial class SettingsPageControl : UserControl
     internal event RoutedEventHandler? ClearSessionRequested;
     internal event RoutedEventHandler? StartStopAriaRequested;
     internal event RoutedEventHandler? RestartAriaRequested;
+    internal event RoutedEventHandler? ManualUpdateRequested;
     internal event RoutedEventHandler? CopyCloneCommandRequested;
     internal event RoutedEventHandler? OpenAboutLinkRequested;
 

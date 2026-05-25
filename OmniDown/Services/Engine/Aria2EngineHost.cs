@@ -26,6 +26,9 @@ public sealed class Aria2EngineHost : IDisposable
 
     public int? ProcessId => IsRunning ? _process?.Id : null;
 
+    public string EngineVariant { get; private set; } = string.Empty;
+    public string EngineVersion { get; private set; } = string.Empty;
+
     public string DiagnosticText { get; private set; } = "No aria2 process has been started.";
 
     public async Task<Aria2EngineStartResult> StartAsync(Aria2EngineOptions options)
@@ -45,7 +48,7 @@ public sealed class Aria2EngineHost : IDisposable
                 "aria2c.exe was not found. Set a path in Settings, add aria2c to PATH, or place it under Engines\\aria2.");
         }
 
-        _isAria2Next = await DetectAria2NextAsync(resolvedPath);
+        _isAria2Next = await DetectEngineAsync(resolvedPath);
 
         Directory.CreateDirectory(options.DownloadDirectory);
         string appDataDirectory = AppPaths.LocalDataDirectory;
@@ -236,7 +239,7 @@ public sealed class Aria2EngineHost : IDisposable
         return string.Empty;
     }
 
-    private static async Task<bool> DetectAria2NextAsync(string executablePath)
+    private async Task<bool> DetectEngineAsync(string executablePath)
     {
         try
         {
@@ -255,12 +258,29 @@ public sealed class Aria2EngineHost : IDisposable
             process.Start();
             string output = await process.StandardOutput.ReadToEndAsync();
             await process.WaitForExitAsync();
-            return output.Contains("aria2-next", StringComparison.OrdinalIgnoreCase);
+
+            string firstLine = output.Split('\n', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()?.Trim() ?? string.Empty;
+            EngineVariant = firstLine;
+            EngineVersion = ParseVersion(firstLine);
+
+            bool isNext = output.Contains("aria2-next", StringComparison.OrdinalIgnoreCase);
+            _isAria2Next = isNext;
+            return isNext;
         }
         catch
         {
+            EngineVariant = string.Empty;
+            EngineVersion = string.Empty;
+            _isAria2Next = false;
             return false;
         }
+    }
+
+    private static string ParseVersion(string firstLine)
+    {
+        // "Aria2 Next version 2.2.0" or "aria2 version 1.37.0"
+        int idx = firstLine.LastIndexOf("version ", StringComparison.OrdinalIgnoreCase);
+        return idx >= 0 ? firstLine[(idx + 8)..].Trim() : string.Empty;
     }
 
     private static string[] GetBundledCandidates()

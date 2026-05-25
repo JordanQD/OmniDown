@@ -128,9 +128,10 @@
     <PublishTrimmed>False</PublishTrimmed>
   </PropertyGroup>
 
-  <!-- Kill stale processes that may lock output files (e.g. resources.pri) -->
-  <Target Name="CleanupStaleProcesses" BeforeTargets="BeforeBuild">
-    <Exec Command="taskkill /F /IM OmniDown.exe /T 2&gt;nul &amp; taskkill /F /IM aria2c.exe /T 2&gt;nul &amp; exit 0"
+  <!-- Kill stale processes that may lock output files (e.g. resources.pri).
+       Runs before both MSBuild and the deployment layout copy step. -->
+  <Target Name="CleanupStaleProcesses" BeforeTargets="BeforeBuild;_CopyFilesToLayoutDirectory">
+    <Exec Command="powershell -NoProfile -Command &quot;Stop-Process -Name OmniDown -Force -ErrorAction SilentlyContinue; Stop-Process -Name aria2c -Force -ErrorAction SilentlyContinue; Start-Sleep -Seconds 2; exit 0&quot;"
           ContinueOnError="true" />
   </Target>
 </Project>

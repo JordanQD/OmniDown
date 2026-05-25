@@ -600,6 +600,9 @@ namespace OmniDown
                 : Strings.Get("AriaStoppedStatus");
 
             SettingsAriaStatusText.Text = status;
+            EngineVersionText.Text = string.IsNullOrEmpty(_aria2EngineHost.EngineVariant)
+                ? "未检测"
+                : _aria2EngineHost.EngineVariant;
             if (AriaStartStopIcon is not null)
             {
                 AriaStartStopIcon.Glyph = isRunning ? "\uE769" : "\uE768";

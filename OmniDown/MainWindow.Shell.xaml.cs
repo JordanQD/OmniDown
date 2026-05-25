@@ -60,6 +60,11 @@ namespace OmniDown
             await StartAriaAsync();
         }
 
+        private async void ManualEngineUpdateButton_Click(object sender, RoutedEventArgs e)
+        {
+            await CheckEngineUpdateAsync(isManual: true);
+        }
+
         private async Task StartAriaAsync()
         {
             AppLogger.Info("Aria2Command", "start requested");

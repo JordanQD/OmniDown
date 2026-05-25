@@ -12,35 +12,53 @@ public sealed partial class AdvancedSettingsSectionControl : UserControl
     public AdvancedSettingsSectionControl()
     {
         InitializeComponent();
+        BuildAriaEngineDescription();
         BuildAriaPathDescription();
+        ApplyEngineAutoUpdate();
     }
 
-    private void BuildAriaPathDescription()
+    private void BuildAriaEngineDescription()
     {
         var paragraph = new Paragraph();
 
-        paragraph.Inlines.Add(new Run { Text = Strings.Get("AriaPathDescriptionPrefix.Text") });
+        paragraph.Inlines.Add(new Run { Text = Strings.Get("AriaEngineDescriptionPart1.Text") });
 
         var aria2Link = new Hyperlink();
         aria2Link.Inlines.Add(new Run { Text = "aria2" });
         aria2Link.Click += (_, _) => _ = Windows.System.Launcher.LaunchUriAsync(new Uri("https://github.com/aria2/aria2"));
         paragraph.Inlines.Add(aria2Link);
 
-        paragraph.Inlines.Add(new Run { Text = Strings.Get("AriaPathDescriptionSeparator.Text") });
+        paragraph.Inlines.Add(new Run { Text = Strings.Get("AriaEngineDescriptionPart2.Text") });
 
         var aria2NextLink = new Hyperlink();
         aria2NextLink.Inlines.Add(new Run { Text = "aria2-next" });
         aria2NextLink.Click += (_, _) => _ = Windows.System.Launcher.LaunchUriAsync(new Uri("https://github.com/AnInsomniacy/aria2-next"));
         paragraph.Inlines.Add(aria2NextLink);
 
-        paragraph.Inlines.Add(new Run { Text = Strings.Get("AriaPathDescriptionSuffix.Text") });
+        paragraph.Inlines.Add(new Run { Text = Strings.Get("AriaEngineDescriptionPart3.Text") });
+
+        AriaEngineDescriptionBlock.Blocks.Add(paragraph);
+    }
+
+    private void BuildAriaPathDescription()
+    {
+        var paragraph = new Paragraph();
+
+        paragraph.Inlines.Add(new Run { Text = Strings.Get("AriaPathDescriptionPart1.Text") });
+
+        var link = new Hyperlink();
+        link.Inlines.Add(new Run { Text = "aria2-next" });
+        link.Click += (_, _) => _ = Windows.System.Launcher.LaunchUriAsync(new Uri("https://github.com/AnInsomniacy/aria2-next"));
+        paragraph.Inlines.Add(link);
+
+        paragraph.Inlines.Add(new Run { Text = Strings.Get("AriaPathDescriptionPart2.Text") });
 
         AriaPathDescriptionBlock.Blocks.Add(paragraph);
     }
 
     internal IEnumerable<SettingSearchEntry> SearchEntries =>
     [
-        new(AriaPathSettingCard, "aria2c", "path", Strings.Get("AriaPathLabel.Text"), Strings.Get("AriaPathTextBox.PlaceholderText"), "路径"),
+        new(AriaEngineSettingsExpander, "aria2", "aria2-next", "engine", "kernel", "引擎", "内核", "路径", "版本"),
         new(RpcPortSettingCard, "rpc", "port", Strings.Get("RpcPortLabel.Text"), "端口"),
         new(RpcSecretSettingCard, "rpc", "secret", "token", "密钥", "令牌"),
         new(ProcessStatusSettingCard, "process", "status", "aria2", Strings.Get("ProcessStatusLabel.Text"), "状态"),
@@ -60,6 +78,8 @@ public sealed partial class AdvancedSettingsSectionControl : UserControl
 
     internal StackPanel AdvancedSettingsContentControl => AdvancedSettingsContent;
     internal TextBox AriaPathTextBoxControl => AriaPathTextBox;
+    internal TextBlock EngineVersionTextControl => EngineVersionText;
+    internal ToggleSwitch EngineAutoUpdateToggleControl => EngineAutoUpdateToggle;
     internal NumberBox RpcPortNumberBoxControl => RpcPortNumberBox;
     internal PasswordBox RpcSecretPasswordBoxControl => RpcSecretPasswordBox;
     internal ToggleSwitch ExtensionAutoSubmitToggleSwitchControl => ExtensionAutoSubmitToggleSwitch;
@@ -99,6 +119,13 @@ public sealed partial class AdvancedSettingsSectionControl : UserControl
     internal event RoutedEventHandler? ClearSessionRequested;
     internal event RoutedEventHandler? StartStopAriaRequested;
     internal event RoutedEventHandler? RestartAriaRequested;
+
+    internal event RoutedEventHandler? ManualUpdateRequested;
+
+    private void ManualUpdateButton_Click(object sender, RoutedEventArgs args)
+    {
+        ManualUpdateRequested?.Invoke(sender, args);
+    }
 
     private void BrowseAriaPathButton_Click(object sender, RoutedEventArgs args)
     {
@@ -174,6 +201,25 @@ public sealed partial class AdvancedSettingsSectionControl : UserControl
     {
         UpdateToggleStateText(sender as ToggleSwitch);
         AdvancedSettingChanged?.Invoke(sender, args);
+    }
+
+    private void EngineAutoUpdateToggle_Toggled(object sender, RoutedEventArgs args)
+    {
+        try { Windows.Storage.ApplicationData.Current.LocalSettings.Values["EngineAutoUpdateEnabled"] = EngineAutoUpdateToggle.IsOn; }
+        catch { }
+    }
+
+    internal void ApplyEngineAutoUpdate()
+    {
+        try
+        {
+            object? value = Windows.Storage.ApplicationData.Current.LocalSettings.Values["EngineAutoUpdateEnabled"];
+            EngineAutoUpdateToggle.IsOn = value is true;
+        }
+        catch
+        {
+            EngineAutoUpdateToggle.IsOn = true;
+        }
     }
 
     private void UpdateToggleStateText(ToggleSwitch? toggleSwitch)

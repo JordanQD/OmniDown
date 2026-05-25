@@ -352,11 +352,15 @@
   <data name="FileAllocationSettingCard.Description" xml:space="preserve"><value>Controls how disk space is reserved when a download starts.</value></data>
 
   <data name="AdvancedSettingsTitle.Text" xml:space="preserve"><value>Advanced</value></data>
-  <data name="AdvancedAria2EngineSectionHeader.Text" xml:space="preserve"><value>aria2 engine</value></data>
-  <data name="AriaPathSettingCard.Header" xml:space="preserve"><value>aria2 path</value></data>
-  <data name="AriaPathDescriptionPrefix.Text" xml:space="preserve"><value>Leave empty to use the built-in engine. Supports </value></data>
-  <data name="AriaPathDescriptionSeparator.Text" xml:space="preserve"><value> and </value></data>
-  <data name="AriaPathDescriptionSuffix.Text" xml:space="preserve"><value> kernels.</value></data>
+  <data name="AriaEngineSettingsExpander.Header" xml:space="preserve"><value>aria2 engine</value></data>
+  <data name="AriaEngineDescriptionPart1.Text" xml:space="preserve"><value>Supports </value></data>
+  <data name="AriaEngineDescriptionPart2.Text" xml:space="preserve"><value> and </value></data>
+  <data name="AriaEngineDescriptionPart3.Text" xml:space="preserve"><value> kernels.</value></data>
+  <data name="AriaPathSettingCard.Header" xml:space="preserve"><value>Executable path</value></data>
+  <data name="EngineVersionSettingCard.Header" xml:space="preserve"><value>Kernel version</value></data>
+  <data name="EngineAutoUpdateSettingCard.Header" xml:space="preserve"><value>Auto-update engine</value></data>
+  <data name="AriaPathDescriptionPart1.Text" xml:space="preserve"><value>Leave empty to use the built-in </value></data>
+  <data name="AriaPathDescriptionPart2.Text" xml:space="preserve"><value> engine.</value></data>
   <data name="RpcPortSettingCard.Header" xml:space="preserve"><value>RPC port</value></data>
   <data name="RpcPortSettingCard.Description" xml:space="preserve"><value>JSON-RPC port used for communication between OmniDown and local aria2.</value></data>
   <data name="RpcSecretSettingCard.Header" xml:space="preserve"><value>RPC secret</value></data>

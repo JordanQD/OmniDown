@@ -18,49 +18,96 @@
             Text="高级" />
 
         <!--  aria2 引擎  -->
-        <TextBlock
-            Margin="1,30,0,6"
-            Style="{StaticResource BodyStrongTextBlockStyle}"
-            x:Uid="AdvancedAria2EngineSectionHeader"
-            Text="aria2 引擎" />
-
-        <controls:SettingsCard
-            x:Name="AriaPathSettingCard"
-            x:Uid="AriaPathSettingCard"
-            Header="aria2c path">
-            <controls:SettingsCard.HeaderIcon>
+        <controls:SettingsExpander
+            x:Name="AriaEngineSettingsExpander"
+            x:Uid="AriaEngineSettingsExpander"
+            Header="aria2 引擎"
+            IsExpanded="True">
+            <controls:SettingsExpander.HeaderIcon>
                 <FontIcon Glyph="&#xE756;" />
-            </controls:SettingsCard.HeaderIcon>
-            <controls:SettingsCard.Description>
+            </controls:SettingsExpander.HeaderIcon>
+            <controls:SettingsExpander.Content>
                 <RichTextBlock
-                    x:Name="AriaPathDescriptionBlock"
+                    x:Name="AriaEngineDescriptionBlock"
                     TextWrapping="WrapWholeWords"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-            </controls:SettingsCard.Description>
-            <Grid
-                Width="300"
-                Height="32"
-                ColumnDefinitions="*,Auto"
-                ColumnSpacing="8">
-                <TextBox
-                    x:Name="AriaPathTextBox"
-                    Height="32"
-                    VerticalAlignment="Center"
-                    TextChanged="AdvancedSettingTextBox_TextChanged" />
-                <Button
-                    Grid.Column="1"
-                    Width="40"
-                    Height="32"
-                    MinWidth="40"
-                    Padding="0"
-                    VerticalAlignment="Center"
-                    Click="BrowseAriaPathButton_Click">
-                    <FontIcon
-                        FontSize="14"
-                        Glyph="&#xE838;" />
-                </Button>
-            </Grid>
-        </controls:SettingsCard>
+            </controls:SettingsExpander.Content>
+            <controls:SettingsExpander.Items>
+                <controls:SettingsCard
+                    x:Uid="AriaPathSettingCard"
+                    Header="可执行文件路径">
+                    <controls:SettingsCard.Description>
+                        <RichTextBlock
+                            x:Name="AriaPathDescriptionBlock"
+                            TextWrapping="WrapWholeWords"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </controls:SettingsCard.Description>
+                    <Grid
+                        Width="300"
+                        Height="32"
+                        ColumnDefinitions="*,Auto"
+                        ColumnSpacing="8">
+                        <TextBox
+                            x:Name="AriaPathTextBox"
+                            Height="32"
+                            VerticalAlignment="Center"
+                            TextChanged="AdvancedSettingTextBox_TextChanged" />
+                        <Button
+                            Grid.Column="1"
+                            Width="40"
+                            Height="32"
+                            MinWidth="40"
+                            Padding="0"
+                            VerticalAlignment="Center"
+                            Click="BrowseAriaPathButton_Click">
+                            <FontIcon
+                                FontSize="14"
+                                Glyph="&#xE838;" />
+                        </Button>
+                    </Grid>
+                </controls:SettingsCard>
+                <controls:SettingsCard
+                    x:Uid="EngineVersionSettingCard"
+                    Header="内核版本">
+                    <Grid
+                        ColumnDefinitions="*,Auto"
+                        ColumnSpacing="8">
+                        <TextBlock
+                            x:Name="EngineVersionText"
+                            x:Uid="EngineVersionText"
+                            VerticalAlignment="Center"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="未检测" />
+                        <Button
+                            Grid.Column="1"
+                            x:Name="ManualUpdateButton"
+                            Width="40"
+                            Height="32"
+                            MinWidth="40"
+                            Padding="0"
+                            VerticalAlignment="Center"
+                            Click="ManualUpdateButton_Click"
+                            ToolTipService.ToolTip="检查更新">
+                            <FontIcon
+                                FontSize="14"
+                                Glyph="&#xE895;" />
+                        </Button>
+                    </Grid>
+                </controls:SettingsCard>
+                <controls:SettingsCard
+                    x:Uid="EngineAutoUpdateSettingCard"
+                    Header="自动更新内核">
+                    <ToggleSwitch
+                        x:Name="EngineAutoUpdateToggle"
+                        Width="48"
+                        MinWidth="0"
+                        Padding="0"
+                        OffContent=""
+                        OnContent=""
+                        Toggled="EngineAutoUpdateToggle_Toggled" />
+                </controls:SettingsCard>
+            </controls:SettingsExpander.Items>
+        </controls:SettingsExpander>
 
         <controls:SettingsCard
             x:Name="RpcPortSettingCard"
