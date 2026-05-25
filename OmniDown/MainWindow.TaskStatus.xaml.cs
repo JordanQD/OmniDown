@@ -370,38 +370,49 @@ namespace OmniDown
 
         private async Task PrepareDownloadsForShutdownAsync()
         {
-            if (_isShutdownPrepared || !_aria2EngineHost.IsRunning)
+            if (_isShutdownPrepared)
             {
                 return;
             }
 
             _isShutdownPrepared = true;
-            try
-            {
-                await RefreshDownloadsAsync();
 
-                if (_settingsPageViewModel.GeneralSettings.PauseActiveOnExit)
+            if (_aria2EngineHost.IsRunning)
+            {
+                try
                 {
-                    DownloadTask[] activeTasks = Tasks.Where(IsActiveTransferTask).ToArray();
-                    if (activeTasks.Length > 0)
+                    await RefreshDownloadsAsync();
+
+                    if (_settingsPageViewModel.GeneralSettings.PauseActiveOnExit)
                     {
-                        await _downloadCoordinator.PauseAsync(activeTasks);
+                        DownloadTask[] activeTasks = Tasks.Where(IsActiveTransferTask).ToArray();
+                        if (activeTasks.Length > 0)
+                        {
+                            await _downloadCoordinator.PauseAsync(activeTasks);
+                        }
                     }
                 }
+                catch
+                {
+                    // Pause-on-exit is best-effort; shutdown should not be blocked by a stale RPC connection.
+                }
+            }
 
-                if (_settingsPageViewModel.GeneralSettings.AutoClearCompletedOnExit)
+            if (_settingsPageViewModel.GeneralSettings.AutoClearCompletedOnExit)
+            {
+                try
                 {
                     await _downloadCoordinator.ClearCompletedAsync(deleteFiles: false);
                 }
+                catch
+                {
+                    // Clear-on-exit is best-effort.
+                }
+            }
 
-                ApplyTaskFilter(_currentTaskFilter);
-                UpdateDashboard();
-                UpdateSelectionCommands();
-            }
-            catch
-            {
-                // Exit rules are best-effort; shutdown should not be blocked by a stale RPC connection.
-            }
+            ApplyTaskFilter(_currentTaskFilter);
+            UpdateDashboard();
+            UpdateSelectionCommands();
         }
 
         private async Task<bool?> AskCloseBehaviorAsync()
@@ -479,7 +490,7 @@ namespace OmniDown
             }
 
             bool hasCompletedTask = Tasks.Any(IsCompletedTask);
-            bool hasRunningTask = Tasks.Any(IsActiveTransferTask) || Tasks.Any(task => task.Status.Contains("waiting", StringComparison.OrdinalIgnoreCase));
+            bool hasRunningTask = Tasks.Any(IsActiveTransferTask);
             if (hasRunningTask)
             {
                 _hasSeenActiveDownloadsForAutoShutdown = true;

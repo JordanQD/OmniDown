@@ -142,7 +142,7 @@ public sealed class DownloadTask : INotifyPropertyChanged
 
     public Brush ProgressBrush => StatusBrushKey switch
     {
-        "Success" => SuccessBrush,
+        "Success" => GetResourceBrush("SystemFillColorSuccessBrush", SuccessBrush),
         "Caution" => GetResourceBrush("SystemFillColorCautionBrush", CautionBrush),
         "Critical" => GetResourceBrush("SystemFillColorCriticalBrush", CriticalBrush),
         _ => GetResourceBrush("AccentFillColorDefaultBrush", DefaultProgressBrush)

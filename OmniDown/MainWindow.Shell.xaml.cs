@@ -704,7 +704,7 @@ namespace OmniDown
 
         private async void MainWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
         {
-            if (_isExitRequested)
+            if (_isExitRequested || _hasTriggeredAutoShutdown)
             {
                 return;
             }
