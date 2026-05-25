@@ -137,6 +137,15 @@ namespace OmniDown
             SetTitleBar(AppTitleBar);
             AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
             AppWindow.Closing += MainWindow_Closing;
+
+            // Clean up completed tasks from the on-disk cache at startup, so that even
+            // if the exit-time cleanup failed (RPC timeout, file lock, process killed, etc.),
+            // the next launch starts with a clean task list.
+            if (_settingsPageViewModel.GeneralSettings.AutoClearCompletedOnExit)
+            {
+                PurgeCompletedTasksFromCacheFile();
+            }
+
             _downloadCoordinator = new DownloadCoordinator(_aria2RpcClient, Tasks);
             _downloadCoordinator.DeleteTorrentAfterComplete = _settingsPageViewModel.DownloadSettings.DeleteTorrentAfterComplete;
             _notifications = ((App)Application.Current).Notifications;

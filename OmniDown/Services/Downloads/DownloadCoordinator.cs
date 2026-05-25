@@ -1,4 +1,5 @@
 using OmniDown.Models;
+using OmniDown.Services.Logging;
 using OmniDown.Services.Rpc;
 using OmniDown.Services.Storage;
 using System;
@@ -352,6 +353,38 @@ public sealed class DownloadCoordinator
             .ToArray())
         {
             await RemoveCompletedDownloadResultAsync(task.Gid, cancellationToken);
+        }
+    }
+
+    /// <summary>
+    /// On startup, unconditionally purge all completed / error / removed download
+    /// results from aria2's session, regardless of what the local task cache holds.
+    /// This prevents stale results from resurrecting tasks that were cleared during
+    /// a previous exit (where the RPC call may have failed silently).
+    /// </summary>
+    public async Task PurgeCompletedResultsFromAria2SessionAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            IReadOnlyList<Aria2TaskStatus> stoppedTasks = await _rpcClient.TellStoppedAsync(cancellationToken);
+            foreach (Aria2TaskStatus stoppedTask in stoppedTasks)
+            {
+                if (string.IsNullOrWhiteSpace(stoppedTask.Gid))
+                {
+                    continue;
+                }
+
+                string normalizedStatus = NormalizeStatus(stoppedTask.Status);
+                if (IsResultOnlyStatus(normalizedStatus))
+                {
+                    await RemoveCompletedDownloadResultAsync(stoppedTask.Gid, cancellationToken);
+                }
+            }
+        }
+        catch
+        {
+            // Best-effort: if TellStopped fails (e.g. aria2 not yet ready), the next
+            // RefreshAsync will still remove individual completed results via UpsertTask.
         }
     }
 
@@ -937,9 +970,51 @@ public sealed class DownloadCoordinator
                 WriteIndented = true
             }));
         }
-        catch
+        catch (Exception ex)
         {
-            // Cache persistence is best-effort; aria2 session data still controls downloads.
+            AppLogger.Warning("TaskCache", $"SaveTaskCache failed: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Directly reads <c>tasks.json</c>, removes all completed entries, and writes it back.
+    /// Used as a safety net on exit to guarantee the cache file is clean even if
+    /// <see cref="SaveTaskCache"/> failed silently.
+    /// </summary>
+    public void PurgeCompletedTasksFromCacheFile()
+    {
+        if (!File.Exists(_taskCachePath))
+        {
+            return;
+        }
+
+        try
+        {
+            string json = File.ReadAllText(_taskCachePath);
+            List<CachedDownloadTask>? cached = JsonSerializer.Deserialize<List<CachedDownloadTask>>(json);
+            if (cached is null)
+            {
+                return;
+            }
+
+            List<CachedDownloadTask> filtered = cached
+                .Where(entry => !IsCompletedStatus(entry.Status))
+                .ToList();
+
+            if (filtered.Count == cached.Count)
+            {
+                return; // Nothing to remove.
+            }
+
+            AppLogger.Info("TaskCache", $"PurgeCompleted: removing {cached.Count - filtered.Count} completed entries from tasks.json");
+            File.WriteAllText(_taskCachePath, JsonSerializer.Serialize(filtered, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            }));
+        }
+        catch (Exception ex)
+        {
+            AppLogger.Warning("TaskCache", $"PurgeCompletedTasksFromCacheFile failed: {ex.Message}");
         }
     }
 

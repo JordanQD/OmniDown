@@ -110,7 +110,7 @@ namespace OmniDown
                 AppLogger.Info("Aria2Startup", "RPC ping succeeded");
                 await ApplyConfiguredSpeedLimitsAsync();
                 _refreshTimer.Start();
-                await _downloadCoordinator.RemoveCompletedDownloadResultsAsync();
+                await _downloadCoordinator.PurgeCompletedResultsFromAria2SessionAsync();
                 await RefreshDownloadsAsync();
             }
             catch (Exception ex)
@@ -368,6 +368,44 @@ namespace OmniDown
             Close();
         }
 
+        private void PurgeCompletedTasksFromCacheFile()
+        {
+            string cachePath = Path.Combine(AppPaths.LocalDataDirectory, "tasks.json");
+            if (!File.Exists(cachePath))
+            {
+                return;
+            }
+
+            try
+            {
+                string json = File.ReadAllText(cachePath);
+                List<CachedDownloadTask>? cached = JsonSerializer.Deserialize<List<CachedDownloadTask>>(json);
+                if (cached is null)
+                {
+                    return;
+                }
+
+                List<CachedDownloadTask> filtered = cached
+                    .Where(entry => !entry.Status.Contains("complete", StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                if (filtered.Count == cached.Count)
+                {
+                    return;
+                }
+
+                AppLogger.Info("Startup", $"PurgeCompletedTasks: removing {cached.Count - filtered.Count} completed tasks from cache");
+                File.WriteAllText(cachePath, JsonSerializer.Serialize(filtered, new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                }));
+            }
+            catch (Exception ex)
+            {
+                AppLogger.Warning("Startup", $"PurgeCompletedTasksFromCacheFile failed: {ex.Message}");
+            }
+        }
+
         private async Task PrepareDownloadsForShutdownAsync()
         {
             if (_isShutdownPrepared)
@@ -400,14 +438,20 @@ namespace OmniDown
 
             if (_settingsPageViewModel.GeneralSettings.AutoClearCompletedOnExit)
             {
+                AppLogger.Info("Shutdown", "AutoClearCompletedOnExit enabled, clearing completed tasks");
                 try
                 {
-                    await _downloadCoordinator.ClearCompletedAsync(deleteFiles: false);
+                    int cleared = await _downloadCoordinator.ClearCompletedAsync(deleteFiles: false);
+                    AppLogger.Info("Shutdown", $"ClearCompletedAsync removed {cleared} tasks from memory");
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Clear-on-exit is best-effort.
+                    AppLogger.Warning("Shutdown", $"ClearCompletedAsync failed: {ex.Message}");
                 }
+
+                // Safety net: directly purge completed entries from tasks.json on disk,
+                // in case SaveTaskCache inside ClearCompletedAsync failed silently.
+                _downloadCoordinator.PurgeCompletedTasksFromCacheFile();
             }
 
             ApplyTaskFilter(_currentTaskFilter);
