@@ -12,7 +12,15 @@
             </ResourceDictionary.MergedDictionaries>
             <x:String x:Key="AppTitleName">OmniDown</x:String>
             <Style x:Key="DefaultContentDialogStyle" TargetType="ContentDialog" />
-            <!-- Other app resources here -->
+            <!-- Override InfoBar informational severity to be opaque (default is too transparent) -->
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="InfoBarInformationalSeverityBackgroundBrush" Color="#E6EFF7" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="InfoBarInformationalSeverityBackgroundBrush" Color="#1A2B3D" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

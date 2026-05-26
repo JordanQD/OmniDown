@@ -293,6 +293,10 @@ public sealed class Aria2EngineHost : IDisposable
 
         return
         [
+            // 1. LocalData (writable copy, used for updates)
+            Path.Combine(AppPaths.LocalDataDirectory, "Engines", "aria2", $"win-{architecture}", "aria2c.exe"),
+            Path.Combine(AppPaths.LocalDataDirectory, "Engines", "aria2", "aria2c.exe"),
+            // 2. AppX / installation directory (read-only, fallback)
             Path.Combine(appBase, "Engines", "aria2", $"win-{architecture}", "aria2c.exe"),
             Path.Combine(appBase, "Engines", "aria2", "aria2c.exe"),
             Path.Combine(executableDirectory, "Engines", "aria2", $"win-{architecture}", "aria2c.exe"),

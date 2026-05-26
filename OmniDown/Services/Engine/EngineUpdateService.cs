@@ -12,6 +12,7 @@ namespace OmniDown.Services.Engine;
 public sealed class EngineUpdateService
 {
     private const string GitHubReleaseUrl = "https://api.github.com/repos/AnInsomniacy/aria2-next/releases/latest";
+    private static readonly TimeSpan CacheDuration = TimeSpan.FromHours(6);
     private readonly HttpClient _httpClient;
 
     public EngineUpdateService()
@@ -21,16 +22,28 @@ public sealed class EngineUpdateService
         _httpClient.Timeout = TimeSpan.FromSeconds(30);
     }
 
-    public async Task<EngineUpdateInfo?> CheckForUpdateAsync(string currentVersion)
+    public async Task<EngineUpdateCheckResult> CheckForUpdateAsync(string currentVersion, bool forceRefresh = false)
     {
         if (string.IsNullOrWhiteSpace(currentVersion))
         {
             AppLogger.Info("EngineUpdater", "current version unknown, skipping update check");
-            return null;
+            return new EngineUpdateCheckResult(false, false, null, null);
         }
 
         try
         {
+            // Skip API call if recently checked (unless forced)
+            if (!forceRefresh)
+            {
+                UpdateCache cache = LoadCache();
+                if (cache.IsFresh)
+                {
+                    AppLogger.Info("EngineUpdater", $"using cached result: latest={cache.LatestVersion} (checked {cache.LastCheck:O})");
+                    bool newer = IsNewer(cache.LatestVersion, currentVersion);
+                    return new EngineUpdateCheckResult(true, newer, null, cache.LatestVersion);
+                }
+            }
+
             AppLogger.Info("EngineUpdater", $"checking for updates, current={currentVersion}");
             string json = await _httpClient.GetStringAsync(GitHubReleaseUrl);
             using JsonDocument doc = JsonDocument.Parse(json);
@@ -41,10 +54,12 @@ public sealed class EngineUpdateService
                 ? tagName[1..]
                 : tagName;
 
+            SaveCache(latestVersion);
+
             if (!IsNewer(latestVersion, currentVersion))
             {
                 AppLogger.Info("EngineUpdater", $"current {currentVersion} is up to date (latest={latestVersion})");
-                return null;
+                return new EngineUpdateCheckResult(true, false, null, latestVersion);
             }
 
             string platformSuffix = RuntimeInformation.ProcessArchitecture switch
@@ -57,7 +72,7 @@ public sealed class EngineUpdateService
             if (string.IsNullOrEmpty(platformSuffix))
             {
                 AppLogger.Warning("EngineUpdater", $"unsupported platform: {RuntimeInformation.ProcessArchitecture}");
-                return null;
+                return new EngineUpdateCheckResult(false, false, null, null);
             }
 
             foreach (JsonElement asset in root.GetProperty("assets").EnumerateArray())
@@ -67,17 +82,25 @@ public sealed class EngineUpdateService
                 {
                     string downloadUrl = asset.GetProperty("browser_download_url").GetString() ?? string.Empty;
                     AppLogger.Info("EngineUpdater", $"found update: {name} version={latestVersion}");
-                    return new EngineUpdateInfo(latestVersion, downloadUrl, name);
+                    return new EngineUpdateCheckResult(true, true, new EngineUpdateInfo(latestVersion, downloadUrl, name), latestVersion);
                 }
             }
 
             AppLogger.Warning("EngineUpdater", $"no matching asset for platform {platformSuffix}");
-            return null;
+            return new EngineUpdateCheckResult(false, false, null, null);
+        }
+        catch (HttpRequestException ex)
+        {
+            string error = ex.StatusCode.HasValue
+                ? $"GitHub API returned {(int)ex.StatusCode} ({ex.StatusCode})"
+                : $"network error: {ex.Message}";
+            AppLogger.Warning("EngineUpdater", $"update check failed: {error}");
+            return new EngineUpdateCheckResult(false, false, null, null, error);
         }
         catch (Exception ex)
         {
             AppLogger.Warning("EngineUpdater", $"update check failed: {ex.Message}");
-            return null;
+            return new EngineUpdateCheckResult(false, false, null, null, ex.Message);
         }
     }
 
@@ -121,10 +144,48 @@ public sealed class EngineUpdateService
     public string GetBundledEnginePath()
     {
         string architecture = RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
-        return Path.Combine(
-            Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)
-            ?? AppContext.BaseDirectory,
-            "Engines", "aria2", $"win-{architecture}", "aria2c.exe");
+        return Path.Combine(AppPaths.LocalDataDirectory, "Engines", "aria2", $"win-{architecture}", "aria2c.exe");
+    }
+
+    public static string AppxBundledEnginePath
+    {
+        get
+        {
+            string architecture = RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
+            string appBase = AppContext.BaseDirectory;
+            return Path.Combine(appBase, "Engines", "aria2", $"win-{architecture}", "aria2c.exe");
+        }
+    }
+
+    public async Task<bool> EnsureEngineAvailableAsync()
+    {
+        string localPath = GetBundledEnginePath();
+        if (File.Exists(localPath)) return true;
+
+        try
+        {
+            string appxPath = AppxBundledEnginePath;
+            if (File.Exists(appxPath))
+            {
+                string? directory = Path.GetDirectoryName(localPath);
+                if (!string.IsNullOrEmpty(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                File.Copy(appxPath, localPath);
+                AppLogger.Info("EngineUpdater", $"copied engine from AppX to {localPath}");
+                return true;
+            }
+
+            AppLogger.Warning("EngineUpdater", "no bundled engine found in AppX or LocalData");
+            return false;
+        }
+        catch (Exception ex)
+        {
+            AppLogger.Warning("EngineUpdater", $"failed to copy engine to local data: {ex.Message}");
+            return false;
+        }
     }
 
     private static bool IsNewer(string latest, string current)
@@ -138,11 +199,59 @@ public sealed class EngineUpdateService
         return string.Compare(latest, current, StringComparison.OrdinalIgnoreCase) != 0;
     }
 
+    private static string CachePath => Path.Combine(AppPaths.LocalDataDirectory, "engine_update_cache.json");
+
+    private static UpdateCache LoadCache()
+    {
+        try
+        {
+            if (File.Exists(CachePath))
+            {
+                string json = File.ReadAllText(CachePath);
+                return JsonSerializer.Deserialize<UpdateCache>(json) ?? new UpdateCache();
+            }
+        }
+        catch { }
+        return new UpdateCache();
+    }
+
+    private static void SaveCache(string latestVersion)
+    {
+        try
+        {
+            var cache = new UpdateCache
+            {
+                LastCheck = DateTimeOffset.UtcNow,
+                LatestVersion = latestVersion
+            };
+            string? directory = Path.GetDirectoryName(CachePath);
+            if (!string.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);
+            File.WriteAllText(CachePath, JsonSerializer.Serialize(cache));
+        }
+        catch { }
+    }
+
     private static void TryDelete(string path)
     {
         try { if (File.Exists(path)) File.Delete(path); }
         catch { /* best effort */ }
     }
+
+    private sealed class UpdateCache
+    {
+        public DateTimeOffset LastCheck { get; set; }
+        public string LatestVersion { get; set; } = string.Empty;
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        public bool IsFresh => (DateTimeOffset.UtcNow - LastCheck) < CacheDuration && !string.IsNullOrEmpty(LatestVersion);
+    }
 }
+
+public sealed record EngineUpdateCheckResult(
+    bool Succeeded,
+    bool UpdateAvailable,
+    EngineUpdateInfo? Update,
+    string? LatestVersion,
+    string? ErrorMessage = null);
 
 public sealed record EngineUpdateInfo(string Version, string DownloadUrl, string FileName);

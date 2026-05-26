@@ -199,6 +199,15 @@ namespace OmniDown
             try
             {
                 EngineUpdateService updater = new();
+
+                // Ensure engine is in writable local data (copy from AppX on first run)
+                bool engineAvailable = await updater.EnsureEngineAvailableAsync();
+                if (!engineAvailable)
+                {
+                    if (isManual) ShowMessage("未找到可更新的内置引擎。", InfoBarSeverity.Error);
+                    return;
+                }
+
                 string bundledPath = updater.GetBundledEnginePath();
 
                 if (!File.Exists(bundledPath))
@@ -216,22 +225,32 @@ namespace OmniDown
                     return;
                 }
 
-                EngineUpdateInfo? update = await updater.CheckForUpdateAsync(currentVersion);
-                if (update is null)
+                EngineUpdateCheckResult result = await updater.CheckForUpdateAsync(currentVersion, forceRefresh: isManual);
+
+                if (!result.Succeeded)
+                {
+                    if (isManual) ShowMessage($"检查更新失败：{result.ErrorMessage ?? "未知错误"}", InfoBarSeverity.Error);
+                    return;
+                }
+
+                if (!result.UpdateAvailable)
                 {
                     if (isManual) ShowMessage($"aria2-next {currentVersion} 已是最新版本。", InfoBarSeverity.Success);
                     return;
                 }
 
-                ShowMessage($"正在下载 aria2-next {update.Version}…", InfoBarSeverity.Informational);
+                EngineUpdateInfo update = result.Update!;
+                ShowMessage($"正在下载 aria2-next {update.Version}…", InfoBarSeverity.Success);
                 bool installed = await updater.DownloadAndInstallAsync(update, bundledPath);
                 if (installed)
                 {
+                    // Bust cache so next check reflects the new version
+                    TryBustUpdateCache();
                     ShowMessage($"aria2-next 已更新到 {update.Version}，重启 aria2 后生效。", InfoBarSeverity.Success);
                 }
                 else
                 {
-                    ShowMessage($"aria2-next {update.Version} 下载失败，请检查网络。", InfoBarSeverity.Error);
+                    ShowMessage($"aria2-next {update.Version} 安装失败，请查看日志。", InfoBarSeverity.Error);
                 }
             }
             catch (Exception ex)
@@ -239,6 +258,16 @@ namespace OmniDown
                 AppLogger.Warning("EngineUpdater", $"update check failed: {ex.Message}");
                 if (isManual) ShowMessage($"内核更新检查失败：{ex.Message}", InfoBarSeverity.Error);
             }
+        }
+
+        private static void TryBustUpdateCache()
+        {
+            try
+            {
+                string path = Path.Combine(AppPaths.LocalDataDirectory, "engine_update_cache.json");
+                if (File.Exists(path)) File.Delete(path);
+            }
+            catch { }
         }
 
         private static async Task<string> DetectEngineVersionAsync(string executablePath)
