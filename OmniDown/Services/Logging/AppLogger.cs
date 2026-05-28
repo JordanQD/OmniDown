@@ -16,7 +16,6 @@ public enum AppLogLevel
 
 public static class AppLogger
 {
-    private const long MaxLogFileBytes = 10 * 1024 * 1024;
     private static readonly object SyncRoot = new();
     private static AppLogLevel _minimumLevel = AppLogLevel.Info;
 
@@ -110,7 +109,10 @@ public static class AppLogger
             try
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(path) ?? AppPaths.LogDirectory);
-                RotateIfNeeded(path);
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
             }
             catch
             {
@@ -124,30 +126,12 @@ public static class AppLogger
         try
         {
             Directory.CreateDirectory(Path.GetDirectoryName(path) ?? AppPaths.LogDirectory);
-            RotateIfNeeded(path);
             File.AppendAllText(path, line + Environment.NewLine, Encoding.UTF8);
         }
         catch
         {
             // Logging must never break download or shutdown paths.
         }
-    }
-
-    private static void RotateIfNeeded(string path)
-    {
-        FileInfo fileInfo = new(path);
-        if (!fileInfo.Exists || fileInfo.Length < MaxLogFileBytes)
-        {
-            return;
-        }
-
-        string oldPath = path + ".old";
-        if (File.Exists(oldPath))
-        {
-            File.Delete(oldPath);
-        }
-
-        File.Move(path, oldPath);
     }
 
     private static AppLogLevel? GetAria2SemanticLevel(string line)

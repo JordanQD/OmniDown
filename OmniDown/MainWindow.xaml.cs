@@ -114,6 +114,7 @@ namespace OmniDown
 
         public MainWindow()
         {
+            AppLogger.PrepareLogFile(AppPaths.AppLogPath);
             _browserExtensionApiServer = new BrowserExtensionApiServer(
                 HandleBrowserExtensionAddAsync,
                 HandleBrowserExtensionStatAsync,
@@ -241,12 +242,25 @@ namespace OmniDown
 
                 EngineUpdateInfo update = result.Update!;
                 ShowMessage($"正在下载 aria2-next {update.Version}…", InfoBarSeverity.Success);
+
+                bool wasRunning = _aria2EngineHost.IsRunning;
+                if (wasRunning)
+                {
+                    await StopAriaAsync(showMessage: false);
+                }
+
                 bool installed = await updater.DownloadAndInstallAsync(update, bundledPath);
+
+                if (wasRunning)
+                {
+                    await StartAriaAsync();
+                }
+
                 if (installed)
                 {
                     // Bust cache so next check reflects the new version
                     TryBustUpdateCache();
-                    ShowMessage($"aria2-next 已更新到 {update.Version}，重启 aria2 后生效。", InfoBarSeverity.Success);
+                    ShowMessage($"aria2-next 已更新到 {update.Version}，已自动重启。", InfoBarSeverity.Success);
                 }
                 else
                 {

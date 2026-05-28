@@ -119,19 +119,34 @@ public sealed class EngineUpdateService
                 Directory.CreateDirectory(directory);
             }
 
+            TryDelete(tempPath);
+
             await using Stream sourceStream = await response.Content.ReadAsStreamAsync();
             await using FileStream targetStream = File.Create(tempPath, 4096, FileOptions.Asynchronous);
             await sourceStream.CopyToAsync(targetStream);
 
-            // Atomic replacement: delete old, rename new
-            if (File.Exists(targetPath))
+            // Retry swapping the file — antivirus may briefly lock the target
+            for (int attempt = 0; attempt < 5; attempt++)
             {
-                File.Delete(targetPath);
+                try
+                {
+                    if (File.Exists(targetPath))
+                    {
+                        File.Delete(targetPath);
+                    }
+
+                    File.Move(tempPath, targetPath);
+                    AppLogger.Info("EngineUpdater", $"installed {update.Version} to {targetPath}");
+                    return true;
+                }
+                catch (IOException) when (attempt < 4)
+                {
+                    AppLogger.Info("EngineUpdater", $"file locked, retrying ({attempt + 1}/5)...");
+                    await Task.Delay(TimeSpan.FromSeconds(2));
+                }
             }
 
-            File.Move(tempPath, targetPath);
-            AppLogger.Info("EngineUpdater", $"installed {update.Version} to {targetPath}");
-            return true;
+            return false;
         }
         catch (Exception ex)
         {
@@ -144,7 +159,7 @@ public sealed class EngineUpdateService
     public string GetBundledEnginePath()
     {
         string architecture = RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
-        return Path.Combine(AppPaths.LocalDataDirectory, "Engines", "aria2", $"win-{architecture}", "aria2c.exe");
+        return Path.Combine(AppPaths.LocalDataDirectory, "Engines", "aria2", $"win-{architecture}", "aria2-next.exe");
     }
 
     public static string AppxBundledEnginePath
@@ -153,7 +168,7 @@ public sealed class EngineUpdateService
         {
             string architecture = RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
             string appBase = AppContext.BaseDirectory;
-            return Path.Combine(appBase, "Engines", "aria2", $"win-{architecture}", "aria2c.exe");
+            return Path.Combine(appBase, "Engines", "aria2", $"win-{architecture}", "aria2-next.exe");
         }
     }
 

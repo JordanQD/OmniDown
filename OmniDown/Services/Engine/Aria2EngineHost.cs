@@ -70,10 +70,9 @@ public sealed class Aria2EngineHost : IDisposable
         Directory.CreateDirectory(appDataDirectory);
         Directory.CreateDirectory(AppPaths.LogDirectory);
         AppLogger.Configure(options.AdvancedSettings.LogLevel);
-        AppLogger.PrepareLogFile(AppPaths.AppLogPath);
         AppLogger.PrepareLogFile(AppPaths.Aria2LogPath);
         AppLogger.Info("Aria2Engine", $"starting executable={resolvedPath} rpcPort={options.RpcPort} downloadDir={options.DownloadDirectory}");
-        RemoveStaleTasksFromSession(appDataDirectory);
+        RemoveStaleTasksFromSession(appDataDirectory, options.EngineType);
         await CleanupRpcPortAsync(options.RpcPort);
 
         var startInfo = new ProcessStartInfo
@@ -284,7 +283,8 @@ public sealed class Aria2EngineHost : IDisposable
             EngineVariant = firstLine;
             EngineVersion = ParseVersion(firstLine);
 
-            bool isNext = output.Contains("aria2-next", StringComparison.OrdinalIgnoreCase);
+            bool isNext = output.Contains("aria2-next", StringComparison.OrdinalIgnoreCase) ||
+                          output.Contains("Aria2 Next", StringComparison.OrdinalIgnoreCase);
             _isAria2Next = isNext;
             return isNext;
         }
@@ -331,7 +331,7 @@ public sealed class Aria2EngineHost : IDisposable
 
     private static List<string> BuildArguments(Aria2EngineOptions options, string appDataDirectory, string resolvedExecutablePath, bool isAria2Next)
     {
-        string sessionPath = GetSessionPath(appDataDirectory);
+        string sessionPath = GetSessionPath(appDataDirectory, options.EngineType);
         string dhtPath = Path.Combine(appDataDirectory, "dht.dat");
         string dht6Path = Path.Combine(appDataDirectory, "dht6.dat");
 
@@ -661,9 +661,9 @@ public sealed class Aria2EngineHost : IDisposable
         }
     }
 
-    private static void RemoveStaleTasksFromSession(string appDataDirectory)
+    private static void RemoveStaleTasksFromSession(string appDataDirectory, Aria2EngineType engineType)
     {
-        string sessionPath = GetSessionPath(appDataDirectory);
+        string sessionPath = GetSessionPath(appDataDirectory, engineType);
         if (!File.Exists(sessionPath))
         {
             return;
@@ -791,9 +791,15 @@ public sealed class Aria2EngineHost : IDisposable
             : string.Empty;
     }
 
-    private static string GetSessionPath(string appDataDirectory)
+    private static string GetSessionPath(string appDataDirectory, Aria2EngineType engineType)
     {
-        return Path.Combine(appDataDirectory, "download.session");
+        string fileName = engineType switch
+        {
+            Aria2EngineType.Aria2Next => "download.session.next",
+            Aria2EngineType.Custom => "download.session.custom",
+            _ => "download.session"
+        };
+        return Path.Combine(appDataDirectory, fileName);
     }
 
     private sealed record CachedTaskState(
