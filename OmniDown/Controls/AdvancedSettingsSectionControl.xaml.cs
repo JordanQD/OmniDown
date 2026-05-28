@@ -77,6 +77,7 @@ public sealed partial class AdvancedSettingsSectionControl : UserControl
     ];
 
     internal StackPanel AdvancedSettingsContentControl => AdvancedSettingsContent;
+    internal ComboBox EngineTypeComboBoxControl => EngineTypeComboBox;
     internal TextBox AriaPathTextBoxControl => AriaPathTextBox;
     internal TextBlock EngineVersionTextControl => EngineVersionText;
     internal ToggleSwitch EngineAutoUpdateToggleControl => EngineAutoUpdateToggle;
@@ -195,6 +196,19 @@ public sealed partial class AdvancedSettingsSectionControl : UserControl
     private void AdvancedSettingComboBox_SelectionChanged(object sender, SelectionChangedEventArgs args)
     {
         AdvancedSettingChanged?.Invoke(sender, new RoutedEventArgs());
+    }
+
+    private void EngineTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs args)
+    {
+        UpdateAriaPathVisibility();
+        AdvancedSettingChanged?.Invoke(sender, new RoutedEventArgs());
+    }
+
+    internal void UpdateAriaPathVisibility()
+    {
+        bool isCustom = EngineTypeComboBox.SelectedItem is ComboBoxItem item &&
+            item.Tag?.ToString() == "Custom";
+        AriaPathSettingCard.Visibility = isCustom ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void AdvancedSettingToggleSwitch_Toggled(object sender, RoutedEventArgs args)

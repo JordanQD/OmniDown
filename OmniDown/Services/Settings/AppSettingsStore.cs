@@ -63,7 +63,24 @@ internal sealed class AppSettingsStore
 
     public AdvancedSettings ReadAdvancedSettings()
     {
-        return Read(_advancedSettingsPath, AdvancedSettings.Default);
+        AdvancedSettings settings = Read(_advancedSettingsPath, AdvancedSettings.Default);
+        if (settings.EngineType == default(Aria2EngineType) && File.Exists(_advancedSettingsPath))
+        {
+            try
+            {
+                string json = File.ReadAllText(_advancedSettingsPath);
+                if (!json.Contains("\"EngineType\"", StringComparison.OrdinalIgnoreCase))
+                {
+                    settings = settings with { EngineType = Aria2EngineType.Aria2Next };
+                }
+            }
+            catch
+            {
+                // Migration is best-effort; keep deserialized value on error.
+            }
+        }
+
+        return settings;
     }
 
     public void SaveAdvancedSettings(AdvancedSettings settings)

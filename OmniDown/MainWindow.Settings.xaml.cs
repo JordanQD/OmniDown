@@ -116,6 +116,7 @@ namespace OmniDown
         private NumberBox TimeoutNumberBox => SettingsPage.TimeoutNumberBoxControl;
         private ComboBox FileAllocationComboBox => SettingsPage.FileAllocationComboBoxControl;
         private TextBox AriaPathTextBox => SettingsPage.AriaPathTextBoxControl;
+        private ComboBox EngineTypeComboBox => SettingsPage.EngineTypeComboBoxControl;
         private TextBlock EngineVersionText => SettingsPage.EngineVersionTextControl;
         private NumberBox RpcPortNumberBox => SettingsPage.RpcPortNumberBoxControl;
         private PasswordBox RpcSecretPasswordBox => SettingsPage.RpcSecretPasswordBoxControl;
@@ -653,6 +654,7 @@ namespace OmniDown
         {
             AdvancedSettings settings = _settingsPageViewModel.AdvancedSettings;
             AriaPathTextBox.Text = settings.Aria2Path;
+            SetEngineTypeSelection(settings.EngineType);
             RpcPortNumberBox.Value = settings.RpcPort;
             RpcSecretPasswordBox.Password = settings.RpcSecret;
             SetToggleSwitch(ExtensionAutoSubmitToggleSwitch, settings.AutoSubmitFromExtension);
@@ -676,7 +678,7 @@ namespace OmniDown
             UpdateClipboardTypeControls();
         }
 
-        private void AdvancedSetting_Changed(object sender, RoutedEventArgs e)
+        private async void AdvancedSetting_Changed(object sender, RoutedEventArgs e)
         {
             if (_isLoadingAdvancedSettings)
             {
@@ -685,6 +687,12 @@ namespace OmniDown
 
             ShowSettingsSaveTeachingTip();
             UpdateClipboardTypeControls();
+
+            if (ReferenceEquals(sender, EngineTypeComboBox) ||
+                ReferenceEquals(sender, AriaPathTextBox))
+            {
+                await RefreshEngineVersionAsync();
+            }
 
             if (sender is ToggleSwitch toggleSwitch &&
                 toggleSwitch.IsOn &&
@@ -695,6 +703,24 @@ namespace OmniDown
                 _ = Launcher.LaunchUriAsync(new Uri("ms-settings:defaultapps"));
                 ShowMessage("已注册协议入口。若浏览器仍未打开 OmniDown，请在 Windows 默认应用中把该协议设为 OmniDown。", InfoBarSeverity.Informational);
             }
+        }
+
+        private async Task RefreshEngineVersionAsync()
+        {
+            try
+            {
+                await _aria2EngineHost.DetectVersionAsync(
+                    string.IsNullOrWhiteSpace(AriaPathTextBox.Text) ? null : AriaPathTextBox.Text.Trim(),
+                    GetSelectedEngineType());
+            }
+            catch
+            {
+                // Best-effort version detection.
+            }
+
+            EngineVersionText.Text = string.IsNullOrEmpty(_aria2EngineHost.EngineVariant)
+                ? "未检测"
+                : _aria2EngineHost.EngineVariant;
         }
 
         private async void BrowseAriaPathButton_Click(object sender, RoutedEventArgs e)
@@ -818,6 +844,7 @@ namespace OmniDown
         {
             return new AdvancedSettings(
                 AriaPathTextBox.Text.Trim(),
+                GetSelectedEngineType(),
                 GetValidIntNumberBoxValue(RpcPortNumberBox, 1024, 65535, AdvancedSettings.Default.RpcPort),
                 string.IsNullOrWhiteSpace(RpcSecretPasswordBox.Password)
                     ? AdvancedSettings.GenerateSecret()
@@ -1134,6 +1161,7 @@ namespace OmniDown
                 bitTorrent.MaxPeers.ToString(CultureInfo.InvariantCulture),
                 NormalizeTrackerList(bitTorrent.TrackerList),
                 advanced.Aria2Path,
+                advanced.EngineType.ToString(),
                 advanced.RpcPort.ToString(CultureInfo.InvariantCulture),
                 advanced.RpcSecret,
                 advanced.LogLevel
@@ -1156,6 +1184,33 @@ namespace OmniDown
             }
 
             LogLevelComboBox.SelectedIndex = 2;
+        }
+
+        private void SetEngineTypeSelection(Aria2EngineType engineType)
+        {
+            string tag = engineType.ToString();
+            for (int index = 0; index < EngineTypeComboBox.Items.Count; index++)
+            {
+                if (EngineTypeComboBox.Items[index] is ComboBoxItem item &&
+                    item.Tag?.ToString()?.Equals(tag, StringComparison.OrdinalIgnoreCase) == true)
+                {
+                    EngineTypeComboBox.SelectedIndex = index;
+                    SettingsPage.UpdateAriaPathVisibility();
+                    return;
+                }
+            }
+
+            EngineTypeComboBox.SelectedIndex = 1;
+            SettingsPage.UpdateAriaPathVisibility();
+        }
+
+        private Aria2EngineType GetSelectedEngineType()
+        {
+            return EngineTypeComboBox?.SelectedItem is ComboBoxItem item &&
+                item.Tag?.ToString() is string tag &&
+                Enum.TryParse(tag, ignoreCase: true, out Aria2EngineType engineType)
+                ? engineType
+                : Aria2EngineType.Aria2Next;
         }
 
         private string GetSelectedLogLevel()

@@ -4,6 +4,7 @@ using OmniDown.Models.Settings;
 
 public sealed record Aria2EngineOptions(
     string? ExecutablePath,
+    Aria2EngineType EngineType,
     int RpcPort,
     string DownloadDirectory,
     string RpcSecret,

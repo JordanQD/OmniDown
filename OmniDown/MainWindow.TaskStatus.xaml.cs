@@ -84,6 +84,7 @@ namespace OmniDown
 
             Aria2EngineStartResult result = await _aria2EngineHost.StartAsync(new Aria2EngineOptions(
                 string.IsNullOrWhiteSpace(advancedSettings.Aria2Path) ? null : advancedSettings.Aria2Path,
+                advancedSettings.EngineType,
                 rpcPort,
                 downloadSettings.DownloadDirectory,
                 _rpcSecret,

@@ -2,8 +2,16 @@ namespace OmniDown.Models.Settings;
 
 using System.Security.Cryptography;
 
+public enum Aria2EngineType
+{
+    Aria2c,
+    Aria2Next,
+    Custom
+}
+
 public sealed record AdvancedSettings(
     string Aria2Path,
+    Aria2EngineType EngineType,
     int RpcPort,
     string RpcSecret,
     bool AutoSubmitFromExtension,
@@ -22,6 +30,7 @@ public sealed record AdvancedSettings(
 {
     public static AdvancedSettings Default { get; } = new(
         Aria2Path: string.Empty,
+        EngineType: Aria2EngineType.Aria2Next,
         RpcPort: 6800,
         RpcSecret: GenerateSecret(),
         AutoSubmitFromExtension: false,

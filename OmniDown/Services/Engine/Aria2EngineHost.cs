@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using OmniDown.Services.Logging;
 using OmniDown.Services.Rpc;
 using OmniDown.Services.Storage;
+using OmniDown.Models.Settings;
 
 namespace OmniDown.Services.Engine;
 
@@ -31,6 +32,20 @@ public sealed class Aria2EngineHost : IDisposable
 
     public string DiagnosticText { get; private set; } = "No aria2 process has been started.";
 
+    public async Task DetectVersionAsync(string? executablePath, Aria2EngineType engineType)
+    {
+        string resolvedPath = ResolveExecutablePath(executablePath, engineType);
+        if (!string.IsNullOrWhiteSpace(resolvedPath) && File.Exists(resolvedPath))
+        {
+            await DetectEngineAsync(resolvedPath);
+        }
+        else
+        {
+            EngineVariant = string.Empty;
+            EngineVersion = string.Empty;
+        }
+    }
+
     public async Task<Aria2EngineStartResult> StartAsync(Aria2EngineOptions options)
     {
         if (IsRunning)
@@ -41,11 +56,11 @@ public sealed class Aria2EngineHost : IDisposable
                 _process.Id);
         }
 
-        string resolvedPath = ResolveExecutablePath(options.ExecutablePath);
+        string resolvedPath = ResolveExecutablePath(options.ExecutablePath, options.EngineType);
         if (string.IsNullOrWhiteSpace(resolvedPath))
         {
             return Aria2EngineStartResult.Failure(
-                "aria2c.exe was not found. Set a path in Settings, add aria2c to PATH, or place it under Engines\\aria2.");
+                "aria2 executable was not found. Set a path in Settings, add aria2c to PATH, or place it under Engines\\aria2.");
         }
 
         _isAria2Next = await DetectEngineAsync(resolvedPath);
@@ -211,14 +226,20 @@ public sealed class Aria2EngineHost : IDisposable
         _process?.Dispose();
     }
 
-    private static string ResolveExecutablePath(string? executablePath)
+    private static string ResolveExecutablePath(string? executablePath, Aria2EngineType engineType)
     {
         if (!string.IsNullOrWhiteSpace(executablePath) && File.Exists(executablePath))
         {
             return executablePath;
         }
 
-        foreach (string candidate in GetBundledCandidates())
+        string exeName = engineType switch
+        {
+            Aria2EngineType.Aria2Next => "aria2-next.exe",
+            _ => "aria2c.exe"
+        };
+
+        foreach (string candidate in GetBundledCandidates(exeName))
         {
             if (File.Exists(candidate))
             {
@@ -229,7 +250,7 @@ public sealed class Aria2EngineHost : IDisposable
         string pathValue = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
         foreach (string path in pathValue.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries))
         {
-            string candidate = Path.Combine(path.Trim(), "aria2c.exe");
+            string candidate = Path.Combine(path.Trim(), exeName);
             if (File.Exists(candidate))
             {
                 return candidate;
@@ -283,7 +304,7 @@ public sealed class Aria2EngineHost : IDisposable
         return idx >= 0 ? firstLine[(idx + 8)..].Trim() : string.Empty;
     }
 
-    private static string[] GetBundledCandidates()
+    private static string[] GetBundledCandidates(string exeName)
     {
         string architecture = RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
         string appBase = AppContext.BaseDirectory;
@@ -294,17 +315,17 @@ public sealed class Aria2EngineHost : IDisposable
         return
         [
             // 1. LocalData (writable copy, used for updates)
-            Path.Combine(AppPaths.LocalDataDirectory, "Engines", "aria2", $"win-{architecture}", "aria2c.exe"),
-            Path.Combine(AppPaths.LocalDataDirectory, "Engines", "aria2", "aria2c.exe"),
+            Path.Combine(AppPaths.LocalDataDirectory, "Engines", "aria2", $"win-{architecture}", exeName),
+            Path.Combine(AppPaths.LocalDataDirectory, "Engines", "aria2", exeName),
             // 2. AppX / installation directory (read-only, fallback)
-            Path.Combine(appBase, "Engines", "aria2", $"win-{architecture}", "aria2c.exe"),
-            Path.Combine(appBase, "Engines", "aria2", "aria2c.exe"),
-            Path.Combine(executableDirectory, "Engines", "aria2", $"win-{architecture}", "aria2c.exe"),
-            Path.Combine(executableDirectory, "Engines", "aria2", "aria2c.exe"),
-            Path.Combine(appBaseParent ?? appBase, "Engines", "aria2", $"win-{architecture}", "aria2c.exe"),
-            Path.Combine(appBaseParent ?? appBase, "Engines", "aria2", "aria2c.exe"),
-            Path.Combine(executableDirectoryParent ?? executableDirectory, "Engines", "aria2", $"win-{architecture}", "aria2c.exe"),
-            Path.Combine(executableDirectoryParent ?? executableDirectory, "Engines", "aria2", "aria2c.exe")
+            Path.Combine(appBase, "Engines", "aria2", $"win-{architecture}", exeName),
+            Path.Combine(appBase, "Engines", "aria2", exeName),
+            Path.Combine(executableDirectory, "Engines", "aria2", $"win-{architecture}", exeName),
+            Path.Combine(executableDirectory, "Engines", "aria2", exeName),
+            Path.Combine(appBaseParent ?? appBase, "Engines", "aria2", $"win-{architecture}", exeName),
+            Path.Combine(appBaseParent ?? appBase, "Engines", "aria2", exeName),
+            Path.Combine(executableDirectoryParent ?? executableDirectory, "Engines", "aria2", $"win-{architecture}", exeName),
+            Path.Combine(executableDirectoryParent ?? executableDirectory, "Engines", "aria2", exeName)
         ];
     }
 
@@ -313,6 +334,13 @@ public sealed class Aria2EngineHost : IDisposable
         string sessionPath = GetSessionPath(appDataDirectory);
         string dhtPath = Path.Combine(appDataDirectory, "dht.dat");
         string dht6Path = Path.Combine(appDataDirectory, "dht6.dat");
+
+        string configFileName = options.EngineType switch
+        {
+            Aria2EngineType.Aria2Next => "aria2-next.conf",
+            Aria2EngineType.Custom => "aria2-custom.conf",
+            _ => "aria2.conf"
+        };
 
         List<string> arguments =
         [
@@ -344,7 +372,7 @@ public sealed class Aria2EngineHost : IDisposable
             arguments.Add($"--dht-file-path6={dht6Path}");
         }
 
-        string? confPath = ResolveBundledConfigPath(resolvedExecutablePath);
+        string? confPath = ResolveBundledConfigPath(resolvedExecutablePath, configFileName);
         if (!string.IsNullOrWhiteSpace(confPath))
         {
             arguments.Insert(0, $"--conf-path={confPath}");
@@ -518,7 +546,7 @@ public sealed class Aria2EngineHost : IDisposable
         return value ? "true" : "false";
     }
 
-    private static string? ResolveBundledConfigPath(string resolvedExecutablePath)
+    private static string? ResolveBundledConfigPath(string resolvedExecutablePath, string configFileName)
     {
         string? executableDirectory = Path.GetDirectoryName(resolvedExecutablePath);
         string appBase = AppContext.BaseDirectory;
@@ -528,12 +556,12 @@ public sealed class Aria2EngineHost : IDisposable
 
         string[] candidates =
         [
-            Path.Combine(executableDirectory ?? appBase, "..", "aria2.conf"),
-            Path.Combine(executableDirectory ?? appBase, "aria2.conf"),
-            Path.Combine(appBase, "Engines", "aria2", "aria2.conf"),
-            Path.Combine(assemblyDirectory, "Engines", "aria2", "aria2.conf"),
-            Path.Combine(appBaseParent ?? appBase, "Engines", "aria2", "aria2.conf"),
-            Path.Combine(assemblyDirectoryParent ?? assemblyDirectory, "Engines", "aria2", "aria2.conf")
+            Path.Combine(executableDirectory ?? appBase, "..", configFileName),
+            Path.Combine(executableDirectory ?? appBase, configFileName),
+            Path.Combine(appBase, "Engines", "aria2", configFileName),
+            Path.Combine(assemblyDirectory, "Engines", "aria2", configFileName),
+            Path.Combine(appBaseParent ?? appBase, "Engines", "aria2", configFileName),
+            Path.Combine(assemblyDirectoryParent ?? assemblyDirectory, "Engines", "aria2", configFileName)
         ];
 
         foreach (string candidate in candidates)

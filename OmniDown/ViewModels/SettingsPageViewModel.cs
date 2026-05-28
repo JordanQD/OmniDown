@@ -175,6 +175,10 @@ internal sealed class SettingsPageViewModel
             logLevel = AdvancedSettings.Default.LogLevel;
         }
 
+        Aria2EngineType engineType = settings.EngineType is Aria2EngineType.Aria2c or Aria2EngineType.Aria2Next or Aria2EngineType.Custom
+            ? settings.EngineType
+            : AdvancedSettings.Default.EngineType;
+
         return settings with
         {
             RpcPort = Math.Clamp(settings.RpcPort, 1024, 65535),
@@ -186,7 +190,8 @@ internal sealed class SettingsPageViewModel
                 ? AdvancedSettings.GenerateSecret()
                 : settings.ExtensionApiSecret.Trim(),
             LogLevel = logLevel,
-            Aria2Path = settings.Aria2Path?.Trim() ?? string.Empty
+            Aria2Path = settings.Aria2Path?.Trim() ?? string.Empty,
+            EngineType = engineType
         };
     }
 }

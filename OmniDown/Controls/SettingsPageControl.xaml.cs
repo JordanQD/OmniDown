@@ -239,6 +239,7 @@ public sealed partial class SettingsPageControl : UserControl
     internal ComboBox FileAllocationComboBoxControl => NetworkSettingsContent.FileAllocationComboBoxControl;
 
     // Advanced section controls
+    internal ComboBox EngineTypeComboBoxControl => AdvancedSettingsContent.EngineTypeComboBoxControl;
     internal TextBox AriaPathTextBoxControl => AdvancedSettingsContent.AriaPathTextBoxControl;
     internal TextBlock EngineVersionTextControl => AdvancedSettingsContent.EngineVersionTextControl;
     internal ToggleSwitch EngineAutoUpdateToggleControl => AdvancedSettingsContent.EngineAutoUpdateToggleControl;
@@ -372,5 +373,10 @@ public sealed partial class SettingsPageControl : UserControl
     internal void ResetToHome()
     {
         NavigateTo("Home");
+    }
+
+    internal void UpdateAriaPathVisibility()
+    {
+        AdvancedSettingsContent.UpdateAriaPathVisibility();
     }
 }

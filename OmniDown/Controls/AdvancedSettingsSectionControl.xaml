@@ -34,6 +34,21 @@
             </controls:SettingsExpander.Content>
             <controls:SettingsExpander.Items>
                 <controls:SettingsCard
+                    x:Uid="EngineTypeSettingCard"
+                    Header="引擎类型">
+                    <ComboBox
+                        x:Name="EngineTypeComboBox"
+                        Width="180"
+                        Height="32"
+                        HorizontalAlignment="Right"
+                        SelectionChanged="EngineTypeComboBox_SelectionChanged">
+                        <ComboBoxItem x:Uid="EngineTypeAria2cItem" Content="aria2c" Tag="Aria2c" />
+                        <ComboBoxItem x:Uid="EngineTypeAria2NextItem" Content="aria2-next" Tag="Aria2Next" />
+                        <ComboBoxItem x:Uid="EngineTypeCustomItem" Content="自定义路径" Tag="Custom" />
+                    </ComboBox>
+                </controls:SettingsCard>
+                <controls:SettingsCard
+                    x:Name="AriaPathSettingCard"
                     x:Uid="AriaPathSettingCard"
                     Header="可执行文件路径">
                     <controls:SettingsCard.Description>
