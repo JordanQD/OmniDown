@@ -512,6 +512,13 @@ namespace OmniDown
                     _visibleTasks.Insert(desiredIndex, desiredTask);
                 }
             }
+
+            // 同步 ViewModel 数据
+            _downloadsViewModel.AllTasks.Clear();
+            foreach (var task in Tasks) _downloadsViewModel.AllTasks.Add(task);
+            _downloadsViewModel.CurrentFilter = _currentTaskFilter;
+            _downloadsViewModel.SortColumn = _sortColumn;
+            _downloadsViewModel.SortAscending = _sortAscending;
         }
 
         private void UpdateSelectAllCheckBox()

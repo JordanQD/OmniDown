@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using OmniDown.Models;
+using OmniDown.Pages;
 using OmniDown.Services.Engine;
 using OmniDown.Services.Localization;
 using OmniDown.Services.Logging;
@@ -241,7 +242,6 @@ namespace OmniDown
 
         private void SettingsNavItem_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            SettingsPage.NavigateTo("Home");
             NavigateTo("Settings");
             e.Handled = true;
         }
@@ -261,24 +261,36 @@ namespace OmniDown
             }
 
             _currentTaskFilter = tag;
-            TasksHeaderPanel.Visibility = isSettings ? Visibility.Collapsed : Visibility.Visible;
-            SettingsPage.Visibility = isSettings ? Visibility.Visible : Visibility.Collapsed;
-            TasksPageSurface.Visibility = isSettings ? Visibility.Collapsed : Visibility.Visible;
-            TasksPage.Visibility = isSettings ? Visibility.Collapsed : Visibility.Visible;
+
             if (isSettings)
             {
+                if (_appSettingsPage == null)
+                {
+                    _appSettingsPage = new AppSettingsPage();
+                    HookSettingsPageEvents();
+                }
+
+                ContentFrame.Content = _appSettingsPage;
+                _appSettingsPage.SettingsPageControl.NavigateTo("Home");
                 RootNavigation.SelectedItem = SettingsNavItem;
-                UpdateTaskDetailsPaneVisibility();
                 ClearTitleSearchBox();
                 UpdateSearchPlaceholder();
                 UpdateStatusBar();
-                ShowSettingsPage();
                 UpdateTitleBarBackButton();
                 return;
             }
 
+            if (_downloadsPage == null)
+            {
+                _downloadsPage = new DownloadsPage();
+                WireMainPageEvents();
+                _downloadsPage.TasksListView.ItemsSource = _visibleTasks;
+                _downloadsPage.NotificationHistoryListView.ItemsSource = _statusMessages;
+            }
+
+            ContentFrame.Content = _downloadsPage;
+
             UpdateTitleBarBackButton();
-            UpdateTaskDetailsPaneVisibility();
             UpdateSearchPlaceholder();
             UpdateDownloadsHeader(tag);
             UpdateStatsVisibility(tag);

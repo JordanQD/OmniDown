@@ -289,6 +289,8 @@ namespace OmniDown
             _currentGlobalDownloadSpeed = Math.Max(downloadSpeed, 0);
             _currentGlobalUploadSpeed = Math.Max(uploadSpeed, 0);
 
+            _downloadsViewModel.SetGlobalSpeeds(downloadSpeed, uploadSpeed);
+
             if (GlobalDownloadSpeedText is not null)
             {
                 GlobalDownloadSpeedText.Text = FormatSpeed(downloadSpeed);
@@ -610,6 +612,10 @@ namespace OmniDown
 
         private void UpdateGlobalSpeedLimitText()
         {
+            _downloadsViewModel.UpdateSpeedLimits(
+                _isDownloadSpeedLimitEnabled, _isUploadSpeedLimitEnabled,
+                _downloadLimitBytesPerSecond, _uploadLimitBytesPerSecond);
+
             bool showUploadLimit = _isUploadSpeedLimitEnabled && _uploadLimitBytesPerSecond > 0;
             if (GlobalUploadLimitIconPanel is not null)
             {
@@ -960,6 +966,7 @@ namespace OmniDown
 
         private void SetTaskListLoading(bool isLoading)
         {
+            _downloadsViewModel.IsLoading = isLoading;
             if (TasksLoadingPanel is null || TasksLoadingRing is null)
             {
                 return;

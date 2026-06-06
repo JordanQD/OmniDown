@@ -13,6 +13,7 @@ using OmniDown.Services.Settings;
 using OmniDown.Services.Shell;
 using OmniDown.Services.Storage;
 using OmniDown.Services.Widgets;
+using OmniDown.Pages;
 using OmniDown.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -48,6 +49,7 @@ namespace OmniDown
         private readonly DispatcherTimer _refreshTimer = new();
         private readonly DispatcherTimer _statusMessageTimer = new();
         private string _rpcSecret = AdvancedSettings.Default.RpcSecret;
+        private readonly DownloadsPageViewModel _downloadsViewModel = new();
         private readonly ObservableCollection<DownloadTask> _visibleTasks = new();
         private readonly ObservableCollection<AppStatusMessage> _statusMessages = new();
         private readonly AutoStartService _autoStartService = new();
@@ -93,6 +95,8 @@ namespace OmniDown
         private string _lastClipboardDownloadText = string.Empty;
         private readonly Dictionary<string, bool> _observedTaskDownloadCompletions = new(StringComparer.OrdinalIgnoreCase);
         private readonly WidgetSnapshotStore _widgetSnapshotStore = new();
+        private DownloadsPage? _downloadsPage;
+        private AppSettingsPage? _appSettingsPage;
 
         public ObservableCollection<DownloadTask> Tasks { get; } = new();
 
@@ -107,10 +111,19 @@ namespace OmniDown
                 GetBrowserExtensionVersion);
             _settingsPageViewModel = new SettingsPageViewModel(_settingsStore);
             InitializeComponent();
+            _appSettingsPage = new AppSettingsPage();
+            ContentFrame.Navigate(typeof(DownloadsPage));
+            _downloadsPage = ContentFrame.Content as DownloadsPage;
+            if (_downloadsPage != null)
+            {
+                WireMainPageEvents();
+            }
+
             WinUIGallery.App.MainWindow.NavigationView = RootNavigation;
             HookSettingsPageEvents();
-            TasksListView.ItemsSource = _visibleTasks;
-            NotificationHistoryListView.ItemsSource = _statusMessages;
+            _downloadsViewModel.AllTasks.Clear();
+            _downloadsPage!.TasksListView.ItemsSource = _visibleTasks;
+            _downloadsPage!.NotificationHistoryListView.ItemsSource = _statusMessages;
             SetTaskListLoading(true);
             _windowHandle = WindowNative.GetWindowHandle(this);
             SetWindowIcon();
@@ -295,6 +308,45 @@ namespace OmniDown
             {
                 return string.Empty;
             }
+        }
+
+        private void WireMainPageEvents()
+        {
+            if (_downloadsPage == null) return;
+
+            _downloadsPage.NewDownloadButtonClick += NewDownloadButton_Click;
+            _downloadsPage.ResumeTasksButtonClick += ResumeTasksButton_Click;
+            _downloadsPage.PauseTasksButtonClick += PauseTasksButton_Click;
+            _downloadsPage.RecoverTasksButtonClick += RecoverTasksButton_Click;
+            _downloadsPage.DeleteTasksButtonClick += DeleteTasksButton_Click;
+            _downloadsPage.OpenSelectedTaskFileButtonClick += OpenSelectedTaskFileButton_Click;
+            _downloadsPage.OpenSelectedTaskFolderButtonClick += OpenSelectedTaskFolderButton_Click;
+            _downloadsPage.CopySelectedTaskLinksButtonClick += CopySelectedTaskLinksButton_Click;
+            _downloadsPage.ClearCompletedTasksButtonClick += ClearCompletedTasksButton_Click;
+            _downloadsPage.TaskDetailsButtonClick += TaskDetailsButton_Click;
+            _downloadsPage.StatusBarSpeedButtonClick += StatusBarSpeedButton_Click;
+            _downloadsPage.ApplySpeedLimitButtonClick += ApplySpeedLimitButton_Click;
+            _downloadsPage.SortColumnMenuItemClick += SortColumnMenuItem_Click;
+            _downloadsPage.SortDirectionMenuItemClick += SortDirectionMenuItem_Click;
+            _downloadsPage.StatusToastActionButtonClick += StatusToastActionButton_Click;
+            _downloadsPage.UploadLimitToggleSwitchToggled += UploadLimitToggleSwitch_Toggled;
+            _downloadsPage.DownloadLimitToggleSwitchToggled += DownloadLimitToggleSwitch_Toggled;
+            _downloadsPage.SelectAllTasksCheckBoxChecked += SelectAllTasksCheckBox_Checked;
+            _downloadsPage.SelectAllTasksCheckBoxUnchecked += SelectAllTasksCheckBox_Unchecked;
+            _downloadsPage.SelectAllTasksCheckBoxIndeterminate += SelectAllTasksCheckBox_Indeterminate;
+            _downloadsPage.TaskCheckBoxChanged += TaskCheckBox_Changed;
+            _downloadsPage.TaskItemLoaded += TaskItem_Loaded;
+            _downloadsPage.TasksListViewPointerPressed += TasksListView_PointerPressed;
+            _downloadsPage.TaskIconSelectionBoxPointerEntered += TaskIconSelectionBox_PointerEntered;
+            _downloadsPage.TaskIconSelectionBoxPointerExited += TaskIconSelectionBox_PointerExited;
+            _downloadsPage.TasksListViewRightTapped += TasksListView_RightTapped;
+            _downloadsPage.TasksListViewSelectionChanged += TasksListView_SelectionChanged;
+            _downloadsPage.SortMenuFlyoutOpening += SortMenuFlyout_Opening;
+            _downloadsPage.StatusToastInfoBarClosed += StatusToastInfoBar_Closed;
+            _downloadsPage.SettingsSaveTeachingTipActionButtonClick += SettingsSaveTeachingTip_ActionButtonClick;
+            _downloadsPage.SettingsSaveTeachingTipCloseButtonClick += SettingsSaveTeachingTip_CloseButtonClick;
+            _downloadsPage.AriaRestartTeachingTipActionButtonClick += AriaRestartTeachingTip_ActionButtonClick;
+            _downloadsPage.AriaRestartTeachingTipCloseButtonClick += AriaRestartTeachingTip_CloseButtonClick;
         }
     }
 }

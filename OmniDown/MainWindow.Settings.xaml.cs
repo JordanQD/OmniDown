@@ -27,7 +27,6 @@ namespace OmniDown
 {
     public sealed partial class MainWindow
     {
-        private ScrollViewer SettingsContentScrollViewer => SettingsPage.SettingsContentScrollViewerControl;
         private FrameworkElement GeneralSettingsContent => SettingsPage.GeneralSettingsContentControl;
         private FrameworkElement DownloadSettingsContent => SettingsPage.DownloadSettingsContentControl;
         private FrameworkElement BitTorrentSettingsContent => SettingsPage.BitTorrentSettingsContentControl;
