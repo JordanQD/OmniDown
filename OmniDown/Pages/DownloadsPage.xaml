@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:OmniDown.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:OmniDown.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
@@ -60,7 +61,7 @@
             <StackPanel
                 Spacing="4"
                 Visibility="Collapsed">
-                <TextBlock
+                <TextBlock 
                     x:Name="_downloadsTitleText"
                     FontSize="28"
                     FontWeight="SemiBold"
@@ -145,7 +146,7 @@
                                 <FontIcon
                                     FontSize="18"
                                     Glyph="&#xE8CB;" />
-                                <TextBlock
+                                <TextBlock 
                                     FontSize="15"
                                     x:Uid="SortTasksButtonLabel"
                                     Text="Sort" />
@@ -281,84 +282,86 @@
             Grid.Row="0"
             Margin="0,20,0,14"
             ColumnDefinitions="*,*,*,*,*,Auto"
-            Visibility="Collapsed">
+            Visibility="{x:Bind local:DownloadsPage.BoolToVisibility(ViewModel.IsStatsPanelVisible), Mode=OneWay}">
             <StackPanel
                 x:Name="_totalMetricPanel"
                 Margin="0,8,0,0"
                 Spacing="4">
-                <TextBlock
+                <TextBlock 
                     x:Name="_totalMetricLabelText"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     x:Uid="TotalMetricLabel"
                     Text="Total" />
-                <TextBlock
+                <TextBlock 
                     x:Name="_totalTasksText"
                     FontSize="24"
                     FontWeight="SemiBold"
-                    Text="0" />
+                    Text="{x:Bind ViewModel.TotalTasksText, Mode=OneWay}" />
             </StackPanel>
             <StackPanel
                 x:Name="_activeMetricPanel"
                 Grid.Column="1"
                 Margin="0,8,0,0"
                 Spacing="4">
-                <TextBlock
+                <TextBlock 
                     x:Name="_activeMetricLabelText"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     x:Uid="ActiveMetricLabel"
                     Text="Downloading" />
-                <TextBlock
+                <TextBlock 
                     x:Name="_activeTasksText"
                     FontSize="24"
                     FontWeight="SemiBold"
-                    Text="0" />
+                    Text="{x:Bind ViewModel.ActiveTasksText, Mode=OneWay}" />
             </StackPanel>
             <StackPanel
                 x:Name="_pausedMetricPanel"
                 Grid.Column="2"
                 Margin="0,8,0,0"
                 Spacing="4">
-                <TextBlock
+                <TextBlock 
                     x:Name="_pausedMetricLabelText"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     Text="Paused" />
-                <TextBlock
+                <TextBlock 
                     x:Name="_pausedTasksText"
                     FontSize="24"
                     FontWeight="SemiBold"
-                    Text="0" />
+                    Text="{x:Bind ViewModel.PausedTasksText, Mode=OneWay}" />
             </StackPanel>
             <StackPanel
                 x:Name="_completedMetricPanel"
                 Grid.Column="3"
                 Margin="0,8,0,0"
-                Spacing="4">
-                <TextBlock
+                Spacing="4"
+                Visibility="{x:Bind local:DownloadsPage.BoolToVisibility(ViewModel.IsCompletedMetricVisible), Mode=OneWay}">
+                <TextBlock 
                     x:Name="_completedMetricLabelText"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     x:Uid="DownloadSpeedMetricLabel"
                     Text="Completed" />
-                <TextBlock
+                <TextBlock 
                     x:Name="_completedTasksText"
                     FontSize="24"
                     FontWeight="SemiBold"
-                    Text="0" />
+                    Text="{x:Bind ViewModel.CompletedTasksText, Mode=OneWay}" />
             </StackPanel>
             <StackPanel
                 x:Name="_issueMetricPanel"
                 Grid.Column="4"
                 Margin="0,8,0,0"
-                Spacing="4">
-                <TextBlock
+                Spacing="4"
+                Visibility="{x:Bind local:DownloadsPage.BoolToVisibility(ViewModel.IsIssueMetricVisible), Mode=OneWay}">
+                <TextBlock 
                     x:Name="_issueMetricLabelText"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     x:Uid="Aria2MetricLabel"
                     Text="Issues" />
-                <TextBlock
+                <TextBlock 
                     x:Name="_issueTasksText"
                     FontSize="24"
                     FontWeight="SemiBold"
-                    Text="0" />
+                    Text="{x:Bind ViewModel.IssueTasksText, Mode=OneWay}" />
             </StackPanel>
             <DropDownButton
                 x:Name="_speedLimitButton"
@@ -379,7 +382,7 @@
                         Width="264"
                         RowDefinitions="Auto,Auto,16"
                         RowSpacing="4">
-                        <TextBlock
+                        <TextBlock 
                             HorizontalAlignment="Left"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                             x:Uid="RealtimeSpeedLabel"
@@ -399,14 +402,14 @@
                                         FontSize="16"
                                         Glyph="&#xE74A;" />
                                 </Grid>
-                                <TextBlock
+                                <TextBlock 
                                     x:Name="_globalUploadSpeedText"
                                     Grid.Column="1"
                                     Width="96"
                                     FontSize="18"
                                     FontWeight="SemiBold"
                                     TextTrimming="CharacterEllipsis"
-                                    Text="0 B/s" />
+                                    Text="{x:Bind ViewModel.GlobalUploadSpeedText, Mode=OneWay}" />
                             </Grid>
                             <Grid
                                 ColumnDefinitions="22,96">
@@ -418,14 +421,14 @@
                                         FontSize="16"
                                         Glyph="&#xE74B;" />
                                 </Grid>
-                                <TextBlock
+                                <TextBlock 
                                     x:Name="_globalDownloadSpeedText"
                                     Grid.Column="1"
                                     Width="96"
                                     FontSize="18"
                                     FontWeight="SemiBold"
                                     TextTrimming="CharacterEllipsis"
-                                    Text="0 B/s" />
+                                    Text="{x:Bind ViewModel.GlobalDownloadSpeedText, Mode=OneWay}" />
                             </Grid>
                         </StackPanel>
                         <StackPanel
@@ -439,7 +442,7 @@
                                     x:Name="_globalUploadLimitIconPanel"
                                     Width="22"
                                     HorizontalAlignment="Center"
-                                    Opacity="0">
+                                    Opacity="{x:Bind local:DownloadsPage.BoolToOpacity(ViewModel.IsGlobalUploadLimitIconVisible), Mode=OneWay}">
                                     <Grid
                                         Width="22"
                                         HorizontalAlignment="Center">
@@ -450,14 +453,14 @@
                                             Glyph="&#xE72E;" />
                                     </Grid>
                                 </Grid>
-                                <TextBlock
+                                <TextBlock 
                                     x:Name="_globalUploadLimitText"
                                     Grid.Column="1"
                                     Width="96"
                                     FontSize="12"
                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Opacity="0"
-                                    Text="0 B/s"
+                                    Opacity="{x:Bind local:DownloadsPage.BoolToOpacity(ViewModel.IsGlobalUploadLimitIconVisible), Mode=OneWay}"
+                                    Text="{x:Bind ViewModel.GlobalUploadLimitText, Mode=OneWay}"
                                     TextTrimming="CharacterEllipsis" />
                             </Grid>
                             <Grid
@@ -466,7 +469,7 @@
                                     x:Name="_globalDownloadLimitIconPanel"
                                     Width="22"
                                     HorizontalAlignment="Center"
-                                    Opacity="0">
+                                    Opacity="{x:Bind local:DownloadsPage.BoolToOpacity(ViewModel.IsGlobalDownloadLimitIconVisible), Mode=OneWay}">
                                     <Grid
                                         Width="22"
                                         HorizontalAlignment="Center">
@@ -477,14 +480,14 @@
                                             Glyph="&#xE72E;" />
                                     </Grid>
                                 </Grid>
-                                <TextBlock
+                                <TextBlock 
                                     x:Name="_globalDownloadLimitText"
                                     Grid.Column="1"
                                     Width="96"
                                     FontSize="12"
                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Opacity="0"
-                                    Text="0 B/s"
+                                    Opacity="{x:Bind local:DownloadsPage.BoolToOpacity(ViewModel.IsGlobalDownloadLimitIconVisible), Mode=OneWay}"
+                                    Text="{x:Bind ViewModel.GlobalDownloadLimitText, Mode=OneWay}"
                                     TextTrimming="CharacterEllipsis" />
                             </Grid>
                         </StackPanel>
@@ -500,7 +503,7 @@
                                     Width="280"
                                     ColumnDefinitions="*,92"
                                     ColumnSpacing="8">
-                                    <TextBlock
+                                    <TextBlock 
                                         VerticalAlignment="Center"
                                         x:Uid="UploadLimitLabel"
                                         Text="Upload limit" />
@@ -541,7 +544,7 @@
                                     Width="280"
                                     ColumnDefinitions="*,92"
                                     ColumnSpacing="8">
-                                    <TextBlock
+                                    <TextBlock 
                                         VerticalAlignment="Center"
                                         x:Uid="DownloadLimitLabel"
                                         Text="Download limit" />
@@ -610,35 +613,35 @@
                     Indeterminate="SelectAllTasksCheckBox_Indeterminate"
                     IsThreeState="True"
                     Unchecked="SelectAllTasksCheckBox_Unchecked" />
-                <TextBlock
+                <TextBlock 
                     Grid.Column="1"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Center"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     x:Uid="NameColumnHeader"
                     Text="Name" />
-                <TextBlock
+                <TextBlock 
                     Grid.Column="2"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Center"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     x:Uid="StatusColumnHeader"
                     Text="Status" />
-                <TextBlock
+                <TextBlock 
                     Grid.Column="3"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Center"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     x:Uid="ProgressColumnHeader"
                     Text="Progress" />
-                <TextBlock
+                <TextBlock 
                     Grid.Column="4"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Center"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     x:Uid="RemainingTimeColumnHeader"
                     Text="Remaining" />
-                <TextBlock
+                <TextBlock 
                     Grid.Column="5"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Center"
@@ -735,14 +738,14 @@
                                                 Opacity="{Binding SelectionCheckboxOpacity}"
                                                 Unchecked="TaskCheckBox_Changed" />
                                         </Grid>
-                                        <TextBlock
+                                        <TextBlock 
                                             Grid.Column="1"
                                             VerticalAlignment="Center"
                                             FontWeight="SemiBold"
                                             Foreground="{Binding NameBrush}"
                                             Text="{Binding Name}"
                                             TextTrimming="CharacterEllipsis" />
-                                        <TextBlock
+                                        <TextBlock 
                                             Grid.Column="2"
                                             VerticalAlignment="Center"
                                             Foreground="{Binding StatusBrush}"
@@ -752,24 +755,24 @@
                                             Grid.Column="3"
                                             VerticalAlignment="Center"
                                             Spacing="1">
-                                            <TextBlock
+                                            <TextBlock 
                                                 FontWeight="SemiBold"
                                                 Foreground="{Binding ProgressBrush}"
                                                 Text="{Binding ProgressText}"
                                                 TextAlignment="Left" />
-                                            <TextBlock
+                                            <TextBlock 
                                                 FontSize="12"
                                                 Foreground="{ThemeResource TextFillColorTertiaryBrush}"
                                                 Text="{Binding TransferredSizeText}"
                                                 TextTrimming="CharacterEllipsis" />
                                         </StackPanel>
-                                        <TextBlock
+                                        <TextBlock 
                                             Grid.Column="4"
                                             VerticalAlignment="Center"
                                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                             Text="{Binding RemainingTimeText}"
                                             TextTrimming="CharacterEllipsis" />
-                                        <TextBlock
+                                        <TextBlock 
                                             Grid.Column="5"
                                             VerticalAlignment="Center"
                                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -789,7 +792,7 @@
                                                     FontSize="12"
                                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                     Glyph="&#xE74A;" />
-                                                <TextBlock
+                                                <TextBlock 
                                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                     Text="{Binding UploadSpeedText}"
                                                     TextTrimming="CharacterEllipsis" />
@@ -802,7 +805,7 @@
                                                     FontSize="12"
                                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                     Glyph="&#xE74B;" />
-                                                <TextBlock
+                                                <TextBlock 
                                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                     Text="{Binding DownloadSpeedText}"
                                                     TextTrimming="CharacterEllipsis" />
@@ -888,22 +891,22 @@
                     VerticalAlignment="Center"
                     Orientation="Horizontal"
                     Spacing="12">
-                    <TextBlock
+                    <TextBlock 
                         x:Name="_statusBarItemCountText"
                         VerticalAlignment="Center"
-                        Text="0 个项目" />
+                        Text="{x:Bind ViewModel.StatusBarItemCountText, Mode=OneWay}" />
                     <Rectangle
                         x:Name="_statusBarSelectedCountDivider"
                         Width="1"
                         Height="18"
                         VerticalAlignment="Center"
                         Fill="{ThemeResource DividerStrokeColorDefaultBrush}"
-                        Visibility="Collapsed" />
-                    <TextBlock
+                        Visibility="{x:Bind local:DownloadsPage.BoolToVisibility(ViewModel.IsStatusBarSelectedCountVisible), Mode=OneWay}" />
+                    <TextBlock 
                         x:Name="_statusBarSelectedCountText"
                         VerticalAlignment="Center"
-                        Text="已选择 0 个项目"
-                        Visibility="Collapsed" />
+                        Text="{x:Bind ViewModel.StatusBarSelectedCountText, Mode=OneWay}"
+                        Visibility="{x:Bind local:DownloadsPage.BoolToVisibility(ViewModel.IsStatusBarSelectedCountVisible), Mode=OneWay}" />
                 </StackPanel>
                 <Rectangle
                     x:Name="_statusBarTaskCountsDivider"
@@ -912,25 +915,25 @@
                     Height="18"
                     VerticalAlignment="Center"
                     Fill="{ThemeResource DividerStrokeColorDefaultBrush}"
-                    Visibility="Collapsed" />
+                    Visibility="{x:Bind local:DownloadsPage.BoolToVisibility(ViewModel.IsStatusBarTaskCountsPanelVisible), Mode=OneWay}" />
                 <StackPanel
                     x:Name="_statusBarTaskCountsPanel"
                     Grid.Column="2"
                     VerticalAlignment="Center"
                     Orientation="Horizontal"
                     Spacing="12"
-                    Visibility="Collapsed">
+                    Visibility="{x:Bind local:DownloadsPage.BoolToVisibility(ViewModel.IsStatusBarTaskCountsPanelVisible), Mode=OneWay}">
                     <Grid ColumnDefinitions="16,Auto" ColumnSpacing="4">
                         <FontIcon
                             Width="16"
                             VerticalAlignment="Center"
                             FontSize="13"
                             Glyph="&#xE768;" />
-                        <TextBlock
+                        <TextBlock 
                             x:Name="_statusBarActiveTasksText"
                             Grid.Column="1"
                             VerticalAlignment="Center"
-                            Text="0" />
+                            Text="{x:Bind ViewModel.StatusBarActiveTasksText, Mode=OneWay}" />
                     </Grid>
                     <Grid ColumnDefinitions="16,Auto" ColumnSpacing="4">
                         <FontIcon
@@ -938,27 +941,27 @@
                             VerticalAlignment="Center"
                             FontSize="13"
                             Glyph="&#xE769;" />
-                        <TextBlock
+                        <TextBlock 
                             x:Name="_statusBarPausedTasksText"
                             Grid.Column="1"
                             VerticalAlignment="Center"
-                            Text="0" />
+                            Text="{x:Bind ViewModel.StatusBarPausedTasksText, Mode=OneWay}" />
                     </Grid>
                     <Grid
                         x:Name="_statusBarIssueTasksPanel"
                         ColumnDefinitions="16,Auto"
                         ColumnSpacing="4"
-                        Visibility="Collapsed">
+                        Visibility="{x:Bind local:DownloadsPage.BoolToVisibility(ViewModel.IsStatusBarIssueTasksPanelVisible), Mode=OneWay}">
                         <FontIcon
                             Width="16"
                             VerticalAlignment="Center"
                             FontSize="13"
                             Glyph="&#xE7BA;" />
-                        <TextBlock
+                        <TextBlock 
                             x:Name="_statusBarIssueTasksText"
                             Grid.Column="1"
                             VerticalAlignment="Center"
-                            Text="0" />
+                            Text="{x:Bind ViewModel.StatusBarIssueTasksText, Mode=OneWay}" />
                     </Grid>
                 </StackPanel>
                 <StackPanel
@@ -967,7 +970,7 @@
                     VerticalAlignment="Center"
                     Orientation="Horizontal"
                     Spacing="12"
-                    Visibility="Collapsed">
+                    Visibility="{x:Bind local:DownloadsPage.BoolToVisibility(ViewModel.IsStatusBarSpeedPanelVisible), Mode=OneWay}">
                     <Rectangle
                         Width="1"
                         Height="18"
@@ -981,18 +984,19 @@
                         BorderBrush="Transparent"
                         BorderThickness="0"
                         Click="StatusBarSpeedButton_Click">
-                        <StackPanel Orientation="Horizontal" Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="0">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
                             <Grid ColumnDefinitions="16,Auto,Auto" ColumnSpacing="4">
                                 <FontIcon
                                     Width="16"
                                     VerticalAlignment="Center"
                                     FontSize="13"
                                     Glyph="&#xE74A;" />
-                                <TextBlock
+                                <TextBlock 
                                     x:Name="_statusBarUploadSpeedText"
                                     Grid.Column="1"
                                     VerticalAlignment="Center"
-                                    Text="0 B/s" />
+                                    Text="{x:Bind ViewModel.StatusBarUploadSpeedText, Mode=OneWay}" />
                                 <StackPanel
                                     x:Name="_statusBarUploadLimitPanel"
                                     Grid.Column="2"
@@ -1000,18 +1004,18 @@
                                     VerticalAlignment="Center"
                                     Orientation="Horizontal"
                                     Spacing="4"
-                                    Visibility="Collapsed">
+                                    Visibility="{x:Bind local:DownloadsPage.BoolToVisibility(ViewModel.IsStatusBarUploadLimitVisible), Mode=OneWay}">
                                     <FontIcon
                                         VerticalAlignment="Center"
                                         FontSize="11"
                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                         Glyph="&#xE72E;" />
-                                    <TextBlock
+                                    <TextBlock 
                                         x:Name="_statusBarUploadLimitText"
                                         VerticalAlignment="Center"
                                         FontSize="12"
                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                        Text="" />
+                                        Text="{x:Bind ViewModel.StatusBarUploadLimitText, Mode=OneWay}" />
                                 </StackPanel>
                             </Grid>
                             <Grid ColumnDefinitions="16,Auto,Auto" ColumnSpacing="4">
@@ -1020,11 +1024,11 @@
                                     VerticalAlignment="Center"
                                     FontSize="13"
                                     Glyph="&#xE74B;" />
-                                <TextBlock
+                                <TextBlock 
                                     x:Name="_statusBarDownloadSpeedText"
                                     Grid.Column="1"
                                     VerticalAlignment="Center"
-                                    Text="0 B/s" />
+                                    Text="{x:Bind ViewModel.StatusBarDownloadSpeedText, Mode=OneWay}" />
                                 <StackPanel
                                     x:Name="_statusBarDownloadLimitPanel"
                                     Grid.Column="2"
@@ -1032,20 +1036,29 @@
                                     VerticalAlignment="Center"
                                     Orientation="Horizontal"
                                     Spacing="4"
-                                    Visibility="Collapsed">
+                                    Visibility="{x:Bind local:DownloadsPage.BoolToVisibility(ViewModel.IsStatusBarDownloadLimitVisible), Mode=OneWay}">
                                     <FontIcon
                                         VerticalAlignment="Center"
                                         FontSize="11"
                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                         Glyph="&#xE72E;" />
-                                    <TextBlock
+                                    <TextBlock 
                                         x:Name="_statusBarDownloadLimitText"
                                         VerticalAlignment="Center"
                                         FontSize="12"
                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                        Text="" />
+                                        Text="{x:Bind ViewModel.StatusBarDownloadLimitText, Mode=OneWay}" />
                                 </StackPanel>
                             </Grid>
+                            </StackPanel>
+                            <FontIcon
+                            x:Name="_statusBarSpeedChevron"
+                            Margin="6,0,0,0"
+                            VerticalAlignment="Center"
+                            FontSize="8"
+                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                            Glyph="&#xE70D;"
+                            RenderTransformOrigin="0.5,0.5" />
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -1068,7 +1081,7 @@
                                 MaxHeight="420"
                                 RowDefinitions="Auto,*"
                                 RowSpacing="8">
-                                <TextBlock
+                                <TextBlock 
                                     FontSize="16"
                                     FontWeight="SemiBold"
                                     x:Uid="NotificationHistoryTitleText"
@@ -1093,14 +1106,14 @@
                                                 <StackPanel
                                                     Grid.Column="1"
                                                     Spacing="2">
-                                                    <TextBlock
+                                                    <TextBlock 
                                                         FontWeight="SemiBold"
                                                         Foreground="{Binding SeverityBrush}"
                                                         Text="{Binding SeverityText}" />
-                                                    <TextBlock
+                                                    <TextBlock 
                                                         Text="{Binding Message}"
                                                         TextWrapping="WrapWholeWords" />
-                                                    <TextBlock
+                                                    <TextBlock 
                                                         FontSize="12"
                                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                         Text="{Binding DetailText}" />
@@ -1146,7 +1159,7 @@
                         x:Name="_statusToastActionIcon"
                         FontSize="14"
                         Glyph="&#xE8C8;" />
-                    <TextBlock
+                    <TextBlock 
                         x:Name="_statusToastActionText"
                         x:Uid="StatusToastCopyButtonLabel"
                         Text="Copy" />

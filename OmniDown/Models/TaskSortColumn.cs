@@ -1,6 +1,6 @@
 namespace OmniDown.Models;
 
-internal enum TaskSortColumn
+public enum TaskSortColumn
 {
     CreatedAt,
     Name,

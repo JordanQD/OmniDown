@@ -2,8 +2,10 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Shapes;
 using OmniDown.Controls;
+using OmniDown.ViewModels;
 using System;
 using Windows.Foundation;
 
@@ -14,10 +16,43 @@ namespace OmniDown.Pages;
 /// </summary>
 public sealed partial class DownloadsPage : Page
 {
-    public DownloadsPage()
+    private readonly DownloadsPageViewModel _viewModel;
+
+    public DownloadsPage(DownloadsPageViewModel viewModel)
     {
+        _viewModel = viewModel;
         InitializeComponent();
+        HookSpeedChevronAnimation();
     }
+
+    private void HookSpeedChevronAnimation()
+    {
+        // 动态创建 RotateTransform（不在 XAML 属性元素里放，避免字段生成问题）
+        var chevronRotate = new RotateTransform { Angle = 0 };
+        _statusBarSpeedChevron.RenderTransform = chevronRotate;
+
+        // 初始：箭头朝上（ChevronDown 旋转 180° = 上箭头）
+        chevronRotate.Angle = 180;
+
+        if (_speedLimitButton?.Flyout is Flyout flyout)
+        {
+            flyout.Opened += (_, _) => chevronRotate.Angle = 0;    // 打开 → 下箭头
+            flyout.Closed += (_, _) => chevronRotate.Angle = 180;  // 关闭 → 上箭头
+        }
+    }
+
+    public DownloadsPageViewModel ViewModel => _viewModel;
+
+    // ── x:Bind 辅助函数 ──
+
+    public static Visibility BoolToVisibility(bool value) =>
+        value ? Visibility.Visible : Visibility.Collapsed;
+
+    public static Visibility InvertBoolToVisibility(bool value) =>
+        value ? Visibility.Collapsed : Visibility.Visible;
+
+    public static double BoolToOpacity(bool value) =>
+        value ? 1.0 : 0.0;
 
     // ── 控件公开属性（供 MainWindow 重定向使用）──
 

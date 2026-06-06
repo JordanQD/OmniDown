@@ -282,7 +282,7 @@ namespace OmniDown
 
             if (_downloadsPage == null)
             {
-                _downloadsPage = new DownloadsPage();
+                _downloadsPage = new DownloadsPage(_downloadsViewModel);
                 WireMainPageEvents();
                 _downloadsPage.TasksListView.ItemsSource = _visibleTasks;
                 _downloadsPage.NotificationHistoryListView.ItemsSource = _statusMessages;

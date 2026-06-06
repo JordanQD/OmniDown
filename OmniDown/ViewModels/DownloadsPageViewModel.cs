@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using OmniDown.Models;
+using OmniDown.Services.Localization;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -12,7 +13,7 @@ namespace OmniDown.ViewModels;
 /// <summary>
 /// DownloadsPage 的 ViewModel。管理任务列表的过滤、排序、选中状态和展示数据。
 /// </summary>
-internal sealed class DownloadsPageViewModel : INotifyPropertyChanged
+public sealed class DownloadsPageViewModel : INotifyPropertyChanged
 {
     private string _currentFilter = "Home";
     private TaskSortColumn _sortColumn = TaskSortColumn.CreatedAt;
@@ -239,10 +240,10 @@ internal sealed class DownloadsPageViewModel : INotifyPropertyChanged
         // 标题
         DownloadsTitleText = tag switch
         {
-            "Downloading" => "Transfers",
-            "Completed" => "Complete",
-            "Issues" => "Issues",
-            _ => "Downloads"
+            "Downloading" => Strings.Get("DownloadingPageTitle"),
+            "Completed" => Strings.Get("CompletedPageTitle"),
+            "Issues" => Strings.Get("IssuesPageTitle"),
+            _ => Strings.Get("HomePageTitle")
         };
 
         // 统计面板可见性
@@ -252,41 +253,55 @@ internal sealed class DownloadsPageViewModel : INotifyPropertyChanged
 
         // 从全部任务计算计数
         var allTasks = AllTasks.ToList();
+        bool isTransferPage = tag == "Downloading";
         _totalCount = allTasks.Count;
-        _activeCount = allTasks.Count(t => IsDownloadingTask(t));
-        _pausedCount = allTasks.Count(t => IsPausedTask(t));
-        _completedCount = allTasks.Count(t => IsCompletedTask(t));
-        _issueCount = allTasks.Count(t => IsIssueTask(t));
+        _activeCount = allTasks.Count(IsActiveTransferTask);
+        _pausedCount = allTasks.Count(IsPausedTask);
+        _completedCount = allTasks.Count(IsCompletedTask);
+        _issueCount = allTasks.Count(IsIssueTask);
 
-        TotalTasksText = _totalCount.ToString();
+        TotalTasksText = (isTransferPage ? allTasks.Count(IsDownloadingTask) : _totalCount).ToString();
         ActiveTasksText = _activeCount.ToString();
         PausedTasksText = _pausedCount.ToString();
         CompletedTasksText = _completedCount.ToString();
         IssueTasksText = _issueCount.ToString();
     }
 
-    public void UpdateStatusBar(int visibleCount, int selectedCount)
+    public void UpdateStatusBar(int visibleCount, int selectedCount, string filterTag)
     {
         _visibleTaskCount = visibleCount;
         _selectedTaskCount = selectedCount;
 
-        StatusBarItemCountText = $"{visibleCount} items";
+        StatusBarItemCountText = Strings.Format("StatusBarItemCountText", visibleCount);
         IsStatusBarSelectedCountVisible = selectedCount > 0;
-        StatusBarSelectedCountText = selectedCount > 0 ? $"Selected {selectedCount} items" : string.Empty;
+        StatusBarSelectedCountText = selectedCount > 0
+            ? Strings.Format("StatusBarSelectedItemCountText", selectedCount)
+            : string.Empty;
 
-        IsStatusBarSpeedPanelVisible = true;
-        IsStatusBarTaskCountsPanelVisible = true;
+        bool showTransferSummary = filterTag is "Home" or "Downloading";
+        IsStatusBarSpeedPanelVisible = showTransferSummary;
+        IsStatusBarTaskCountsPanelVisible = showTransferSummary;
 
-        StatusBarActiveTasksText = _activeCount.ToString();
-        StatusBarPausedTasksText = _pausedCount.ToString();
-        IsStatusBarIssueTasksPanelVisible = _issueCount > 0;
-        StatusBarIssueTasksText = _issueCount.ToString();
+        if (showTransferSummary)
+        {
+            // 用全部任务的计数而非可见任务
+            var all = AllTasks.ToList();
+            _activeCount = all.Count(IsActiveTransferTask);
+            _pausedCount = all.Count(IsPausedTask);
+            _issueCount = all.Count(IsIssueTask);
+            StatusBarActiveTasksText = _activeCount.ToString();
+            StatusBarPausedTasksText = _pausedCount.ToString();
+            StatusBarIssueTasksText = _issueCount.ToString();
+        }
+
+        IsStatusBarIssueTasksPanelVisible = showTransferSummary;
     }
 
     public void HideStatusBar()
     {
         IsStatusBarSpeedPanelVisible = false;
         IsStatusBarTaskCountsPanelVisible = false;
+        IsStatusBarIssueTasksPanelVisible = false;
         IsStatusBarSelectedCountVisible = false;
     }
 
@@ -312,7 +327,7 @@ internal sealed class DownloadsPageViewModel : INotifyPropertyChanged
         }
 
         UpdateDashboard(tag);
-        UpdateStatusBar(VisibleTasks.Count, _selectedTaskCount);
+        UpdateStatusBar(VisibleTasks.Count, _selectedTaskCount, tag);
         VisibleTaskCount = VisibleTasks.Count;
     }
 
@@ -330,19 +345,29 @@ internal sealed class DownloadsPageViewModel : INotifyPropertyChanged
             : tasks.OrderByDescending(keySelector);
     }
 
-    // ── 静态判断方法（被 MainWindow 复用）──
+    // ── 静态判断方法（与原 MainWindow.SearchAndHelpers.xaml.cs 逻辑一致）──
+    //
+    // task.Status 是原始状态码（"downloading"/"paused"/"complete"/"error" 等）
+    // task.StatusText 是本地化后的显示文本（"下载中"/"已暂停" 等），不能用于逻辑判断！
 
-    public static bool IsDownloadingTask(DownloadTask task) =>
-        task.StatusText is "downloading" or "waiting" or "active";
+    public static bool IsDownloadingTask(DownloadTask task)
+    {
+        return task.Status.Contains("download", StringComparison.OrdinalIgnoreCase)
+            || task.Status.Contains("waiting", StringComparison.OrdinalIgnoreCase)
+            || task.Status.Contains("paused", StringComparison.OrdinalIgnoreCase);
+    }
+
+    public static bool IsActiveTransferTask(DownloadTask task) =>
+        IsDownloadingTask(task) && !IsPausedTask(task);
 
     public static bool IsPausedTask(DownloadTask task) =>
-        task.StatusText == "paused";
+        task.Status.Contains("paused", StringComparison.OrdinalIgnoreCase);
 
     public static bool IsCompletedTask(DownloadTask task) =>
-        task.StatusText is "complete" or "removed";
+        task.Status.Contains("complete", StringComparison.OrdinalIgnoreCase);
 
     public static bool IsIssueTask(DownloadTask task) =>
-        task.StatusText is "error" or "unknown";
+        task.Status.Contains("error", StringComparison.OrdinalIgnoreCase);
 
     private static bool IsSearchMatch(DownloadTask task, string query)
     {

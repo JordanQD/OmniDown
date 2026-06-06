@@ -112,18 +112,14 @@ namespace OmniDown
             _settingsPageViewModel = new SettingsPageViewModel(_settingsStore);
             InitializeComponent();
             _appSettingsPage = new AppSettingsPage();
-            ContentFrame.Navigate(typeof(DownloadsPage));
-            _downloadsPage = ContentFrame.Content as DownloadsPage;
-            if (_downloadsPage != null)
-            {
-                WireMainPageEvents();
-            }
-
+            _downloadsPage = new DownloadsPage(_downloadsViewModel);
+            WireMainPageEvents();
+            _downloadsPage.TasksListView.ItemsSource = _visibleTasks;
+            _downloadsPage.NotificationHistoryListView.ItemsSource = _statusMessages;
+            ContentFrame.Content = _downloadsPage;
             WinUIGallery.App.MainWindow.NavigationView = RootNavigation;
             HookSettingsPageEvents();
             _downloadsViewModel.AllTasks.Clear();
-            _downloadsPage!.TasksListView.ItemsSource = _visibleTasks;
-            _downloadsPage!.NotificationHistoryListView.ItemsSource = _statusMessages;
             SetTaskListLoading(true);
             _windowHandle = WindowNative.GetWindowHandle(this);
             SetWindowIcon();
