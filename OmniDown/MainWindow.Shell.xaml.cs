@@ -263,11 +263,12 @@ namespace OmniDown
             _currentTaskFilter = tag;
             TasksHeaderPanel.Visibility = isSettings ? Visibility.Collapsed : Visibility.Visible;
             SettingsPage.Visibility = isSettings ? Visibility.Visible : Visibility.Collapsed;
+            TasksPageSurface.Visibility = isSettings ? Visibility.Collapsed : Visibility.Visible;
             TasksPage.Visibility = isSettings ? Visibility.Collapsed : Visibility.Visible;
             if (isSettings)
             {
                 RootNavigation.SelectedItem = SettingsNavItem;
-                TaskDetailsPane.Visibility = Visibility.Collapsed;
+                UpdateTaskDetailsPaneVisibility();
                 ClearTitleSearchBox();
                 UpdateSearchPlaceholder();
                 UpdateStatusBar();

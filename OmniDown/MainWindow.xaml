@@ -139,20 +139,30 @@
 
             <Grid>
                 <Grid
+                    x:Name="TasksContentHost"
                     Grid.Column="0"
-                    Padding="16,8,0,0"
-                    RowDefinitions="Auto,*,Auto">
+                    Padding="0"
+                    RowDefinitions="Auto,*,Auto"
+                    RowSpacing="8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition
                             x:Name="TaskDetailsHostColumn"
                             Width="0" />
                     </Grid.ColumnDefinitions>
-                    <Grid
+                    <Border
                         x:Name="TasksHeaderPanel"
+                        Grid.Column="0"
                         Grid.ColumnSpan="2"
-                        Padding="0,0,12,0"
-                        ColumnDefinitions="Auto,*,Auto">
+                        Margin="8,8,8,0"
+                        Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                        BackgroundSizing="InnerBorderEdge"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                        <Grid
+                            Padding="0"
+                            ColumnDefinitions="Auto,*,Auto">
                         <StackPanel
                             Spacing="4"
                             Visibility="Collapsed">
@@ -167,7 +177,6 @@
                         <CommandBar
                             Grid.Column="0"
                             Background="Transparent"
-                            Padding="0"
                             HorizontalAlignment="Left"
                             DefaultLabelPosition="Right"
                             IsOpen="False">
@@ -337,27 +346,36 @@
                         <CommandBar
                             Grid.Column="2"
                             Background="Transparent"
-                            Padding="0"
                             DefaultLabelPosition="Right"
                             IsOpen="False">
                             <CommandBar.PrimaryCommands>
-                                <AppBarButton
+                                <AppBarToggleButton
                                     x:Name="TaskDetailsButton"
                                     Click="TaskDetailsButton_Click"
                                     x:Uid="TaskDetailsButton"
-                                    Label="Details">
-                                    <AppBarButton.Icon>
+                                    Label="Details"
+                                    ToolTipService.ToolTip="Details">
+                                    <AppBarToggleButton.Icon>
                                         <FontIcon Glyph="&#xE946;" />
-                                    </AppBarButton.Icon>
-                                </AppBarButton>
+                                    </AppBarToggleButton.Icon>
+                                </AppBarToggleButton>
                             </CommandBar.PrimaryCommands>
                         </CommandBar>
-                    </Grid>
-                    <Grid
-                        x:Name="TasksPage"
+                        </Grid>
+                    </Border>
+                    <Border
+                        x:Name="TasksPageSurface"
                         Grid.Column="0"
                         Grid.Row="1"
-                        Padding="0,0,24,0"
+                        Margin="8,0,8,0"
+                        Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                        BackgroundSizing="InnerBorderEdge"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="0">
+                    <Grid
+                        x:Name="TasksPage"
                         RowDefinitions="Auto,Auto,*">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -679,9 +697,8 @@
                     <Border
                         x:Name="TasksListHeaderPanel"
                         Grid.Row="1"
-                        Margin="0,8,0,4"
-                        Background="{ThemeResource LayerFillColorDefaultBrush}"
-                        CornerRadius="4">
+                        Margin="0"
+                        Background="Transparent">
                         <Grid
                             MinHeight="38"
                             Padding="0,0,20,0"
@@ -943,9 +960,10 @@
                                 x:Uid="TasksLoadingRing" />
                         </Grid>
 
-                    </Grid>
+                        </Grid>
 
                     </Grid>
+                    </Border>
 
                     <controls:SettingsPageControl
                         x:Name="SettingsPage"
@@ -957,19 +975,19 @@
                     x:Name="TaskDetailsPane"
                     Grid.Column="1"
                     Grid.Row="1"
+                    Margin="0,0,8,0"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     Visibility="Collapsed" />
                 <Grid
                     Grid.Row="2"
                     Grid.ColumnSpan="2"
-                    Margin="-16,0,0,0"
                     RowDefinitions="*,Auto">
                     <Border
                         x:Name="StatusBarPanel"
                         Grid.Row="1"
-                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        Background="{ThemeResource NavigationViewDefaultPaneBackground}"
+                        BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
                         BorderThickness="0,1,0,0">
                         <Grid RowDefinitions="Auto,Auto">
                             <Grid

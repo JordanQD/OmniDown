@@ -61,6 +61,8 @@ namespace OmniDown
         private bool _isDownloadSpeedLimitEnabled;
         private bool _isUploadSpeedLimitEnabled;
         private bool _isTaskDetailsPaneOpen;
+        private long _currentGlobalDownloadSpeed;
+        private long _currentGlobalUploadSpeed;
         private long _downloadLimitBytesPerSecond;
         private long _uploadLimitBytesPerSecond;
         private readonly Dictionary<string, string> _observedTaskStatuses = new(StringComparer.OrdinalIgnoreCase);

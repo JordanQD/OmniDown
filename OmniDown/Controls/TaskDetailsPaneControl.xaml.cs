@@ -1,3 +1,4 @@
+using CommunityToolkit.WinUI.Animations;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using OmniDown.Models;
@@ -24,6 +25,23 @@ public sealed partial class TaskDetailsPaneControl : UserControl
             new PropertyMetadata(0, OnSelectedTaskCountChanged));
 
     private DownloadTask? _subscribedTask;
+    private int _overviewItemCount;
+    private int _overviewActiveCount;
+    private int _overviewPausedCount;
+    private int _overviewIssueCount;
+    private long _overviewDownloadSpeed;
+    private long _overviewUploadSpeed;
+    private bool _overviewDownloadLimitEnabled;
+    private long _overviewDownloadLimit;
+    private bool _overviewUploadLimitEnabled;
+    private long _overviewUploadLimit;
+    private bool _ariaIsRunning;
+    private string _ariaEngineVariant = string.Empty;
+    private int? _ariaProcessId;
+    private string _ariaEndpoint = string.Empty;
+    private string _ariaDiagnosticText = string.Empty;
+    private FrameworkElement? _currentContent;
+    private int _previousVisibleSelectedIndex;
 
     public TaskDetailsPaneControl()
     {
@@ -42,6 +60,42 @@ public sealed partial class TaskDetailsPaneControl : UserControl
     {
         get => (int)GetValue(SelectedTaskCountProperty);
         set => SetValue(SelectedTaskCountProperty, value);
+    }
+
+    public void UpdateOverviewState(
+        int itemCount,
+        int activeCount,
+        int pausedCount,
+        int issueCount,
+        long downloadSpeed,
+        long uploadSpeed,
+        bool downloadLimitEnabled,
+        long downloadLimit,
+        bool uploadLimitEnabled,
+        long uploadLimit,
+        bool ariaIsRunning,
+        string ariaEngineVariant,
+        int? ariaProcessId,
+        string ariaEndpoint,
+        string ariaDiagnosticText)
+    {
+        _overviewItemCount = Math.Max(itemCount, 0);
+        _overviewActiveCount = Math.Max(activeCount, 0);
+        _overviewPausedCount = Math.Max(pausedCount, 0);
+        _overviewIssueCount = Math.Max(issueCount, 0);
+        _overviewDownloadSpeed = Math.Max(downloadSpeed, 0);
+        _overviewUploadSpeed = Math.Max(uploadSpeed, 0);
+        _overviewDownloadLimitEnabled = downloadLimitEnabled;
+        _overviewDownloadLimit = Math.Max(downloadLimit, 0);
+        _overviewUploadLimitEnabled = uploadLimitEnabled;
+        _overviewUploadLimit = Math.Max(uploadLimit, 0);
+        _ariaIsRunning = ariaIsRunning;
+        _ariaEngineVariant = ariaEngineVariant;
+        _ariaProcessId = ariaProcessId;
+        _ariaEndpoint = ariaEndpoint;
+        _ariaDiagnosticText = ariaDiagnosticText;
+        RefreshOverviewDetails();
+        RefreshAriaStatusDetails();
     }
 
     private static void OnSelectedTaskChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs args)
@@ -79,32 +133,38 @@ public sealed partial class TaskDetailsPaneControl : UserControl
     {
         if (SelectedTask is null)
         {
-            ShowEmpty();
+            ShowOverview();
             return;
         }
 
         ShowTask(SelectedTask);
     }
 
-    private void ShowEmpty()
+    private void ShowOverview()
     {
-        TaskDetailsEmptyContent.Visibility = Visibility.Visible;
+        ConfigureSelectorBar(DetailPaneMode.Overview);
+        RefreshOverviewDetails();
+        RefreshAriaStatusDetails();
+        ShowTaskDetailsSection(SelectedSectionTag);
+    }
+
+    private void HideAllContent()
+    {
+        TaskDetailsOverviewContent.Visibility = Visibility.Collapsed;
+        TaskDetailsAriaStatusContent.Visibility = Visibility.Collapsed;
         TaskDetailsSummaryContent.Visibility = Visibility.Collapsed;
         TaskDetailsActivityContent.Visibility = Visibility.Collapsed;
         TaskDetailsFilesContent.Visibility = Visibility.Collapsed;
         TaskDetailsOptionsContent.Visibility = Visibility.Collapsed;
+        TaskDetailsSourceContent.Visibility = Visibility.Collapsed;
+        TaskDetailsStatusContent.Visibility = Visibility.Collapsed;
         TaskDetailsPeersContent.Visibility = Visibility.Collapsed;
         TaskDetailsTrackersContent.Visibility = Visibility.Collapsed;
-
-        TaskDetailsEmptyTitleText.Text = SelectedTaskCount == 0 ? "未选择任务" : $"已选择 {SelectedTaskCount} 个任务";
-        TaskDetailsEmptyMessageText.Text = SelectedTaskCount == 0
-            ? "选择一个任务以查看概要、活动、文件、选项、节点和追踪器。"
-            : "请选择单个任务以查看详细信息并继续编辑任务级选项。";
     }
 
     private void ShowTask(DownloadTask task)
     {
-        TaskDetailsEmptyContent.Visibility = Visibility.Collapsed;
+        ConfigureSelectorBar(ResolveDetailPaneMode(task));
 
         TaskDetailsNameText.Text = string.IsNullOrWhiteSpace(task.Name) ? "未命名任务" : task.Name;
         string resolvedFilePath = ResolveTaskFilePath(task);
@@ -178,6 +238,30 @@ public sealed partial class TaskDetailsPaneControl : UserControl
             : "该任务没有可显示的 Tracker 信息。";
     }
 
+    private void RefreshOverviewDetails()
+    {
+        TaskDetailsOverviewItemCountText.Text = $"{_overviewItemCount} 个项目";
+        TaskDetailsOverviewActiveCountText.Text = _overviewActiveCount.ToString();
+        TaskDetailsOverviewPausedCountText.Text = _overviewPausedCount.ToString();
+        TaskDetailsOverviewIssueCountText.Text = _overviewIssueCount.ToString();
+        TaskDetailsOverviewDownloadSpeedText.Text = FormatSpeedForDetails(_overviewDownloadSpeed);
+        TaskDetailsOverviewUploadSpeedText.Text = FormatSpeedForDetails(_overviewUploadSpeed);
+        TaskDetailsOverviewSpeedLimitText.Text = FormatOverviewSpeedLimitText();
+    }
+
+    private void RefreshAriaStatusDetails()
+    {
+        TaskDetailsAriaVersionText.Text = string.IsNullOrWhiteSpace(_ariaEngineVariant)
+            ? "未检测"
+            : _ariaEngineVariant;
+        TaskDetailsAriaRunningStateText.Text = _ariaIsRunning ? "运行中" : "未运行";
+        TaskDetailsAriaProcessText.Text = _ariaIsRunning && _ariaProcessId is int processId
+            ? $"PID {processId}"
+            : "-";
+        TaskDetailsAriaEndpointText.Text = string.IsNullOrWhiteSpace(_ariaEndpoint) ? "-" : _ariaEndpoint;
+        TaskDetailsAriaDiagnosticText.Text = string.IsNullOrWhiteSpace(_ariaDiagnosticText) ? "-" : _ariaDiagnosticText;
+    }
+
     private string SelectedSectionTag => TaskDetailsSelectorBar.SelectedItem?.Tag?.ToString() ?? "Summary";
 
     private void TaskDetailsSelectorBar_SelectionChanged(SelectorBar sender, SelectorBarSelectionChangedEventArgs args)
@@ -187,13 +271,112 @@ public sealed partial class TaskDetailsPaneControl : UserControl
 
     private void ShowTaskDetailsSection(string tag)
     {
-        bool hasSingleSelection = TaskDetailsEmptyContent.Visibility != Visibility.Visible;
-        TaskDetailsSummaryContent.Visibility = hasSingleSelection && tag == "Summary" ? Visibility.Visible : Visibility.Collapsed;
-        TaskDetailsActivityContent.Visibility = hasSingleSelection && tag == "Activity" ? Visibility.Visible : Visibility.Collapsed;
-        TaskDetailsFilesContent.Visibility = hasSingleSelection && tag == "Files" ? Visibility.Visible : Visibility.Collapsed;
-        TaskDetailsOptionsContent.Visibility = hasSingleSelection && tag == "Options" ? Visibility.Visible : Visibility.Collapsed;
-        TaskDetailsPeersContent.Visibility = hasSingleSelection && tag == "Peers" ? Visibility.Visible : Visibility.Collapsed;
-        TaskDetailsTrackersContent.Visibility = hasSingleSelection && tag == "Trackers" ? Visibility.Visible : Visibility.Collapsed;
+        FrameworkElement targetContent = ResolveContentForTag(tag);
+        if (_currentContent == targetContent &&
+            targetContent.Visibility == Visibility.Visible)
+        {
+            return;
+        }
+
+        int currentVisibleSelectedIndex = GetVisibleSelectedIndex();
+        int direction = currentVisibleSelectedIndex >= _previousVisibleSelectedIndex ? 1 : -1;
+        if (SelectedTask is null)
+        {
+            HideAllContent();
+            ShowContent(targetContent, direction, animate: _currentContent is not null);
+            _currentContent = targetContent;
+            _previousVisibleSelectedIndex = currentVisibleSelectedIndex;
+            return;
+        }
+
+        HideAllContent();
+        ShowContent(targetContent, direction, animate: _currentContent is not null);
+        _currentContent = targetContent;
+        _previousVisibleSelectedIndex = currentVisibleSelectedIndex;
+    }
+
+    private FrameworkElement ResolveContentForTag(string tag)
+    {
+        if (SelectedTask is null)
+        {
+            return tag == "AriaStatus" ? TaskDetailsAriaStatusContent : TaskDetailsOverviewContent;
+        }
+
+        return tag switch
+        {
+            "Activity" => TaskDetailsActivityContent,
+            "Files" => TaskDetailsFilesContent,
+            "Options" => TaskDetailsOptionsContent,
+            "Source" => TaskDetailsSourceContent,
+            "Status" => TaskDetailsStatusContent,
+            "Peers" => TaskDetailsPeersContent,
+            "Trackers" => TaskDetailsTrackersContent,
+            _ => TaskDetailsSummaryContent
+        };
+    }
+
+    private static void ShowContent(FrameworkElement content, int direction, bool animate)
+    {
+        content.Visibility = Visibility.Visible;
+        if (!animate)
+        {
+            content.Opacity = 1;
+            content.Translation = new System.Numerics.Vector3(0, 0, 0);
+            return;
+        }
+
+        double offset = direction >= 0 ? 24 : -24;
+        AnimationBuilder.Create()
+            .Opacity(to: 1, from: 0, duration: TimeSpan.FromMilliseconds(140))
+            .Translation(Axis.X, to: 0, from: offset, duration: TimeSpan.FromMilliseconds(220))
+            .Start(content);
+    }
+
+    private int GetVisibleSelectedIndex()
+    {
+        int visibleIndex = 0;
+        foreach (object item in TaskDetailsSelectorBar.Items)
+        {
+            if (item is not SelectorBarItem selectorItem ||
+                selectorItem.Visibility != Visibility.Visible)
+            {
+                continue;
+            }
+
+            if (selectorItem == TaskDetailsSelectorBar.SelectedItem)
+            {
+                return visibleIndex;
+            }
+
+            visibleIndex++;
+        }
+
+        return 0;
+    }
+
+    private void ConfigureSelectorBar(DetailPaneMode mode)
+    {
+        SetSelectorItemVisible(TaskDetailsSummaryItem, true);
+        SetSelectorItemVisible(TaskDetailsAriaStatusItem, mode == DetailPaneMode.Overview);
+        SetSelectorItemVisible(TaskDetailsActivityItem, mode != DetailPaneMode.Overview);
+        SetSelectorItemVisible(TaskDetailsFilesItem, mode != DetailPaneMode.Overview);
+        SetSelectorItemVisible(TaskDetailsOptionsItem, mode != DetailPaneMode.Overview);
+        SetSelectorItemVisible(TaskDetailsSourceItem, mode is DetailPaneMode.Normal or DetailPaneMode.Ed2k);
+        SetSelectorItemVisible(TaskDetailsStatusItem, mode is DetailPaneMode.Magnet or DetailPaneMode.Ed2k);
+        SetSelectorItemVisible(TaskDetailsPeersItem, mode == DetailPaneMode.Magnet);
+        SetSelectorItemVisible(TaskDetailsTrackersItem, mode == DetailPaneMode.Magnet);
+
+        if (TaskDetailsSelectorBar.SelectedItem is not SelectorBarItem selectedItem ||
+            selectedItem.Visibility != Visibility.Visible)
+        {
+            TaskDetailsSelectorBar.SelectedItem = TaskDetailsSummaryItem;
+            _previousVisibleSelectedIndex = 0;
+        }
+    }
+
+    private static void SetSelectorItemVisible(SelectorBarItem item, bool isVisible)
+    {
+        item.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private static string FormatBytesForDetails(long bytes)
@@ -208,6 +391,32 @@ public sealed partial class TaskDetailsPaneControl : UserControl
         }
 
         return $"{size:0.#} {units[unitIndex]}";
+    }
+
+    private static string FormatSpeedForDetails(long bytesPerSecond)
+    {
+        string[] units = ["B/s", "KB/s", "MB/s", "GB/s"];
+        double speed = bytesPerSecond;
+        int unitIndex = 0;
+        while (speed >= 1024 && unitIndex < units.Length - 1)
+        {
+            speed /= 1024;
+            unitIndex++;
+        }
+
+        return $"{speed:0.#} {units[unitIndex]}";
+    }
+
+    private string FormatOverviewSpeedLimitText()
+    {
+        string downloadLimit = _overviewDownloadLimitEnabled && _overviewDownloadLimit > 0
+            ? FormatSpeedForDetails(_overviewDownloadLimit)
+            : "不限速";
+        string uploadLimit = _overviewUploadLimitEnabled && _overviewUploadLimit > 0
+            ? FormatSpeedForDetails(_overviewUploadLimit)
+            : "不限速";
+
+        return $"下载 {downloadLimit} / 上传 {uploadLimit}";
     }
 
     private static string ResolveLocalStateText(DownloadTask task, string resolvedFilePath)
@@ -251,6 +460,23 @@ public sealed partial class TaskDetailsPaneControl : UserControl
         return "下载任务";
     }
 
+    private static DetailPaneMode ResolveDetailPaneMode(DownloadTask task)
+    {
+        string source = task.SourceUri.Trim();
+        if (source.StartsWith("ed2k://", StringComparison.OrdinalIgnoreCase))
+        {
+            return DetailPaneMode.Ed2k;
+        }
+
+        if (source.StartsWith("magnet:", StringComparison.OrdinalIgnoreCase) ||
+            task.IsPeerTransfer)
+        {
+            return DetailPaneMode.Magnet;
+        }
+
+        return DetailPaneMode.Normal;
+    }
+
     private static string ResolveProtocolText(string sourceUri)
     {
         if (string.IsNullOrWhiteSpace(sourceUri))
@@ -277,5 +503,13 @@ public sealed partial class TaskDetailsPaneControl : UserControl
         return string.IsNullOrWhiteSpace(task.SaveDirectory) || string.IsNullOrWhiteSpace(task.Name)
             ? string.Empty
             : Path.Combine(task.SaveDirectory, task.Name);
+    }
+
+    private enum DetailPaneMode
+    {
+        Overview,
+        Normal,
+        Magnet,
+        Ed2k
     }
 }

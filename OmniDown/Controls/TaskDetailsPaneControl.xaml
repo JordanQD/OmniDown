@@ -5,11 +5,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <UserControl.Resources>
-        <Style x:Key="TaskDetailsSectionTitleTextBlockStyle" TargetType="TextBlock">
-            <Setter Property="Margin" Value="0,18,0,8" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
-        </Style>
         <Style x:Key="TaskDetailsPropertyNameTextBlockStyle" TargetType="TextBlock">
             <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
             <Setter Property="FontWeight" Value="SemiBold" />
@@ -31,13 +26,15 @@
     <Border
         HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch"
-        Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
-        BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
-        BorderThickness="1,0,0,0">
+        Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+        BackgroundSizing="InnerBorderEdge"
+        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+        BorderThickness="1"
+        CornerRadius="8">
         <Grid RowDefinitions="Auto,*">
             <ScrollViewer
                 Grid.Row="0"
-                Margin="8,8,8,0"
+                Margin="8,0,8,0"
                 HorizontalScrollBarVisibility="Auto"
                 HorizontalScrollMode="Enabled"
                 VerticalScrollBarVisibility="Disabled"
@@ -50,11 +47,38 @@
                         x:Name="TaskDetailsSummaryItem"
                         Text="概要"
                         Tag="Summary" />
-                    <SelectorBarItem Text="活动" Tag="Activity" />
-                    <SelectorBarItem Text="文件" Tag="Files" />
-                    <SelectorBarItem Text="选项" Tag="Options" />
-                    <SelectorBarItem Text="节点" Tag="Peers" />
-                    <SelectorBarItem Text="追踪器" Tag="Trackers" />
+                    <SelectorBarItem
+                        x:Name="TaskDetailsAriaStatusItem"
+                        Text="aria2 状态"
+                        Tag="AriaStatus" />
+                    <SelectorBarItem
+                        x:Name="TaskDetailsActivityItem"
+                        Text="活动"
+                        Tag="Activity" />
+                    <SelectorBarItem
+                        x:Name="TaskDetailsFilesItem"
+                        Text="文件"
+                        Tag="Files" />
+                    <SelectorBarItem
+                        x:Name="TaskDetailsOptionsItem"
+                        Text="选项"
+                        Tag="Options" />
+                    <SelectorBarItem
+                        x:Name="TaskDetailsSourceItem"
+                        Text="来源"
+                        Tag="Source" />
+                    <SelectorBarItem
+                        x:Name="TaskDetailsStatusItem"
+                        Text="状态"
+                        Tag="Status" />
+                    <SelectorBarItem
+                        x:Name="TaskDetailsPeersItem"
+                        Text="节点"
+                        Tag="Peers" />
+                    <SelectorBarItem
+                        x:Name="TaskDetailsTrackersItem"
+                        Text="追踪器"
+                        Tag="Trackers" />
                 </SelectorBar>
             </ScrollViewer>
 
@@ -65,30 +89,90 @@
                 VerticalScrollBarVisibility="Auto">
                 <Grid>
                     <StackPanel
-                        x:Name="TaskDetailsEmptyContent"
-                        MinHeight="420"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Center"
-                        Spacing="14">
-                        <FontIcon
-                            HorizontalAlignment="Center"
-                            FontSize="64"
-                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                            Glyph="&#xE7C3;" />
-                        <TextBlock
-                            x:Name="TaskDetailsEmptyTitleText"
-                            HorizontalAlignment="Center"
-                            FontSize="18"
-                            FontWeight="SemiBold"
-                            Text="未选择任务" />
-                        <TextBlock
-                            x:Name="TaskDetailsEmptyMessageText"
-                            MaxWidth="260"
-                            HorizontalAlignment="Center"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="选择一个任务以查看概要、活动、文件、选项、节点和追踪器。"
-                            TextAlignment="Center"
-                            TextWrapping="WrapWholeWords" />
+                        x:Name="TaskDetailsOverviewContent"
+                        Spacing="0">
+                        <StackPanel>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="项目总数" />
+                                    <TextBlock x:Name="TaskDetailsOverviewItemCountText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="正在下载" />
+                                    <TextBlock x:Name="TaskDetailsOverviewActiveCountText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="暂停任务" />
+                                    <TextBlock x:Name="TaskDetailsOverviewPausedCountText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="异常任务" />
+                                    <TextBlock x:Name="TaskDetailsOverviewIssueCountText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="当前下载速度" />
+                                    <TextBlock x:Name="TaskDetailsOverviewDownloadSpeedText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="当前上传速度" />
+                                    <TextBlock x:Name="TaskDetailsOverviewUploadSpeedText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Padding="0,8">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="全局限速" />
+                                    <TextBlock x:Name="TaskDetailsOverviewSpeedLimitText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel
+                        x:Name="TaskDetailsAriaStatusContent"
+                        Spacing="0"
+                        Visibility="Collapsed">
+                        <StackPanel>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="引擎版本" />
+                                    <TextBlock x:Name="TaskDetailsAriaVersionText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="当前状态" />
+                                    <TextBlock x:Name="TaskDetailsAriaRunningStateText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="进程" />
+                                    <TextBlock x:Name="TaskDetailsAriaProcessText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="RPC 端点" />
+                                    <TextBlock x:Name="TaskDetailsAriaEndpointText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Padding="0,8">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="诊断信息" />
+                                    <TextBlock x:Name="TaskDetailsAriaDiagnosticText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
                     </StackPanel>
 
                     <StackPanel
@@ -154,9 +238,6 @@
                                     Text="-" />
                             </Border>
                         </Grid>
-                        <TextBlock
-                            Style="{StaticResource TaskDetailsSectionTitleTextBlockStyle}"
-                            Text="概要" />
                         <StackPanel>
                             <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
                                 <StackPanel Spacing="4">
@@ -195,9 +276,6 @@
                         x:Name="TaskDetailsActivityContent"
                         Spacing="0"
                         Visibility="Collapsed">
-                        <TextBlock
-                            Style="{StaticResource TaskDetailsSectionTitleTextBlockStyle}"
-                            Text="活动" />
                         <ProgressBar
                             x:Name="TaskDetailsProgressBar"
                             Height="8"
@@ -234,9 +312,6 @@
                         x:Name="TaskDetailsFilesContent"
                         Spacing="0"
                         Visibility="Collapsed">
-                        <TextBlock
-                            Style="{StaticResource TaskDetailsSectionTitleTextBlockStyle}"
-                            Text="文件" />
                         <StackPanel>
                             <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
                                 <StackPanel Spacing="4">
@@ -269,9 +344,6 @@
                         x:Name="TaskDetailsOptionsContent"
                         Spacing="0"
                         Visibility="Collapsed">
-                        <TextBlock
-                            Style="{StaticResource TaskDetailsSectionTitleTextBlockStyle}"
-                            Text="选项" />
                         <StackPanel>
                             <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
                                 <StackPanel Spacing="4">
@@ -304,9 +376,6 @@
                         x:Name="TaskDetailsPeersContent"
                         Spacing="0"
                         Visibility="Collapsed">
-                        <TextBlock
-                            Style="{StaticResource TaskDetailsSectionTitleTextBlockStyle}"
-                            Text="节点" />
                         <StackPanel>
                             <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
                                 <StackPanel Spacing="4">
@@ -336,12 +405,29 @@
                     </StackPanel>
 
                     <StackPanel
-                        x:Name="TaskDetailsTrackersContent"
+                        x:Name="TaskDetailsSourceContent"
                         Spacing="0"
                         Visibility="Collapsed">
                         <TextBlock
-                            Style="{StaticResource TaskDetailsSectionTitleTextBlockStyle}"
-                            Text="追踪器" />
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="来源明细尚未接入。"
+                            TextWrapping="WrapWholeWords" />
+                    </StackPanel>
+
+                    <StackPanel
+                        x:Name="TaskDetailsStatusContent"
+                        Spacing="0"
+                        Visibility="Collapsed">
+                        <TextBlock
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="BT 状态明细尚未接入。"
+                            TextWrapping="WrapWholeWords" />
+                    </StackPanel>
+
+                    <StackPanel
+                        x:Name="TaskDetailsTrackersContent"
+                        Spacing="0"
+                        Visibility="Collapsed">
                         <StackPanel>
                             <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
                                 <StackPanel Spacing="4">

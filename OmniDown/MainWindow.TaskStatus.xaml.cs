@@ -219,6 +219,7 @@ namespace OmniDown
             bool canShow = _isTaskDetailsPaneOpen && _currentTaskFilter != "Settings";
             TaskDetailsHostColumn.Width = canShow ? new GridLength(360) : new GridLength(0);
             TaskDetailsPane.Visibility = canShow ? Visibility.Visible : Visibility.Collapsed;
+            TaskDetailsButton.IsChecked = canShow;
         }
 
         private void UpdateTaskDetailsPane()
@@ -227,6 +228,8 @@ namespace OmniDown
             {
                 return;
             }
+
+            UpdateTaskDetailsPaneOverviewState();
 
             List<DownloadTask> selectedTasks = GetSelectedTasks();
             if (selectedTasks.Count != 1)
@@ -238,6 +241,31 @@ namespace OmniDown
 
             TaskDetailsPane.SelectedTaskCount = selectedTasks.Count;
             TaskDetailsPane.SelectedTask = selectedTasks[0];
+        }
+
+        private void UpdateTaskDetailsPaneOverviewState()
+        {
+            if (TaskDetailsPane is null)
+            {
+                return;
+            }
+
+            TaskDetailsPane.UpdateOverviewState(
+                _visibleTasks.Count,
+                _visibleTasks.Count(IsActiveTransferTask),
+                _visibleTasks.Count(IsPausedTask),
+                _visibleTasks.Count(IsIssueTask),
+                _currentGlobalDownloadSpeed,
+                _currentGlobalUploadSpeed,
+                _isDownloadSpeedLimitEnabled,
+                _downloadLimitBytesPerSecond,
+                _isUploadSpeedLimitEnabled,
+                _uploadLimitBytesPerSecond,
+                _aria2EngineHost.IsRunning,
+                _aria2EngineHost.EngineVariant,
+                _aria2EngineHost.ProcessId,
+                _aria2RpcClient.Endpoint,
+                _aria2EngineHost.DiagnosticText);
         }
 
         private void UpdateDashboard()
@@ -258,6 +286,9 @@ namespace OmniDown
 
         private void UpdateGlobalSpeeds(long downloadSpeed, long uploadSpeed)
         {
+            _currentGlobalDownloadSpeed = Math.Max(downloadSpeed, 0);
+            _currentGlobalUploadSpeed = Math.Max(uploadSpeed, 0);
+
             if (GlobalDownloadSpeedText is not null)
             {
                 GlobalDownloadSpeedText.Text = FormatSpeed(downloadSpeed);
@@ -277,6 +308,8 @@ namespace OmniDown
             {
                 StatusBarUploadSpeedText.Text = FormatSpeed(uploadSpeed);
             }
+
+            UpdateTaskDetailsPaneOverviewState();
         }
 
         private void UpdateGlobalSpeedsFromTasks()
@@ -312,6 +345,7 @@ namespace OmniDown
             StatusBarTaskCountsPanel.Visibility = showTransferSummary ? Visibility.Visible : Visibility.Collapsed;
             StatusBarSpeedPanel.Visibility = showTransferSummary ? Visibility.Visible : Visibility.Collapsed;
             StatusBarIssueTasksPanel.Visibility = showIssues ? Visibility.Visible : Visibility.Collapsed;
+            UpdateTaskDetailsPaneOverviewState();
 
             if (!showTransferSummary)
             {
@@ -619,6 +653,8 @@ namespace OmniDown
             {
                 StatusBarDownloadLimitPanel.Visibility = showDownloadLimit ? Visibility.Visible : Visibility.Collapsed;
             }
+
+            UpdateTaskDetailsPaneOverviewState();
         }
 
         private void StatusBarSpeedButton_Click(object sender, RoutedEventArgs e)
@@ -655,6 +691,7 @@ namespace OmniDown
                 AriaRestartButton.IsEnabled = isRunning;
             }
 
+            UpdateTaskDetailsPaneOverviewState();
             UpdateDebugStatus();
         }
 
