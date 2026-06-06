@@ -129,8 +129,53 @@ public sealed partial class TaskDetailsPaneControl : UserControl
         TaskDetailsRemainingText.Text = task.RemainingTimeText;
         TaskDetailsDownloadSpeedText.Text = task.DownloadSpeedText;
         TaskDetailsUploadSpeedText.Text = task.UploadSpeedText;
+        RefreshFileDetails(task, resolvedFilePath);
+        RefreshOptionDetails(task);
+        RefreshPeerDetails(task);
+        RefreshTrackerDetails(task);
 
         ShowTaskDetailsSection(SelectedSectionTag);
+    }
+
+    private void RefreshFileDetails(DownloadTask task, string resolvedFilePath)
+    {
+        TaskDetailsFileNameText.Text = string.IsNullOrWhiteSpace(task.Name) ? "-" : task.Name;
+        TaskDetailsFilePathText.Text = string.IsNullOrWhiteSpace(resolvedFilePath) ? "-" : resolvedFilePath;
+        TaskDetailsSaveDirectoryText.Text = string.IsNullOrWhiteSpace(task.SaveDirectory) ? "-" : task.SaveDirectory;
+        TaskDetailsLocalStateText.Text = ResolveLocalStateText(task, resolvedFilePath);
+    }
+
+    private void RefreshOptionDetails(DownloadTask task)
+    {
+        TaskDetailsTaskTypeText.Text = ResolveTaskTypeText(task);
+        TaskDetailsSessionText.Text = task.IsAria2SessionAttached
+            ? "已连接到当前 aria2 会话"
+            : "仅保留本地记录，当前 aria2 会话中未找到该 GID";
+        TaskDetailsProtocolText.Text = ResolveProtocolText(task.SourceUri);
+        TaskDetailsTaskOptionsText.Text = "当前侧栏显示已缓存的任务信息；Referer、Cookie、代理等任务级 aria2 选项尚未接入 getOption。";
+    }
+
+    private void RefreshPeerDetails(DownloadTask task)
+    {
+        TaskDetailsPeerModeText.Text = task.IsPeerTransfer
+            ? task.IsMetadataTransfer ? "BitTorrent 元数据获取" : "BitTorrent / 磁力传输"
+            : "普通 HTTP/FTP 下载";
+        TaskDetailsPeerUploadText.Text = task.UploadSpeedText;
+        TaskDetailsPeerDownloadText.Text = task.DownloadSpeedText;
+        TaskDetailsPeerDetailText.Text = task.IsPeerTransfer
+            ? "节点列表尚未接入 aria2.getPeers；当前可查看该任务的上下行速度和传输模式。"
+            : "该任务不是 BT 或磁力传输，通常没有 Peer 节点。";
+    }
+
+    private void RefreshTrackerDetails(DownloadTask task)
+    {
+        TaskDetailsTrackerApplicabilityText.Text = task.IsPeerTransfer
+            ? "适用于该 BT / 磁力任务"
+            : "普通下载通常不使用 Tracker";
+        TaskDetailsTrackerSourceText.Text = string.IsNullOrWhiteSpace(task.SourceUri) ? "-" : task.SourceUri;
+        TaskDetailsTrackerDetailText.Text = task.IsPeerTransfer
+            ? "Tracker tier、URL 和状态尚未接入 aria2.getServers；当前显示任务来源作为追踪入口。"
+            : "该任务没有可显示的 Tracker 信息。";
     }
 
     private string SelectedSectionTag => TaskDetailsSelectorBar.SelectedItem?.Tag?.ToString() ?? "Summary";
@@ -163,6 +208,63 @@ public sealed partial class TaskDetailsPaneControl : UserControl
         }
 
         return $"{size:0.#} {units[unitIndex]}";
+    }
+
+    private static string ResolveLocalStateText(DownloadTask task, string resolvedFilePath)
+    {
+        if (string.IsNullOrWhiteSpace(resolvedFilePath))
+        {
+            return "尚未解析到本地文件路径";
+        }
+
+        if (File.Exists(resolvedFilePath))
+        {
+            return "文件已存在";
+        }
+
+        if (Directory.Exists(resolvedFilePath))
+        {
+            return "目录已存在";
+        }
+
+        if (!string.IsNullOrWhiteSpace(task.SaveDirectory) && Directory.Exists(task.SaveDirectory))
+        {
+            return "保存目录存在，目标文件尚未生成或已被移动";
+        }
+
+        return "路径暂不可用";
+    }
+
+    private static string ResolveTaskTypeText(DownloadTask task)
+    {
+        if (task.IsPeerTransfer)
+        {
+            return task.IsMetadataTransfer ? "磁力链接元数据任务" : "BT / 磁力任务";
+        }
+
+        if (Uri.TryCreate(task.SourceUri, UriKind.Absolute, out Uri? uri) &&
+            !string.IsNullOrWhiteSpace(uri.Scheme))
+        {
+            return $"{uri.Scheme.ToUpperInvariant()} 下载任务";
+        }
+
+        return "下载任务";
+    }
+
+    private static string ResolveProtocolText(string sourceUri)
+    {
+        if (string.IsNullOrWhiteSpace(sourceUri))
+        {
+            return "-";
+        }
+
+        if (Uri.TryCreate(sourceUri, UriKind.Absolute, out Uri? uri) &&
+            !string.IsNullOrWhiteSpace(uri.Scheme))
+        {
+            return uri.Scheme;
+        }
+
+        return "本地路径或自定义来源";
     }
 
     private static string ResolveTaskFilePath(DownloadTask task)

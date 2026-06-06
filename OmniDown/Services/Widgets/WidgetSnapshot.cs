@@ -1,7 +1,7 @@
+using OmniDown.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using OmniDown.Models;
 
 namespace OmniDown.Services.Widgets;
 

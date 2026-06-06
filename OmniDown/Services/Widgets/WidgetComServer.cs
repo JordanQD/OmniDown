@@ -1,7 +1,7 @@
-using System;
-using System.Runtime.InteropServices;
 using Microsoft.Windows.Widgets.Providers;
 using OmniDown.Services.Widgets;
+using System;
+using System.Runtime.InteropServices;
 using WinRT;
 
 namespace OmniDown;

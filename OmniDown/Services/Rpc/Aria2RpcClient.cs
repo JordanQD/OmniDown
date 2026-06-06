@@ -1,3 +1,4 @@
+using OmniDown.Services.Logging;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -8,7 +9,6 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using OmniDown.Services.Logging;
 
 namespace OmniDown.Services.Rpc;
 

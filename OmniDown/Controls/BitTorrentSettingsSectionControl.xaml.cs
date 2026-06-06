@@ -1,7 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using OmniDown.Services.Localization;
-using System;
 using System.Collections.Generic;
 
 namespace OmniDown.Controls;

@@ -1,17 +1,11 @@
-using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.Win32;
 using OmniDown.Models;
 using OmniDown.Models.Settings;
 using OmniDown.Services.BrowserExtension;
 using OmniDown.Services.Downloads;
 using OmniDown.Services.Engine;
-using OmniDown.Services.Localization;
 using OmniDown.Services.Logging;
 using OmniDown.Services.Notifications;
 using OmniDown.Services.Rpc;
@@ -23,21 +17,9 @@ using OmniDown.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
-using Windows.ApplicationModel;
 using Windows.ApplicationModel.DataTransfer;
-using Windows.Graphics;
-using Windows.Storage;
-using Windows.Storage.Pickers;
-using Windows.System;
-using Windows.UI;
 using WinRT.Interop;
 
 namespace OmniDown
@@ -108,7 +90,7 @@ namespace OmniDown
         private string _lastStatusMessage = string.Empty;
         private string _lastClipboardDownloadText = string.Empty;
         private readonly Dictionary<string, bool> _observedTaskDownloadCompletions = new(StringComparer.OrdinalIgnoreCase);
-    private readonly WidgetSnapshotStore _widgetSnapshotStore = new();
+        private readonly WidgetSnapshotStore _widgetSnapshotStore = new();
 
         public ObservableCollection<DownloadTask> Tasks { get; } = new();
 

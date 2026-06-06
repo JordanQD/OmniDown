@@ -1,11 +1,11 @@
+using OmniDown.Services.Logging;
+using OmniDown.Services.Storage;
 using System;
 using System.IO;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading.Tasks;
-using OmniDown.Services.Logging;
-using OmniDown.Services.Storage;
 
 namespace OmniDown.Services.Engine;
 

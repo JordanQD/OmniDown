@@ -1,13 +1,11 @@
 namespace OmniDown.Dialogs;
 
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.UI;
 using OmniDown.Models;
 using OmniDown.Models.Settings;
-using OmniDown.Services.Localization;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,7 +13,6 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
-using Windows.System;
 using Windows.UI;
 
 internal static class NewDownloadDialogHelpers

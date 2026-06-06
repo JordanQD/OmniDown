@@ -232,54 +232,136 @@
 
                     <StackPanel
                         x:Name="TaskDetailsFilesContent"
-                        Spacing="10"
+                        Spacing="0"
                         Visibility="Collapsed">
                         <TextBlock
                             Style="{StaticResource TaskDetailsSectionTitleTextBlockStyle}"
                             Text="文件" />
-                        <TextBlock
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="文件列表框架已就位，后续可接入 aria2 的文件明细。"
-                            TextWrapping="WrapWholeWords" />
+                        <StackPanel>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="文件名" />
+                                    <TextBlock x:Name="TaskDetailsFileNameText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="完整路径" />
+                                    <TextBlock x:Name="TaskDetailsFilePathText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="保存目录" />
+                                    <TextBlock x:Name="TaskDetailsSaveDirectoryText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Padding="0,8">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="本地状态" />
+                                    <TextBlock x:Name="TaskDetailsLocalStateText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
                     </StackPanel>
 
                     <StackPanel
                         x:Name="TaskDetailsOptionsContent"
-                        Spacing="10"
+                        Spacing="0"
                         Visibility="Collapsed">
                         <TextBlock
                             Style="{StaticResource TaskDetailsSectionTitleTextBlockStyle}"
                             Text="选项" />
-                        <TextBlock
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="任务选项框架已就位，可继续接入 User-Agent、Referer、Cookie、代理等设置。"
-                            TextWrapping="WrapWholeWords" />
+                        <StackPanel>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="任务类型" />
+                                    <TextBlock x:Name="TaskDetailsTaskTypeText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="aria2 会话" />
+                                    <TextBlock x:Name="TaskDetailsSessionText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="来源协议" />
+                                    <TextBlock x:Name="TaskDetailsProtocolText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Padding="0,8">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="任务级选项" />
+                                    <TextBlock x:Name="TaskDetailsTaskOptionsText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
                     </StackPanel>
 
                     <StackPanel
                         x:Name="TaskDetailsPeersContent"
-                        Spacing="10"
+                        Spacing="0"
                         Visibility="Collapsed">
                         <TextBlock
                             Style="{StaticResource TaskDetailsSectionTitleTextBlockStyle}"
                             Text="节点" />
-                        <TextBlock
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="BT 节点列表框架已就位，后续可接入 peer 地址、客户端、进度和速度。"
-                            TextWrapping="WrapWholeWords" />
+                        <StackPanel>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="传输模式" />
+                                    <TextBlock x:Name="TaskDetailsPeerModeText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="上行速度" />
+                                    <TextBlock x:Name="TaskDetailsPeerUploadText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="下行速度" />
+                                    <TextBlock x:Name="TaskDetailsPeerDownloadText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Padding="0,8">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="节点明细" />
+                                    <TextBlock x:Name="TaskDetailsPeerDetailText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
                     </StackPanel>
 
                     <StackPanel
                         x:Name="TaskDetailsTrackersContent"
-                        Spacing="10"
+                        Spacing="0"
                         Visibility="Collapsed">
                         <TextBlock
                             Style="{StaticResource TaskDetailsSectionTitleTextBlockStyle}"
                             Text="追踪器" />
-                        <TextBlock
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="追踪器列表框架已就位，后续可接入 tier、URL、协议和状态。"
-                            TextWrapping="WrapWholeWords" />
+                        <StackPanel>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="适用性" />
+                                    <TextBlock x:Name="TaskDetailsTrackerApplicabilityText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="来源" />
+                                    <TextBlock x:Name="TaskDetailsTrackerSourceText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Padding="0,8">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="Tracker 明细" />
+                                    <TextBlock x:Name="TaskDetailsTrackerDetailText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
                     </StackPanel>
                 </Grid>
             </ScrollViewer>

@@ -1,6 +1,5 @@
 using Microsoft.Windows.Widgets;
 using Microsoft.Windows.Widgets.Providers;
-using OmniDown.Services.Storage;
 using System;
 
 namespace OmniDown.Services.Widgets;

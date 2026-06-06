@@ -1,8 +1,12 @@
+using OmniDown.Models.Settings;
+using OmniDown.Services.Logging;
+using OmniDown.Services.Rpc;
+using OmniDown.Services.Storage;
 using System;
-using System.Diagnostics;
-using System.IO;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Reflection;
@@ -10,10 +14,6 @@ using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using OmniDown.Services.Logging;
-using OmniDown.Services.Rpc;
-using OmniDown.Services.Storage;
-using OmniDown.Models.Settings;
 
 namespace OmniDown.Services.Engine;
 
