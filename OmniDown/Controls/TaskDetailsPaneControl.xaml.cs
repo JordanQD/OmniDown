@@ -160,7 +160,6 @@ public sealed partial class TaskDetailsPaneControl : UserControl
         TaskDetailsOverviewContent.Visibility = Visibility.Collapsed;
         TaskDetailsAriaStatusContent.Visibility = Visibility.Collapsed;
         TaskDetailsSummaryContent.Visibility = Visibility.Collapsed;
-        TaskDetailsActivityContent.Visibility = Visibility.Collapsed;
         TaskDetailsFilesContent.Visibility = Visibility.Collapsed;
         TaskDetailsOptionsContent.Visibility = Visibility.Collapsed;
         TaskDetailsSourceContent.Visibility = Visibility.Collapsed;
@@ -175,16 +174,21 @@ public sealed partial class TaskDetailsPaneControl : UserControl
 
         TaskDetailsNameText.Text = string.IsNullOrWhiteSpace(task.Name) ? "未命名任务" : task.Name;
         string resolvedFilePath = ResolveTaskFilePath(task);
-        TaskDetailsPathText.Text = string.IsNullOrWhiteSpace(resolvedFilePath)
+        TaskDetailsDownloadPathText.Text = string.IsNullOrWhiteSpace(resolvedFilePath)
             ? task.SaveDirectory
             : resolvedFilePath;
+        bool isDownloadTargetDirectory = Directory.Exists(resolvedFilePath);
+        TaskDetailsOpenDownloadFileButton.Visibility = isDownloadTargetDirectory
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+        bool isDownloadComplete = string.Equals(task.Status, "completed", StringComparison.OrdinalIgnoreCase);
+        TaskDetailsOpenDownloadFileButton.IsEnabled = isDownloadComplete && File.Exists(resolvedFilePath);
         TaskDetailsGidText.Text = string.IsNullOrWhiteSpace(task.Gid) ? "-" : task.Gid;
-        TaskDetailsStatusText.Text = task.StatusText;
-        TaskDetailsStatusText.Foreground = task.StatusBrush;
         TaskDetailsHeroIcon.Glyph = task.IsPeerTransfer ? "\uE968" : "\uE7C3";
         TaskDetailsHeroIcon.Foreground = task.StatusBrush;
         TaskDetailsSizeText.Text = task.SizeText;
-        TaskDetailsProgressText.Text = task.ProgressText;
+        TaskDetailsProgressPercentText.Text = task.ProgressText;
+        TaskDetailsStatusDetailText.Text = task.StatusText;
         TaskDetailsCreatedAtText.Text = task.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss");
         TaskDetailsSourceText.Text = string.IsNullOrWhiteSpace(task.SourceUri) ? "-" : task.SourceUri;
 
@@ -328,7 +332,6 @@ public sealed partial class TaskDetailsPaneControl : UserControl
 
         return tag switch
         {
-            "Activity" => TaskDetailsActivityContent,
             "Files" => TaskDetailsFilesContent,
             "Options" => TaskDetailsOptionsContent,
             "Source" => TaskDetailsSourceContent,
@@ -382,7 +385,6 @@ public sealed partial class TaskDetailsPaneControl : UserControl
     {
         SetSelectorItemVisible(TaskDetailsSummaryItem, true);
         SetSelectorItemVisible(TaskDetailsAriaStatusItem, mode == DetailPaneMode.Overview);
-        SetSelectorItemVisible(TaskDetailsActivityItem, mode != DetailPaneMode.Overview);
         SetSelectorItemVisible(TaskDetailsFilesItem, mode != DetailPaneMode.Overview);
         SetSelectorItemVisible(TaskDetailsOptionsItem, mode != DetailPaneMode.Overview);
         SetSelectorItemVisible(TaskDetailsSourceItem, mode is DetailPaneMode.Normal or DetailPaneMode.Ed2k);
@@ -529,5 +531,96 @@ public sealed partial class TaskDetailsPaneControl : UserControl
         Normal,
         Magnet,
         Ed2k
+    }
+
+    private void TaskDetailsCopyGidButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (SelectedTask is not { } task || string.IsNullOrWhiteSpace(task.Gid))
+        {
+            return;
+        }
+
+        Windows.ApplicationModel.DataTransfer.DataPackage package = new();
+        package.SetText(task.Gid);
+        Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(package);
+    }
+
+    private void TaskDetailsOpenDownloadFileButton_Click(object sender, RoutedEventArgs e)
+    {
+        string resolvedFilePath = SelectedTask is not null ? ResolveTaskFilePath(SelectedTask) : string.Empty;
+        if (!string.IsNullOrWhiteSpace(resolvedFilePath) && File.Exists(resolvedFilePath))
+        {
+            OpenShellTarget(resolvedFilePath);
+        }
+    }
+
+    private void TaskDetailsOpenDownloadFolderButton_Click(object sender, RoutedEventArgs e)
+    {
+        string resolvedFilePath = SelectedTask is not null ? ResolveTaskFilePath(SelectedTask) : string.Empty;
+        string? folderPath;
+
+        if (!string.IsNullOrWhiteSpace(resolvedFilePath))
+        {
+            if (Directory.Exists(resolvedFilePath))
+            {
+                folderPath = resolvedFilePath;
+            }
+            else
+            {
+                folderPath = File.Exists(resolvedFilePath)
+                    ? Path.GetDirectoryName(resolvedFilePath)
+                    : null;
+            }
+        }
+        else
+        {
+            folderPath = SelectedTask?.SaveDirectory;
+        }
+
+        if (!string.IsNullOrWhiteSpace(folderPath) && Directory.Exists(folderPath))
+        {
+            OpenShellTarget(folderPath);
+        }
+    }
+
+    private void TaskDetailsOpenSourceFileButton_Click(object sender, RoutedEventArgs e)
+    {
+        string? sourceUri = SelectedTask?.SourceUri;
+        if (string.IsNullOrWhiteSpace(sourceUri))
+        {
+            return;
+        }
+
+        if (Uri.TryCreate(sourceUri, UriKind.Absolute, out Uri? uri) && uri.IsFile)
+        {
+            OpenShellTarget(uri.LocalPath);
+        }
+    }
+
+    private void TaskDetailsOpenSourceFolderButton_Click(object sender, RoutedEventArgs e)
+    {
+        string? sourceUri = SelectedTask?.SourceUri;
+        if (string.IsNullOrWhiteSpace(sourceUri))
+        {
+            return;
+        }
+
+        if (Uri.TryCreate(sourceUri, UriKind.Absolute, out Uri? uri) && uri.IsFile)
+        {
+            string? folderPath = Path.GetDirectoryName(uri.LocalPath);
+            if (!string.IsNullOrWhiteSpace(folderPath) && Directory.Exists(folderPath))
+            {
+                OpenShellTarget(folderPath);
+            }
+        }
+    }
+
+    private static void OpenShellTarget(string path)
+    {
+        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+        {
+            FileName = path,
+            UseShellExecute = true
+        });
     }
 }

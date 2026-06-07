@@ -30,7 +30,7 @@
         BackgroundSizing="InnerBorderEdge"
         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
         BorderThickness="1"
-        CornerRadius="8">
+        CornerRadius="8,8,0,0">
         <Grid RowDefinitions="Auto,*">
             <ScrollViewer
                 Grid.Row="0"
@@ -51,10 +51,6 @@
                         x:Name="TaskDetailsAriaStatusItem"
                         Text="aria2 状态"
                         Tag="AriaStatus" />
-                    <SelectorBarItem
-                        x:Name="TaskDetailsActivityItem"
-                        Text="活动"
-                        Tag="Activity" />
                     <SelectorBarItem
                         x:Name="TaskDetailsFilesItem"
                         Text="文件"
@@ -295,71 +291,57 @@
                         x:Name="TaskDetailsSummaryContent"
                         Spacing="0"
                         Visibility="Collapsed">
+                        <!-- Hero: icon + name/status -->
                         <Grid
-                            Margin="0,6,0,8"
-                            RowDefinitions="Auto,Auto,Auto"
-                            RowSpacing="10">
+                            Margin="0,6,0,10"
+                            ColumnDefinitions="Auto,*"
+                            ColumnSpacing="12">
                             <Border
-                                Width="76"
-                                Height="76"
-                                HorizontalAlignment="Center"
+                                Width="48"
+                                Height="48"
                                 Background="{ThemeResource ControlFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1"
-                                CornerRadius="8">
+                                CornerRadius="6">
                                 <FontIcon
                                     x:Name="TaskDetailsHeroIcon"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
-                                    FontSize="34"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    FontSize="24"
                                     Glyph="&#xE7C3;" />
                             </Border>
                             <StackPanel
-                                Grid.Row="1"
-                                MaxWidth="312"
-                                HorizontalAlignment="Stretch"
-                                Spacing="4">
+                                Grid.Column="1"
+                                VerticalAlignment="Center">
                                 <TextBlock
                                     x:Name="TaskDetailsNameText"
-                                    HorizontalAlignment="Stretch"
-                                    FontSize="20"
+                                    FontSize="16"
                                     FontWeight="SemiBold"
-                                    MaxLines="3"
-                                    TextAlignment="Center"
-                                    TextTrimming="CharacterEllipsis"
-                                    TextWrapping="Wrap" />
-                                <TextBlock
-                                    x:Name="TaskDetailsPathText"
-                                    HorizontalAlignment="Stretch"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    IsTextSelectionEnabled="True"
-                                    MaxLines="4"
-                                    TextAlignment="Center"
+                                    MaxLines="2"
                                     TextTrimming="CharacterEllipsis"
                                     TextWrapping="Wrap" />
                             </StackPanel>
-                            <Border
-                                Grid.Row="2"
-                                Padding="10,5"
-                                HorizontalAlignment="Center"
-                                Background="{ThemeResource ControlFillColorDefaultBrush}"
-                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                BorderThickness="1"
-                                CornerRadius="14">
-                                <TextBlock
-                                    x:Name="TaskDetailsStatusText"
-                                    FontSize="12"
-                                    FontWeight="SemiBold"
-                                    Text="-" />
-                            </Border>
                         </Grid>
+                        <!-- Property rows -->
                         <StackPanel>
                             <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
-                                <StackPanel Spacing="4">
-                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="GID" />
-                                    <TextBlock x:Name="TaskDetailsGidText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
-                                </StackPanel>
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="GID" />
+                                        <TextBlock x:Name="TaskDetailsGidText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                    </StackPanel>
+                                    <Button
+                                        x:Name="TaskDetailsCopyGidButton"
+                                        Grid.Column="1"
+                                        Width="32"
+                                        Height="32"
+                                        Padding="0"
+                                        VerticalAlignment="Bottom"
+                                        Click="TaskDetailsCopyGidButton_Click"
+                                        ToolTipService.ToolTip="复制 GID">
+                                        <FontIcon FontSize="14" Glyph="&#xE8C8;" />
+                                    </Button>
+                                </Grid>
                             </Border>
                             <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
                                 <StackPanel Spacing="4">
@@ -369,185 +351,247 @@
                             </Border>
                             <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
                                 <StackPanel Spacing="4">
-                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="进度" />
-                                    <TextBlock x:Name="TaskDetailsProgressText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
-                                </StackPanel>
-                            </Border>
-                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
-                                <StackPanel Spacing="4">
                                     <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="添加时间" />
                                     <TextBlock x:Name="TaskDetailsCreatedAtText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
                                 </StackPanel>
                             </Border>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4">
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="下载路径" />
+                                        <TextBlock x:Name="TaskDetailsDownloadPathText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" MaxLines="2" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <Button
+                                        x:Name="TaskDetailsOpenDownloadFileButton"
+                                        Grid.Column="1"
+                                        Width="32"
+                                        Height="32"
+                                        Padding="0"
+                                        VerticalAlignment="Bottom"
+                                        Click="TaskDetailsOpenDownloadFileButton_Click"
+                                        ToolTipService.ToolTip="打开文件">
+                                        <FontIcon FontSize="14" Glyph="&#xE8E5;" />
+                                    </Button>
+                                    <Button
+                                        x:Name="TaskDetailsOpenDownloadFolderButton"
+                                        Grid.Column="2"
+                                        Width="32"
+                                        Height="32"
+                                        Padding="0"
+                                        VerticalAlignment="Bottom"
+                                        Click="TaskDetailsOpenDownloadFolderButton_Click"
+                                        ToolTipService.ToolTip="打开文件夹">
+                                        <FontIcon FontSize="14" Glyph="&#xE838;" />
+                                    </Button>
+                                </Grid>
+                            </Border>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4">
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="来源" />
+                                        <TextBlock x:Name="TaskDetailsSourceText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" MaxLines="2" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <Button
+                                        x:Name="TaskDetailsOpenSourceFileButton"
+                                        Grid.Column="1"
+                                        Width="32"
+                                        Height="32"
+                                        Padding="0"
+                                        VerticalAlignment="Bottom"
+                                        Click="TaskDetailsOpenSourceFileButton_Click"
+                                        ToolTipService.ToolTip="打开文件">
+                                        <FontIcon FontSize="14" Glyph="&#xE8E5;" />
+                                    </Button>
+                                    <Button
+                                        x:Name="TaskDetailsOpenSourceFolderButton"
+                                        Grid.Column="2"
+                                        Width="32"
+                                        Height="32"
+                                        Padding="0"
+                                        VerticalAlignment="Bottom"
+                                        Click="TaskDetailsOpenSourceFolderButton_Click"
+                                        ToolTipService.ToolTip="打开文件夹">
+                                        <FontIcon FontSize="14" Glyph="&#xE838;" />
+                                    </Button>
+                                </Grid>
+                            </Border>
                             <Border Padding="0,8">
-                                <StackPanel Spacing="4">
-                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="来源" />
-                                    <TextBlock x:Name="TaskDetailsSourceText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
-                                </StackPanel>
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <TextBlock
+                                        Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}"
+                                        Text="状态" />
+                                    <TextBlock
+                                        x:Name="TaskDetailsStatusDetailText"
+                                        Grid.Column="1"
+                                        HorizontalAlignment="Right"
+                                        Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </Grid>
                             </Border>
                         </StackPanel>
-                    </StackPanel>
-
-                    <StackPanel
-                        x:Name="TaskDetailsActivityContent"
-                        Spacing="0"
-                        Visibility="Collapsed">
+                        <!-- Progress section (merged from Activity) -->
                         <ProgressBar
                             x:Name="TaskDetailsProgressBar"
                             Height="8"
+                            Margin="0,12,0,0"
                             Maximum="100" />
-                        <StackPanel Margin="0,14,0,0">
-                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
-                                <StackPanel Spacing="4">
-                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="已完成" />
-                                    <TextBlock x:Name="TaskDetailsCompletedText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
-                                </StackPanel>
-                            </Border>
-                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
-                                <StackPanel Spacing="4">
-                                    <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="剩余时间" />
-                                    <TextBlock x:Name="TaskDetailsRemainingText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
-                                </StackPanel>
-                            </Border>
-                            <Border
-                                Style="{StaticResource TaskDetailsPropertyRowBorderStyle}"
-                                Visibility="{Binding TaskUploadSectionVisibility}">
-                                <Grid RowDefinitions="Auto,Auto" RowSpacing="8">
-                                    <Button
-                                        HorizontalAlignment="Stretch"
-                                        HorizontalContentAlignment="Stretch"
-                                        Background="Transparent"
-                                        BorderThickness="0"
-                                        Command="{Binding ToggleSpeedLimitEditorCommand}"
-                                        CommandParameter="TaskUpload"
-                                        Padding="0">
-                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                            <StackPanel Spacing="4">
-                                                <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="{Binding UploadSpeedLabel}" />
-                                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                                    <TextBlock Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" Text="{Binding TaskUploadSpeedText}" />
-                                                    <TextBlock
-                                                        VerticalAlignment="Center"
-                                                        FontSize="12"
-                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                        Text="{Binding TaskUploadLimitText}"
-                                                        Visibility="{Binding TaskUploadLimitVisibility}" />
-                                                </StackPanel>
+                        <Border
+                            Padding="0,6,0,8"
+                            BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                            BorderThickness="0,0,0,1">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock
+                                    x:Name="TaskDetailsProgressPercentText"
+                                    Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                <TextBlock
+                                    x:Name="TaskDetailsCompletedText"
+                                    Grid.Column="1"
+                                    Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                            <StackPanel Spacing="4">
+                                <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="剩余时间" />
+                                <TextBlock x:Name="TaskDetailsRemainingText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                            </StackPanel>
+                        </Border>
+                        <Border
+                            Style="{StaticResource TaskDetailsPropertyRowBorderStyle}"
+                            Visibility="{Binding TaskUploadSectionVisibility}">
+                            <Grid RowDefinitions="Auto,Auto" RowSpacing="8">
+                                <Button
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Stretch"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Command="{Binding ToggleSpeedLimitEditorCommand}"
+                                    CommandParameter="TaskUpload"
+                                    Padding="0">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <StackPanel Spacing="4">
+                                            <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="{Binding UploadSpeedLabel}" />
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <TextBlock Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" Text="{Binding TaskUploadSpeedText}" />
+                                                <TextBlock
+                                                    VerticalAlignment="Center"
+                                                    FontSize="12"
+                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                    Text="{Binding TaskUploadLimitText}"
+                                                    Visibility="{Binding TaskUploadLimitVisibility}" />
                                             </StackPanel>
-                                            <FontIcon
-                                                Grid.Column="1"
-                                                FontSize="12"
-                                                Glyph="{Binding TaskUploadLimitChevron}" />
-                                        </Grid>
-                                    </Button>
-                                    <StackPanel
-                                        Grid.Row="1"
-                                        Spacing="8"
-                                        Visibility="{Binding TaskUploadLimitEditorVisibility}">
-                                        <Grid ColumnDefinitions="Auto,*,Auto">
-                                            <TextBlock
-                                                Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}"
-                                                Text="{Binding SpeedLimitEnabledLabel}" />
-                                            <ToggleSwitch
-                                                Grid.Column="2"
-                                                MinWidth="0"
-                                                IsOn="{Binding TaskUploadLimitEnabled, Mode=TwoWay}" />
-                                        </Grid>
-                                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
-                                            <NumberBox
-                                                IsEnabled="{Binding IsTaskUploadLimitInputEnabled}"
-                                                Minimum="1"
-                                                SpinButtonPlacementMode="Inline"
-                                                Value="{Binding TaskUploadLimitValue, Mode=TwoWay}" />
-                                            <ComboBox
-                                                Grid.Column="1"
-                                                IsEnabled="{Binding IsTaskUploadLimitInputEnabled}"
-                                                SelectedValue="{Binding TaskUploadLimitUnit, Mode=TwoWay}"
-                                                SelectedValuePath="Content">
-                                                <ComboBoxItem Content="KB/s" />
-                                                <ComboBoxItem Content="MB/s" />
-                                            </ComboBox>
-                                            <Button
-                                                Grid.Column="2"
-                                                VerticalAlignment="Stretch"
-                                                Command="{Binding ApplySpeedLimitCommand}"
-                                                CommandParameter="TaskUpload"
-                                                ToolTipService.ToolTip="{Binding SpeedLimitApplyText}">
-                                                <FontIcon FontSize="14" Glyph="&#xE8FB;" />
-                                            </Button>
-                                        </Grid>
-                                    </StackPanel>
-                                </Grid>
-                            </Border>
-                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
-                                <Grid RowDefinitions="Auto,Auto" RowSpacing="8">
-                                    <Button
-                                        HorizontalAlignment="Stretch"
-                                        HorizontalContentAlignment="Stretch"
-                                        Background="Transparent"
-                                        BorderThickness="0"
-                                        Command="{Binding ToggleSpeedLimitEditorCommand}"
-                                        CommandParameter="TaskDownload"
-                                        Padding="0">
-                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                            <StackPanel Spacing="4">
-                                                <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="{Binding DownloadSpeedLabel}" />
-                                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                                    <TextBlock Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" Text="{Binding TaskDownloadSpeedText}" />
-                                                    <TextBlock
-                                                        VerticalAlignment="Center"
-                                                        FontSize="12"
-                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                        Text="{Binding TaskDownloadLimitText}"
-                                                        Visibility="{Binding TaskDownloadLimitVisibility}" />
-                                                </StackPanel>
+                                        </StackPanel>
+                                        <FontIcon
+                                            Grid.Column="1"
+                                            FontSize="12"
+                                            Glyph="{Binding TaskUploadLimitChevron}" />
+                                    </Grid>
+                                </Button>
+                                <StackPanel
+                                    Grid.Row="1"
+                                    Spacing="8"
+                                    Visibility="{Binding TaskUploadLimitEditorVisibility}">
+                                    <Grid ColumnDefinitions="Auto,*,Auto">
+                                        <TextBlock
+                                            Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}"
+                                            Text="{Binding SpeedLimitEnabledLabel}" />
+                                        <ToggleSwitch
+                                            Grid.Column="2"
+                                            MinWidth="0"
+                                            IsOn="{Binding TaskUploadLimitEnabled, Mode=TwoWay}" />
+                                    </Grid>
+                                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                                        <NumberBox
+                                            IsEnabled="{Binding IsTaskUploadLimitInputEnabled}"
+                                            Minimum="1"
+                                            SpinButtonPlacementMode="Inline"
+                                            Value="{Binding TaskUploadLimitValue, Mode=TwoWay}" />
+                                        <ComboBox
+                                            Grid.Column="1"
+                                            IsEnabled="{Binding IsTaskUploadLimitInputEnabled}"
+                                            SelectedValue="{Binding TaskUploadLimitUnit, Mode=TwoWay}"
+                                            SelectedValuePath="Content">
+                                            <ComboBoxItem Content="KB/s" />
+                                            <ComboBoxItem Content="MB/s" />
+                                        </ComboBox>
+                                        <Button
+                                            Grid.Column="2"
+                                            VerticalAlignment="Stretch"
+                                            Command="{Binding ApplySpeedLimitCommand}"
+                                            CommandParameter="TaskUpload"
+                                            ToolTipService.ToolTip="{Binding SpeedLimitApplyText}">
+                                            <FontIcon FontSize="14" Glyph="&#xE8FB;" />
+                                        </Button>
+                                    </Grid>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <Border Padding="0,8">
+                            <Grid RowDefinitions="Auto,Auto" RowSpacing="8">
+                                <Button
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Stretch"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Command="{Binding ToggleSpeedLimitEditorCommand}"
+                                    CommandParameter="TaskDownload"
+                                    Padding="0">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <StackPanel Spacing="4">
+                                            <TextBlock Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="{Binding DownloadSpeedLabel}" />
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <TextBlock Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" Text="{Binding TaskDownloadSpeedText}" />
+                                                <TextBlock
+                                                    VerticalAlignment="Center"
+                                                    FontSize="12"
+                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                    Text="{Binding TaskDownloadLimitText}"
+                                                    Visibility="{Binding TaskDownloadLimitVisibility}" />
                                             </StackPanel>
-                                            <FontIcon
-                                                Grid.Column="1"
-                                                FontSize="12"
-                                                Glyph="{Binding TaskDownloadLimitChevron}" />
-                                        </Grid>
-                                    </Button>
-                                    <StackPanel
-                                        Grid.Row="1"
-                                        Spacing="8"
-                                        Visibility="{Binding TaskDownloadLimitEditorVisibility}">
-                                        <Grid ColumnDefinitions="Auto,*,Auto">
-                                            <TextBlock
-                                                Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}"
-                                                Text="{Binding SpeedLimitEnabledLabel}" />
-                                            <ToggleSwitch
-                                                Grid.Column="2"
-                                                MinWidth="0"
-                                                IsOn="{Binding TaskDownloadLimitEnabled, Mode=TwoWay}" />
-                                        </Grid>
-                                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
-                                            <NumberBox
-                                                IsEnabled="{Binding IsTaskDownloadLimitInputEnabled}"
-                                                Minimum="1"
-                                                SpinButtonPlacementMode="Inline"
-                                                Value="{Binding TaskDownloadLimitValue, Mode=TwoWay}" />
-                                            <ComboBox
-                                                Grid.Column="1"
-                                                IsEnabled="{Binding IsTaskDownloadLimitInputEnabled}"
-                                                SelectedValue="{Binding TaskDownloadLimitUnit, Mode=TwoWay}"
-                                                SelectedValuePath="Content">
-                                                <ComboBoxItem Content="KB/s" />
-                                                <ComboBoxItem Content="MB/s" />
-                                            </ComboBox>
-                                            <Button
-                                                Grid.Column="2"
-                                                VerticalAlignment="Stretch"
-                                                Command="{Binding ApplySpeedLimitCommand}"
-                                                CommandParameter="TaskDownload"
-                                                ToolTipService.ToolTip="{Binding SpeedLimitApplyText}">
-                                                <FontIcon FontSize="14" Glyph="&#xE8FB;" />
-                                            </Button>
-                                        </Grid>
-                                    </StackPanel>
-                                </Grid>
-                            </Border>
-                        </StackPanel>
+                                        </StackPanel>
+                                        <FontIcon
+                                            Grid.Column="1"
+                                            FontSize="12"
+                                            Glyph="{Binding TaskDownloadLimitChevron}" />
+                                    </Grid>
+                                </Button>
+                                <StackPanel
+                                    Grid.Row="1"
+                                    Spacing="8"
+                                    Visibility="{Binding TaskDownloadLimitEditorVisibility}">
+                                    <Grid ColumnDefinitions="Auto,*,Auto">
+                                        <TextBlock
+                                            Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}"
+                                            Text="{Binding SpeedLimitEnabledLabel}" />
+                                        <ToggleSwitch
+                                            Grid.Column="2"
+                                            MinWidth="0"
+                                            IsOn="{Binding TaskDownloadLimitEnabled, Mode=TwoWay}" />
+                                    </Grid>
+                                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                                        <NumberBox
+                                            IsEnabled="{Binding IsTaskDownloadLimitInputEnabled}"
+                                            Minimum="1"
+                                            SpinButtonPlacementMode="Inline"
+                                            Value="{Binding TaskDownloadLimitValue, Mode=TwoWay}" />
+                                        <ComboBox
+                                            Grid.Column="1"
+                                            IsEnabled="{Binding IsTaskDownloadLimitInputEnabled}"
+                                            SelectedValue="{Binding TaskDownloadLimitUnit, Mode=TwoWay}"
+                                            SelectedValuePath="Content">
+                                            <ComboBoxItem Content="KB/s" />
+                                            <ComboBoxItem Content="MB/s" />
+                                        </ComboBox>
+                                        <Button
+                                            Grid.Column="2"
+                                            VerticalAlignment="Stretch"
+                                            Command="{Binding ApplySpeedLimitCommand}"
+                                            CommandParameter="TaskDownload"
+                                            ToolTipService.ToolTip="{Binding SpeedLimitApplyText}">
+                                            <FontIcon FontSize="14" Glyph="&#xE8FB;" />
+                                        </Button>
+                                    </Grid>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
                     </StackPanel>
 
                     <StackPanel
