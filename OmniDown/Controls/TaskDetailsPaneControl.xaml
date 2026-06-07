@@ -30,7 +30,7 @@
         BackgroundSizing="InnerBorderEdge"
         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
         BorderThickness="1"
-        CornerRadius="8,8,0,0">
+        CornerRadius="8">
         <Grid RowDefinitions="Auto,*">
             <ScrollViewer
                 Grid.Row="0"
