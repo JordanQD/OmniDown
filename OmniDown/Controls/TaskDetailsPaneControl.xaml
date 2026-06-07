@@ -115,7 +115,7 @@
                                 </Grid>
                             </Border>
                             <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
-                                <Grid RowDefinitions="Auto,Auto" RowSpacing="10">
+                                <Grid RowDefinitions="Auto,Auto" RowSpacing="8">
                                     <Button
                                         HorizontalAlignment="Stretch"
                                         HorizontalContentAlignment="Stretch"
@@ -145,38 +145,45 @@
                                     </Button>
                                     <StackPanel
                                         Grid.Row="1"
-                                        Spacing="12"
+                                        Spacing="8"
                                         Visibility="{Binding OverviewUploadLimitEditorVisibility}">
-                                        <ToggleSwitch
-                                            Header="{Binding SpeedLimitEnabledLabel}"
-                                            IsOn="{Binding OverviewUploadLimitEnabled, Mode=TwoWay}" />
-                                        <Grid ColumnDefinitions="*,96" ColumnSpacing="12">
+                                        <Grid ColumnDefinitions="Auto,*,Auto">
+                                            <TextBlock
+                                                Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}"
+                                                Text="{Binding SpeedLimitEnabledLabel}" />
+                                            <ToggleSwitch
+                                                Grid.Column="2"
+                                                MinWidth="0"
+                                                IsOn="{Binding OverviewUploadLimitEnabled, Mode=TwoWay}" />
+                                        </Grid>
+                                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
                                             <NumberBox
-                                                Header="{Binding SpeedLimitValueLabel}"
                                                 IsEnabled="{Binding IsOverviewUploadLimitInputEnabled}"
                                                 Minimum="1"
                                                 SpinButtonPlacementMode="Inline"
                                                 Value="{Binding OverviewUploadLimitValue, Mode=TwoWay}" />
                                             <ComboBox
                                                 Grid.Column="1"
-                                                Header="{Binding SpeedLimitUnitLabel}"
                                                 IsEnabled="{Binding IsOverviewUploadLimitInputEnabled}"
                                                 SelectedValue="{Binding OverviewUploadLimitUnit, Mode=TwoWay}"
                                                 SelectedValuePath="Content">
                                                 <ComboBoxItem Content="KB/s" />
                                                 <ComboBoxItem Content="MB/s" />
                                             </ComboBox>
+                                            <Button
+                                                Grid.Column="2"
+                                                VerticalAlignment="Stretch"
+                                                Command="{Binding ApplySpeedLimitCommand}"
+                                                CommandParameter="GlobalUpload"
+                                                ToolTipService.ToolTip="{Binding SpeedLimitApplyText}">
+                                                <FontIcon FontSize="14" Glyph="&#xE8FB;" />
+                                            </Button>
                                         </Grid>
-                                        <Button
-                                            HorizontalAlignment="Right"
-                                            Command="{Binding ApplySpeedLimitCommand}"
-                                            CommandParameter="GlobalUpload"
-                                            Content="{Binding SpeedLimitApplyText}" />
                                     </StackPanel>
                                 </Grid>
                             </Border>
                             <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
-                                <Grid RowDefinitions="Auto,Auto" RowSpacing="10">
+                                <Grid RowDefinitions="Auto,Auto" RowSpacing="8">
                                     <Button
                                         HorizontalAlignment="Stretch"
                                         HorizontalContentAlignment="Stretch"
@@ -206,33 +213,40 @@
                                     </Button>
                                     <StackPanel
                                         Grid.Row="1"
-                                        Spacing="12"
+                                        Spacing="8"
                                         Visibility="{Binding OverviewDownloadLimitEditorVisibility}">
-                                        <ToggleSwitch
-                                            Header="{Binding SpeedLimitEnabledLabel}"
-                                            IsOn="{Binding OverviewDownloadLimitEnabled, Mode=TwoWay}" />
-                                        <Grid ColumnDefinitions="*,96" ColumnSpacing="12">
+                                        <Grid ColumnDefinitions="Auto,*,Auto">
+                                            <TextBlock
+                                                Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}"
+                                                Text="{Binding SpeedLimitEnabledLabel}" />
+                                            <ToggleSwitch
+                                                Grid.Column="2"
+                                                MinWidth="0"
+                                                IsOn="{Binding OverviewDownloadLimitEnabled, Mode=TwoWay}" />
+                                        </Grid>
+                                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
                                             <NumberBox
-                                                Header="{Binding SpeedLimitValueLabel}"
                                                 IsEnabled="{Binding IsOverviewDownloadLimitInputEnabled}"
                                                 Minimum="1"
                                                 SpinButtonPlacementMode="Inline"
                                                 Value="{Binding OverviewDownloadLimitValue, Mode=TwoWay}" />
                                             <ComboBox
                                                 Grid.Column="1"
-                                                Header="{Binding SpeedLimitUnitLabel}"
                                                 IsEnabled="{Binding IsOverviewDownloadLimitInputEnabled}"
                                                 SelectedValue="{Binding OverviewDownloadLimitUnit, Mode=TwoWay}"
                                                 SelectedValuePath="Content">
                                                 <ComboBoxItem Content="KB/s" />
                                                 <ComboBoxItem Content="MB/s" />
                                             </ComboBox>
+                                            <Button
+                                                Grid.Column="2"
+                                                VerticalAlignment="Stretch"
+                                                Command="{Binding ApplySpeedLimitCommand}"
+                                                CommandParameter="GlobalDownload"
+                                                ToolTipService.ToolTip="{Binding SpeedLimitApplyText}">
+                                                <FontIcon FontSize="14" Glyph="&#xE8FB;" />
+                                            </Button>
                                         </Grid>
-                                        <Button
-                                            HorizontalAlignment="Right"
-                                            Command="{Binding ApplySpeedLimitCommand}"
-                                            CommandParameter="GlobalDownload"
-                                            Content="{Binding SpeedLimitApplyText}" />
                                     </StackPanel>
                                 </Grid>
                             </Border>
@@ -396,11 +410,9 @@
                                 </StackPanel>
                             </Border>
                             <Border
-                                Padding="0,8"
-                                BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
-                                BorderThickness="0,0,0,1"
+                                Style="{StaticResource TaskDetailsPropertyRowBorderStyle}"
                                 Visibility="{Binding TaskUploadSectionVisibility}">
-                                <Grid RowDefinitions="Auto,Auto" RowSpacing="10">
+                                <Grid RowDefinitions="Auto,Auto" RowSpacing="8">
                                     <Button
                                         HorizontalAlignment="Stretch"
                                         HorizontalContentAlignment="Stretch"
@@ -430,38 +442,45 @@
                                     </Button>
                                     <StackPanel
                                         Grid.Row="1"
-                                        Spacing="12"
+                                        Spacing="8"
                                         Visibility="{Binding TaskUploadLimitEditorVisibility}">
-                                        <ToggleSwitch
-                                            Header="{Binding SpeedLimitEnabledLabel}"
-                                            IsOn="{Binding TaskUploadLimitEnabled, Mode=TwoWay}" />
-                                        <Grid ColumnDefinitions="*,96" ColumnSpacing="12">
+                                        <Grid ColumnDefinitions="Auto,*,Auto">
+                                            <TextBlock
+                                                Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}"
+                                                Text="{Binding SpeedLimitEnabledLabel}" />
+                                            <ToggleSwitch
+                                                Grid.Column="2"
+                                                MinWidth="0"
+                                                IsOn="{Binding TaskUploadLimitEnabled, Mode=TwoWay}" />
+                                        </Grid>
+                                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
                                             <NumberBox
-                                                Header="{Binding SpeedLimitValueLabel}"
                                                 IsEnabled="{Binding IsTaskUploadLimitInputEnabled}"
                                                 Minimum="1"
                                                 SpinButtonPlacementMode="Inline"
                                                 Value="{Binding TaskUploadLimitValue, Mode=TwoWay}" />
                                             <ComboBox
                                                 Grid.Column="1"
-                                                Header="{Binding SpeedLimitUnitLabel}"
                                                 IsEnabled="{Binding IsTaskUploadLimitInputEnabled}"
                                                 SelectedValue="{Binding TaskUploadLimitUnit, Mode=TwoWay}"
                                                 SelectedValuePath="Content">
                                                 <ComboBoxItem Content="KB/s" />
                                                 <ComboBoxItem Content="MB/s" />
                                             </ComboBox>
+                                            <Button
+                                                Grid.Column="2"
+                                                VerticalAlignment="Stretch"
+                                                Command="{Binding ApplySpeedLimitCommand}"
+                                                CommandParameter="TaskUpload"
+                                                ToolTipService.ToolTip="{Binding SpeedLimitApplyText}">
+                                                <FontIcon FontSize="14" Glyph="&#xE8FB;" />
+                                            </Button>
                                         </Grid>
-                                        <Button
-                                            HorizontalAlignment="Right"
-                                            Command="{Binding ApplySpeedLimitCommand}"
-                                            CommandParameter="TaskUpload"
-                                            Content="{Binding SpeedLimitApplyText}" />
                                     </StackPanel>
                                 </Grid>
                             </Border>
-                            <Border Padding="0,8">
-                                <Grid RowDefinitions="Auto,Auto" RowSpacing="10">
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <Grid RowDefinitions="Auto,Auto" RowSpacing="8">
                                     <Button
                                         HorizontalAlignment="Stretch"
                                         HorizontalContentAlignment="Stretch"
@@ -491,33 +510,40 @@
                                     </Button>
                                     <StackPanel
                                         Grid.Row="1"
-                                        Spacing="12"
+                                        Spacing="8"
                                         Visibility="{Binding TaskDownloadLimitEditorVisibility}">
-                                        <ToggleSwitch
-                                            Header="{Binding SpeedLimitEnabledLabel}"
-                                            IsOn="{Binding TaskDownloadLimitEnabled, Mode=TwoWay}" />
-                                        <Grid ColumnDefinitions="*,96" ColumnSpacing="12">
+                                        <Grid ColumnDefinitions="Auto,*,Auto">
+                                            <TextBlock
+                                                Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}"
+                                                Text="{Binding SpeedLimitEnabledLabel}" />
+                                            <ToggleSwitch
+                                                Grid.Column="2"
+                                                MinWidth="0"
+                                                IsOn="{Binding TaskDownloadLimitEnabled, Mode=TwoWay}" />
+                                        </Grid>
+                                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
                                             <NumberBox
-                                                Header="{Binding SpeedLimitValueLabel}"
                                                 IsEnabled="{Binding IsTaskDownloadLimitInputEnabled}"
                                                 Minimum="1"
                                                 SpinButtonPlacementMode="Inline"
                                                 Value="{Binding TaskDownloadLimitValue, Mode=TwoWay}" />
                                             <ComboBox
                                                 Grid.Column="1"
-                                                Header="{Binding SpeedLimitUnitLabel}"
                                                 IsEnabled="{Binding IsTaskDownloadLimitInputEnabled}"
                                                 SelectedValue="{Binding TaskDownloadLimitUnit, Mode=TwoWay}"
                                                 SelectedValuePath="Content">
                                                 <ComboBoxItem Content="KB/s" />
                                                 <ComboBoxItem Content="MB/s" />
                                             </ComboBox>
+                                            <Button
+                                                Grid.Column="2"
+                                                VerticalAlignment="Stretch"
+                                                Command="{Binding ApplySpeedLimitCommand}"
+                                                CommandParameter="TaskDownload"
+                                                ToolTipService.ToolTip="{Binding SpeedLimitApplyText}">
+                                                <FontIcon FontSize="14" Glyph="&#xE8FB;" />
+                                            </Button>
                                         </Grid>
-                                        <Button
-                                            HorizontalAlignment="Right"
-                                            Command="{Binding ApplySpeedLimitCommand}"
-                                            CommandParameter="TaskDownload"
-                                            Content="{Binding SpeedLimitApplyText}" />
                                     </StackPanel>
                                 </Grid>
                             </Border>

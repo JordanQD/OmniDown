@@ -193,7 +193,7 @@
   <data name="TaskDetailsSpeedLimitOffText" xml:space="preserve"><value>No limit</value></data>
   <data name="TaskDetailsUploadLimitHeader" xml:space="preserve"><value>Upload limit</value></data>
   <data name="TaskDetailsDownloadLimitHeader" xml:space="preserve"><value>Download limit</value></data>
-  <data name="TaskDetailsSpeedLimitEnabledLabel" xml:space="preserve"><value>Enable limit</value></data>
+  <data name="TaskDetailsSpeedLimitEnabledLabel" xml:space="preserve"><value>Limit</value></data>
   <data name="TaskDetailsSpeedLimitValueLabel" xml:space="preserve"><value>Speed</value></data>
   <data name="TaskDetailsSpeedLimitUnitLabel" xml:space="preserve"><value>Unit</value></data>
   <data name="TaskDetailsSpeedLimitApplyText" xml:space="preserve"><value>Apply</value></data>
