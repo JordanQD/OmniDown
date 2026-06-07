@@ -51,7 +51,8 @@ public sealed class Aria2RpcClient : IDisposable
         Dictionary<string, string> options = new()
         {
             ["dir"] = directory,
-            ["split"] = Math.Clamp(splitCount, 1, 256).ToString(CultureInfo.InvariantCulture)
+            ["split"] = Math.Clamp(splitCount, 1, 256).ToString(CultureInfo.InvariantCulture),
+            ["continue"] = "true"
         };
 
         if (!string.IsNullOrWhiteSpace(outputFileName))
@@ -84,7 +85,8 @@ public sealed class Aria2RpcClient : IDisposable
         Dictionary<string, string> options = new()
         {
             ["dir"] = directory,
-            ["split"] = Math.Clamp(splitCount, 1, 256).ToString(CultureInfo.InvariantCulture)
+            ["split"] = Math.Clamp(splitCount, 1, 256).ToString(CultureInfo.InvariantCulture),
+            ["continue"] = "true"
         };
 
         if (selectedFileIndexes.Count > 0)
@@ -121,6 +123,27 @@ public sealed class Aria2RpcClient : IDisposable
         CancellationToken cancellationToken = default)
     {
         return SendAsync<string>("aria2.changeGlobalOption", [options], cancellationToken);
+    }
+
+    public Task<Dictionary<string, string>> GetGlobalOptionAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return SendAsync<Dictionary<string, string>>("aria2.getGlobalOption", [], cancellationToken);
+    }
+
+    public Task ChangeOptionAsync(
+        string gid,
+        Dictionary<string, string> options,
+        CancellationToken cancellationToken = default)
+    {
+        return SendAsync<string>("aria2.changeOption", [gid, options], cancellationToken);
+    }
+
+    public Task<Dictionary<string, string>> GetOptionAsync(
+        string gid,
+        CancellationToken cancellationToken = default)
+    {
+        return SendAsync<Dictionary<string, string>>("aria2.getOption", [gid], cancellationToken);
     }
 
     public Task ForcePauseAllAsync(CancellationToken cancellationToken = default)
@@ -349,6 +372,19 @@ public sealed class Aria2RpcClient : IDisposable
             }
 
             return (T)(object)tasks;
+        }
+
+        if (resultType == typeof(Dictionary<string, string>))
+        {
+            Dictionary<string, string> options = new(StringComparer.OrdinalIgnoreCase);
+            foreach (JsonProperty property in result.EnumerateObject())
+            {
+                options[property.Name] = property.Value.ValueKind == JsonValueKind.String
+                    ? property.Value.GetString() ?? string.Empty
+                    : property.Value.ToString();
+            }
+
+            return (T)(object)options;
         }
 
         throw new NotSupportedException($"aria2 RPC result type {resultType.Name} is not supported.");

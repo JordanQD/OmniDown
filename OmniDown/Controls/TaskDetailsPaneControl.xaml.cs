@@ -2,6 +2,7 @@ using CommunityToolkit.WinUI.Animations;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using OmniDown.Models;
+using OmniDown.ViewModels;
 using System;
 using System.ComponentModel;
 using System.IO;
@@ -43,9 +44,15 @@ public sealed partial class TaskDetailsPaneControl : UserControl
     private FrameworkElement? _currentContent;
     private int _previousVisibleSelectedIndex;
 
+    public TaskDetailsPaneViewModel ViewModel { get; } = new();
+
+    public event EventHandler<SpeedLimitApplyRequestedEventArgs>? SpeedLimitApplyRequested;
+
     public TaskDetailsPaneControl()
     {
         InitializeComponent();
+        DataContext = ViewModel;
+        ViewModel.SpeedLimitApplyRequested += ViewModel_SpeedLimitApplyRequested;
         TaskDetailsSelectorBar.SelectedItem = TaskDetailsSummaryItem;
         Refresh();
     }
@@ -187,8 +194,7 @@ public sealed partial class TaskDetailsPaneControl : UserControl
             ? $"{FormatBytesForDetails(task.CompletedLength)} / {FormatBytesForDetails(task.TotalLength)}"
             : FormatBytesForDetails(task.CompletedLength);
         TaskDetailsRemainingText.Text = task.RemainingTimeText;
-        TaskDetailsDownloadSpeedText.Text = task.DownloadSpeedText;
-        TaskDetailsUploadSpeedText.Text = task.UploadSpeedText;
+        ViewModel.UpdateTaskSpeeds(task.DownloadSpeed, task.UploadSpeed, ShouldShowUploadDetails(task));
         RefreshFileDetails(task, resolvedFilePath);
         RefreshOptionDetails(task);
         RefreshPeerDetails(task);
@@ -240,13 +246,26 @@ public sealed partial class TaskDetailsPaneControl : UserControl
 
     private void RefreshOverviewDetails()
     {
-        TaskDetailsOverviewItemCountText.Text = $"{_overviewItemCount} 个项目";
-        TaskDetailsOverviewActiveCountText.Text = _overviewActiveCount.ToString();
-        TaskDetailsOverviewPausedCountText.Text = _overviewPausedCount.ToString();
-        TaskDetailsOverviewIssueCountText.Text = _overviewIssueCount.ToString();
-        TaskDetailsOverviewDownloadSpeedText.Text = FormatSpeedForDetails(_overviewDownloadSpeed);
-        TaskDetailsOverviewUploadSpeedText.Text = FormatSpeedForDetails(_overviewUploadSpeed);
-        TaskDetailsOverviewSpeedLimitText.Text = FormatOverviewSpeedLimitText();
+        ViewModel.UpdateOverview(
+            _overviewItemCount,
+            _overviewActiveCount,
+            _overviewPausedCount,
+            _overviewIssueCount,
+            _overviewDownloadSpeed,
+            _overviewUploadSpeed,
+            _overviewDownloadLimitEnabled,
+            _overviewDownloadLimit,
+            _overviewUploadLimitEnabled,
+            _overviewUploadLimit);
+    }
+
+    public void UpdateSelectedTaskSpeedLimitState(
+        bool downloadLimitEnabled,
+        long downloadLimit,
+        bool uploadLimitEnabled,
+        long uploadLimit)
+    {
+        ViewModel.UpdateTaskLimits(downloadLimitEnabled, downloadLimit, uploadLimitEnabled, uploadLimit);
     }
 
     private void RefreshAriaStatusDetails()
@@ -267,6 +286,11 @@ public sealed partial class TaskDetailsPaneControl : UserControl
     private void TaskDetailsSelectorBar_SelectionChanged(SelectorBar sender, SelectorBarSelectionChangedEventArgs args)
     {
         ShowTaskDetailsSection(SelectedSectionTag);
+    }
+
+    private void ViewModel_SpeedLimitApplyRequested(object? sender, SpeedLimitApplyRequestedEventArgs e)
+    {
+        SpeedLimitApplyRequested?.Invoke(this, e);
     }
 
     private void ShowTaskDetailsSection(string tag)
@@ -407,18 +431,6 @@ public sealed partial class TaskDetailsPaneControl : UserControl
         return $"{speed:0.#} {units[unitIndex]}";
     }
 
-    private string FormatOverviewSpeedLimitText()
-    {
-        string downloadLimit = _overviewDownloadLimitEnabled && _overviewDownloadLimit > 0
-            ? FormatSpeedForDetails(_overviewDownloadLimit)
-            : "不限速";
-        string uploadLimit = _overviewUploadLimitEnabled && _overviewUploadLimit > 0
-            ? FormatSpeedForDetails(_overviewUploadLimit)
-            : "不限速";
-
-        return $"下载 {downloadLimit} / 上传 {uploadLimit}";
-    }
-
     private static string ResolveLocalStateText(DownloadTask task, string resolvedFilePath)
     {
         if (string.IsNullOrWhiteSpace(resolvedFilePath))
@@ -475,6 +487,12 @@ public sealed partial class TaskDetailsPaneControl : UserControl
         }
 
         return DetailPaneMode.Normal;
+    }
+
+    private static bool ShouldShowUploadDetails(DownloadTask task)
+    {
+        return task.IsPeerTransfer ||
+            task.SourceUri.StartsWith("ed2k://", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string ResolveProtocolText(string sourceUri)

@@ -216,18 +216,44 @@ public sealed class DownloadCoordinator
                 ? null
                 : task.Name;
 
-            string newGid = await _rpcClient.AddUriAsync(
-                task.SourceUri,
-                outputFileName,
-                saveDirectory,
-                splitCount,
-                null,
-                null,
-                cancellationToken);
+            string newGid;
+            TorrentMetadata? torrentMetadata = null;
+            if (IsLocalTorrentSource(task.SourceUri))
+            {
+                byte[] torrentBytes = await File.ReadAllBytesAsync(task.SourceUri, cancellationToken);
+                torrentMetadata = TorrentMetadataReader.Read(torrentBytes);
+                newGid = await _rpcClient.AddTorrentAsync(
+                    torrentBytes,
+                    saveDirectory,
+                    splitCount,
+                    [],
+                    cancellationToken);
+            }
+            else
+            {
+                newGid = await _rpcClient.AddUriAsync(
+                    task.SourceUri,
+                    outputFileName,
+                    saveDirectory,
+                    splitCount,
+                    null,
+                    null,
+                    cancellationToken);
+            }
 
             await RemoveCompletedDownloadResultAsync(oldGid, cancellationToken);
 
             task.Gid = newGid;
+            if (torrentMetadata is not null)
+            {
+                task.Name = string.IsNullOrWhiteSpace(torrentMetadata.Name)
+                    ? Path.GetFileNameWithoutExtension(task.SourceUri)
+                    : torrentMetadata.Name;
+                task.IsPeerTransfer = true;
+                task.IsMetadataTransfer = false;
+                task.TotalLength = torrentMetadata.Files.Sum(file => file.Length);
+            }
+
             task.SaveDirectory = saveDirectory;
             task.LocalFilePath = string.IsNullOrWhiteSpace(task.Name) ? string.Empty : Path.Combine(saveDirectory, task.Name);
             task.Status = "Waiting";
@@ -388,7 +414,7 @@ public sealed class DownloadCoordinator
         }
     }
 
-    public Task SetGlobalSpeedLimitsAsync(
+    public async Task SetGlobalSpeedLimitsAsync(
         long downloadLimitBytesPerSecond,
         long uploadLimitBytesPerSecond,
         CancellationToken cancellationToken = default)
@@ -396,12 +422,68 @@ public sealed class DownloadCoordinator
         Dictionary<string, string> options = new()
         {
             ["max-overall-download-limit"] = FormatAria2SpeedLimit(downloadLimitBytesPerSecond),
+            ["max-overall-upload-limit"] = FormatAria2SpeedLimit(uploadLimitBytesPerSecond)
+        };
+
+        await _rpcClient.ChangeGlobalOptionAsync(options, cancellationToken);
+
+        Dictionary<string, string> appliedOptions = await _rpcClient.GetGlobalOptionAsync(cancellationToken);
+        VerifyAppliedSpeedLimit(
+            appliedOptions,
+            "max-overall-download-limit",
+            downloadLimitBytesPerSecond);
+        VerifyAppliedSpeedLimit(
+            appliedOptions,
+            "max-overall-upload-limit",
+            uploadLimitBytesPerSecond);
+    }
+
+    public Task SetTaskSpeedLimitsAsync(
+        string gid,
+        long downloadLimitBytesPerSecond,
+        long uploadLimitBytesPerSecond,
+        CancellationToken cancellationToken = default)
+    {
+        Dictionary<string, string> options = new()
+        {
             ["max-download-limit"] = FormatAria2SpeedLimit(downloadLimitBytesPerSecond),
-            ["max-overall-upload-limit"] = FormatAria2SpeedLimit(uploadLimitBytesPerSecond),
             ["max-upload-limit"] = FormatAria2SpeedLimit(uploadLimitBytesPerSecond)
         };
 
-        return _rpcClient.ChangeGlobalOptionAsync(options, cancellationToken);
+        return _rpcClient.ChangeOptionAsync(gid, options, cancellationToken);
+    }
+
+    public Task SetTaskDownloadSpeedLimitAsync(
+        string gid,
+        long downloadLimitBytesPerSecond,
+        CancellationToken cancellationToken = default)
+    {
+        Dictionary<string, string> options = new()
+        {
+            ["max-download-limit"] = FormatAria2SpeedLimit(downloadLimitBytesPerSecond)
+        };
+
+        return _rpcClient.ChangeOptionAsync(gid, options, cancellationToken);
+    }
+
+    public Task SetTaskUploadSpeedLimitAsync(
+        string gid,
+        long uploadLimitBytesPerSecond,
+        CancellationToken cancellationToken = default)
+    {
+        Dictionary<string, string> options = new()
+        {
+            ["max-upload-limit"] = FormatAria2SpeedLimit(uploadLimitBytesPerSecond)
+        };
+
+        return _rpcClient.ChangeOptionAsync(gid, options, cancellationToken);
+    }
+
+    public Task<Dictionary<string, string>> GetTaskOptionsAsync(
+        string gid,
+        CancellationToken cancellationToken = default)
+    {
+        return _rpcClient.GetOptionAsync(gid, cancellationToken);
     }
 
     public Task SetGlobalDownloadSettingsAsync(
@@ -813,6 +895,51 @@ public sealed class DownloadCoordinator
         return Math.Max(bytesPerSecond, 0).ToString(CultureInfo.InvariantCulture);
     }
 
+    private static void VerifyAppliedSpeedLimit(
+        IReadOnlyDictionary<string, string> options,
+        string optionName,
+        long expectedBytesPerSecond)
+    {
+        if (!options.TryGetValue(optionName, out string? value))
+        {
+            throw new InvalidOperationException($"aria2 did not report global option {optionName} after applying speed limits.");
+        }
+
+        long actualBytesPerSecond = ParseAria2SpeedLimit(value);
+        long expected = Math.Max(expectedBytesPerSecond, 0);
+        if (actualBytesPerSecond != expected)
+        {
+            throw new InvalidOperationException(
+                $"aria2 reported {optionName}={value}, expected {FormatAria2SpeedLimit(expected)}.");
+        }
+    }
+
+    private static long ParseAria2SpeedLimit(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return 0;
+        }
+
+        string trimmed = value.Trim();
+        long multiplier = 1;
+        char suffix = trimmed[^1];
+        if (suffix is 'K' or 'k')
+        {
+            multiplier = 1024L;
+            trimmed = trimmed[..^1];
+        }
+        else if (suffix is 'M' or 'm')
+        {
+            multiplier = 1024L * 1024L;
+            trimmed = trimmed[..^1];
+        }
+
+        return double.TryParse(trimmed, NumberStyles.Float, CultureInfo.InvariantCulture, out double parsed)
+            ? Math.Max(0, (long)Math.Round(parsed * multiplier))
+            : 0;
+    }
+
     private static void DeleteLocalFiles(DownloadTask task)
     {
         string path = task.LocalFilePath;
@@ -1063,6 +1190,13 @@ public sealed class DownloadCoordinator
     private static bool IsErrorTask(DownloadTask task)
     {
         return task.Status.Contains("error", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsLocalTorrentSource(string sourceUri)
+    {
+        return !string.IsNullOrWhiteSpace(sourceUri) &&
+            sourceUri.EndsWith(".torrent", StringComparison.OrdinalIgnoreCase) &&
+            File.Exists(sourceUri);
     }
 
     private static string ResolveRecoveryDirectory(DownloadTask task)

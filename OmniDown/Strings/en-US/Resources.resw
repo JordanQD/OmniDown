@@ -182,6 +182,28 @@
   <data name="SpeedLimitButton.AutomationProperties.Name" xml:space="preserve"><value>Realtime speed and speed limit</value></data>
   <data name="RealtimeSpeedLabel.Text" xml:space="preserve"><value>Realtime speed</value></data>
   <data name="SpeedLimitFlyoutTitle.Text" xml:space="preserve"><value>Speed limit</value></data>
+  <data name="TaskDetailsItemCountLabel" xml:space="preserve"><value>Total items</value></data>
+  <data name="TaskDetailsTransferCountLabel" xml:space="preserve"><value>Transfers</value></data>
+  <data name="TaskDetailsPausedCountLabel" xml:space="preserve"><value>Paused</value></data>
+  <data name="TaskDetailsIssueCountLabel" xml:space="preserve"><value>Issues</value></data>
+  <data name="TaskDetailsDownloadSpeedLabel" xml:space="preserve"><value>Download speed</value></data>
+  <data name="TaskDetailsUploadSpeedLabel" xml:space="preserve"><value>Upload speed</value></data>
+  <data name="TaskDetailsItemCountFormat" xml:space="preserve"><value>{0} items</value></data>
+  <data name="TaskDetailsSpeedLimitInlineText" xml:space="preserve"><value>limit {0}</value></data>
+  <data name="TaskDetailsSpeedLimitOffText" xml:space="preserve"><value>No limit</value></data>
+  <data name="TaskDetailsUploadLimitHeader" xml:space="preserve"><value>Upload limit</value></data>
+  <data name="TaskDetailsDownloadLimitHeader" xml:space="preserve"><value>Download limit</value></data>
+  <data name="TaskDetailsSpeedLimitEnabledLabel" xml:space="preserve"><value>Enable limit</value></data>
+  <data name="TaskDetailsSpeedLimitValueLabel" xml:space="preserve"><value>Speed</value></data>
+  <data name="TaskDetailsSpeedLimitUnitLabel" xml:space="preserve"><value>Unit</value></data>
+  <data name="TaskDetailsSpeedLimitApplyText" xml:space="preserve"><value>Apply</value></data>
+  <data name="TaskDetailsGlobalDownloadLimitToolTip" xml:space="preserve"><value>Set global download limit</value></data>
+  <data name="TaskDetailsGlobalUploadLimitToolTip" xml:space="preserve"><value>Set global upload limit</value></data>
+  <data name="TaskDetailsTaskDownloadLimitToolTip" xml:space="preserve"><value>Set this task's download limit</value></data>
+  <data name="TaskDetailsTaskUploadLimitToolTip" xml:space="preserve"><value>Set this task's upload limit</value></data>
+  <data name="TaskSpeedLimitNoTaskMessage" xml:space="preserve"><value>Select one task before setting task speed limits.</value></data>
+  <data name="TaskSpeedLimitAppliedMessage" xml:space="preserve"><value>Task speed limit applied.</value></data>
+  <data name="TaskSpeedLimitApplyFailedMessage" xml:space="preserve"><value>Failed to apply task speed limit: {0}</value></data>
   <data name="DownloadLimitLabel.Text" xml:space="preserve"><value>Download limit</value></data>
   <data name="UploadLimitLabel.Text" xml:space="preserve"><value>Upload limit</value></data>
   <data name="ApplySpeedLimitButton.Content" xml:space="preserve"><value>Apply</value></data>

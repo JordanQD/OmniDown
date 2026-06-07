@@ -236,11 +236,55 @@ namespace OmniDown
             {
                 TaskDetailsPane.SelectedTaskCount = selectedTasks.Count;
                 TaskDetailsPane.SelectedTask = null;
+                TaskDetailsPane.UpdateSelectedTaskSpeedLimitState(false, 0, false, 0);
                 return;
             }
 
             TaskDetailsPane.SelectedTaskCount = selectedTasks.Count;
             TaskDetailsPane.SelectedTask = selectedTasks[0];
+            _ = RefreshTaskDetailsSpeedLimitStateAsync(selectedTasks[0]);
+        }
+
+        private async Task RefreshTaskDetailsSpeedLimitStateAsync(DownloadTask task)
+        {
+            if (TaskDetailsPane is null ||
+                string.IsNullOrWhiteSpace(task.Gid) ||
+                !_aria2EngineHost.IsRunning)
+            {
+                TaskDetailsPane?.UpdateSelectedTaskSpeedLimitState(false, 0, false, 0);
+                return;
+            }
+
+            int requestId = ++_taskDetailsSpeedLimitRequestId;
+            long downloadLimit = 0;
+            long uploadLimit = 0;
+
+            try
+            {
+                Dictionary<string, string> options = await _downloadCoordinator.GetTaskOptionsAsync(task.Gid);
+                if (options.TryGetValue("max-download-limit", out string? downloadValue))
+                {
+                    downloadLimit = ParseAria2SpeedLimit(downloadValue);
+                }
+
+                if (options.TryGetValue("max-upload-limit", out string? uploadValue))
+                {
+                    uploadLimit = ParseAria2SpeedLimit(uploadValue);
+                }
+            }
+            catch
+            {
+                downloadLimit = 0;
+                uploadLimit = 0;
+            }
+
+            if (requestId != _taskDetailsSpeedLimitRequestId ||
+                TaskDetailsPane?.SelectedTask != task)
+            {
+                return;
+            }
+
+            TaskDetailsPane.UpdateSelectedTaskSpeedLimitState(downloadLimit > 0, downloadLimit, uploadLimit > 0, uploadLimit);
         }
 
         private void UpdateTaskDetailsPaneOverviewState()
@@ -583,7 +627,98 @@ namespace OmniDown
         {
             if (sender is FrameworkElement placementTarget)
             {
+                PrepareGlobalSpeedLimitFlyout();
                 SpeedLimitButton.Flyout?.ShowAt(placementTarget);
+            }
+        }
+
+        private void SpeedLimitButton_Click(object sender, RoutedEventArgs e)
+        {
+            PrepareGlobalSpeedLimitFlyout();
+        }
+
+        private async void TaskDetailsPane_SpeedLimitApplyRequested(object? sender, SpeedLimitApplyRequestedEventArgs e)
+        {
+            if (e.Scope == SpeedLimitScope.Global)
+            {
+                await ApplyTaskDetailsGlobalSpeedLimitAsync(e);
+                return;
+            }
+
+            await ApplyTaskDetailsTaskSpeedLimitAsync(e);
+        }
+
+        private async Task ApplyTaskDetailsGlobalSpeedLimitAsync(SpeedLimitApplyRequestedEventArgs args)
+        {
+            if (args.Direction == SpeedLimitDirection.Upload)
+            {
+                _isUploadSpeedLimitEnabled = args.IsEnabled;
+                _uploadLimitBytesPerSecond = args.BytesPerSecond;
+            }
+            else
+            {
+                _isDownloadSpeedLimitEnabled = args.IsEnabled;
+                _downloadLimitBytesPerSecond = args.BytesPerSecond;
+            }
+
+            Aria2EngineStartResult startResult = await EnsureAria2StartedAsync();
+            if (!startResult.Started)
+            {
+                ShowMessage(startResult.Message, InfoBarSeverity.Error);
+                return;
+            }
+
+            try
+            {
+                await ApplyConfiguredSpeedLimitsAsync();
+                SetSpeedLimitControlsFromBytes(
+                    _isDownloadSpeedLimitEnabled,
+                    _downloadLimitBytesPerSecond,
+                    _isUploadSpeedLimitEnabled,
+                    _uploadLimitBytesPerSecond);
+                SaveSpeedLimitSettings();
+                UpdateGlobalSpeedLimitText();
+                ShowMessage(Strings.Get("SpeedLimitAppliedMessage"), InfoBarSeverity.Success);
+            }
+            catch (Exception ex)
+            {
+                ShowMessage(Strings.Format("SpeedLimitApplyFailedMessage", ex.Message), InfoBarSeverity.Error);
+            }
+        }
+
+        private async Task ApplyTaskDetailsTaskSpeedLimitAsync(SpeedLimitApplyRequestedEventArgs args)
+        {
+            DownloadTask? task = TaskDetailsPane?.SelectedTask;
+            if (task is null || string.IsNullOrWhiteSpace(task.Gid))
+            {
+                ShowMessage(Strings.Get("TaskSpeedLimitNoTaskMessage"), InfoBarSeverity.Warning);
+                return;
+            }
+
+            Aria2EngineStartResult startResult = await EnsureAria2StartedAsync();
+            if (!startResult.Started)
+            {
+                ShowMessage(startResult.Message, InfoBarSeverity.Error);
+                return;
+            }
+
+            try
+            {
+                if (args.Direction == SpeedLimitDirection.Upload)
+                {
+                    await _downloadCoordinator.SetTaskUploadSpeedLimitAsync(task.Gid, args.BytesPerSecond);
+                }
+                else
+                {
+                    await _downloadCoordinator.SetTaskDownloadSpeedLimitAsync(task.Gid, args.BytesPerSecond);
+                }
+
+                await RefreshTaskDetailsSpeedLimitStateAsync(task);
+                ShowMessage(Strings.Get("TaskSpeedLimitAppliedMessage"), InfoBarSeverity.Success);
+            }
+            catch (Exception ex)
+            {
+                ShowMessage(Strings.Format("TaskSpeedLimitApplyFailedMessage", ex.Message), InfoBarSeverity.Error);
             }
         }
 

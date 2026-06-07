@@ -227,7 +227,13 @@ namespace OmniDown
 
         private async Task ApplySpeedLimitAsync(bool hideFlyout)
         {
-            UpdateSpeedLimitStateFromToolbar();
+            if (_speedLimitTargetMode == SpeedLimitTargetMode.Task)
+            {
+                await ApplyTaskSpeedLimitAsync(hideFlyout);
+                return;
+            }
+
+            UpdateGlobalSpeedLimitStateFromToolbar();
 
             Aria2EngineStartResult startResult = await EnsureAria2StartedAsync();
             if (!startResult.Started)
@@ -251,6 +257,51 @@ namespace OmniDown
             catch (Exception ex)
             {
                 ShowMessage(Strings.Format("SpeedLimitApplyFailedMessage", ex.Message), InfoBarSeverity.Error);
+            }
+        }
+
+        private async Task ApplyTaskSpeedLimitAsync(bool hideFlyout)
+        {
+            if (string.IsNullOrWhiteSpace(_speedLimitTaskGid))
+            {
+                ShowMessage("请选择一个任务后再设置任务限速。", InfoBarSeverity.Warning);
+                return;
+            }
+
+            bool downloadEnabled = DownloadLimitToggleSwitch?.IsOn == true;
+            bool uploadEnabled = UploadLimitToggleSwitch?.IsOn == true;
+            long downloadLimit = downloadEnabled
+                ? GetSpeedLimitBytesPerSecond(DownloadLimitNumberBox, GetSelectedSpeedLimitUnit(DownloadLimitUnitComboBox))
+                : 0;
+            long uploadLimit = uploadEnabled
+                ? GetSpeedLimitBytesPerSecond(UploadLimitNumberBox, GetSelectedSpeedLimitUnit(UploadLimitUnitComboBox))
+                : 0;
+
+            Aria2EngineStartResult startResult = await EnsureAria2StartedAsync();
+            if (!startResult.Started)
+            {
+                ShowMessage(startResult.Message, InfoBarSeverity.Error);
+                return;
+            }
+
+            try
+            {
+                await _downloadCoordinator.SetTaskSpeedLimitsAsync(_speedLimitTaskGid, downloadLimit, uploadLimit);
+                TaskDetailsPane?.UpdateSelectedTaskSpeedLimitState(
+                    downloadLimit > 0,
+                    downloadLimit,
+                    uploadLimit > 0,
+                    uploadLimit);
+                if (hideFlyout)
+                {
+                    SpeedLimitButton.Flyout?.Hide();
+                }
+
+                ShowMessage("任务限速已应用。", InfoBarSeverity.Success);
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"任务限速应用失败：{ex.Message}", InfoBarSeverity.Error);
             }
         }
 
@@ -360,6 +411,43 @@ namespace OmniDown
             DownloadLimitToggleSwitch.IsOn = settings.DownloadEnabled;
             SetUploadSpeedLimitInputsEnabled(settings.UploadEnabled);
             SetDownloadSpeedLimitInputsEnabled(settings.DownloadEnabled);
+        }
+
+        private void PrepareGlobalSpeedLimitFlyout()
+        {
+            _speedLimitTargetMode = SpeedLimitTargetMode.Global;
+            _speedLimitTaskGid = string.Empty;
+            LoadSpeedLimitSettings();
+        }
+
+        private async Task LoadTaskSpeedLimitStateIntoToolbarAsync(string gid)
+        {
+            long downloadLimit = 0;
+            long uploadLimit = 0;
+
+            if (_aria2EngineHost.IsRunning)
+            {
+                try
+                {
+                    Dictionary<string, string> options = await _downloadCoordinator.GetTaskOptionsAsync(gid);
+                    if (options.TryGetValue("max-download-limit", out string? downloadValue))
+                    {
+                        downloadLimit = ParseAria2SpeedLimit(downloadValue);
+                    }
+
+                    if (options.TryGetValue("max-upload-limit", out string? uploadValue))
+                    {
+                        uploadLimit = ParseAria2SpeedLimit(uploadValue);
+                    }
+                }
+                catch
+                {
+                    downloadLimit = 0;
+                    uploadLimit = 0;
+                }
+            }
+
+            SetSpeedLimitControlsFromBytes(downloadLimit > 0, downloadLimit, uploadLimit > 0, uploadLimit);
         }
 
         private void LoadCloseBehaviorSettings()
@@ -1973,7 +2061,7 @@ namespace OmniDown
             _settingsPageViewModel.SaveSpeedLimitSettings(settings);
         }
 
-        private void UpdateSpeedLimitStateFromToolbar()
+        private void UpdateGlobalSpeedLimitStateFromToolbar()
         {
             _isDownloadSpeedLimitEnabled = DownloadLimitToggleSwitch?.IsOn == true;
             _isUploadSpeedLimitEnabled = UploadLimitToggleSwitch?.IsOn == true;
@@ -2067,6 +2155,56 @@ namespace OmniDown
         private static void SetSpeedLimitUnit(ComboBox comboBox, string unit)
         {
             comboBox.SelectedIndex = unit.Equals("MB/s", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
+        }
+
+        private void SetSpeedLimitControlsFromBytes(
+            bool downloadEnabled,
+            long downloadBytesPerSecond,
+            bool uploadEnabled,
+            long uploadBytesPerSecond)
+        {
+            SetToggleSwitch(DownloadLimitToggleSwitch, downloadEnabled);
+            SetToggleSwitch(UploadLimitToggleSwitch, uploadEnabled);
+            SetSpeedLimitValue(DownloadLimitNumberBox, DownloadLimitUnitComboBox, downloadBytesPerSecond);
+            SetSpeedLimitValue(UploadLimitNumberBox, UploadLimitUnitComboBox, uploadBytesPerSecond);
+            SetDownloadSpeedLimitInputsEnabled(downloadEnabled);
+            SetUploadSpeedLimitInputsEnabled(uploadEnabled);
+        }
+
+        private static void SetSpeedLimitValue(NumberBox numberBox, ComboBox comboBox, long bytesPerSecond)
+        {
+            long normalized = Math.Max(bytesPerSecond, 1024);
+            const long mb = 1024L * 1024L;
+            bool useMegabytes = normalized >= mb && normalized % mb == 0;
+            comboBox.SelectedIndex = useMegabytes ? 1 : 0;
+            long divisor = useMegabytes ? mb : 1024L;
+            numberBox.Value = Math.Max(1, (double)normalized / divisor);
+        }
+
+        private static long ParseAria2SpeedLimit(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return 0;
+            }
+
+            string trimmed = value.Trim();
+            long multiplier = 1;
+            char suffix = trimmed[^1];
+            if (suffix is 'K' or 'k')
+            {
+                multiplier = 1024L;
+                trimmed = trimmed[..^1];
+            }
+            else if (suffix is 'M' or 'm')
+            {
+                multiplier = 1024L * 1024L;
+                trimmed = trimmed[..^1];
+            }
+
+            return double.TryParse(trimmed, NumberStyles.Float, CultureInfo.InvariantCulture, out double parsed)
+                ? Math.Max(0, (long)Math.Round(parsed * multiplier))
+                : 0;
         }
     }
 }

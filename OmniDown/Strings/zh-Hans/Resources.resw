@@ -182,6 +182,28 @@
   <data name="SpeedLimitButton.AutomationProperties.Name" xml:space="preserve"><value>实时速度和限速</value></data>
   <data name="RealtimeSpeedLabel.Text" xml:space="preserve"><value>实时速度</value></data>
   <data name="SpeedLimitFlyoutTitle.Text" xml:space="preserve"><value>限速</value></data>
+  <data name="TaskDetailsItemCountLabel" xml:space="preserve"><value>项目总数</value></data>
+  <data name="TaskDetailsTransferCountLabel" xml:space="preserve"><value>传输</value></data>
+  <data name="TaskDetailsPausedCountLabel" xml:space="preserve"><value>暂停</value></data>
+  <data name="TaskDetailsIssueCountLabel" xml:space="preserve"><value>异常</value></data>
+  <data name="TaskDetailsDownloadSpeedLabel" xml:space="preserve"><value>下载速度</value></data>
+  <data name="TaskDetailsUploadSpeedLabel" xml:space="preserve"><value>上传速度</value></data>
+  <data name="TaskDetailsItemCountFormat" xml:space="preserve"><value>{0} 个项目</value></data>
+  <data name="TaskDetailsSpeedLimitInlineText" xml:space="preserve"><value>限速 {0}</value></data>
+  <data name="TaskDetailsSpeedLimitOffText" xml:space="preserve"><value>不限速</value></data>
+  <data name="TaskDetailsUploadLimitHeader" xml:space="preserve"><value>上传限速</value></data>
+  <data name="TaskDetailsDownloadLimitHeader" xml:space="preserve"><value>下载限速</value></data>
+  <data name="TaskDetailsSpeedLimitEnabledLabel" xml:space="preserve"><value>启用限速</value></data>
+  <data name="TaskDetailsSpeedLimitValueLabel" xml:space="preserve"><value>速度</value></data>
+  <data name="TaskDetailsSpeedLimitUnitLabel" xml:space="preserve"><value>单位</value></data>
+  <data name="TaskDetailsSpeedLimitApplyText" xml:space="preserve"><value>应用</value></data>
+  <data name="TaskDetailsGlobalDownloadLimitToolTip" xml:space="preserve"><value>设置全局下载限速</value></data>
+  <data name="TaskDetailsGlobalUploadLimitToolTip" xml:space="preserve"><value>设置全局上传限速</value></data>
+  <data name="TaskDetailsTaskDownloadLimitToolTip" xml:space="preserve"><value>设置当前任务下载限速</value></data>
+  <data name="TaskDetailsTaskUploadLimitToolTip" xml:space="preserve"><value>设置当前任务上传限速</value></data>
+  <data name="TaskSpeedLimitNoTaskMessage" xml:space="preserve"><value>请选择一个任务后再设置任务限速。</value></data>
+  <data name="TaskSpeedLimitAppliedMessage" xml:space="preserve"><value>任务限速已应用。</value></data>
+  <data name="TaskSpeedLimitApplyFailedMessage" xml:space="preserve"><value>任务限速应用失败：{0}</value></data>
   <data name="DownloadLimitLabel.Text" xml:space="preserve"><value>下载限速</value></data>
   <data name="UploadLimitLabel.Text" xml:space="preserve"><value>上传限速</value></data>
   <data name="ApplySpeedLimitButton.Content" xml:space="preserve"><value>应用</value></data>

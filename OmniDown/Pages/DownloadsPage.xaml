@@ -376,6 +376,7 @@
                 Background="Transparent"
                 BorderBrush="Transparent"
                 BorderThickness="0"
+                Click="SpeedLimitButton_Click"
                 x:Uid="SpeedLimitButton">
                 <DropDownButton.Content>
                     <Grid

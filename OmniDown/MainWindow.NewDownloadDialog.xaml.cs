@@ -648,6 +648,17 @@ namespace OmniDown
 
                 bool isTorrentTask = isTorrentMode;
                 List<string> sourceUris = isTorrentTask ? [] : GetDownloadSourceUris(uriTextBox.Text);
+                if (!isTorrentTask && sourceUris.Count == 1)
+                {
+                    TorrentSelection? localTorrentSelection = await TryLoadLocalTorrentPathAsync(sourceUris[0]);
+                    if (localTorrentSelection is not null)
+                    {
+                        setTorrentSelection(localTorrentSelection);
+                        isTorrentTask = true;
+                        sourceUris.Clear();
+                    }
+                }
+
                 if (!isTorrentTask && sourceUris.Count == 0)
                 {
                     ShowMessage(Strings.Get("DownloadUrlRequiredMessage"), InfoBarSeverity.Warning);
@@ -752,12 +763,29 @@ namespace OmniDown
 
         private static async Task<TorrentSelection> LoadTorrentFileAsync(StorageFile file)
         {
-            byte[] bytes = await File.ReadAllBytesAsync(file.Path);
+            return await LoadTorrentFileAsync(file.Path, file.Name);
+        }
+
+        private static async Task<TorrentSelection?> TryLoadLocalTorrentPathAsync(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path) ||
+                !path.EndsWith(".torrent", StringComparison.OrdinalIgnoreCase) ||
+                !File.Exists(path))
+            {
+                return null;
+            }
+
+            return await LoadTorrentFileAsync(path, Path.GetFileName(path));
+        }
+
+        private static async Task<TorrentSelection> LoadTorrentFileAsync(string path, string fileName)
+        {
+            byte[] bytes = await File.ReadAllBytesAsync(path);
             TorrentMetadata metadata = TorrentMetadataReader.Read(bytes);
             string displayName = string.IsNullOrWhiteSpace(metadata.Name)
-                ? file.Name
+                ? fileName
                 : metadata.Name;
-            return new TorrentSelection(file.Path, displayName, bytes, metadata);
+            return new TorrentSelection(path, displayName, bytes, metadata);
         }
     }
 }

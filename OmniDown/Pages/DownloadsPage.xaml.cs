@@ -154,6 +154,7 @@ public sealed partial class DownloadsPage : Page
     public event RoutedEventHandler? ClearCompletedTasksButtonClick;
     public event RoutedEventHandler? TaskDetailsButtonClick;
     public event RoutedEventHandler? StatusBarSpeedButtonClick;
+    public event RoutedEventHandler? SpeedLimitButtonClick;
     public event RoutedEventHandler? ApplySpeedLimitButtonClick;
     public event RoutedEventHandler? SortColumnMenuItemClick;
     public event RoutedEventHandler? SortDirectionMenuItemClick;
@@ -188,6 +189,7 @@ public sealed partial class DownloadsPage : Page
     private void ClearCompletedTasksButton_Click(object sender, RoutedEventArgs e) => ClearCompletedTasksButtonClick?.Invoke(sender, e);
     private void TaskDetailsButton_Click(object sender, RoutedEventArgs e) => TaskDetailsButtonClick?.Invoke(sender, e);
     private void StatusBarSpeedButton_Click(object sender, RoutedEventArgs e) => StatusBarSpeedButtonClick?.Invoke(sender, e);
+    private void SpeedLimitButton_Click(object sender, RoutedEventArgs e) => SpeedLimitButtonClick?.Invoke(sender, e);
     private void ApplySpeedLimitButton_Click(object sender, RoutedEventArgs e) => ApplySpeedLimitButtonClick?.Invoke(sender, e);
     private void SortColumnMenuItem_Click(object sender, RoutedEventArgs e) => SortColumnMenuItemClick?.Invoke(sender, e);
     private void SortDirectionMenuItem_Click(object sender, RoutedEventArgs e) => SortDirectionMenuItemClick?.Invoke(sender, e);

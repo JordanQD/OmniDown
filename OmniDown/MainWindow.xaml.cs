@@ -39,6 +39,12 @@ namespace OmniDown
             NetworkSettings Network,
             AdvancedSettings Advanced);
 
+        private enum SpeedLimitTargetMode
+        {
+            Global,
+            Task
+        }
+
         private const string CloneCommand = "git clone https://github.com/JordanQD/OmniDown.git";
         private readonly Aria2EngineHost _aria2EngineHost = new();
         private readonly Aria2RpcClient _aria2RpcClient = new();
@@ -62,6 +68,9 @@ namespace OmniDown
         private bool _hasStartedInitialLoad;
         private bool _isDownloadSpeedLimitEnabled;
         private bool _isUploadSpeedLimitEnabled;
+        private SpeedLimitTargetMode _speedLimitTargetMode = SpeedLimitTargetMode.Global;
+        private string _speedLimitTaskGid = string.Empty;
+        private int _taskDetailsSpeedLimitRequestId;
         private bool _isTaskDetailsPaneOpen;
         private long _currentGlobalDownloadSpeed;
         private long _currentGlobalUploadSpeed;
@@ -146,7 +155,7 @@ namespace OmniDown
             _notifications.NotificationInvoked += Notifications_NotificationInvoked;
             RecordObservedTaskStatuses();
             Closed += MainWindow_Closed;
-            _refreshTimer.Interval = TimeSpan.FromSeconds(2);
+            _refreshTimer.Interval = TimeSpan.FromSeconds(1);
             _refreshTimer.Tick += RefreshTimer_Tick;
             _statusMessageTimer.Interval = TimeSpan.FromSeconds(3);
             _statusMessageTimer.Tick += StatusMessageTimer_Tick;
@@ -321,6 +330,7 @@ namespace OmniDown
             _downloadsPage.ClearCompletedTasksButtonClick += ClearCompletedTasksButton_Click;
             _downloadsPage.TaskDetailsButtonClick += TaskDetailsButton_Click;
             _downloadsPage.StatusBarSpeedButtonClick += StatusBarSpeedButton_Click;
+            _downloadsPage.SpeedLimitButtonClick += SpeedLimitButton_Click;
             _downloadsPage.ApplySpeedLimitButtonClick += ApplySpeedLimitButton_Click;
             _downloadsPage.SortColumnMenuItemClick += SortColumnMenuItem_Click;
             _downloadsPage.SortDirectionMenuItemClick += SortDirectionMenuItem_Click;
@@ -343,6 +353,7 @@ namespace OmniDown
             _downloadsPage.SettingsSaveTeachingTipCloseButtonClick += SettingsSaveTeachingTip_CloseButtonClick;
             _downloadsPage.AriaRestartTeachingTipActionButtonClick += AriaRestartTeachingTip_ActionButtonClick;
             _downloadsPage.AriaRestartTeachingTipCloseButtonClick += AriaRestartTeachingTip_CloseButtonClick;
+            _downloadsPage.TaskDetailsPane.SpeedLimitApplyRequested += TaskDetailsPane_SpeedLimitApplyRequested;
         }
     }
 }
