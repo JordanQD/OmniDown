@@ -18,11 +18,6 @@
         x:Name="DownloadSettingsContent"
         Margin="0,24,0,36"
         Spacing="{StaticResource SettingsCardSpacing}">
-        <StackPanel.ChildrenTransitions>
-            <EntranceThemeTransition FromVerticalOffset="50" />
-            <RepositionThemeTransition />
-        </StackPanel.ChildrenTransitions>
-
         <TextBlock
             AutomationProperties.HeadingLevel="Level1"
             Style="{StaticResource TitleTextBlockStyle}"

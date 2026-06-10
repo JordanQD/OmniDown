@@ -7,10 +7,6 @@
         x:Name="AboutSettingsContent"
         Margin="0,24,0,36"
         Spacing="4">
-        <StackPanel.ChildrenTransitions>
-            <EntranceThemeTransition FromVerticalOffset="50" />
-            <RepositionThemeTransition />
-        </StackPanel.ChildrenTransitions>
         <TextBlock
             x:Uid="AboutSettingsHeaderText"
             AutomationProperties.HeadingLevel="Level1"

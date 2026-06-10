@@ -3,10 +3,21 @@
     x:Class="OmniDown.Pages.AppSettingsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:controls="using:OmniDown.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <controls:SettingsPageControl x:Name="_settingsPageControl" />
+    <Frame
+        x:Name="SettingsFrame"
+        IsNavigationStackEnabled="False">
+        <Frame.ContentTransitions>
+            <TransitionCollection>
+                <NavigationThemeTransition>
+                    <NavigationThemeTransition.DefaultNavigationTransitionInfo>
+                        <SlideNavigationTransitionInfo Effect="FromRight" />
+                    </NavigationThemeTransition.DefaultNavigationTransitionInfo>
+                </NavigationThemeTransition>
+            </TransitionCollection>
+        </Frame.ContentTransitions>
+    </Frame>
 </Page>

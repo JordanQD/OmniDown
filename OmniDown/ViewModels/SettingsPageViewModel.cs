@@ -1,8 +1,8 @@
-namespace OmniDown.ViewModels;
-
 using OmniDown.Models.Settings;
 using OmniDown.Services.Settings;
 using System;
+
+namespace OmniDown.ViewModels;
 
 internal sealed class SettingsPageViewModel
 {
@@ -12,6 +12,8 @@ internal sealed class SettingsPageViewModel
     {
         _settingsStore = settingsStore;
     }
+
+    // ── Settings state ──
 
     public GeneralSettings GeneralSettings { get; private set; } = GeneralSettings.Default;
 
@@ -27,10 +29,81 @@ internal sealed class SettingsPageViewModel
 
     public SpeedLimitSettings SpeedLimitSettings { get; private set; } = SpeedLimitSettings.Default;
 
+    // ── Dirty tracking ──
+
+    /// <summary>
+    /// True when any settings section has unsaved changes.
+    /// Each settings Page sets this to true on user edits, and the host
+    /// resets it to false after saving.
+    /// </summary>
+    public bool HasPendingChanges { get; set; }
+
+    /// <summary>
+    /// Reset dirty flag after a successful save.
+    /// </summary>
+    public void ClearPendingChanges()
+    {
+        HasPendingChanges = false;
+    }
+
+    /// <summary>
+    /// Mark that the user has made an edit that needs saving.
+    /// </summary>
+    public void MarkPendingChanges()
+    {
+        HasPendingChanges = true;
+    }
+
+    // ── Load ──
+
+    public void LoadAll()
+    {
+        LoadGeneralSettings();
+        LoadDownloadSettings();
+        LoadBitTorrentSettings();
+        LoadNetworkSettings();
+        LoadAdvancedSettings();
+        LoadCloseBehaviorSettings();
+        LoadSpeedLimitSettings();
+    }
+
     public void LoadGeneralSettings()
     {
         GeneralSettings = NormalizeGeneralSettings(_settingsStore.ReadGeneralSettings());
     }
+
+    public void LoadDownloadSettings()
+    {
+        DownloadSettings = _settingsStore.ReadDownloadSettings();
+    }
+
+    public void LoadBitTorrentSettings()
+    {
+        BitTorrentSettings = _settingsStore.ReadBitTorrentSettings();
+    }
+
+    public void LoadNetworkSettings()
+    {
+        NetworkSettings = _settingsStore.ReadNetworkSettings();
+    }
+
+    public void LoadAdvancedSettings()
+    {
+        AdvancedSettings = NormalizeAdvancedSettings(_settingsStore.ReadAdvancedSettings());
+        _settingsStore.SaveAdvancedSettings(AdvancedSettings);
+    }
+
+    public void LoadCloseBehaviorSettings()
+    {
+        CloseBehaviorSettings = _settingsStore.ReadCloseBehaviorSettings();
+    }
+
+    public void LoadSpeedLimitSettings()
+    {
+        SpeedLimitSettings = _settingsStore.ReadSpeedLimitSettings();
+    }
+
+    // ── Save ──
 
     public void SaveGeneralSettings()
     {
@@ -38,9 +111,9 @@ internal sealed class SettingsPageViewModel
         _settingsStore.SaveGeneralSettings(GeneralSettings);
     }
 
-    public void LoadDownloadSettings()
+    public void SaveDownloadSettings()
     {
-        DownloadSettings = _settingsStore.ReadDownloadSettings();
+        _settingsStore.SaveDownloadSettings(DownloadSettings);
     }
 
     public void SaveDownloadSettings(DownloadSettings settings)
@@ -49,9 +122,9 @@ internal sealed class SettingsPageViewModel
         _settingsStore.SaveDownloadSettings(settings);
     }
 
-    public void LoadBitTorrentSettings()
+    public void SaveBitTorrentSettings()
     {
-        BitTorrentSettings = _settingsStore.ReadBitTorrentSettings();
+        _settingsStore.SaveBitTorrentSettings(BitTorrentSettings);
     }
 
     public void SaveBitTorrentSettings(BitTorrentSettings settings)
@@ -60,9 +133,9 @@ internal sealed class SettingsPageViewModel
         _settingsStore.SaveBitTorrentSettings(settings);
     }
 
-    public void LoadNetworkSettings()
+    public void SaveNetworkSettings()
     {
-        NetworkSettings = _settingsStore.ReadNetworkSettings();
+        _settingsStore.SaveNetworkSettings(NetworkSettings);
     }
 
     public void SaveNetworkSettings(NetworkSettings settings)
@@ -71,9 +144,9 @@ internal sealed class SettingsPageViewModel
         _settingsStore.SaveNetworkSettings(settings);
     }
 
-    public void LoadAdvancedSettings()
+    public void SaveAdvancedSettings()
     {
-        AdvancedSettings = NormalizeAdvancedSettings(_settingsStore.ReadAdvancedSettings());
+        AdvancedSettings = NormalizeAdvancedSettings(AdvancedSettings);
         _settingsStore.SaveAdvancedSettings(AdvancedSettings);
     }
 
@@ -83,19 +156,14 @@ internal sealed class SettingsPageViewModel
         _settingsStore.SaveAdvancedSettings(AdvancedSettings);
     }
 
-    public void LoadCloseBehaviorSettings()
-    {
-        CloseBehaviorSettings = _settingsStore.ReadCloseBehaviorSettings();
-    }
-
     public void SaveCloseBehaviorSettings()
     {
         _settingsStore.SaveCloseBehaviorSettings(CloseBehaviorSettings);
     }
 
-    public void LoadSpeedLimitSettings()
+    public void SaveSpeedLimitSettings()
     {
-        SpeedLimitSettings = _settingsStore.ReadSpeedLimitSettings();
+        _settingsStore.SaveSpeedLimitSettings(SpeedLimitSettings);
     }
 
     public void SaveSpeedLimitSettings(SpeedLimitSettings settings)
@@ -104,24 +172,59 @@ internal sealed class SettingsPageViewModel
         _settingsStore.SaveSpeedLimitSettings(settings);
     }
 
-    public void UpdateCloseBehavior(bool minimizeToTrayOnClose)
+    // ── Save all pending sections ──
+
+    public void SaveAll()
     {
-        CloseBehaviorSettings = CloseBehaviorSettings with
-        {
-            MinimizeToTrayOnClose = minimizeToTrayOnClose
-        };
+        SaveGeneralSettings();
+        SaveDownloadSettings();
+        SaveBitTorrentSettings();
+        SaveNetworkSettings();
+        SaveAdvancedSettings();
+        SaveCloseBehaviorSettings();
+        SaveSpeedLimitSettings();
+        ClearPendingChanges();
     }
 
-    public void UpdateWindowPlacement(int x, int y, int width, int height)
+    // ── Per-section updates (called by settings Pages) ──
+
+    public void UpdateGeneralSettings(GeneralSettings settings)
     {
-        GeneralSettings = GeneralSettings with
-        {
-            WindowX = x,
-            WindowY = y,
-            WindowWidth = width,
-            WindowHeight = height
-        };
+        GeneralSettings = NormalizeGeneralSettings(settings);
+        MarkPendingChanges();
     }
+
+    public void UpdateDownloadSettings(DownloadSettings settings)
+    {
+        DownloadSettings = settings;
+        MarkPendingChanges();
+    }
+
+    public void UpdateBitTorrentSettings(BitTorrentSettings settings)
+    {
+        BitTorrentSettings = settings;
+        MarkPendingChanges();
+    }
+
+    public void UpdateNetworkSettings(NetworkSettings settings)
+    {
+        NetworkSettings = settings;
+        MarkPendingChanges();
+    }
+
+    public void UpdateAdvancedSettings(AdvancedSettings settings)
+    {
+        AdvancedSettings = NormalizeAdvancedSettings(settings);
+        MarkPendingChanges();
+    }
+
+    public void UpdateSpeedLimitSettings(SpeedLimitSettings settings)
+    {
+        SpeedLimitSettings = settings;
+        MarkPendingChanges();
+    }
+
+    // ── Fine-grained general settings update (kept for MainWindow compatibility) ──
 
     public void UpdateGeneralSettings(
         bool restoreWindowPlacement,
@@ -150,12 +253,34 @@ internal sealed class SettingsPageViewModel
             PreventSleepWhileDownloading = preventSleepWhileDownloading,
             Theme = theme
         };
+        MarkPendingChanges();
     }
 
-    public void UpdateGeneralSettings(GeneralSettings settings)
+    // ── Close behavior ──
+
+    public void UpdateCloseBehavior(bool minimizeToTrayOnClose)
     {
-        GeneralSettings = NormalizeGeneralSettings(settings);
+        CloseBehaviorSettings = CloseBehaviorSettings with
+        {
+            MinimizeToTrayOnClose = minimizeToTrayOnClose
+        };
+        MarkPendingChanges();
     }
+
+    // ── Window placement (saved separately, does not trigger pending-changes UI) ──
+
+    public void UpdateWindowPlacement(int x, int y, int width, int height)
+    {
+        GeneralSettings = GeneralSettings with
+        {
+            WindowX = x,
+            WindowY = y,
+            WindowWidth = width,
+            WindowHeight = height
+        };
+    }
+
+    // ── Normalization helpers ──
 
     private static GeneralSettings NormalizeGeneralSettings(GeneralSettings settings)
     {

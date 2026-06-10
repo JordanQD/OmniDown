@@ -109,6 +109,6 @@ public sealed partial class MainWindow
 
     // ── AppSettingsPage 控件 ──
 
-    private SettingsPageControl SettingsPage => _appSettingsPage!.SettingsPageControl;
-    internal ScrollViewer SettingsContentScrollViewer => _appSettingsPage!.SettingsPageControl.SettingsContentScrollViewerControl;
+    private AppSettingsPage SettingsPage => _appSettingsPage!;
+    internal ScrollViewer SettingsContentScrollViewer => _appSettingsPage!.SettingsContentScrollViewerControl!;
 }

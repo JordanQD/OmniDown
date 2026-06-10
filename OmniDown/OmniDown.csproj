@@ -128,10 +128,13 @@
     <PublishTrimmed>False</PublishTrimmed>
   </PropertyGroup>
 
-  <!-- Kill stale processes that may lock output files (e.g. resources.pri).
-       Runs before both MSBuild and the deployment layout copy step. -->
-  <Target Name="CleanupStaleProcesses" BeforeTargets="BeforeBuild;_CopyFilesToLayoutDirectory">
-    <Exec Command="powershell -NoProfile -Command &quot;Stop-Process -Name OmniDown -Force -ErrorAction SilentlyContinue; Stop-Process -Name aria2c -Force -ErrorAction SilentlyContinue; Start-Sleep -Seconds 2; exit 0&quot;"
+  <!-- Kill stale app/engine processes that can memory-map AppX layout files
+       such as resources.pri and make VS deploy fail with DEP1000 / 0x800704C8. -->
+  <Target
+    Name="CleanupStaleDeployLocks"
+    BeforeTargets="BeforeBuild;PrepareForBuild;_CopyFilesToLayoutDirectory;_GenerateProjectPriFile;_GenerateProjectPriFileCore;_GenerateAppxPackageRecipe;_GenerateAppxPackage;_CreateAppxPackage"
+    Condition="'$(DesignTimeBuild)' != 'true'">
+    <Exec Command="powershell -NoProfile -Command &quot;$names = @('OmniDown','aria2c','aria2-next'); Get-Process -Name $names -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue; Start-Sleep -Milliseconds 750; exit 0&quot;"
           ContinueOnError="true" />
   </Target>
 </Project>

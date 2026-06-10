@@ -121,6 +121,8 @@ namespace OmniDown
             _settingsPageViewModel = new SettingsPageViewModel(_settingsStore);
             InitializeComponent();
             _appSettingsPage = new AppSettingsPage();
+            _appSettingsPage.InitializeNavigation(_settingsPageViewModel, this);
+            _appSettingsPage.NavigationStateChanged += (_, _) => UpdateTitleBarBackButton();
             _downloadsPage = new DownloadsPage(_downloadsViewModel);
             WireMainPageEvents();
             _downloadsPage.TasksListView.ItemsSource = _visibleTasks;

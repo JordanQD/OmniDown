@@ -7,10 +7,6 @@
         x:Name="NetworkSettingsContent"
         Margin="0,24,0,36"
         Spacing="4">
-        <StackPanel.ChildrenTransitions>
-            <EntranceThemeTransition FromVerticalOffset="50" />
-            <RepositionThemeTransition />
-        </StackPanel.ChildrenTransitions>
         <TextBlock
             AutomationProperties.HeadingLevel="Level1"
             Style="{StaticResource TitleTextBlockStyle}"
@@ -53,13 +49,14 @@
             </StackPanel>
         </controls:SettingsCard>
 
-        <controls:SettingsCard
+        <controls:SettingsExpander
             x:Name="CustomProxySettingCard"
             x:Uid="CustomProxySettingCard"
+            Description="自定义 HTTP 或 HTTPS 代理会优先于系统代理。"
             Header="自定义代理">
-            <controls:SettingsCard.HeaderIcon>
+            <controls:SettingsExpander.HeaderIcon>
                 <FontIcon Glyph="&#xE8A7;" />
-            </controls:SettingsCard.HeaderIcon>
+            </controls:SettingsExpander.HeaderIcon>
             <StackPanel
                 HorizontalAlignment="Right"
                 VerticalAlignment="Center"
@@ -78,77 +75,78 @@
                     OnContent=""
                     Toggled="NetworkSettingToggleSwitch_Toggled" />
             </StackPanel>
-            <controls:SettingsCard.Description>
-                <StackPanel Spacing="12">
-                    <TextBlock
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        x:Uid="CustomProxyDescriptionText"
-                        Text="为 aria2 设置 HTTP 或 HTTPS 代理；自定义代理会优先于系统代理。"
-                        TextWrapping="WrapWholeWords" />
-                    <Grid
-                        Width="360"
+            <controls:SettingsExpander.Items>
+                <controls:SettingsCard
+                    x:Uid="ProxyServerSettingCard"
+                    Description="示例：http://127.0.0.1:7890"
+                    Header="代理地址">
+                    <TextBox
+                        x:Name="ProxyServerTextBox"
+                        x:Uid="ProxyServerTextBox"
+                        Width="420"
                         Height="32"
-                        HorizontalAlignment="Left"
-                        ColumnDefinitions="*,Auto"
-                        ColumnSpacing="8">
-                        <TextBox
-                            x:Name="ProxyServerTextBox"
-                            x:Uid="ProxyServerTextBox"
-                            Height="32"
-                            VerticalAlignment="Center"
-                            PlaceholderText="代理地址"
-                            TextChanged="NetworkSettingTextBox_TextChanged" />
-                        <Button
-                            x:Name="DetectSystemProxyButton"
-                            Grid.Column="1"
-                            Width="40"
-                            Height="32"
-                            MinWidth="40"
-                            Padding="0"
-                            VerticalAlignment="Center"
-                            x:Uid="DetectSystemProxyButton"
-                            Click="DetectSystemProxyButton_Click"
-                            ToolTipService.ToolTip="检测系统代理">
-                            <FontIcon Glyph="&#xE721;" />
-                        </Button>
-                    </Grid>
-                    <TextBlock
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        x:Uid="ProxyExampleText"
-                        Text="示例：http://127.0.0.1:7890 或 127.0.0.1:7890。当前 aria2 版本不支持 SOCKS 代理。"
-                        TextWrapping="WrapWholeWords" />
+                        HorizontalAlignment="Right"
+                        PlaceholderText="代理地址"
+                        TextChanged="NetworkSettingTextBox_TextChanged"
+                        TextWrapping="NoWrap" />
+                </controls:SettingsCard>
+
+                <controls:SettingsCard
+                    x:Uid="DetectSystemProxySettingCard"
+                    Description="读取 Windows 当前系统代理并填入代理地址。"
+                    Header="检测系统代理">
+                    <Button
+                        x:Name="DetectSystemProxyButton"
+                        Width="40"
+                        Height="32"
+                        MinWidth="40"
+                        Padding="0"
+                        HorizontalAlignment="Right"
+                        x:Uid="DetectSystemProxyButton"
+                        Click="DetectSystemProxyButton_Click"
+                        ToolTipService.ToolTip="检测系统代理">
+                        <FontIcon Glyph="&#xE721;" />
+                    </Button>
+                </controls:SettingsCard>
+
+                <controls:SettingsCard
+                    x:Uid="ProxyBypassSettingCard"
+                    Description="用分号分隔不走代理的主机或网段。"
+                    Header="代理绕过">
                     <TextBox
                         x:Name="ProxyBypassTextBox"
                         x:Uid="ProxyBypassTextBox"
-                        Width="360"
+                        Width="420"
                         Height="32"
-                        HorizontalAlignment="Left"
+                        HorizontalAlignment="Right"
                         PlaceholderText="不使用代理的地址"
                         TextChanged="NetworkSettingTextBox_TextChanged"
                         TextWrapping="NoWrap" />
-                    <TextBlock
-                        FontWeight="SemiBold"
-                        x:Uid="ProxyScopeHeader"
-                        Text="代理范围" />
-                    <StackPanel
-                        Orientation="Horizontal"
-                        Spacing="16">
-                        <CheckBox
-                            x:Name="ProxyDownloadsCheckBox"
-                            x:Uid="ProxyDownloadsCheckBox"
-                            Checked="NetworkSettingCheckBox_Changed"
-                            Content="下载任务"
-                            Unchecked="NetworkSettingCheckBox_Changed" />
-                        <CheckBox
-                            x:Name="ProxyTrackersCheckBox"
-                            x:Uid="ProxyTrackersCheckBox"
-                            Checked="NetworkSettingCheckBox_Changed"
-                            Content="Tracker 同步"
-                            Unchecked="NetworkSettingCheckBox_Changed" />
-                    </StackPanel>
-                </StackPanel>
-            </controls:SettingsCard.Description>
-        </controls:SettingsCard>
+                </controls:SettingsCard>
+
+                <controls:SettingsCard
+                    x:Uid="ProxyDownloadsSettingCard"
+                    Description="下载任务使用上方代理配置。"
+                    Header="下载任务">
+                    <CheckBox
+                        x:Name="ProxyDownloadsCheckBox"
+                        HorizontalAlignment="Right"
+                        Checked="NetworkSettingCheckBox_Changed"
+                        Unchecked="NetworkSettingCheckBox_Changed" />
+                </controls:SettingsCard>
+
+                <controls:SettingsCard
+                    x:Uid="ProxyTrackersSettingCard"
+                    Description="同步 Tracker 列表时使用上方代理配置。"
+                    Header="Tracker 同步">
+                    <CheckBox
+                        x:Name="ProxyTrackersCheckBox"
+                        HorizontalAlignment="Right"
+                        Checked="NetworkSettingCheckBox_Changed"
+                        Unchecked="NetworkSettingCheckBox_Changed" />
+                </controls:SettingsCard>
+            </controls:SettingsExpander.Items>
+        </controls:SettingsExpander>
 
         <!--  端口  -->
         <TextBlock

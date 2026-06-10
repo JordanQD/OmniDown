@@ -3,13 +3,17 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
 
-namespace OmniDown.Controls;
+namespace OmniDown.Pages;
 
-public sealed partial class SettingsHomePageControl : UserControl
+public sealed partial class SettingsHomePage : Page
 {
+    /// <summary>
+    /// Fired when the user clicks a settings section card.
+    /// The string argument is the section tag (e.g. "General", "Download").
+    /// </summary>
     public event EventHandler<string>? SectionRequested;
 
-    public SettingsHomePageControl()
+    public SettingsHomePage()
     {
         InitializeComponent();
     }

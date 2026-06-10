@@ -130,7 +130,6 @@ namespace OmniDown
 
         private void HookSettingsPageEvents()
         {
-            SettingsPage.SectionNavigationRequested += SettingsPage_SectionNavigationRequested;
             SettingsPage.GeneralSettingChanged += SettingsPage_GeneralSettingChanged;
             SettingsPage.CloseBehaviorSettingChanged += SettingsPage_CloseBehaviorSettingChanged;
             SettingsPage.BrowseDownloadDirectoryRequested += BrowseDownloadDirectoryButton_Click;
@@ -618,7 +617,7 @@ namespace OmniDown
 
         private void ApplyNetworkSettingsToUi()
         {
-            NetworkSettings settings = NormalizeNetworkSettings(_settingsPageViewModel.NetworkSettings);
+            NetworkSettings settings = NormalizeNetworkSettingsWithSystemProxyDefault(_settingsPageViewModel.NetworkSettings);
             if (settings != _settingsPageViewModel.NetworkSettings)
             {
                 _settingsPageViewModel.SaveNetworkSettings(settings);
@@ -1467,6 +1466,29 @@ namespace OmniDown
                 TimeoutSeconds = Math.Clamp(settings.TimeoutSeconds, 1, 600),
                 FileAllocation = NormalizeFileAllocation(settings.FileAllocation)
             };
+        }
+
+        private static NetworkSettings NormalizeNetworkSettingsWithSystemProxyDefault(NetworkSettings settings)
+        {
+            NetworkSettings normalized = NormalizeNetworkSettings(settings);
+            if (!string.IsNullOrWhiteSpace(normalized.ProxyServer))
+            {
+                return normalized;
+            }
+
+            SystemProxySettings proxySettings = SystemProxyResolver.Resolve();
+            if (!proxySettings.HasProxy || string.IsNullOrWhiteSpace(proxySettings.AllProxy))
+            {
+                return normalized;
+            }
+
+            return NormalizeNetworkSettings(normalized with
+            {
+                ProxyServer = proxySettings.AllProxy,
+                ProxyBypass = string.IsNullOrWhiteSpace(proxySettings.NoProxy)
+                    ? normalized.ProxyBypass
+                    : proxySettings.NoProxy
+            });
         }
 
         private static bool IsValidProxyUrl(string value)

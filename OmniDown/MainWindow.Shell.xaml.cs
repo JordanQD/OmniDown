@@ -267,11 +267,13 @@ namespace OmniDown
                 if (_appSettingsPage == null)
                 {
                     _appSettingsPage = new AppSettingsPage();
+                    _appSettingsPage.InitializeNavigation(_settingsPageViewModel, this);
+                    _appSettingsPage.NavigationStateChanged += (_, _) => UpdateTitleBarBackButton();
                     HookSettingsPageEvents();
                 }
 
                 ContentFrame.Content = _appSettingsPage;
-                _appSettingsPage.SettingsPageControl.NavigateTo("Home");
+                _appSettingsPage.NavigateTo("Home");
                 RootNavigation.SelectedItem = SettingsNavItem;
                 ClearTitleSearchBox();
                 UpdateSearchPlaceholder();
@@ -450,9 +452,10 @@ namespace OmniDown
         private void AppTitleBar_BackRequested(TitleBar sender, object args)
         {
             if (_currentTaskFilter == "Settings" &&
-                !string.IsNullOrWhiteSpace(SettingsPage.CurrentSection))
+                _appSettingsPage is not null &&
+                _appSettingsPage.CanGoBack)
             {
-                SettingsPage.NavigateBackToHome();
+                _appSettingsPage.GoBack();
                 UpdateTitleBarBackButton();
             }
         }
@@ -461,7 +464,8 @@ namespace OmniDown
         {
             AppTitleBar.IsBackButtonVisible =
                 _currentTaskFilter == "Settings" &&
-                !string.IsNullOrWhiteSpace(SettingsPage.CurrentSection);
+                _appSettingsPage is not null &&
+                _appSettingsPage.CanGoBack;
         }
 
         private void RootNavigation_DisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs args)

@@ -1,12 +1,13 @@
-<UserControl
-    x:Class="OmniDown.Controls.SettingsHomePageControl"
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="OmniDown.Pages.SettingsHomePage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:CommunityToolkit.WinUI.Controls">
 
-    <UserControl.Resources>
+    <Page.Resources>
         <x:Double x:Key="SettingsCardSpacing">4</x:Double>
-    </UserControl.Resources>
+    </Page.Resources>
 
     <ScrollViewer
         x:Name="SettingsHomeScrollViewer"
@@ -20,11 +21,6 @@
             HorizontalAlignment="Center"
             Margin="0,24,0,36"
             Spacing="{StaticResource SettingsCardSpacing}">
-            <StackPanel.ChildrenTransitions>
-                <EntranceThemeTransition FromVerticalOffset="50" />
-                <RepositionThemeTransition IsStaggeringEnabled="False" />
-            </StackPanel.ChildrenTransitions>
-
             <TextBlock
                 AutomationProperties.HeadingLevel="Level1"
                 Margin="0,0,0,30"
@@ -109,19 +105,6 @@
                     <FontIcon Glyph="&#xE946;" />
                 </controls:SettingsCard.HeaderIcon>
             </controls:SettingsCard>
-
-            <controls:SettingsCard
-                x:Name="ExampleCard"
-                x:Uid="ExampleSettingsHomeCard"
-                Click="SettingsCard_Click"
-                Description="WinUI Gallery 的设置页面"
-                Header="示例"
-                IsClickEnabled="True"
-                Tag="Example">
-                <controls:SettingsCard.HeaderIcon>
-                    <FontIcon Glyph="&#xE7C3;" />
-                </controls:SettingsCard.HeaderIcon>
-            </controls:SettingsCard>
         </StackPanel>
     </ScrollViewer>
-</UserControl>
+</Page>
