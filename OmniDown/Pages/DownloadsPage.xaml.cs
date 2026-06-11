@@ -107,6 +107,7 @@ public sealed partial class DownloadsPage : Page
     public AppBarButton OpenSelectedTaskFolderButton => _openSelectedTaskFolderButton;
     public AppBarButton CopySelectedTaskLinksButton => _copySelectedTaskLinksButton;
     public AppBarButton ClearCompletedTasksButton => _clearCompletedTasksButton;
+    public ComboBox TaskFilterComboBox => _taskFilterComboBox;
     public ToggleMenuFlyoutItem SortByCreatedAtMenuItem => _sortByCreatedAtMenuItem;
     public ToggleMenuFlyoutItem SortByNameMenuItem => _sortByNameMenuItem;
     public ToggleMenuFlyoutItem SortBySizeMenuItem => _sortBySizeMenuItem;
@@ -159,6 +160,7 @@ public sealed partial class DownloadsPage : Page
     public event RoutedEventHandler? SortColumnMenuItemClick;
     public event RoutedEventHandler? SortDirectionMenuItemClick;
     public event RoutedEventHandler? StatusToastActionButtonClick;
+    public event SelectionChangedEventHandler? TaskFilterSelectionChanged;
     public event RoutedEventHandler? UploadLimitToggleSwitchToggled;
     public event RoutedEventHandler? DownloadLimitToggleSwitchToggled;
     public event RoutedEventHandler? SelectAllTasksCheckBoxChecked;
@@ -194,6 +196,7 @@ public sealed partial class DownloadsPage : Page
     private void SortColumnMenuItem_Click(object sender, RoutedEventArgs e) => SortColumnMenuItemClick?.Invoke(sender, e);
     private void SortDirectionMenuItem_Click(object sender, RoutedEventArgs e) => SortDirectionMenuItemClick?.Invoke(sender, e);
     private void StatusToastActionButton_Click(object sender, RoutedEventArgs e) => StatusToastActionButtonClick?.Invoke(sender, e);
+    private void TaskFilterComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) => TaskFilterSelectionChanged?.Invoke(sender, e);
     private void UploadLimitToggleSwitch_Toggled(object sender, RoutedEventArgs e) => UploadLimitToggleSwitchToggled?.Invoke(sender, e);
     private void DownloadLimitToggleSwitch_Toggled(object sender, RoutedEventArgs e) => DownloadLimitToggleSwitchToggled?.Invoke(sender, e);
     private void SelectAllTasksCheckBox_Checked(object sender, RoutedEventArgs e) => SelectAllTasksCheckBoxChecked?.Invoke(sender, e);

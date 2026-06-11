@@ -244,6 +244,19 @@
                 DefaultLabelPosition="Right"
                 IsOpen="False">
                 <CommandBar.PrimaryCommands>
+                    <AppBarElementContainer>
+                        <ComboBox
+                            x:Name="_taskFilterComboBox"
+                            MinWidth="116"
+                            AutomationProperties.Name="下载状态筛选"
+                            SelectionChanged="TaskFilterComboBox_SelectionChanged"
+                            SelectedIndex="0">
+                            <ComboBoxItem Content="全部" Tag="Home" />
+                            <ComboBoxItem Content="下载中" Tag="Downloading" />
+                            <ComboBoxItem Content="已完成" Tag="Completed" />
+                            <ComboBoxItem Content="异常" Tag="Issues" />
+                        </ComboBox>
+                    </AppBarElementContainer>
                     <AppBarToggleButton
                         x:Name="_taskDetailsButton"
                         Click="TaskDetailsButton_Click"
@@ -596,7 +609,8 @@
             x:Name="_tasksListHeaderPanel"
             Grid.Row="1"
             Margin="0"
-            Background="Transparent">
+            Background="Transparent"
+            Visibility="Collapsed">
             <Grid
                 MinHeight="38"
                 Padding="0,0,20,0"
@@ -879,7 +893,7 @@
         <Border
             x:Name="_statusBarPanel"
             Grid.Row="1"
-            Background="{ThemeResource NavigationViewDefaultPaneBackground}"
+            Background="{ThemeResource RailNavigationViewDefaultPaneBackground}"
             BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
             BorderThickness="0,1,0,0">
             <Grid RowDefinitions="Auto,Auto">

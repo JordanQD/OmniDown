@@ -56,8 +56,7 @@
             FontSize="13"
             BackRequested="AppTitleBar_BackRequested"
             IsBackButtonVisible="False"
-            IsPaneToggleButtonVisible="True"
-            PaneToggleRequested="AppTitleBar_PaneToggleRequested"
+            IsPaneToggleButtonVisible="False"
             Title="OmniDown">
             <TitleBar.IconSource>
                 <ImageIconSource ImageSource="/Assets/OmniDown.ico" />
@@ -82,54 +81,25 @@
             IsBackButtonVisible="Collapsed"
             IsPaneToggleButtonVisible="False"
             IsSettingsVisible="False"
-            CompactPaneLength="48"
-            OpenPaneLength="220"
-            PaneDisplayMode="Auto"
-            DisplayModeChanged="RootNavigation_DisplayModeChanged"
+            PaneDisplayMode="Left"
             ItemInvoked="RootNavigation_ItemInvoked"
-            SelectionChanged="RootNavigation_SelectionChanged">
+            Style="{StaticResource MainNavigationViewStyle}">
             <NavigationView.MenuItems>
                 <NavigationViewItem
                     x:Name="TasksNavItem"
-                    Content="Home"
+                    Content="下载"
                     IsSelected="True"
-                    x:Uid="TasksNavItem"
                     Tag="Home">
                     <NavigationViewItem.Icon>
-                        <SymbolIcon Symbol="Home" />
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem
-                    Content="Transfers"
-                    x:Uid="ActiveNavItem"
-                    Tag="Downloading">
-                    <NavigationViewItem.Icon>
-                        <SymbolIcon Symbol="Play" />
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem
-                    Content="Complete"
-                    x:Uid="CompletedNavItem"
-                    Tag="Completed">
-                    <NavigationViewItem.Icon>
-                        <SymbolIcon Symbol="Accept" />
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem
-                    Content="Issues"
-                    x:Uid="IssuesNavItem"
-                    Tag="Issues">
-                    <NavigationViewItem.Icon>
-                        <SymbolIcon Symbol="Important" />
+                        <FontIcon Glyph="&#xE896;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
             </NavigationView.MenuItems>
             <NavigationView.FooterMenuItems>
                 <NavigationViewItem
                     x:Name="SettingsNavItem"
-                    Content="Settings"
-                    Tapped="SettingsNavItem_Tapped"
-                    x:Uid="SettingsNavItem"
+                    Content="设置"
+                    Style="{StaticResource MainNavigationViewItemStyle}"
                     Tag="Settings">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Setting" />

@@ -247,7 +247,7 @@ public sealed class DownloadsPageViewModel : INotifyPropertyChanged
         };
 
         // 统计面板可见性
-        IsStatsPanelVisible = tag is "Home" or "Downloading";
+        IsStatsPanelVisible = false;
         IsCompletedMetricVisible = tag == "Home";
         IsIssueMetricVisible = tag == "Home";
 

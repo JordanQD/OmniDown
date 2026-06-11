@@ -240,12 +240,6 @@ namespace OmniDown
             NavigateTo(tag);
         }
 
-        private void SettingsNavItem_Tapped(object sender, TappedRoutedEventArgs e)
-        {
-            NavigateTo("Settings");
-            e.Handled = true;
-        }
-
         private void NavigateTo(string tag)
         {
             if (string.IsNullOrWhiteSpace(tag))
@@ -294,11 +288,56 @@ namespace OmniDown
 
             UpdateTitleBarBackButton();
             UpdateSearchPlaceholder();
+            UpdateDownloadFilterComboBox(tag);
             UpdateDownloadsHeader(tag);
             UpdateStatsVisibility(tag);
             ApplyTaskFilter(tag);
             UpdateDashboard();
             ApplySettingsFilter();
+        }
+
+        private void TaskFilterComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_isUpdatingDownloadFilterComboBox || sender is not ComboBox comboBox)
+            {
+                return;
+            }
+
+            if (comboBox.SelectedItem is ComboBoxItem item &&
+                item.Tag?.ToString() is string tag &&
+                !string.IsNullOrWhiteSpace(tag))
+            {
+                RootNavigation.SelectedItem = TasksNavItem;
+                NavigateTo(tag);
+            }
+        }
+
+        private void UpdateDownloadFilterComboBox(string tag)
+        {
+            if (_downloadsPage?.TaskFilterComboBox is not ComboBox comboBox)
+            {
+                return;
+            }
+
+            _isUpdatingDownloadFilterComboBox = true;
+            try
+            {
+                foreach (object item in comboBox.Items)
+                {
+                    if (item is ComboBoxItem comboBoxItem &&
+                        string.Equals(comboBoxItem.Tag?.ToString(), tag, StringComparison.OrdinalIgnoreCase))
+                    {
+                        comboBox.SelectedItem = comboBoxItem;
+                        return;
+                    }
+                }
+
+                comboBox.SelectedIndex = 0;
+            }
+            finally
+            {
+                _isUpdatingDownloadFilterComboBox = false;
+            }
         }
 
         private static string GetNavigationTag(NavigationViewSelectionChangedEventArgs args)
@@ -444,11 +483,6 @@ namespace OmniDown
             await Launcher.LaunchUriAsync(uri);
         }
 
-        private void AppTitleBar_PaneToggleRequested(TitleBar sender, object args)
-        {
-            RootNavigation.IsPaneOpen = !RootNavigation.IsPaneOpen;
-        }
-
         private void AppTitleBar_BackRequested(TitleBar sender, object args)
         {
             if (_currentTaskFilter == "Settings" &&
@@ -466,11 +500,6 @@ namespace OmniDown
                 _currentTaskFilter == "Settings" &&
                 _appSettingsPage is not null &&
                 _appSettingsPage.CanGoBack;
-        }
-
-        private void RootNavigation_DisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs args)
-        {
-            AppTitleBar.IsPaneToggleButtonVisible = sender.PaneDisplayMode != NavigationViewPaneDisplayMode.Top;
         }
 
         private void ApplyToolbarTooltips()

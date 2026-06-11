@@ -111,7 +111,7 @@
                                 </Grid>
                             </Border>
                             <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
-                                <Grid RowDefinitions="Auto,Auto" RowSpacing="8">
+                                <Grid RowDefinitions="Auto,Auto">
                                     <Button
                                         HorizontalAlignment="Stretch"
                                         HorizontalContentAlignment="Stretch"
@@ -141,6 +141,7 @@
                                     </Button>
                                     <StackPanel
                                         Grid.Row="1"
+                                        Margin="0,8,0,0"
                                         Spacing="8"
                                         Visibility="{Binding OverviewUploadLimitEditorVisibility}">
                                         <Grid ColumnDefinitions="Auto,*,Auto">
@@ -179,7 +180,7 @@
                                 </Grid>
                             </Border>
                             <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
-                                <Grid RowDefinitions="Auto,Auto" RowSpacing="8">
+                                <Grid RowDefinitions="Auto,Auto">
                                     <Button
                                         HorizontalAlignment="Stretch"
                                         HorizontalContentAlignment="Stretch"
@@ -209,6 +210,7 @@
                                     </Button>
                                     <StackPanel
                                         Grid.Row="1"
+                                        Margin="0,8,0,0"
                                         Spacing="8"
                                         Visibility="{Binding OverviewDownloadLimitEditorVisibility}">
                                         <Grid ColumnDefinitions="Auto,*,Auto">
@@ -457,7 +459,7 @@
                         <Border
                             Style="{StaticResource TaskDetailsPropertyRowBorderStyle}"
                             Visibility="{Binding TaskUploadSectionVisibility}">
-                            <Grid RowDefinitions="Auto,Auto" RowSpacing="8">
+                            <Grid RowDefinitions="Auto,Auto">
                                 <Button
                                     HorizontalAlignment="Stretch"
                                     HorizontalContentAlignment="Stretch"
@@ -487,6 +489,7 @@
                                 </Button>
                                 <StackPanel
                                     Grid.Row="1"
+                                    Margin="0,8,0,0"
                                     Spacing="8"
                                     Visibility="{Binding TaskUploadLimitEditorVisibility}">
                                     <Grid ColumnDefinitions="Auto,*,Auto">
@@ -525,7 +528,7 @@
                             </Grid>
                         </Border>
                         <Border Padding="0,8">
-                            <Grid RowDefinitions="Auto,Auto" RowSpacing="8">
+                            <Grid RowDefinitions="Auto,Auto">
                                 <Button
                                     HorizontalAlignment="Stretch"
                                     HorizontalContentAlignment="Stretch"
@@ -555,6 +558,7 @@
                                 </Button>
                                 <StackPanel
                                     Grid.Row="1"
+                                    Margin="0,8,0,0"
                                     Spacing="8"
                                     Visibility="{Binding TaskDownloadLimitEditorVisibility}">
                                     <Grid ColumnDefinitions="Auto,*,Auto">
