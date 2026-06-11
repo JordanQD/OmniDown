@@ -569,7 +569,7 @@ namespace OmniDown
             StatsPanel.Visibility = Visibility.Collapsed;
             CompletedMetricPanel.Visibility = tag == "Home" ? Visibility.Visible : Visibility.Collapsed;
             IssueMetricPanel.Visibility = tag == "Home" ? Visibility.Visible : Visibility.Collapsed;
-            TasksListHeaderPanel.Visibility = Visibility.Collapsed;
+            TasksListHeaderPanel.Visibility = Visibility.Visible;
             TasksListHeaderPanel.Margin = new Thickness(0, 8, 0, 4);
         }
 

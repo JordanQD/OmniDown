@@ -726,12 +726,11 @@
             x:Name="_tasksListHeaderPanel"
             Grid.Row="1"
             Margin="0"
-            Background="Transparent"
-            Visibility="Collapsed">
+            Background="Transparent">
             <Grid
                 MinHeight="38"
                 Padding="0,0,20,0"
-                ColumnDefinitions="48,*,120,150,110,180"
+                ColumnDefinitions="48,2*,0.75*,1*,0.8*,1.1*"
                 ColumnSpacing="16">
                 <CheckBox
                     x:Name="_selectAllTasksCheckBox"
@@ -751,35 +750,40 @@
                     VerticalAlignment="Center"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     x:Uid="NameColumnHeader"
-                    Text="Name" />
+                    Text="Name"
+                    TextTrimming="CharacterEllipsis" />
                 <TextBlock 
                     Grid.Column="2"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Center"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     x:Uid="StatusColumnHeader"
-                    Text="Status" />
+                    Text="Status"
+                    TextTrimming="CharacterEllipsis" />
                 <TextBlock 
                     Grid.Column="3"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Center"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     x:Uid="ProgressColumnHeader"
-                    Text="Progress" />
+                    Text="Progress"
+                    TextTrimming="CharacterEllipsis" />
                 <TextBlock 
                     Grid.Column="4"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Center"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     x:Uid="RemainingTimeColumnHeader"
-                    Text="Remaining" />
+                    Text="Remaining"
+                    TextTrimming="CharacterEllipsis" />
                 <TextBlock 
                     Grid.Column="5"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Center"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     x:Uid="SpeedColumnHeader"
-                    Text="Speed" />
+                    Text="Speed"
+                    TextTrimming="CharacterEllipsis" />
             </Grid>
         </Border>
 
@@ -837,7 +841,7 @@
                                     <Grid
                                         Grid.Row="0"
                                         Padding="0,0,20,0"
-                                        ColumnDefinitions="48,*,120,150,110,180"
+                                        ColumnDefinitions="48,2*,0.75*,1*,0.8*,1.1*"
                                         ColumnSpacing="16">
                                         <Grid
                                             Width="40"
