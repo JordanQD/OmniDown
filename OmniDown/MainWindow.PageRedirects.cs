@@ -2,6 +2,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Shapes;
+using CommunityToolkit.Labs.WinUI;
 using OmniDown.Controls;
 using OmniDown.Pages;
 
@@ -66,11 +67,16 @@ public sealed partial class MainWindow
     private AppBarButton RecoverTasksButton => _downloadsPage!.RecoverTasksButton;
     private AppBarButton DeleteTasksButton => _downloadsPage!.DeleteTasksButton;
     private AppBarButton SortTasksButton => _downloadsPage!.SortTasksButton;
-    private AppBarToggleButton TaskDetailsButton => _downloadsPage!.TaskDetailsButton;
+    private AppBarButton TaskDetailsButton => _downloadsPage!.TaskDetailsButton;
     private AppBarButton OpenSelectedTaskFileButton => _downloadsPage!.OpenSelectedTaskFileButton;
     private AppBarButton OpenSelectedTaskFolderButton => _downloadsPage!.OpenSelectedTaskFolderButton;
     private AppBarButton CopySelectedTaskLinksButton => _downloadsPage!.CopySelectedTaskLinksButton;
     private AppBarButton ClearCompletedTasksButton => _downloadsPage!.ClearCompletedTasksButton;
+    private AppBarToggleButton TaskFilterButton => _downloadsPage!.TaskFilterButton;
+    private Grid TaskFilterPanel => _downloadsPage!.TaskFilterPanel;
+    private Grid TaskCategoryFilterPanel => _downloadsPage!.TaskCategoryFilterPanel;
+    private TokenView TaskStatusFilterTokenView => _downloadsPage!.TaskStatusFilterTokenView;
+    private TokenView TaskCategoryFilterTokenView => _downloadsPage!.TaskCategoryFilterTokenView;
     private ToggleMenuFlyoutItem SortByCreatedAtMenuItem => _downloadsPage!.SortByCreatedAtMenuItem;
     private ToggleMenuFlyoutItem SortByNameMenuItem => _downloadsPage!.SortByNameMenuItem;
     private ToggleMenuFlyoutItem SortBySizeMenuItem => _downloadsPage!.SortBySizeMenuItem;

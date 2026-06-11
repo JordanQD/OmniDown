@@ -241,6 +241,8 @@ public sealed class DownloadsPageViewModel : INotifyPropertyChanged
         DownloadsTitleText = tag switch
         {
             "Downloading" => Strings.Get("DownloadingPageTitle"),
+            "Waiting" => "等待中",
+            "Paused" => "暂停中",
             "Completed" => Strings.Get("CompletedPageTitle"),
             "Issues" => Strings.Get("IssuesPageTitle"),
             _ => Strings.Get("HomePageTitle")
@@ -312,7 +314,9 @@ public sealed class DownloadsPageViewModel : INotifyPropertyChanged
 
         var filtered = tag switch
         {
-            "Downloading" => AllTasks.Where(t => IsDownloadingTask(t) && IsSearchMatch(t, query)),
+            "Downloading" => AllTasks.Where(t => IsRunningDownloadTask(t) && IsSearchMatch(t, query)),
+            "Waiting" => AllTasks.Where(t => IsWaitingTask(t) && IsSearchMatch(t, query)),
+            "Paused" => AllTasks.Where(t => IsPausedTask(t) && IsSearchMatch(t, query)),
             "Completed" => AllTasks.Where(t => IsCompletedTask(t) && IsSearchMatch(t, query)),
             "Issues" => AllTasks.Where(t => IsIssueTask(t) && IsSearchMatch(t, query)),
             _ => AllTasks.Where(t => IsSearchMatch(t, query))
@@ -359,6 +363,14 @@ public sealed class DownloadsPageViewModel : INotifyPropertyChanged
 
     public static bool IsActiveTransferTask(DownloadTask task) =>
         IsDownloadingTask(task) && !IsPausedTask(task);
+
+    public static bool IsRunningDownloadTask(DownloadTask task) =>
+        task.Status.Contains("download", StringComparison.OrdinalIgnoreCase)
+        || task.Status.Contains("resum", StringComparison.OrdinalIgnoreCase)
+        || task.Status.Contains("paus", StringComparison.OrdinalIgnoreCase) && !IsPausedTask(task);
+
+    public static bool IsWaitingTask(DownloadTask task) =>
+        task.Status.Contains("waiting", StringComparison.OrdinalIgnoreCase);
 
     public static bool IsPausedTask(DownloadTask task) =>
         task.Status.Contains("paused", StringComparison.OrdinalIgnoreCase);

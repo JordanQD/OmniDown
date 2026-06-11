@@ -288,56 +288,109 @@ namespace OmniDown
 
             UpdateTitleBarBackButton();
             UpdateSearchPlaceholder();
-            UpdateDownloadFilterComboBox(tag);
+            UpdateDownloadFilterTokens(tag);
             UpdateDownloadsHeader(tag);
             UpdateStatsVisibility(tag);
             ApplyTaskFilter(tag);
             UpdateDashboard();
+            UpdateFilterAppliedIndicator();
             ApplySettingsFilter();
         }
 
-        private void TaskFilterComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void TaskFilterButton_Click(object sender, RoutedEventArgs e)
         {
-            if (_isUpdatingDownloadFilterComboBox || sender is not ComboBox comboBox)
+            _isTaskFilterPanelOpen = !_isTaskFilterPanelOpen;
+            UpdateFilterPanelVisibility();
+            UpdateFilterAppliedIndicator();
+        }
+
+        private void TaskStatusFilterTokenView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_isUpdatingDownloadFilterTokens || sender is not CommunityToolkit.Labs.WinUI.TokenView tokenView)
             {
                 return;
             }
 
-            if (comboBox.SelectedItem is ComboBoxItem item &&
+            if (tokenView.SelectedItem is CommunityToolkit.Labs.WinUI.TokenItem item &&
                 item.Tag?.ToString() is string tag &&
                 !string.IsNullOrWhiteSpace(tag))
             {
                 RootNavigation.SelectedItem = TasksNavItem;
                 NavigateTo(tag);
+                UpdateFilterAppliedIndicator();
             }
         }
 
-        private void UpdateDownloadFilterComboBox(string tag)
+        private void TaskCategoryFilterTokenView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (_downloadsPage?.TaskFilterComboBox is not ComboBox comboBox)
+            if (_isUpdatingDownloadFilterTokens || sender is not CommunityToolkit.Labs.WinUI.TokenView tokenView)
             {
                 return;
             }
 
-            _isUpdatingDownloadFilterComboBox = true;
+            if (tokenView.SelectedItem is CommunityToolkit.Labs.WinUI.TokenItem item &&
+                item.Tag?.ToString() is string tag &&
+                !string.IsNullOrWhiteSpace(tag))
+            {
+                _currentTaskCategoryFilter = tag;
+                ApplyTaskFilter(_currentTaskFilter);
+                UpdateDashboard();
+                UpdateFilterAppliedIndicator();
+            }
+        }
+
+        private void UpdateDownloadFilterTokens(string tag)
+        {
+            if (_downloadsPage is null)
+            {
+                return;
+            }
+
+            _isUpdatingDownloadFilterTokens = true;
             try
             {
-                foreach (object item in comboBox.Items)
-                {
-                    if (item is ComboBoxItem comboBoxItem &&
-                        string.Equals(comboBoxItem.Tag?.ToString(), tag, StringComparison.OrdinalIgnoreCase))
-                    {
-                        comboBox.SelectedItem = comboBoxItem;
-                        return;
-                    }
-                }
-
-                comboBox.SelectedIndex = 0;
+                SelectTokenByTag(TaskStatusFilterTokenView, tag);
+                SelectTokenByTag(TaskCategoryFilterTokenView, _currentTaskCategoryFilter);
+                UpdateFilterPanelVisibility();
+                UpdateFilterAppliedIndicator();
             }
             finally
             {
-                _isUpdatingDownloadFilterComboBox = false;
+                _isUpdatingDownloadFilterTokens = false;
             }
+        }
+
+        private void UpdateFilterPanelVisibility()
+        {
+            Visibility visibility = _isTaskFilterPanelOpen ? Visibility.Visible : Visibility.Collapsed;
+            TaskFilterPanel.Visibility = visibility;
+            TaskCategoryFilterPanel.Visibility = visibility;
+        }
+
+        private void UpdateFilterAppliedIndicator()
+        {
+            bool isFilterApplied =
+                _currentTaskFilter is not "Home" and not "Settings" ||
+                !string.Equals(_currentTaskCategoryFilter, "All", StringComparison.OrdinalIgnoreCase);
+
+            TaskFilterButton.IsChecked = isFilterApplied;
+            ToolTipService.SetToolTip(TaskFilterButton, isFilterApplied ? "筛选（已应用）" : "筛选");
+            AutomationProperties.SetName(TaskFilterButton, isFilterApplied ? "筛选，已应用" : "筛选");
+        }
+
+        private static void SelectTokenByTag(CommunityToolkit.Labs.WinUI.TokenView tokenView, string tag)
+        {
+            for (int index = 0; index < tokenView.Items.Count; index++)
+            {
+                if (tokenView.Items[index] is CommunityToolkit.Labs.WinUI.TokenItem tokenItem &&
+                    string.Equals(tokenItem.Tag?.ToString(), tag, StringComparison.OrdinalIgnoreCase))
+                {
+                    tokenView.SelectedIndex = index;
+                    return;
+                }
+            }
+
+            tokenView.SelectedIndex = tokenView.Items.Count > 0 ? 0 : -1;
         }
 
         private static string GetNavigationTag(NavigationViewSelectionChangedEventArgs args)
@@ -514,6 +567,7 @@ namespace OmniDown
             SetToolbarText(DeleteTasksButton, Strings.Get("DeleteTasksButton.Label"));
             SetToolbarText(ClearCompletedTasksButton, Strings.Get("ClearCompletedTasksButton.Label"));
             SetToolbarText(SortTasksButton, Strings.Get("SortTasksButton.Label"));
+            SetToolbarText(TaskFilterButton, "筛选");
             SetToolbarText(TaskDetailsButton, Strings.Get("TaskDetailsButton.Label"));
         }
 

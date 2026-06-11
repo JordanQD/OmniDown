@@ -34,13 +34,20 @@ namespace OmniDown
                 .Select(task => task.Gid)
                 .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-            IEnumerable<DownloadTask> filteredTasks = tag switch
+            IEnumerable<DownloadTask> statusFilteredTasks = tag switch
             {
-                "Downloading" => Tasks.Where(task => IsDownloadingTask(task) && IsTaskSearchMatch(task, query)),
-                "Completed" => Tasks.Where(task => IsCompletedTask(task) && IsTaskSearchMatch(task, query)),
-                "Issues" => Tasks.Where(task => IsIssueTask(task) && IsTaskSearchMatch(task, query)),
-                _ => Tasks.Where(task => IsTaskSearchMatch(task, query))
+                "Downloading" => Tasks.Where(IsRunningDownloadTask),
+                "Waiting" => Tasks.Where(IsWaitingTask),
+                "Paused" => Tasks.Where(IsPausedTask),
+                "Completed" => Tasks.Where(IsCompletedTask),
+                "Issues" => Tasks.Where(IsIssueTask),
+                _ => Tasks
             };
+
+            List<DownloadTask> filteredTasks = statusFilteredTasks
+                .Where(task => IsTaskCategoryMatch(task, _currentTaskCategoryFilter))
+                .Where(task => IsTaskSearchMatch(task, query))
+                .ToList();
 
             SyncVisibleTasks(SortTasks(filteredTasks).ToList());
             RestoreSelection(selectedGids);
@@ -219,7 +226,6 @@ namespace OmniDown
             bool canShow = _isTaskDetailsPaneOpen && _currentTaskFilter != "Settings";
             TaskDetailsHostColumn.Width = canShow ? new GridLength(360) : new GridLength(0);
             TaskDetailsPane.Visibility = canShow ? Visibility.Visible : Visibility.Collapsed;
-            TaskDetailsButton.IsChecked = canShow;
         }
 
         private void UpdateTaskDetailsPane()
@@ -321,7 +327,7 @@ namespace OmniDown
             CompletedMetricLabelText.Text = Strings.Get("DownloadSpeedMetricLabel.Text");
             IssueMetricLabelText.Text = Strings.Get("Aria2MetricLabel.Text");
 
-            TotalTasksText.Text = (isTransferPage ? Tasks.Count(IsDownloadingTask) : Tasks.Count).ToString();
+            TotalTasksText.Text = (isTransferPage ? Tasks.Count(IsRunningDownloadTask) : Tasks.Count).ToString();
             ActiveTasksText.Text = Tasks.Count(IsActiveTransferTask).ToString();
             PausedTasksText.Text = Tasks.Count(IsPausedTask).ToString();
             CompletedTasksText.Text = Tasks.Count(IsCompletedTask).ToString();

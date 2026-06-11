@@ -7,6 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:OmniDown.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:toolkit="using:CommunityToolkit.Labs.WinUI"
     mc:Ignorable="d">
 
     <Page.Resources>
@@ -30,6 +31,11 @@
             <Setter Property="Padding" Value="0,8" />
             <Setter Property="BorderBrush" Value="{ThemeResource DividerStrokeColorDefaultBrush}" />
             <Setter Property="BorderThickness" Value="0,0,0,1" />
+        </Style>
+        <Style x:Key="CompactFilterTokenItemStyle" TargetType="toolkit:TokenItem">
+            <Setter Property="MinHeight" Value="28" />
+            <Setter Property="Padding" Value="8,3" />
+            <Setter Property="FontSize" Value="12" />
         </Style>
     </Page.Resources>
 
@@ -57,7 +63,9 @@
             CornerRadius="8">
             <Grid
                 Padding="0"
-                ColumnDefinitions="Auto,*,Auto">
+                ColumnDefinitions="Auto,*,Auto"
+                RowDefinitions="Auto,Auto,Auto"
+                RowSpacing="0">
             <StackPanel
                 Spacing="4"
                 Visibility="Collapsed">
@@ -193,6 +201,16 @@
                             </MenuFlyout>
                         </AppBarButton.Flyout>
                     </AppBarButton>
+                    <AppBarToggleButton
+                        x:Name="_taskFilterButton"
+                        AutomationProperties.Name="筛选"
+                        Click="TaskFilterButton_Click"
+                        Label="筛选"
+                        ToolTipService.ToolTip="筛选">
+                        <AppBarToggleButton.Icon>
+                            <FontIcon Glyph="&#xE71C;" />
+                        </AppBarToggleButton.Icon>
+                    </AppBarToggleButton>
                 </CommandBar.PrimaryCommands>
                 <CommandBar.SecondaryCommands>
                     <AppBarButton
@@ -244,31 +262,130 @@
                 DefaultLabelPosition="Right"
                 IsOpen="False">
                 <CommandBar.PrimaryCommands>
-                    <AppBarElementContainer>
-                        <ComboBox
-                            x:Name="_taskFilterComboBox"
-                            MinWidth="116"
-                            AutomationProperties.Name="下载状态筛选"
-                            SelectionChanged="TaskFilterComboBox_SelectionChanged"
-                            SelectedIndex="0">
-                            <ComboBoxItem Content="全部" Tag="Home" />
-                            <ComboBoxItem Content="下载中" Tag="Downloading" />
-                            <ComboBoxItem Content="已完成" Tag="Completed" />
-                            <ComboBoxItem Content="异常" Tag="Issues" />
-                        </ComboBox>
-                    </AppBarElementContainer>
-                    <AppBarToggleButton
+                    <AppBarButton
                         x:Name="_taskDetailsButton"
                         Click="TaskDetailsButton_Click"
                         x:Uid="TaskDetailsButton"
                         Label="Details"
                         ToolTipService.ToolTip="Details">
-                        <AppBarToggleButton.Icon>
+                        <AppBarButton.Icon>
                             <FontIcon Glyph="&#xE946;" />
-                        </AppBarToggleButton.Icon>
-                    </AppBarToggleButton>
+                        </AppBarButton.Icon>
+                    </AppBarButton>
                 </CommandBar.PrimaryCommands>
             </CommandBar>
+
+            <Grid
+                x:Name="_taskFilterPanel"
+                Grid.Row="1"
+                Grid.ColumnSpan="3"
+                Margin="12,0,0,4"
+                ColumnDefinitions="44,*"
+                ColumnSpacing="8"
+                Visibility="Collapsed">
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Text="状态" />
+                <toolkit:TokenView
+                    x:Name="_taskStatusFilterTokenView"
+                    Grid.Column="1"
+                    AutomationProperties.Name="下载状态筛选"
+                    CanRemoveTokens="False"
+                    IsWrapped="False"
+                    SelectedIndex="0"
+                    SelectionChanged="TaskStatusFilterTokenView_SelectionChanged"
+                    SelectionMode="Single">
+                    <toolkit:TokenItem Content="全部" Style="{StaticResource CompactFilterTokenItemStyle}" Tag="Home" />
+                    <toolkit:TokenItem Content="下载中" Style="{StaticResource CompactFilterTokenItemStyle}" Tag="Downloading">
+                        <toolkit:TokenItem.Icon>
+                            <FontIcon Glyph="&#xE896;" />
+                        </toolkit:TokenItem.Icon>
+                    </toolkit:TokenItem>
+                    <toolkit:TokenItem Content="等待中" Style="{StaticResource CompactFilterTokenItemStyle}" Tag="Waiting">
+                        <toolkit:TokenItem.Icon>
+                            <FontIcon Glyph="&#xE823;" />
+                        </toolkit:TokenItem.Icon>
+                    </toolkit:TokenItem>
+                    <toolkit:TokenItem Content="暂停中" Style="{StaticResource CompactFilterTokenItemStyle}" Tag="Paused">
+                        <toolkit:TokenItem.Icon>
+                            <FontIcon Glyph="&#xE769;" />
+                        </toolkit:TokenItem.Icon>
+                    </toolkit:TokenItem>
+                    <toolkit:TokenItem Content="异常" Style="{StaticResource CompactFilterTokenItemStyle}" Tag="Issues">
+                        <toolkit:TokenItem.Icon>
+                            <FontIcon Glyph="&#xE7BA;" />
+                        </toolkit:TokenItem.Icon>
+                    </toolkit:TokenItem>
+                </toolkit:TokenView>
+            </Grid>
+
+            <Grid
+                x:Name="_taskCategoryFilterPanel"
+                Grid.Row="2"
+                Grid.ColumnSpan="3"
+                Margin="12,0,0,8"
+                ColumnDefinitions="44,*"
+                ColumnSpacing="8"
+                Visibility="Collapsed">
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Text="类别" />
+                <toolkit:TokenView
+                    x:Name="_taskCategoryFilterTokenView"
+                    Grid.Column="1"
+                    AutomationProperties.Name="下载类别筛选"
+                    CanRemoveTokens="False"
+                    IsWrapped="False"
+                    SelectedIndex="0"
+                    SelectionChanged="TaskCategoryFilterTokenView_SelectionChanged"
+                    SelectionMode="Single">
+                    <toolkit:TokenItem Content="全部" Style="{StaticResource CompactFilterTokenItemStyle}" Tag="All" />
+                    <toolkit:TokenItem Content="图片" Style="{StaticResource CompactFilterTokenItemStyle}" Tag="Images">
+                        <toolkit:TokenItem.Icon>
+                            <FontIcon Glyph="&#xE91B;" />
+                        </toolkit:TokenItem.Icon>
+                    </toolkit:TokenItem>
+                    <toolkit:TokenItem Content="视频" Style="{StaticResource CompactFilterTokenItemStyle}" Tag="Videos">
+                        <toolkit:TokenItem.Icon>
+                            <FontIcon Glyph="&#xE714;" />
+                        </toolkit:TokenItem.Icon>
+                    </toolkit:TokenItem>
+                    <toolkit:TokenItem Content="音频" Style="{StaticResource CompactFilterTokenItemStyle}" Tag="Audio">
+                        <toolkit:TokenItem.Icon>
+                            <FontIcon Glyph="&#xE8D6;" />
+                        </toolkit:TokenItem.Icon>
+                    </toolkit:TokenItem>
+                    <toolkit:TokenItem Content="文档" Style="{StaticResource CompactFilterTokenItemStyle}" Tag="Documents">
+                        <toolkit:TokenItem.Icon>
+                            <FontIcon Glyph="&#xE8A5;" />
+                        </toolkit:TokenItem.Icon>
+                    </toolkit:TokenItem>
+                    <toolkit:TokenItem Content="压缩文件" Style="{StaticResource CompactFilterTokenItemStyle}" Tag="Archives">
+                        <toolkit:TokenItem.Icon>
+                            <FontIcon Glyph="&#xF012;" />
+                        </toolkit:TokenItem.Icon>
+                    </toolkit:TokenItem>
+                    <toolkit:TokenItem Content="应用" Style="{StaticResource CompactFilterTokenItemStyle}" Tag="Apps">
+                        <toolkit:TokenItem.Icon>
+                            <FontIcon Glyph="&#xECAA;" />
+                        </toolkit:TokenItem.Icon>
+                    </toolkit:TokenItem>
+                    <toolkit:TokenItem Content="文件夹" Style="{StaticResource CompactFilterTokenItemStyle}" Tag="Folders">
+                        <toolkit:TokenItem.Icon>
+                            <FontIcon Glyph="&#xE8B7;" />
+                        </toolkit:TokenItem.Icon>
+                    </toolkit:TokenItem>
+                    <toolkit:TokenItem Content="其他" Style="{StaticResource CompactFilterTokenItemStyle}" Tag="Other">
+                        <toolkit:TokenItem.Icon>
+                            <FontIcon Glyph="&#xE946;" />
+                        </toolkit:TokenItem.Icon>
+                    </toolkit:TokenItem>
+                </toolkit:TokenView>
+            </Grid>
             </Grid>
         </Border>
         <Border

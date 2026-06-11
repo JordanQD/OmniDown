@@ -60,6 +60,7 @@ namespace OmniDown
         private readonly ObservableCollection<AppStatusMessage> _statusMessages = new();
         private readonly AutoStartService _autoStartService = new();
         private string _currentTaskFilter = "Home";
+        private string _currentTaskCategoryFilter = "All";
         private TaskSortColumn _sortColumn = TaskSortColumn.CreatedAt;
         private bool _sortAscending = false;
         private bool _isRefreshing;
@@ -72,6 +73,7 @@ namespace OmniDown
         private string _speedLimitTaskGid = string.Empty;
         private int _taskDetailsSpeedLimitRequestId;
         private bool _isTaskDetailsPaneOpen;
+        private bool _isTaskFilterPanelOpen;
         private long _currentGlobalDownloadSpeed;
         private long _currentGlobalUploadSpeed;
         private long _downloadLimitBytesPerSecond;
@@ -98,7 +100,7 @@ namespace OmniDown
         private AriaRelatedSettingsSnapshot? _pendingAriaSettingsRollback;
         private AriaRelatedSettingsSnapshot? _restartAriaSettingsRollback;
         private bool _isSavingAriaSettings;
-        private bool _isUpdatingDownloadFilterComboBox;
+        private bool _isUpdatingDownloadFilterTokens;
         private bool _statusToastActionRestartsAria;
         private bool _isHiding;
         private string _lastStatusMessage = string.Empty;
@@ -352,7 +354,9 @@ namespace OmniDown
             _downloadsPage.TasksListViewSelectionChanged += TasksListView_SelectionChanged;
             _downloadsPage.SortMenuFlyoutOpening += SortMenuFlyout_Opening;
             _downloadsPage.StatusToastInfoBarClosed += StatusToastInfoBar_Closed;
-            _downloadsPage.TaskFilterSelectionChanged += TaskFilterComboBox_SelectionChanged;
+            _downloadsPage.TaskFilterButtonClick += TaskFilterButton_Click;
+            _downloadsPage.TaskStatusFilterSelectionChanged += TaskStatusFilterTokenView_SelectionChanged;
+            _downloadsPage.TaskCategoryFilterSelectionChanged += TaskCategoryFilterTokenView_SelectionChanged;
             _downloadsPage.SettingsSaveTeachingTipActionButtonClick += SettingsSaveTeachingTip_ActionButtonClick;
             _downloadsPage.SettingsSaveTeachingTipCloseButtonClick += SettingsSaveTeachingTip_CloseButtonClick;
             _downloadsPage.AriaRestartTeachingTipActionButtonClick += AriaRestartTeachingTip_ActionButtonClick;

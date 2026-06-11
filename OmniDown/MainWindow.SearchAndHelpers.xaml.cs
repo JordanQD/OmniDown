@@ -306,6 +306,18 @@ namespace OmniDown
                 || task.Status.Contains("paused", StringComparison.OrdinalIgnoreCase);
         }
 
+        private static bool IsRunningDownloadTask(DownloadTask task)
+        {
+            return task.Status.Contains("download", StringComparison.OrdinalIgnoreCase)
+                || task.Status.Contains("resum", StringComparison.OrdinalIgnoreCase)
+                || task.Status.Contains("paus", StringComparison.OrdinalIgnoreCase) && !IsPausedTask(task);
+        }
+
+        private static bool IsWaitingTask(DownloadTask task)
+        {
+            return task.Status.Contains("waiting", StringComparison.OrdinalIgnoreCase);
+        }
+
         private static bool IsActiveTransferTask(DownloadTask task)
         {
             return IsDownloadingTask(task) && !IsPausedTask(task);
@@ -336,6 +348,112 @@ namespace OmniDown
         private static bool IsIssueTask(DownloadTask task)
         {
             return IsErrorTaskStatus(task.Status);
+        }
+
+        private static bool IsTaskCategoryMatch(DownloadTask task, string categoryTag)
+        {
+            return categoryTag switch
+            {
+                "Images" => HasExtension(task, ImageExtensions),
+                "Videos" => HasExtension(task, VideoExtensions),
+                "Audio" => HasExtension(task, AudioExtensions),
+                "Documents" => HasExtension(task, DocumentExtensions),
+                "Archives" => HasExtension(task, ArchiveExtensions),
+                "Apps" => HasExtension(task, AppExtensions),
+                "Folders" => IsFolderLikeTask(task),
+                "Other" => !IsKnownCategoryTask(task),
+                _ => true
+            };
+        }
+
+        private static readonly HashSet<string> ImageExtensions = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".tif", ".tiff", ".heic", ".avif", ".svg", ".ico"
+        };
+
+        private static readonly HashSet<string> VideoExtensions = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".mp4", ".mkv", ".avi", ".mov", ".wmv", ".flv", ".webm", ".m4v", ".ts", ".m2ts", ".3gp"
+        };
+
+        private static readonly HashSet<string> AudioExtensions = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".mp3", ".flac", ".wav", ".aac", ".m4a", ".ogg", ".opus", ".wma", ".ape", ".alac"
+        };
+
+        private static readonly HashSet<string> DocumentExtensions = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt", ".md", ".rtf", ".epub", ".mobi", ".azw3", ".csv", ".json", ".xml"
+        };
+
+        private static readonly HashSet<string> ArchiveExtensions = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".zip", ".rar", ".7z", ".tar", ".gz", ".bz2", ".xz", ".zst", ".tgz", ".tbz2", ".txz", ".iso"
+        };
+
+        private static readonly HashSet<string> AppExtensions = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".exe", ".msi", ".msix", ".msixbundle", ".appx", ".appxbundle", ".apk", ".dmg", ".pkg", ".deb", ".rpm"
+        };
+
+        private static bool IsKnownCategoryTask(DownloadTask task)
+        {
+            return IsFolderLikeTask(task)
+                || HasExtension(task, ImageExtensions)
+                || HasExtension(task, VideoExtensions)
+                || HasExtension(task, AudioExtensions)
+                || HasExtension(task, DocumentExtensions)
+                || HasExtension(task, ArchiveExtensions)
+                || HasExtension(task, AppExtensions);
+        }
+
+        private static bool IsFolderLikeTask(DownloadTask task)
+        {
+            if (task.IsPeerTransfer)
+            {
+                return true;
+            }
+
+            string filePath = ResolveTaskFilePath(task);
+            return !string.IsNullOrWhiteSpace(filePath) && Directory.Exists(filePath);
+        }
+
+        private static bool HasExtension(DownloadTask task, HashSet<string> extensions)
+        {
+            string extension = GetTaskExtension(task);
+            return !string.IsNullOrWhiteSpace(extension) && extensions.Contains(extension);
+        }
+
+        private static string GetTaskExtension(DownloadTask task)
+        {
+            string[] candidates =
+            [
+                task.LocalFilePath,
+                task.Name,
+                task.SourceUri
+            ];
+
+            foreach (string candidate in candidates)
+            {
+                if (string.IsNullOrWhiteSpace(candidate))
+                {
+                    continue;
+                }
+
+                string value = candidate;
+                if (Uri.TryCreate(candidate, UriKind.Absolute, out Uri? uri))
+                {
+                    value = uri.LocalPath;
+                }
+
+                string extension = Path.GetExtension(value);
+                if (!string.IsNullOrWhiteSpace(extension))
+                {
+                    return extension;
+                }
+            }
+
+            return string.Empty;
         }
 
         private static bool IsRecoverableTask(DownloadTask task)
@@ -433,7 +551,12 @@ namespace OmniDown
                 _ => "HomePage"
             };
 
-            DownloadsTitleText.Text = Strings.Get($"{resourceKey}Title");
+            DownloadsTitleText.Text = tag switch
+            {
+                "Waiting" => "等待中",
+                "Paused" => "暂停中",
+                _ => Strings.Get($"{resourceKey}Title")
+            };
         }
 
         private void UpdateStatsVisibility(string tag)
