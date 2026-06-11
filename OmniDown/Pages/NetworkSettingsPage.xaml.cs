@@ -43,6 +43,6 @@ public sealed partial class NetworkSettingsPage : Page
         _content.DetectSystemProxyRequested += (s, e) => DetectSystemProxyRequested?.Invoke(this, e);
         _content.RandomBtPortRequested += (s, e) => RandomBtPortRequested?.Invoke(this, e);
         _content.RandomDhtPortRequested += (s, e) => RandomDhtPortRequested?.Invoke(this, e);
-        _content.UserAgentPresetRequested += (s, e) => UserAgentPresetRequested?.Invoke(this, e);
+        _content.UserAgentPresetRequested += (s, e) => UserAgentPresetRequested?.Invoke(s ?? this, e);
     }
 }

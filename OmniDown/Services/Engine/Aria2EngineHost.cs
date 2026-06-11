@@ -353,7 +353,6 @@ public sealed class Aria2EngineHost : IDisposable
             $"--remote-time={FormatAriaBool(options.RemoteTime)}",
             $"--max-tries={Math.Clamp(options.MaxTries, 0, 60)}",
             $"--retry-wait={Math.Clamp(options.RetryWaitSeconds, 0, 600)}",
-            $"--user-agent={options.NetworkSettings.UserAgent ?? string.Empty}",
             $"--log-level={NormalizeLogLevel(options.AdvancedSettings.LogLevel)}",
             $"--log={AppPaths.Aria2LogPath}",
             $"--connect-timeout={Math.Clamp(options.NetworkSettings.ConnectTimeoutSeconds, 1, 600)}",
@@ -363,6 +362,11 @@ public sealed class Aria2EngineHost : IDisposable
             $"--save-session={sessionPath}",
             "--force-save=true",
         ];
+
+        if (!string.IsNullOrWhiteSpace(options.NetworkSettings.UserAgent))
+        {
+            arguments.Add($"--user-agent={options.NetworkSettings.UserAgent.Trim()}");
+        }
 
         AddBitTorrentArguments(arguments, options, isAria2Next);
 
@@ -427,6 +431,16 @@ public sealed class Aria2EngineHost : IDisposable
             argument.StartsWith("--no-proxy=", StringComparison.OrdinalIgnoreCase));
 
         arguments.Add($"--all-proxy={settings.ProxyServer.Trim()}");
+        if (!string.IsNullOrWhiteSpace(settings.ProxyUsername))
+        {
+            arguments.Add($"--all-proxy-user={settings.ProxyUsername.Trim()}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(settings.ProxyPassword))
+        {
+            arguments.Add($"--all-proxy-passwd={settings.ProxyPassword}");
+        }
+
         if (!string.IsNullOrWhiteSpace(settings.ProxyBypass))
         {
             arguments.Add($"--no-proxy={NormalizeNoProxy(settings.ProxyBypass)}");

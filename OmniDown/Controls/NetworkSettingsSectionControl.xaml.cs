@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using CommunityToolkit.WinUI.Controls;
 using OmniDown.Services.Localization;
 using System.Collections.Generic;
 
@@ -14,8 +15,7 @@ public sealed partial class NetworkSettingsSectionControl : UserControl
 
     internal IEnumerable<SettingSearchEntry> SearchEntries =>
     [
-        new(UseSystemProxySettingCard, "proxy", "system proxy", Strings.Get("ProxyLabel.Text"), "Use Windows system proxy when aria2 starts", "代理"),
-        new(CustomProxySettingCard, "proxy", "http", "https", "socks", "custom", "代理"),
+        new(DownloadProxySettingCard, "proxy", "http", "https", "download", "tracker", "update", "代理"),
         new(UpnpSettingCard, "upnp", "nat", "pmp", "port", "端口", "映射"),
         new(BtPortSettingCard, "bt", "bittorrent", "listen", "port", "监听", "端口"),
         new(DhtPortSettingCard, "dht", "listen", "port", "监听", "端口"),
@@ -26,19 +26,26 @@ public sealed partial class NetworkSettingsSectionControl : UserControl
     ];
 
     internal StackPanel NetworkSettingsContentControl => NetworkSettingsContent;
-    internal ToggleSwitch UseSystemProxyCheckBoxControl => UseSystemProxyCheckBox;
-    internal TextBlock UseSystemProxyStateTextControl => UseSystemProxyStateText;
-    internal ToggleSwitch CustomProxyToggleSwitchControl => CustomProxyToggleSwitch;
-    internal TextBlock CustomProxyStateTextControl => CustomProxyStateText;
+    internal ToggleSwitch UseSystemProxyCheckBoxControl => DownloadProxyToggleSwitch;
+    internal TextBlock UseSystemProxyStateTextControl => DownloadProxyStateText;
+    internal ToggleSwitch CustomProxyToggleSwitchControl => DownloadProxyToggleSwitch;
+    internal TextBlock CustomProxyStateTextControl => DownloadProxyStateText;
+    internal ToggleSwitch DownloadProxyToggleSwitchControl => DownloadProxyToggleSwitch;
+    internal TextBlock DownloadProxyStateTextControl => DownloadProxyStateText;
     internal TextBox ProxyServerTextBoxControl => ProxyServerTextBox;
+    internal TextBox ProxyUsernameTextBoxControl => ProxyUsernameTextBox;
+    internal PasswordBox ProxyPasswordBoxControl => ProxyPasswordBox;
     internal Button DetectSystemProxyButtonControl => DetectSystemProxyButton;
     internal TextBox ProxyBypassTextBoxControl => ProxyBypassTextBox;
+    internal Button ProxyScopeDropDownButtonControl => ProxyScopeDropDownButton;
     internal CheckBox ProxyDownloadsCheckBoxControl => ProxyDownloadsCheckBox;
     internal CheckBox ProxyTrackersCheckBoxControl => ProxyTrackersCheckBox;
     internal ToggleSwitch EnableUpnpToggleSwitchControl => EnableUpnpToggleSwitch;
     internal TextBlock EnableUpnpStateTextControl => EnableUpnpStateText;
     internal NumberBox BtListenPortNumberBoxControl => BtListenPortNumberBox;
     internal NumberBox DhtListenPortNumberBoxControl => DhtListenPortNumberBox;
+    internal ComboBox UserAgentComboBoxControl => UserAgentComboBox;
+    internal SettingsCard UserAgentCustomSettingCardControl => UserAgentCustomSettingCard;
     internal TextBox UserAgentTextBoxControl => UserAgentTextBox;
     internal NumberBox ConnectTimeoutNumberBoxControl => ConnectTimeoutNumberBox;
     internal NumberBox TimeoutNumberBoxControl => TimeoutNumberBox;
@@ -61,6 +68,11 @@ public sealed partial class NetworkSettingsSectionControl : UserControl
         NetworkSettingChanged?.Invoke(sender, new RoutedEventArgs());
     }
 
+    private void NetworkSettingPasswordBox_PasswordChanged(object sender, RoutedEventArgs args)
+    {
+        NetworkSettingChanged?.Invoke(sender, args);
+    }
+
     private void NetworkSettingNumberBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
     {
         NetworkSettingChanged?.Invoke(sender, new RoutedEventArgs());
@@ -73,6 +85,7 @@ public sealed partial class NetworkSettingsSectionControl : UserControl
 
     private void NetworkSettingCheckBox_Changed(object sender, RoutedEventArgs args)
     {
+        UpdateProxyScopeSummary();
         NetworkSettingChanged?.Invoke(sender, args);
     }
 
@@ -91,9 +104,9 @@ public sealed partial class NetworkSettingsSectionControl : UserControl
         RandomDhtPortRequested?.Invoke(sender, args);
     }
 
-    private void UserAgentPresetButton_Click(object sender, RoutedEventArgs args)
+    private void UserAgentComboBox_SelectionChanged(object sender, SelectionChangedEventArgs args)
     {
-        UserAgentPresetRequested?.Invoke(sender, args);
+        UserAgentPresetRequested?.Invoke(sender, new RoutedEventArgs());
     }
 
     private void UpdateToggleStateText(ToggleSwitch? toggleSwitch)
@@ -109,9 +122,20 @@ public sealed partial class NetworkSettingsSectionControl : UserControl
 
     private TextBlock? GetToggleStateText(ToggleSwitch toggleSwitch)
     {
-        if (ReferenceEquals(toggleSwitch, UseSystemProxyCheckBox)) return UseSystemProxyStateText;
-        if (ReferenceEquals(toggleSwitch, CustomProxyToggleSwitch)) return CustomProxyStateText;
+        if (ReferenceEquals(toggleSwitch, DownloadProxyToggleSwitch)) return DownloadProxyStateText;
         if (ReferenceEquals(toggleSwitch, EnableUpnpToggleSwitch)) return EnableUpnpStateText;
         return null;
+    }
+
+    internal void UpdateProxyScopeSummary()
+    {
+        bool downloadsSelected = ProxyDownloadsCheckBox?.IsChecked == true;
+        bool trackersSelected = ProxyTrackersCheckBox?.IsChecked == true;
+
+        ProxyDownloadsToken.Visibility = downloadsSelected ? Visibility.Visible : Visibility.Collapsed;
+        ProxyTrackersToken.Visibility = trackersSelected ? Visibility.Visible : Visibility.Collapsed;
+        ProxyScopePlaceholderText.Visibility = downloadsSelected || trackersSelected
+            ? Visibility.Collapsed
+            : Visibility.Visible;
     }
 }

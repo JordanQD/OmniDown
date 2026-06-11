@@ -174,11 +174,37 @@
                 HorizontalContentAlignment="Stretch">
                 <Button.Content>
                     <Grid ColumnDefinitions="*,Auto">
-                        <TextBlock
-                            x:Name="BtTrackerSourceSummaryText"
+                        <StackPanel
                             VerticalAlignment="Center"
-                            Text="trackers_all.txt"
-                            TextTrimming="CharacterEllipsis" />
+                            Orientation="Horizontal"
+                            Spacing="6">
+                            <ItemsControl x:Name="BtTrackerSourceTokensItemsControl">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="6" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border
+                                            Padding="8,2"
+                                            BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="{ThemeResource ControlCornerRadius}">
+                                            <TextBlock
+                                                MaxWidth="120"
+                                                Text="{Binding}"
+                                                TextTrimming="CharacterEllipsis" />
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock
+                                x:Name="BtTrackerSourcePlaceholderText"
+                                VerticalAlignment="Center"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="选择 Tracker 来源" />
+                        </StackPanel>
                         <FontIcon
                             Grid.Column="1"
                             Margin="8,0,0,0"

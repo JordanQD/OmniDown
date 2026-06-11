@@ -324,7 +324,6 @@ public sealed partial class AppSettingsPage : Page
     internal NumberBox BtSeedTimeNumberBoxControl => BitTorrentSettingsContentControl.BtSeedTimeNumberBoxControl;
     internal NumberBox BtMaxPeersNumberBoxControl => BitTorrentSettingsContentControl.BtMaxPeersNumberBoxControl;
     internal Button BtTrackerSourceDropDownButtonControl => BitTorrentSettingsContentControl.BtTrackerSourceDropDownButtonControl;
-    internal TextBlock BtTrackerSourceSummaryTextControl => BitTorrentSettingsContentControl.BtTrackerSourceSummaryTextControl;
     internal CheckBox BtTrackerNgosangBestCheckBoxControl => BitTorrentSettingsContentControl.BtTrackerNgosangBestCheckBoxControl;
     internal CheckBox BtTrackerNgosangBestIpCheckBoxControl => BitTorrentSettingsContentControl.BtTrackerNgosangBestIpCheckBoxControl;
     internal CheckBox BtTrackerNgosangAllCheckBoxControl => BitTorrentSettingsContentControl.BtTrackerNgosangAllCheckBoxControl;
@@ -355,14 +354,19 @@ public sealed partial class AppSettingsPage : Page
     internal ToggleSwitch CustomProxyToggleSwitchControl => NetworkSettingsContentControl.CustomProxyToggleSwitchControl;
     internal TextBlock CustomProxyStateTextControl => NetworkSettingsContentControl.CustomProxyStateTextControl;
     internal TextBox ProxyServerTextBoxControl => NetworkSettingsContentControl.ProxyServerTextBoxControl;
+    internal TextBox ProxyUsernameTextBoxControl => NetworkSettingsContentControl.ProxyUsernameTextBoxControl;
+    internal PasswordBox ProxyPasswordBoxControl => NetworkSettingsContentControl.ProxyPasswordBoxControl;
     internal Button DetectSystemProxyButtonControl => NetworkSettingsContentControl.DetectSystemProxyButtonControl;
     internal TextBox ProxyBypassTextBoxControl => NetworkSettingsContentControl.ProxyBypassTextBoxControl;
+    internal Button ProxyScopeDropDownButtonControl => NetworkSettingsContentControl.ProxyScopeDropDownButtonControl;
     internal CheckBox ProxyDownloadsCheckBoxControl => NetworkSettingsContentControl.ProxyDownloadsCheckBoxControl;
     internal CheckBox ProxyTrackersCheckBoxControl => NetworkSettingsContentControl.ProxyTrackersCheckBoxControl;
     internal ToggleSwitch EnableUpnpToggleSwitchControl => NetworkSettingsContentControl.EnableUpnpToggleSwitchControl;
     internal TextBlock EnableUpnpStateTextControl => NetworkSettingsContentControl.EnableUpnpStateTextControl;
     internal NumberBox BtListenPortNumberBoxControl => NetworkSettingsContentControl.BtListenPortNumberBoxControl;
     internal NumberBox DhtListenPortNumberBoxControl => NetworkSettingsContentControl.DhtListenPortNumberBoxControl;
+    internal ComboBox UserAgentComboBoxControl => NetworkSettingsContentControl.UserAgentComboBoxControl;
+    internal CommunityToolkit.WinUI.Controls.SettingsCard UserAgentCustomSettingCardControl => NetworkSettingsContentControl.UserAgentCustomSettingCardControl;
     internal TextBox UserAgentTextBoxControl => NetworkSettingsContentControl.UserAgentTextBoxControl;
     internal NumberBox ConnectTimeoutNumberBoxControl => NetworkSettingsContentControl.ConnectTimeoutNumberBoxControl;
     internal NumberBox TimeoutNumberBoxControl => NetworkSettingsContentControl.TimeoutNumberBoxControl;

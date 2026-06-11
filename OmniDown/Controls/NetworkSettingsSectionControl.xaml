@@ -20,40 +20,11 @@
             x:Uid="NetworkProxySectionHeader"
             Text="代理" />
 
-        <controls:SettingsCard
-            x:Name="UseSystemProxySettingCard"
-            x:Uid="UseSystemProxySettingCard"
-            Description="启动 aria2 时读取 Windows 当前系统代理。"
-            Header="系统代理">
-            <controls:SettingsCard.HeaderIcon>
-                <FontIcon Glyph="&#xE774;" />
-            </controls:SettingsCard.HeaderIcon>
-            <StackPanel
-                HorizontalAlignment="Right"
-                VerticalAlignment="Center"
-                Orientation="Horizontal"
-                Spacing="8">
-                <TextBlock
-                    x:Name="UseSystemProxyStateText"
-                    VerticalAlignment="Center"
-                    Text="开" />
-                <ToggleSwitch
-                    x:Name="UseSystemProxyCheckBox"
-                    Width="48"
-                    MinWidth="0"
-                    Padding="0"
-                    OffContent=""
-                    OnContent=""
-                    IsOn="True"
-                    Toggled="NetworkSettingToggleSwitch_Toggled" />
-            </StackPanel>
-        </controls:SettingsCard>
-
         <controls:SettingsExpander
-            x:Name="CustomProxySettingCard"
-            x:Uid="CustomProxySettingCard"
-            Description="自定义 HTTP 或 HTTPS 代理会优先于系统代理。"
-            Header="自定义代理">
+            x:Name="DownloadProxySettingCard"
+            x:Uid="DownloadProxySettingCard"
+            Description="仅代理下载请求，不代理 BT/ED2K 节点连接。"
+            Header="下载代理">
             <controls:SettingsExpander.HeaderIcon>
                 <FontIcon Glyph="&#xE8A7;" />
             </controls:SettingsExpander.HeaderIcon>
@@ -63,11 +34,11 @@
                 Orientation="Horizontal"
                 Spacing="8">
                 <TextBlock
-                    x:Name="CustomProxyStateText"
+                    x:Name="DownloadProxyStateText"
                     VerticalAlignment="Center"
                     Text="关" />
                 <ToggleSwitch
-                    x:Name="CustomProxyToggleSwitch"
+                    x:Name="DownloadProxyToggleSwitch"
                     Width="48"
                     MinWidth="0"
                     Padding="0"
@@ -78,72 +49,143 @@
             <controls:SettingsExpander.Items>
                 <controls:SettingsCard
                     x:Uid="ProxyServerSettingCard"
-                    Description="示例：http://127.0.0.1:7890"
-                    Header="代理地址">
+                    Description="仅支持 HTTP/HTTPS 代理，不支持 SOCKS 代理。"
+                    Header="代理服务器">
+                    <Grid
+                        Width="300"
+                        HorizontalAlignment="Right"
+                        ColumnDefinitions="*,Auto"
+                        ColumnSpacing="8">
+                        <TextBox
+                            x:Name="ProxyServerTextBox"
+                            x:Uid="ProxyServerTextBox"
+                            Height="32"
+                            PlaceholderText="http://127.0.0.1:7890"
+                            TextChanged="NetworkSettingTextBox_TextChanged"
+                            TextWrapping="NoWrap" />
+                        <Button
+                            x:Name="DetectSystemProxyButton"
+                            Grid.Column="1"
+                            AutomationProperties.Name="检测系统代理"
+                            Width="40"
+                            Height="32"
+                            MinWidth="40"
+                            Padding="0"
+                            Click="DetectSystemProxyButton_Click"
+                            ToolTipService.ToolTip="检测系统代理">
+                            <FontIcon
+                                FontSize="16"
+                                Glyph="&#xE721;" />
+                        </Button>
+                    </Grid>
+                </controls:SettingsCard>
+
+                <controls:SettingsCard
+                    x:Uid="ProxyUsernameSettingCard"
+                    Header="代理用户名">
                     <TextBox
-                        x:Name="ProxyServerTextBox"
-                        x:Uid="ProxyServerTextBox"
-                        Width="420"
+                        x:Name="ProxyUsernameTextBox"
+                        Width="300"
                         Height="32"
                         HorizontalAlignment="Right"
-                        PlaceholderText="代理地址"
+                        PlaceholderText="可选"
                         TextChanged="NetworkSettingTextBox_TextChanged"
                         TextWrapping="NoWrap" />
                 </controls:SettingsCard>
 
                 <controls:SettingsCard
-                    x:Uid="DetectSystemProxySettingCard"
-                    Description="读取 Windows 当前系统代理并填入代理地址。"
-                    Header="检测系统代理">
-                    <Button
-                        x:Name="DetectSystemProxyButton"
-                        Width="40"
+                    x:Uid="ProxyPasswordSettingCard"
+                    Header="代理密码">
+                    <PasswordBox
+                        x:Name="ProxyPasswordBox"
+                        Width="300"
                         Height="32"
-                        MinWidth="40"
-                        Padding="0"
                         HorizontalAlignment="Right"
-                        x:Uid="DetectSystemProxyButton"
-                        Click="DetectSystemProxyButton_Click"
-                        ToolTipService.ToolTip="检测系统代理">
-                        <FontIcon Glyph="&#xE721;" />
-                    </Button>
+                        PlaceholderText="可选"
+                        PasswordChanged="NetworkSettingPasswordBox_PasswordChanged" />
                 </controls:SettingsCard>
 
                 <controls:SettingsCard
                     x:Uid="ProxyBypassSettingCard"
-                    Description="用分号分隔不走代理的主机或网段。"
-                    Header="代理绕过">
+                    Header="代理排除">
                     <TextBox
                         x:Name="ProxyBypassTextBox"
                         x:Uid="ProxyBypassTextBox"
-                        Width="420"
-                        Height="32"
+                        Width="300"
+                        Height="96"
                         HorizontalAlignment="Right"
                         PlaceholderText="不使用代理的地址"
+                        AcceptsReturn="True"
+                        ScrollViewer.VerticalScrollBarVisibility="Auto"
                         TextChanged="NetworkSettingTextBox_TextChanged"
-                        TextWrapping="NoWrap" />
+                        TextWrapping="Wrap" />
                 </controls:SettingsCard>
 
                 <controls:SettingsCard
-                    x:Uid="ProxyDownloadsSettingCard"
-                    Description="下载任务使用上方代理配置。"
-                    Header="下载任务">
-                    <CheckBox
-                        x:Name="ProxyDownloadsCheckBox"
+                    x:Uid="ProxyScopeSettingCard"
+                    Header="代理范围">
+                    <Button
+                        x:Name="ProxyScopeDropDownButton"
+                        Width="300"
                         HorizontalAlignment="Right"
-                        Checked="NetworkSettingCheckBox_Changed"
-                        Unchecked="NetworkSettingCheckBox_Changed" />
-                </controls:SettingsCard>
-
-                <controls:SettingsCard
-                    x:Uid="ProxyTrackersSettingCard"
-                    Description="同步 Tracker 列表时使用上方代理配置。"
-                    Header="Tracker 同步">
-                    <CheckBox
-                        x:Name="ProxyTrackersCheckBox"
-                        HorizontalAlignment="Right"
-                        Checked="NetworkSettingCheckBox_Changed"
-                        Unchecked="NetworkSettingCheckBox_Changed" />
+                        HorizontalContentAlignment="Stretch">
+                        <Button.Content>
+                            <Grid ColumnDefinitions="*,Auto">
+                                <StackPanel
+                                    VerticalAlignment="Center"
+                                    Orientation="Horizontal"
+                                    Spacing="6">
+                                    <Border
+                                        x:Name="ProxyDownloadsToken"
+                                        Padding="8,2"
+                                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="{ThemeResource ControlCornerRadius}">
+                                        <TextBlock Text="下载" />
+                                    </Border>
+                                    <Border
+                                        x:Name="ProxyTrackersToken"
+                                        Padding="8,2"
+                                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="{ThemeResource ControlCornerRadius}">
+                                        <TextBlock Text="Tracker 更新" />
+                                    </Border>
+                                    <TextBlock
+                                        x:Name="ProxyScopePlaceholderText"
+                                        VerticalAlignment="Center"
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Text="选择代理范围" />
+                                </StackPanel>
+                                <FontIcon
+                                    Grid.Column="1"
+                                    Margin="8,0,0,0"
+                                    FontSize="12"
+                                    Glyph="&#xE70D;" />
+                            </Grid>
+                        </Button.Content>
+                        <Button.Flyout>
+                            <Flyout Placement="BottomEdgeAlignedLeft">
+                                <Border
+                                    Width="360"
+                                    Padding="12"
+                                    CornerRadius="{ThemeResource ControlCornerRadius}">
+                                    <StackPanel Spacing="4">
+                                        <CheckBox
+                                            x:Name="ProxyDownloadsCheckBox"
+                                            Content="下载"
+                                            Checked="NetworkSettingCheckBox_Changed"
+                                            Unchecked="NetworkSettingCheckBox_Changed" />
+                                        <CheckBox
+                                            x:Name="ProxyTrackersCheckBox"
+                                            Content="Tracker 更新"
+                                            Checked="NetworkSettingCheckBox_Changed"
+                                            Unchecked="NetworkSettingCheckBox_Changed" />
+                                    </StackPanel>
+                                </Border>
+                            </Flyout>
+                        </Button.Flyout>
+                    </Button>
                 </controls:SettingsCard>
             </controls:SettingsExpander.Items>
         </controls:SettingsExpander>
@@ -265,50 +307,41 @@
         <controls:SettingsCard
             x:Name="UserAgentSettingCard"
             x:Uid="UserAgentSettingCard"
+            Description="默认为aria2内置 User-Agent。"
             Header="User-Agent">
             <controls:SettingsCard.HeaderIcon>
                 <FontIcon Glyph="&#xE774;" />
             </controls:SettingsCard.HeaderIcon>
+            <ComboBox
+                x:Name="UserAgentComboBox"
+                Width="168"
+                HorizontalAlignment="Right"
+                HorizontalContentAlignment="Stretch"
+                SelectionChanged="UserAgentComboBox_SelectionChanged">
+                <ComboBoxItem Content="默认" Tag="Default" />
+                <ComboBoxItem Content="Chrome" Tag="Chrome" />
+                <ComboBoxItem Content="Edge" Tag="Edge" />
+                <ComboBoxItem Content="Safari" Tag="Safari" />
+                <ComboBoxItem Content="Firefox" Tag="Firefox" />
+                <ComboBoxItem Content="Transmission" Tag="Transmission" />
+                <ComboBoxItem Content="自定义" Tag="Custom" />
+            </ComboBox>
+        </controls:SettingsCard>
+
+        <controls:SettingsCard
+            x:Name="UserAgentCustomSettingCard"
+            x:Uid="UserAgentCustomSettingCard"
+            Header="自定义 User-Agent"
+            Visibility="Collapsed">
             <TextBox
                 x:Name="UserAgentTextBox"
                 x:Uid="UserAgentTextBox"
                 Width="300"
                 Height="32"
-                HorizontalAlignment="Stretch"
+                HorizontalAlignment="Right"
                 PlaceholderText="User-Agent"
                 TextChanged="NetworkSettingTextBox_TextChanged"
                 TextWrapping="NoWrap" />
-            <controls:SettingsCard.Description>
-                <StackPanel
-                    Orientation="Horizontal"
-                    Spacing="8">
-                    <Button
-                        Click="UserAgentPresetButton_Click"
-                        Content="Chrome"
-                        Tag="Chrome" />
-                    <Button
-                        Click="UserAgentPresetButton_Click"
-                        Content="Edge"
-                        Tag="Edge" />
-                    <Button
-                        Click="UserAgentPresetButton_Click"
-                        Content="Safari"
-                        Tag="Safari" />
-                    <Button
-                        Click="UserAgentPresetButton_Click"
-                        Content="Firefox"
-                        Tag="Firefox" />
-                    <Button
-                        Click="UserAgentPresetButton_Click"
-                        Content="Transmission"
-                        Tag="Transmission" />
-                    <Button
-                        Click="UserAgentPresetButton_Click"
-                        x:Uid="UserAgentResetButton"
-                        Content="重置"
-                        Tag="Reset" />
-                </StackPanel>
-            </controls:SettingsCard.Description>
         </controls:SettingsCard>
 
         <!--  传输参数  -->

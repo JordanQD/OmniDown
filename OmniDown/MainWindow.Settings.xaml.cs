@@ -55,7 +55,6 @@ namespace OmniDown
         private NumberBox BtSeedTimeNumberBox => SettingsPage.BtSeedTimeNumberBoxControl;
         private NumberBox BtMaxPeersNumberBox => SettingsPage.BtMaxPeersNumberBoxControl;
         private Button BtTrackerSourceDropDownButton => SettingsPage.BtTrackerSourceDropDownButtonControl;
-        private TextBlock BtTrackerSourceSummaryText => SettingsPage.BtTrackerSourceSummaryTextControl;
         private CheckBox BtTrackerNgosangBestCheckBox => SettingsPage.BtTrackerNgosangBestCheckBoxControl;
         private CheckBox BtTrackerNgosangBestIpCheckBox => SettingsPage.BtTrackerNgosangBestIpCheckBoxControl;
         private CheckBox BtTrackerNgosangAllCheckBox => SettingsPage.BtTrackerNgosangAllCheckBoxControl;
@@ -83,14 +82,19 @@ namespace OmniDown
         private ToggleSwitch CustomProxyToggleSwitch => SettingsPage.CustomProxyToggleSwitchControl;
         private TextBlock CustomProxyStateText => SettingsPage.CustomProxyStateTextControl;
         private TextBox ProxyServerTextBox => SettingsPage.ProxyServerTextBoxControl;
+        private TextBox ProxyUsernameTextBox => SettingsPage.ProxyUsernameTextBoxControl;
+        private PasswordBox ProxyPasswordBox => SettingsPage.ProxyPasswordBoxControl;
         private Button DetectSystemProxyButton => SettingsPage.DetectSystemProxyButtonControl;
         private TextBox ProxyBypassTextBox => SettingsPage.ProxyBypassTextBoxControl;
+        private Button ProxyScopeDropDownButton => SettingsPage.ProxyScopeDropDownButtonControl;
         private CheckBox ProxyDownloadsCheckBox => SettingsPage.ProxyDownloadsCheckBoxControl;
         private CheckBox ProxyTrackersCheckBox => SettingsPage.ProxyTrackersCheckBoxControl;
         private ToggleSwitch EnableUpnpToggleSwitch => SettingsPage.EnableUpnpToggleSwitchControl;
         private TextBlock EnableUpnpStateText => SettingsPage.EnableUpnpStateTextControl;
         private NumberBox BtListenPortNumberBox => SettingsPage.BtListenPortNumberBoxControl;
         private NumberBox DhtListenPortNumberBox => SettingsPage.DhtListenPortNumberBoxControl;
+        private ComboBox UserAgentComboBox => SettingsPage.UserAgentComboBoxControl;
+        private CommunityToolkit.WinUI.Controls.SettingsCard UserAgentCustomSettingCard => SettingsPage.UserAgentCustomSettingCardControl;
         private TextBox UserAgentTextBox => SettingsPage.UserAgentTextBoxControl;
         private NumberBox ConnectTimeoutNumberBox => SettingsPage.ConnectTimeoutNumberBoxControl;
         private NumberBox TimeoutNumberBox => SettingsPage.TimeoutNumberBoxControl;
@@ -623,20 +627,23 @@ namespace OmniDown
                 _settingsPageViewModel.SaveNetworkSettings(settings);
             }
 
-            SetToggleSwitch(UseSystemProxyCheckBox, settings.UseSystemProxy);
             SetToggleSwitch(CustomProxyToggleSwitch, settings.CustomProxyEnabled);
             ProxyServerTextBox.Text = settings.ProxyServer;
-            ProxyBypassTextBox.Text = settings.ProxyBypass;
+            ProxyUsernameTextBox.Text = settings.ProxyUsername;
+            ProxyPasswordBox.Password = settings.ProxyPassword;
+            ProxyBypassTextBox.Text = FormatProxyBypassForDisplay(settings.ProxyBypass);
             ProxyDownloadsCheckBox.IsChecked = settings.ProxyDownloads;
             ProxyTrackersCheckBox.IsChecked = settings.ProxyTrackers;
             SetToggleSwitch(EnableUpnpToggleSwitch, settings.EnableUpnp);
             BtListenPortNumberBox.Value = settings.ListenPort;
             DhtListenPortNumberBox.Value = settings.DhtListenPort;
             UserAgentTextBox.Text = settings.UserAgent;
+            ApplyUserAgentSelectionToUi(settings.UserAgent);
             ConnectTimeoutNumberBox.Value = settings.ConnectTimeoutSeconds;
             TimeoutNumberBox.Value = settings.TimeoutSeconds;
             SetFileAllocationSelection(settings.FileAllocation);
             UpdateNetworkDependentUi();
+            SettingsPage.NetworkSettingsContentControl.UpdateProxyScopeSummary();
         }
 
         private void NetworkSetting_Changed(object sender, RoutedEventArgs e)
@@ -685,12 +692,90 @@ namespace OmniDown
 
         private void UserAgentPresetButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is not Button button)
+            if (sender is not FrameworkElement element)
             {
                 return;
             }
 
-            UserAgentTextBox.Text = button.Tag?.ToString() switch
+            string tag = element is ComboBox comboBox && comboBox.SelectedItem is ComboBoxItem selectedItem
+                ? selectedItem.Tag?.ToString() ?? string.Empty
+                : element.Tag?.ToString() ?? "Default";
+            if (_isLoadingNetworkSettings)
+            {
+                return;
+            }
+
+            if (tag.Equals("Custom", StringComparison.OrdinalIgnoreCase))
+            {
+                SetUserAgentCustomInputVisible(true);
+                return;
+            }
+
+            UserAgentTextBox.Text = GetUserAgentPresetValue(tag);
+            ApplyUserAgentSelectionToUi(UserAgentTextBox.Text);
+            ShowSettingsSaveTeachingTip();
+        }
+
+        private void ApplyUserAgentSelectionToUi(string userAgent)
+        {
+            string preset = GetUserAgentPresetName(userAgent);
+            SetUserAgentComboBoxSelection(preset);
+            SetUserAgentCustomInputVisible(preset == "Custom");
+        }
+
+        private void SetUserAgentComboBoxSelection(string preset)
+        {
+            if (UserAgentComboBox is null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(preset))
+            {
+                UserAgentComboBox.SelectedIndex = -1;
+                return;
+            }
+
+            foreach (object item in UserAgentComboBox.Items)
+            {
+                if (item is ComboBoxItem comboBoxItem &&
+                    comboBoxItem.Tag?.ToString()?.Equals(preset, StringComparison.OrdinalIgnoreCase) == true)
+                {
+                    UserAgentComboBox.SelectedItem = comboBoxItem;
+                    return;
+                }
+            }
+        }
+
+        private void SetUserAgentCustomInputVisible(bool isVisible)
+        {
+            UserAgentCustomSettingCard.Visibility = isVisible
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+        }
+
+        private static string GetUserAgentPresetName(string? userAgent)
+        {
+            string normalized = userAgent?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(normalized))
+            {
+                return "Default";
+            }
+
+            foreach (string preset in new[] { "Chrome", "Edge", "Safari", "Firefox", "Transmission" })
+            {
+                if (string.Equals(normalized, GetUserAgentPresetValue(preset), StringComparison.Ordinal))
+                {
+                    return preset;
+                }
+            }
+
+            return "Custom";
+        }
+
+        private static string GetUserAgentPresetValue(string preset)
+        {
+            return preset switch
             {
                 "Chrome" => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
                 "Edge" => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0",
@@ -699,7 +784,6 @@ namespace OmniDown
                 "Transmission" => "Transmission/3.00",
                 _ => string.Empty
             };
-            ShowSettingsSaveTeachingTip();
         }
 
         private void LoadAdvancedSettings()
@@ -1212,8 +1296,11 @@ namespace OmniDown
                 network.UseSystemProxy.ToString(CultureInfo.InvariantCulture),
                 network.CustomProxyEnabled.ToString(CultureInfo.InvariantCulture),
                 network.ProxyServer,
+                network.ProxyUsername,
+                network.ProxyPassword,
                 network.ProxyBypass,
                 network.ProxyDownloads.ToString(CultureInfo.InvariantCulture),
+                network.ProxyTrackers.ToString(CultureInfo.InvariantCulture),
                 network.ListenPort.ToString(CultureInfo.InvariantCulture),
                 network.DhtListenPort.ToString(CultureInfo.InvariantCulture),
                 network.UserAgent,
@@ -1404,9 +1491,11 @@ namespace OmniDown
         private NetworkSettings GetNetworkSettingsFromUi()
         {
             return NormalizeNetworkSettings(new NetworkSettings(
-                UseSystemProxyCheckBox?.IsOn == true,
+                false,
                 CustomProxyToggleSwitch?.IsOn == true,
                 ProxyServerTextBox.Text.Trim(),
+                ProxyUsernameTextBox.Text.Trim(),
+                ProxyPasswordBox.Password,
                 ProxyBypassTextBox.Text.Trim(),
                 ProxyDownloadsCheckBox?.IsChecked == true,
                 ProxyTrackersCheckBox?.IsChecked == true,
@@ -1423,7 +1512,10 @@ namespace OmniDown
         {
             bool proxyEnabled = CustomProxyToggleSwitch?.IsOn == true;
             ProxyServerTextBox.IsEnabled = proxyEnabled;
+            ProxyUsernameTextBox.IsEnabled = proxyEnabled;
+            ProxyPasswordBox.IsEnabled = proxyEnabled;
             ProxyBypassTextBox.IsEnabled = proxyEnabled;
+            ProxyScopeDropDownButton.IsEnabled = proxyEnabled;
             ProxyDownloadsCheckBox.IsEnabled = proxyEnabled;
             ProxyTrackersCheckBox.IsEnabled = proxyEnabled;
             DetectSystemProxyButton.IsEnabled = true;
@@ -1458,6 +1550,8 @@ namespace OmniDown
             return settings with
             {
                 ProxyServer = NormalizeProxyServer(settings.ProxyServer),
+                ProxyUsername = SanitizeHeaderValue(settings.ProxyUsername),
+                ProxyPassword = SanitizeHeaderValue(settings.ProxyPassword),
                 ProxyBypass = NormalizeProxyBypass(settings.ProxyBypass),
                 ListenPort = Math.Clamp(settings.ListenPort, 1024, 65535),
                 DhtListenPort = Math.Clamp(settings.DhtListenPort, 1024, 65535),
@@ -1499,9 +1593,9 @@ namespace OmniDown
                     uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase));
         }
 
-        private static string NormalizeProxyServer(string value)
+        private static string NormalizeProxyServer(string? value)
         {
-            string trimmed = value.Trim();
+            string trimmed = value?.Trim() ?? string.Empty;
             if (string.IsNullOrWhiteSpace(trimmed) ||
                 trimmed.Contains("://", StringComparison.Ordinal))
             {
@@ -1511,7 +1605,7 @@ namespace OmniDown
             return $"http://{trimmed}";
         }
 
-        private static string NormalizeProxyBypass(string value)
+        private static string NormalizeProxyBypass(string? value)
         {
             if (string.IsNullOrWhiteSpace(value))
             {
@@ -1523,6 +1617,12 @@ namespace OmniDown
                 .Replace(",", "\n", StringComparison.Ordinal)
                 .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                 .Distinct(StringComparer.OrdinalIgnoreCase));
+        }
+
+        private static string FormatProxyBypassForDisplay(string? value)
+        {
+            return string.Join(Environment.NewLine, NormalizeProxyBypass(value)
+                .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
         }
 
         private static string NormalizeFileAllocation(string? value)
@@ -1567,6 +1667,11 @@ namespace OmniDown
                 handler is HttpClientHandler httpHandler)
             {
                 WebProxy proxy = new(proxyUri);
+                if (!string.IsNullOrWhiteSpace(settings.ProxyUsername))
+                {
+                    proxy.Credentials = new NetworkCredential(settings.ProxyUsername, settings.ProxyPassword);
+                }
+
                 string[] bypassList = bypass
                     .Split([';', ','], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
                 if (bypassList.Length > 0)
@@ -1824,11 +1929,6 @@ namespace OmniDown
 
         private void UpdateTrackerSourceSummary()
         {
-            if (BtTrackerSourceSummaryText is null)
-            {
-                return;
-            }
-
             List<string> selectedLabels = [];
             foreach ((string label, _, CheckBox checkBox) in GetBuiltInTrackerSourceCheckBoxes())
             {
@@ -1846,13 +1946,7 @@ namespace OmniDown
                 }
             }
 
-            BtTrackerSourceSummaryText.Text = selectedLabels.Count switch
-            {
-                0 => "选择 Tracker 来源",
-                1 => selectedLabels[0],
-                <= 3 => string.Join(", ", selectedLabels),
-                _ => $"已选择 {selectedLabels.Count} 个来源"
-            };
+            SettingsPage.BitTorrentSettingsContentControl.UpdateTrackerSourceSummary(selectedLabels);
         }
 
         private string[] GetCustomTrackerUrls()

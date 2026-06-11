@@ -2,6 +2,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using OmniDown.Services.Localization;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace OmniDown.Controls;
 
@@ -34,7 +35,6 @@ public sealed partial class BitTorrentSettingsSectionControl : UserControl
     internal NumberBox BtSeedTimeNumberBoxControl => BtSeedTimeNumberBox;
     internal NumberBox BtMaxPeersNumberBoxControl => BtMaxPeersNumberBox;
     internal Button BtTrackerSourceDropDownButtonControl => BtTrackerSourceDropDownButton;
-    internal TextBlock BtTrackerSourceSummaryTextControl => BtTrackerSourceSummaryText;
     internal CheckBox BtTrackerNgosangBestCheckBoxControl => BtTrackerNgosangBestCheckBox;
     internal CheckBox BtTrackerNgosangBestIpCheckBoxControl => BtTrackerNgosangBestIpCheckBox;
     internal CheckBox BtTrackerNgosangAllCheckBoxControl => BtTrackerNgosangAllCheckBox;
@@ -120,5 +120,20 @@ public sealed partial class BitTorrentSettingsSectionControl : UserControl
         if (ReferenceEquals(toggleSwitch, BtForceEncryptionToggleSwitch)) return BtForceEncryptionStateText;
         if (ReferenceEquals(toggleSwitch, BtAutoSyncTrackerToggleSwitch)) return BtAutoSyncTrackerStateText;
         return null;
+    }
+
+    internal void UpdateTrackerSourceSummary(IReadOnlyList<string> selectedLabels)
+    {
+        List<string> tokens = selectedLabels.Count switch
+        {
+            0 => [],
+            <= 3 => selectedLabels.ToList(),
+            _ => [selectedLabels[0], selectedLabels[1], $"已选择 {selectedLabels.Count} 个来源"]
+        };
+
+        BtTrackerSourceTokensItemsControl.ItemsSource = tokens;
+        BtTrackerSourcePlaceholderText.Visibility = tokens.Count == 0
+            ? Visibility.Visible
+            : Visibility.Collapsed;
     }
 }
