@@ -25,6 +25,8 @@ internal sealed class SettingsPageViewModel
 
     public AdvancedSettings AdvancedSettings { get; private set; } = AdvancedSettings.Default;
 
+    public Ed2kSettings Ed2kSettings { get; private set; } = Ed2kSettings.Default;
+
     public CloseBehaviorSettings CloseBehaviorSettings { get; private set; } = CloseBehaviorSettings.Default;
 
     public SpeedLimitSettings SpeedLimitSettings { get; private set; } = SpeedLimitSettings.Default;
@@ -63,6 +65,7 @@ internal sealed class SettingsPageViewModel
         LoadBitTorrentSettings();
         LoadNetworkSettings();
         LoadAdvancedSettings();
+        LoadEd2kSettings();
         LoadCloseBehaviorSettings();
         LoadSpeedLimitSettings();
     }
@@ -91,6 +94,11 @@ internal sealed class SettingsPageViewModel
     {
         AdvancedSettings = NormalizeAdvancedSettings(_settingsStore.ReadAdvancedSettings());
         _settingsStore.SaveAdvancedSettings(AdvancedSettings);
+    }
+
+    public void LoadEd2kSettings()
+    {
+        Ed2kSettings = _settingsStore.ReadEd2kSettings();
     }
 
     public void LoadCloseBehaviorSettings()
@@ -156,6 +164,17 @@ internal sealed class SettingsPageViewModel
         _settingsStore.SaveAdvancedSettings(AdvancedSettings);
     }
 
+    public void SaveEd2kSettings()
+    {
+        _settingsStore.SaveEd2kSettings(Ed2kSettings);
+    }
+
+    public void SaveEd2kSettings(Ed2kSettings settings)
+    {
+        Ed2kSettings = settings;
+        _settingsStore.SaveEd2kSettings(settings);
+    }
+
     public void SaveCloseBehaviorSettings()
     {
         _settingsStore.SaveCloseBehaviorSettings(CloseBehaviorSettings);
@@ -181,6 +200,7 @@ internal sealed class SettingsPageViewModel
         SaveBitTorrentSettings();
         SaveNetworkSettings();
         SaveAdvancedSettings();
+        SaveEd2kSettings();
         SaveCloseBehaviorSettings();
         SaveSpeedLimitSettings();
         ClearPendingChanges();
@@ -215,6 +235,12 @@ internal sealed class SettingsPageViewModel
     public void UpdateAdvancedSettings(AdvancedSettings settings)
     {
         AdvancedSettings = NormalizeAdvancedSettings(settings);
+        MarkPendingChanges();
+    }
+
+    public void UpdateEd2kSettings(Ed2kSettings settings)
+    {
+        Ed2kSettings = settings;
         MarkPendingChanges();
     }
 

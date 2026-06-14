@@ -1,0 +1,388 @@
+<UserControl
+    x:Class="OmniDown.Controls.Ed2kSettingsSectionControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls">
+    <StackPanel
+        x:Name="Ed2kSettingsContent"
+        Margin="0,24,0,36"
+        Spacing="4">
+        <TextBlock
+            AutomationProperties.HeadingLevel="Level1"
+            Style="{StaticResource TitleTextBlockStyle}"
+            x:Uid="Ed2kSettingsTitle"
+            Text="ED2K" />
+
+        <!--  ED2K  -->
+        <TextBlock
+            Margin="1,30,0,6"
+            Style="{StaticResource BodyStrongTextBlockStyle}"
+            x:Uid="Ed2kBasicOptionsHeader"
+            Text="ED2K" />
+
+        <controls:SettingsCard
+            x:Name="Ed2kListenPortSettingCard"
+            x:Uid="Ed2kListenPortSettingCard"
+            Description="ED2K 客户端监听端口。修改后需重启 aria2 生效。"
+            Header="ED2K 监听端口">
+            <controls:SettingsCard.HeaderIcon>
+                <FontIcon Glyph="&#xE95A;" />
+            </controls:SettingsCard.HeaderIcon>
+            <Grid
+                ColumnDefinitions="*,Auto"
+                ColumnSpacing="8">
+                <NumberBox
+                    x:Name="Ed2kListenPortNumberBox"
+                    Width="120"
+                    Height="32"
+                    HorizontalAlignment="Right"
+                    Minimum="1024"
+                    Maximum="65535"
+                    SmallChange="1"
+                    SpinButtonPlacementMode="Inline"
+                    ValueChanged="Ed2kSettingNumberBox_ValueChanged" />
+                <Button
+                    Grid.Column="1"
+                    Width="40"
+                    Height="32"
+                    MinWidth="40"
+                    Padding="0"
+                    VerticalAlignment="Center"
+                    x:Uid="RandomEd2kPortButton"
+                    Click="RandomEd2kPortButton_Click"
+                    ToolTipService.ToolTip="随机端口">
+                    <FontIcon Glyph="&#xE8B1;" />
+                </Button>
+            </Grid>
+        </controls:SettingsCard>
+
+        <controls:SettingsCard
+            x:Name="Ed2kUdpListenPortSettingCard"
+            x:Uid="Ed2kUdpListenPortSettingCard"
+            Description="ED2K UDP 监听端口。修改后需重启 aria2 生效。"
+            Header="ED2K UDP 监听端口">
+            <controls:SettingsCard.HeaderIcon>
+                <FontIcon Glyph="&#xE95A;" />
+            </controls:SettingsCard.HeaderIcon>
+            <Grid
+                ColumnDefinitions="*,Auto"
+                ColumnSpacing="8">
+                <NumberBox
+                    x:Name="Ed2kUdpListenPortNumberBox"
+                    Width="120"
+                    Height="32"
+                    HorizontalAlignment="Right"
+                    Minimum="1024"
+                    Maximum="65535"
+                    SmallChange="1"
+                    SpinButtonPlacementMode="Inline"
+                    ValueChanged="Ed2kSettingNumberBox_ValueChanged" />
+                <Button
+                    Grid.Column="1"
+                    Width="40"
+                    Height="32"
+                    MinWidth="40"
+                    Padding="0"
+                    VerticalAlignment="Center"
+                    x:Uid="RandomEd2kUdpPortButton"
+                    Click="RandomEd2kUdpPortButton_Click"
+                    ToolTipService.ToolTip="随机端口">
+                    <FontIcon Glyph="&#xE8B1;" />
+                </Button>
+            </Grid>
+        </controls:SettingsCard>
+
+        <controls:SettingsCard
+            x:Name="Ed2kUploadSlotsSettingCard"
+            x:Uid="Ed2kUploadSlotsSettingCard"
+            Description="同时上传的最大槽位数。"
+            Header="上传槽位">
+            <controls:SettingsCard.HeaderIcon>
+                <FontIcon Glyph="&#xE8B1;" />
+            </controls:SettingsCard.HeaderIcon>
+            <NumberBox
+                x:Name="Ed2kUploadSlotsNumberBox"
+                Width="280"
+                Height="32"
+                HorizontalAlignment="Right"
+                Minimum="1"
+                Maximum="500"
+                SmallChange="1"
+                SpinButtonPlacementMode="Inline"
+                ValueChanged="Ed2kSettingNumberBox_ValueChanged" />
+        </controls:SettingsCard>
+
+        <!--  网络引导  -->
+        <TextBlock
+            Margin="1,30,0,6"
+            Style="{StaticResource BodyStrongTextBlockStyle}"
+            x:Uid="Ed2kNetworkBootstrapHeader"
+            Text="网络引导" />
+
+        <controls:SettingsCard
+            x:Name="Ed2kServerListUrlSettingCard"
+            x:Uid="Ed2kServerListUrlSettingCard"
+            Description="发现 ED2K 服务器。"
+            Header="server.met 来源">
+            <controls:SettingsCard.HeaderIcon>
+                <FontIcon Glyph="&#xE774;" />
+            </controls:SettingsCard.HeaderIcon>
+            <TextBox
+                x:Name="Ed2kServerListUrlTextBox"
+                Width="280"
+                HorizontalAlignment="Right"
+                Text="https://upd.emule-security.org/server.met"
+                TextChanged="Ed2kSettingTextBox_TextChanged" />
+        </controls:SettingsCard>
+
+        <controls:SettingsCard
+            x:Name="Ed2kKadBootstrapUrlSettingCard"
+            x:Uid="Ed2kKadBootstrapUrlSettingCard"
+            Description="发现 Kad 节点。"
+            Header="nodes.dat 来源">
+            <controls:SettingsCard.HeaderIcon>
+                <FontIcon Glyph="&#xE774;" />
+            </controls:SettingsCard.HeaderIcon>
+            <TextBox
+                x:Name="Ed2kKadBootstrapUrlTextBox"
+                Width="280"
+                HorizontalAlignment="Right"
+                Text="https://upd.emule-security.org/nodes.dat"
+                TextChanged="Ed2kSettingTextBox_TextChanged" />
+        </controls:SettingsCard>
+
+        <controls:SettingsExpander
+            x:Name="Ed2kServerListSettingCard"
+            x:Uid="Ed2kServerListSettingCard"
+            Description="手动指定 ED2K 服务器地址。"
+            Header="ED2K 服务器">
+            <controls:SettingsExpander.HeaderIcon>
+                <FontIcon Glyph="&#xE8A5;" />
+            </controls:SettingsExpander.HeaderIcon>
+            <controls:SettingsExpander.Items>
+                <controls:SettingsCard>
+                    <TextBox
+                        x:Name="Ed2kServerListTextBox"
+                        Height="40"
+                        MinHeight="40"
+                        MaxHeight="100"
+                        HorizontalAlignment="Stretch"
+                        AcceptsReturn="True"
+                        PlaceholderText="每行一个服务器"
+                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                        TextChanged="Ed2kSettingTextBox_TextChanged"
+                        TextWrapping="Wrap" />
+                </controls:SettingsCard>
+            </controls:SettingsExpander.Items>
+        </controls:SettingsExpander>
+
+        <controls:SettingsExpander
+            x:Name="Ed2kAutoSyncSettingCard"
+            x:Uid="Ed2kAutoSyncSettingCard"
+            Description="自动同步 server.met 和 nodes.dat 来源。"
+            Header="自动同步">
+            <controls:SettingsExpander.HeaderIcon>
+                <FontIcon Glyph="&#xE895;" />
+            </controls:SettingsExpander.HeaderIcon>
+            <StackPanel
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Orientation="Horizontal"
+                Spacing="8">
+                <TextBlock
+                    x:Name="Ed2kAutoSyncStateText"
+                    VerticalAlignment="Center"
+                    Text="关" />
+                <ToggleSwitch
+                    x:Name="Ed2kAutoSyncToggleSwitch"
+                    Width="48"
+                    MinWidth="0"
+                    Padding="0"
+                    OffContent=""
+                    OnContent=""
+                    Toggled="Ed2kSettingToggleSwitch_Toggled" />
+            </StackPanel>
+            <controls:SettingsExpander.Items>
+                <controls:SettingsCard
+                    x:Uid="Ed2kSyncIntervalCard"
+                    Header="同步频率">
+                    <ComboBox
+                        x:Name="Ed2kSyncIntervalComboBox"
+                        Width="168"
+                        HorizontalAlignment="Right"
+                        SelectedIndex="3"
+                        SelectionChanged="Ed2kSettingComboBox_SelectionChanged">
+                        <ComboBoxItem
+                            x:Uid="Ed2kSyncIntervalEveryStartItem"
+                            Content="每次启动"
+                            Tag="EveryStart" />
+                        <ComboBoxItem
+                            x:Uid="Ed2kSyncInterval6HoursItem"
+                            Content="每 6 小时"
+                            Tag="Every6Hours" />
+                        <ComboBoxItem
+                            x:Uid="Ed2kSyncInterval12HoursItem"
+                            Content="每 12 小时"
+                            Tag="Every12Hours" />
+                        <ComboBoxItem
+                            x:Uid="Ed2kSyncIntervalDailyItem"
+                            Content="每天"
+                            Tag="Daily" />
+                        <ComboBoxItem
+                            x:Uid="Ed2kSyncIntervalWeeklyItem"
+                            Content="每周"
+                            Tag="Weekly" />
+                    </ComboBox>
+                </controls:SettingsCard>
+                <controls:SettingsCard
+                    x:Uid="Ed2kSyncNowCard"
+                    Header="马上同步">
+                    <Button
+                        x:Name="Ed2kSyncNowButton"
+                        Width="40"
+                        Height="32"
+                        MinWidth="40"
+                        Padding="0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        x:Uid="Ed2kSyncNowButton"
+                        Click="SyncEd2kButton_Click"
+                        ToolTipService.ToolTip="马上同步">
+                        <FontIcon
+                            FontSize="14"
+                            Glyph="&#xE895;" />
+                    </Button>
+                    <controls:SettingsCard.Description>
+                        <TextBlock
+                            x:Name="Ed2kLastSyncText"
+                            x:Uid="Ed2kLastSyncText"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="从未同步"
+                            TextWrapping="WrapWholeWords" />
+                    </controls:SettingsCard.Description>
+                </controls:SettingsCard>
+            </controls:SettingsExpander.Items>
+        </controls:SettingsExpander>
+
+        <!--  ED2K 搜索  -->
+        <TextBlock
+            Margin="1,30,0,6"
+            Style="{StaticResource BodyStrongTextBlockStyle}"
+            x:Uid="Ed2kSearchHeader"
+            Text="ED2K 搜索" />
+
+        <controls:SettingsCard
+            x:Name="Ed2kSearchKeywordSettingCard"
+            x:Uid="Ed2kSearchKeywordSettingCard"
+            Description="在 ED2K 网络中搜索指定关键词。"
+            Header="关键词">
+            <controls:SettingsCard.HeaderIcon>
+                <FontIcon Glyph="&#xE721;" />
+            </controls:SettingsCard.HeaderIcon>
+            <Grid
+                ColumnDefinitions="*,Auto"
+                ColumnSpacing="8">
+                <TextBox
+                    x:Name="Ed2kSearchKeywordTextBox"
+                    Width="220"
+                    HorizontalAlignment="Right"
+                    PlaceholderText="输入搜索关键词"
+                    TextChanged="Ed2kSettingTextBox_TextChanged" />
+                <Button
+                    x:Name="Ed2kSearchKeywordButton"
+                    Grid.Column="1"
+                    Width="40"
+                    Height="32"
+                    MinWidth="40"
+                    Padding="0"
+                    VerticalAlignment="Center"
+                    x:Uid="Ed2kSearchKeywordButton"
+                    Click="SearchEd2kButton_Click"
+                    ToolTipService.ToolTip="搜索">
+                    <FontIcon
+                        FontSize="14"
+                        Glyph="&#xE721;" />
+                </Button>
+            </Grid>
+        </controls:SettingsCard>
+
+        <controls:SettingsCard
+            x:Name="Ed2kFileTypeSettingCard"
+            x:Uid="Ed2kFileTypeSettingCard"
+            Description="按文件类型过滤搜索结果。"
+            Header="文件类型">
+            <controls:SettingsCard.HeaderIcon>
+                <FontIcon Glyph="&#xE8A5;" />
+            </controls:SettingsCard.HeaderIcon>
+            <ComboBox
+                x:Name="Ed2kFileTypeComboBox"
+                Width="168"
+                HorizontalAlignment="Right"
+                SelectedIndex="0"
+                SelectionChanged="Ed2kSettingComboBox_SelectionChanged">
+                <ComboBoxItem
+                    x:Uid="Ed2kFileTypeAnyItem"
+                    Content="任意"
+                    Tag="Any" />
+                <ComboBoxItem
+                    x:Uid="Ed2kFileTypeAudioItem"
+                    Content="音频"
+                    Tag="Audio" />
+                <ComboBoxItem
+                    x:Uid="Ed2kFileTypeVideoItem"
+                    Content="视频"
+                    Tag="Video" />
+                <ComboBoxItem
+                    x:Uid="Ed2kFileTypeDocumentItem"
+                    Content="文档"
+                    Tag="Document" />
+                <ComboBoxItem
+                    x:Uid="Ed2kFileTypeArchiveItem"
+                    Content="压缩包"
+                    Tag="Archive" />
+            </ComboBox>
+        </controls:SettingsCard>
+
+        <controls:SettingsCard
+            x:Name="Ed2kMinSourcesSettingCard"
+            x:Uid="Ed2kMinSourcesSettingCard"
+            Description="仅显示来源数不少于该值的结果。"
+            Header="最少来源数">
+            <controls:SettingsCard.HeaderIcon>
+                <FontIcon Glyph="&#xE716;" />
+            </controls:SettingsCard.HeaderIcon>
+            <NumberBox
+                x:Name="Ed2kMinSourcesNumberBox"
+                Width="280"
+                Height="32"
+                HorizontalAlignment="Right"
+                Minimum="1"
+                Maximum="1000"
+                SmallChange="1"
+                SpinButtonPlacementMode="Inline"
+                Value="5"
+                ValueChanged="Ed2kSettingNumberBox_ValueChanged" />
+        </controls:SettingsCard>
+
+        <controls:SettingsCard
+            x:Name="Ed2kSearchTimeoutSettingCard"
+            x:Uid="Ed2kSearchTimeoutSettingCard"
+            Description="搜索请求最大等待秒数。"
+            Header="搜索时长">
+            <controls:SettingsCard.HeaderIcon>
+                <FontIcon Glyph="&#xE823;" />
+            </controls:SettingsCard.HeaderIcon>
+            <NumberBox
+                x:Name="Ed2kSearchTimeoutNumberBox"
+                Width="280"
+                Height="32"
+                HorizontalAlignment="Right"
+                Minimum="1"
+                Maximum="300"
+                SmallChange="1"
+                SpinButtonPlacementMode="Inline"
+                Value="20"
+                ValueChanged="Ed2kSettingNumberBox_ValueChanged" />
+        </controls:SettingsCard>
+    </StackPanel>
+</UserControl>

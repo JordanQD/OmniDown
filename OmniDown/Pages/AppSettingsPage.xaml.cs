@@ -23,6 +23,7 @@ public sealed partial class AppSettingsPage : Page
     private readonly GeneralSettingsPage _generalPage = new();
     private readonly DownloadSettingsPage _downloadPage = new();
     private readonly BitTorrentSettingsPage _bitTorrentPage = new();
+    private readonly Ed2kSettingsPage _ed2kPage = new();
     private readonly NetworkSettingsPage _networkPage = new();
     private readonly AdvancedSettingsPage _advancedPage = new();
     private readonly AboutSettingsPage _aboutPage = new();
@@ -40,6 +41,7 @@ public sealed partial class AppSettingsPage : Page
             ["General"] = _generalPage,
             ["Download"] = _downloadPage,
             ["BitTorrent"] = _bitTorrentPage,
+            ["Ed2k"] = _ed2kPage,
             ["Network"] = _networkPage,
             ["Advanced"] = _advancedPage,
             ["About"] = _aboutPage,
@@ -54,6 +56,7 @@ public sealed partial class AppSettingsPage : Page
         _generalPage.HostActions = hostActions;
         _downloadPage.HostActions = hostActions;
         _bitTorrentPage.HostActions = hostActions;
+        _ed2kPage.HostActions = hostActions;
         _networkPage.HostActions = hostActions;
         _advancedPage.HostActions = hostActions;
         _aboutPage.HostActions = hostActions;
@@ -158,6 +161,7 @@ public sealed partial class AppSettingsPage : Page
     internal GeneralSettingsSectionControl GeneralSettingsContentControl => _generalPage.SectionContentControl!;
     internal DownloadSettingsSectionControl DownloadSettingsContentControl => _downloadPage.SectionContentControl!;
     internal BitTorrentSettingsSectionControl BitTorrentSettingsContentControl => _bitTorrentPage.SectionContentControl!;
+    internal Ed2kSettingsSectionControl Ed2kSettingsContentControl => _ed2kPage.SectionContentControl!;
     internal NetworkSettingsSectionControl NetworkSettingsContentControl => _networkPage.SectionContentControl!;
     internal AdvancedSettingsSectionControl AdvancedSettingsContentControl => _advancedPage.SectionContentControl!;
     internal AboutSettingsSectionControl AboutSettingsContentControl => _aboutPage.SectionContentControl!;
@@ -198,6 +202,16 @@ public sealed partial class AppSettingsPage : Page
     {
         add => _bitTorrentPage.SyncBtTrackerRequested += value;
         remove => _bitTorrentPage.SyncBtTrackerRequested -= value;
+    }
+    internal event RoutedEventHandler? Ed2kSettingChanged
+    {
+        add => _ed2kPage.Ed2kSettingChanged += value;
+        remove => _ed2kPage.Ed2kSettingChanged -= value;
+    }
+    internal event RoutedEventHandler? SearchEd2kRequested
+    {
+        add => _ed2kPage.SearchEd2kRequested += value;
+        remove => _ed2kPage.SearchEd2kRequested -= value;
     }
     internal event RoutedEventHandler? NetworkSettingChanged
     {
@@ -469,6 +483,7 @@ public sealed partial class AppSettingsPage : Page
         foreach (SettingSearchEntry entry in GeneralSettingsContentControl.SearchEntries) yield return entry;
         foreach (SettingSearchEntry entry in DownloadSettingsContentControl.SearchEntries) yield return entry;
         foreach (SettingSearchEntry entry in BitTorrentSettingsContentControl.SearchEntries) yield return entry;
+        foreach (SettingSearchEntry entry in Ed2kSettingsContentControl.SearchEntries) yield return entry;
         foreach (SettingSearchEntry entry in NetworkSettingsContentControl.SearchEntries) yield return entry;
         foreach (SettingSearchEntry entry in AdvancedSettingsContentControl.SearchEntries) yield return entry;
         foreach (SettingSearchEntry entry in AboutSettingsContentControl.SearchEntries) yield return entry;

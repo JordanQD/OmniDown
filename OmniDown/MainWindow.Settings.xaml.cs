@@ -30,6 +30,7 @@ namespace OmniDown
         private FrameworkElement GeneralSettingsContent => SettingsPage.GeneralSettingsContentControl;
         private FrameworkElement DownloadSettingsContent => SettingsPage.DownloadSettingsContentControl;
         private FrameworkElement BitTorrentSettingsContent => SettingsPage.BitTorrentSettingsContentControl;
+        private FrameworkElement Ed2kSettingsContent => SettingsPage.Ed2kSettingsContentControl;
         private FrameworkElement NetworkSettingsContent => SettingsPage.NetworkSettingsContentControl;
         private FrameworkElement AdvancedSettingsContent => SettingsPage.AdvancedSettingsContentControl;
         private FrameworkElement AboutSettingsContent => SettingsPage.AboutSettingsContentControl;
@@ -139,6 +140,7 @@ namespace OmniDown
             SettingsPage.BrowseDownloadDirectoryRequested += BrowseDownloadDirectoryButton_Click;
             SettingsPage.DownloadSettingChanged += DownloadSetting_Changed;
             SettingsPage.BitTorrentSettingChanged += BitTorrentSetting_Changed;
+            SettingsPage.Ed2kSettingChanged += Ed2kSetting_Changed;
             SettingsPage.NetworkSettingChanged += NetworkSetting_Changed;
             SettingsPage.DetectSystemProxyRequested += DetectSystemProxyButton_Click;
             SettingsPage.RandomBtPortRequested += RandomBtPortButton_Click;
@@ -210,6 +212,11 @@ namespace OmniDown
 
             UpdateBitTorrentDependentUi();
             UpdateTrackerSourceSummary();
+            ShowSettingsSaveTeachingTip();
+        }
+
+        private void Ed2kSetting_Changed(object sender, RoutedEventArgs e)
+        {
             ShowSettingsSaveTeachingTip();
         }
 
