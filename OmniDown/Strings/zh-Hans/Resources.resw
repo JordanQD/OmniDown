@@ -121,6 +121,8 @@
   <data name="DownloadUrlRequiredMessage" xml:space="preserve"><value>请输入下载 URL。</value></data>
   <data name="TorrentFileRequiredMessage" xml:space="preserve"><value>请选择种子文件。</value></data>
   <data name="TorrentFileSelectionRequiredMessage" xml:space="preserve"><value>请至少选择一个种子文件。</value></data>
+  <data name="SelectAllTorrentFilesAutomationName" xml:space="preserve"><value>选择全部种子文件</value></data>
+  <data name="TorrentFilesListAutomationName" xml:space="preserve"><value>所选种子中的文件</value></data>
   <data name="TaskAddedMessage" xml:space="preserve"><value>任务已添加到 aria2。</value></data>
   <data name="TasksAddedMessage" xml:space="preserve"><value>已添加 {0} 个任务到 aria2。</value></data>
   <data name="AddTaskFailedMessage" xml:space="preserve"><value>通过 aria2 RPC 添加任务失败：{0}</value></data>

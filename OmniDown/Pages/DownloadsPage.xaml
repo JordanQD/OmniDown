@@ -86,6 +86,7 @@
                 <CommandBar.PrimaryCommands>
                     <AppBarButton
                         x:Name="_newDownloadButton"
+                        AutomationProperties.AutomationId="NewDownloadToolbarButton"
                         Click="NewDownloadButton_Click"
                         x:Uid="NewDownloadButton"
                         Label="New">

@@ -1,8 +1,8 @@
 using Microsoft.UI.Xaml.Controls;
-using OmniDown.Dialogs;
 using OmniDown.Models;
 using OmniDown.Models.Settings;
 using OmniDown.Services.BrowserExtension;
+using OmniDown.Services.Downloads;
 using OmniDown.Services.Engine;
 using OmniDown.Services.Rpc;
 using System;
@@ -155,8 +155,8 @@ namespace OmniDown
         private async Task<BrowserExtensionAddResponse> HandleBrowserExtensionAddOnUiThreadAsync(
             BrowserExtensionAddRequest request)
         {
-            List<string> sourceUris = NewDownloadDialogHelpers.GetDownloadSourceUris(request.Url)
-                .Where(NewDownloadDialogHelpers.IsLikelyDownloadSourceUri)
+            List<string> sourceUris = DownloadSourceParser.ParseLines(request.Url)
+                .Where(DownloadSourceParser.IsLikelyDownloadSourceUri)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
 

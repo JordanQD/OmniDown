@@ -121,6 +121,8 @@
   <data name="DownloadUrlRequiredMessage" xml:space="preserve"><value>A download URL is required.</value></data>
   <data name="TorrentFileRequiredMessage" xml:space="preserve"><value>Please choose a torrent file.</value></data>
   <data name="TorrentFileSelectionRequiredMessage" xml:space="preserve"><value>Select at least one file from the torrent.</value></data>
+  <data name="SelectAllTorrentFilesAutomationName" xml:space="preserve"><value>Select all torrent files</value></data>
+  <data name="TorrentFilesListAutomationName" xml:space="preserve"><value>Files in selected torrent</value></data>
   <data name="TaskAddedMessage" xml:space="preserve"><value>Task added to aria2.</value></data>
   <data name="TasksAddedMessage" xml:space="preserve"><value>{0} tasks added to aria2.</value></data>
   <data name="AddTaskFailedMessage" xml:space="preserve"><value>Failed to add task through aria2 RPC: {0}</value></data>

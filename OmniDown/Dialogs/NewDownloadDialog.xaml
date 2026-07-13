@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog
+    x:Class="OmniDown.Dialogs.NewDownloadDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:OmniDown.Dialogs"
+    xmlns:models="using:OmniDown.Models"
+    CornerRadius="{ThemeResource OverlayCornerRadius}"
+    DefaultButton="Primary"
+    Opened="ContentDialog_Opened"
+    PrimaryButtonClick="ContentDialog_PrimaryButtonClick">
+
+    <ContentDialog.Resources>
+        <x:Double x:Key="ContentDialogMinWidth">820</x:Double>
+        <x:Double x:Key="ContentDialogMaxWidth">820</x:Double>
+        <x:Double x:Key="ContentDialogMinHeight">600</x:Double>
+        <x:Double x:Key="ContentDialogMaxHeight">600</x:Double>
+    </ContentDialog.Resources>
+
+    <ContentDialog.Style>
+        <StaticResource ResourceKey="DefaultContentDialogStyle" />
+    </ContentDialog.Style>
+    <ContentDialog.PrimaryButtonStyle>
+        <Style
+            BasedOn="{StaticResource AccentButtonStyle}"
+            TargetType="Button">
+            <Setter Property="AutomationProperties.AutomationId" Value="NewDownloadAddButton" />
+        </Style>
+    </ContentDialog.PrimaryButtonStyle>
+    <ContentDialog.CloseButtonStyle>
+        <Style
+            BasedOn="{StaticResource DefaultButtonStyle}"
+            TargetType="Button">
+            <Setter Property="AutomationProperties.AutomationId" Value="NewDownloadCancelButton" />
+            <Setter Property="CornerRadius" Value="{ThemeResource ControlCornerRadius}" />
+        </Style>
+    </ContentDialog.CloseButtonStyle>
+
+    <Grid
+        x:Name="DialogRoot"
+        Width="760"
+        Height="460"
+        AutomationProperties.AutomationId="NewDownloadDialogRoot"
+        AllowDrop="True"
+        Background="Transparent"
+        DragLeave="DialogRoot_DragLeave"
+        DragOver="DialogRoot_DragOver"
+        Drop="DialogRoot_Drop"
+        RowSpacing="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition x:Name="TorrentFilesRow" Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <SelectorBar
+            x:Name="TaskTypeSelector"
+            Grid.Row="0"
+            AutomationProperties.AutomationId="NewDownloadTaskTypeSelector"
+            SelectionChanged="TaskTypeSelector_SelectionChanged">
+            <SelectorBarItem
+                x:Name="LinkTaskTypeItem"
+                AutomationProperties.AutomationId="NewDownloadLinkMode"
+                IsSelected="True" />
+            <SelectorBarItem
+                x:Name="TorrentTaskTypeItem"
+                AutomationProperties.AutomationId="NewDownloadTorrentMode" />
+        </SelectorBar>
+
+        <StackPanel
+            x:Name="LinkInputSection"
+            Grid.Row="1"
+            Spacing="4"
+            Visibility="{x:Bind local:NewDownloadDialog.LinkModeToVisibility(ViewModel.TaskType), Mode=OneWay}">
+            <TextBlock x:Name="UrlHeaderText" />
+            <Grid
+                Height="96"
+                ColumnDefinitions="*,Auto"
+                ColumnSpacing="8">
+                <TextBox
+                    x:Name="UriTextBox"
+                    Grid.Column="0"
+                    Height="96"
+                    AutomationProperties.AutomationId="NewDownloadUrlTextBox"
+                    AcceptsReturn="True"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                    Text="{x:Bind ViewModel.UrlText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    TextWrapping="Wrap">
+                    <TextBox.Resources>
+                        <StaticResource x:Key="ScrollBarPanningThumbBackground" ResourceKey="TextFillColorSecondaryBrush" />
+                        <StaticResource x:Key="ScrollBarThumbBackground" ResourceKey="TextFillColorSecondaryBrush" />
+                        <StaticResource x:Key="ScrollBarThumbFill" ResourceKey="TextFillColorSecondaryBrush" />
+                        <StaticResource x:Key="ScrollBarThumbFillPointerOver" ResourceKey="TextFillColorPrimaryBrush" />
+                        <StaticResource x:Key="ScrollBarThumbFillPressed" ResourceKey="TextFillColorPrimaryBrush" />
+                    </TextBox.Resources>
+                    <TextBox.KeyboardAccelerators>
+                        <KeyboardAccelerator
+                            Key="V"
+                            Modifiers="Control"
+                            Invoked="PasteUriAccelerator_Invoked" />
+                    </TextBox.KeyboardAccelerators>
+                </TextBox>
+                <Button
+                    x:Name="PasteUriButton"
+                    Grid.Column="1"
+                    Width="40"
+                    Height="96"
+                    MinWidth="40"
+                    MinHeight="96"
+                    AutomationProperties.AutomationId="NewDownloadPasteButton"
+                    Click="PasteUriButton_Click"
+                    ToolTipService.ToolTip="Paste">
+                    <FontIcon FontSize="16" Glyph="&#xE77F;" />
+                </Button>
+            </Grid>
+            <TextBlock
+                AutomationProperties.AutomationId="NewDownloadUrlValidationMessage"
+                AutomationProperties.LiveSetting="Assertive"
+                Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Text="{x:Bind ViewModel.UriValidationMessage, Mode=OneWay}"
+                TextWrapping="Wrap"
+                Visibility="{x:Bind local:NewDownloadDialog.MessageToVisibility(ViewModel.UriValidationMessage), Mode=OneWay}" />
+        </StackPanel>
+
+        <StackPanel
+            x:Name="TorrentInputSection"
+            Grid.Row="1"
+            Spacing="4"
+            Visibility="{x:Bind local:NewDownloadDialog.TorrentModeToVisibility(ViewModel.TaskType), Mode=OneWay}">
+            <TextBlock x:Name="TorrentFileHeaderText" />
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                <Border
+                    Grid.Column="0"
+                    MinHeight="32"
+                    Padding="12,0,8,0"
+                    Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                    CornerRadius="{ThemeResource ControlCornerRadius}">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind ViewModel.TorrentDisplayName, Mode=OneWay}"
+                            TextTrimming="CharacterEllipsis" />
+                        <Border
+                            Grid.Column="1"
+                            Padding="8,4"
+                            VerticalAlignment="Center"
+                            Background="{ThemeResource AccentFillColorDefaultBrush}"
+                            CornerRadius="{ThemeResource ControlCornerRadius}"
+                            Visibility="{x:Bind local:NewDownloadDialog.BoolToVisibility(ViewModel.HasTorrent), Mode=OneWay}">
+                            <TextBlock
+                                Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                Style="{StaticResource CaptionTextBlockStyle}"
+                                Text="Torrent" />
+                        </Border>
+                    </Grid>
+                </Border>
+                <Button
+                    x:Name="OpenTorrentButton"
+                    Grid.Column="1"
+                    Width="40"
+                    Height="32"
+                    MinWidth="40"
+                    MinHeight="32"
+                    AutomationProperties.AutomationId="NewDownloadOpenTorrentButton"
+                    Click="OpenTorrentButton_Click"
+                    ToolTipService.ToolTip="Open torrent file"
+                    Visibility="{x:Bind local:NewDownloadDialog.InvertBoolToVisibility(ViewModel.HasTorrent), Mode=OneWay}">
+                    <FontIcon FontSize="16" Glyph="&#xE8E5;" />
+                </Button>
+                <Button
+                    x:Name="ClearTorrentButton"
+                    Grid.Column="1"
+                    Width="40"
+                    Height="32"
+                    MinWidth="40"
+                    MinHeight="32"
+                    AutomationProperties.AutomationId="NewDownloadClearTorrentButton"
+                    Click="ClearTorrentButton_Click"
+                    ToolTipService.ToolTip="Clear torrent file"
+                    Visibility="{x:Bind local:NewDownloadDialog.BoolToVisibility(ViewModel.HasTorrent), Mode=OneWay}">
+                    <FontIcon FontSize="16" Glyph="&#xE711;" />
+                </Button>
+            </Grid>
+            <TextBlock
+                AutomationProperties.AutomationId="NewDownloadTorrentValidationMessage"
+                AutomationProperties.LiveSetting="Assertive"
+                Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Text="{x:Bind ViewModel.TorrentValidationMessage, Mode=OneWay}"
+                TextWrapping="Wrap"
+                Visibility="{x:Bind local:NewDownloadDialog.MessageToVisibility(ViewModel.TorrentValidationMessage), Mode=OneWay}" />
+        </StackPanel>
+
+        <Border
+            x:Name="TorrentFilesBorder"
+            Grid.Row="2"
+            BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="{ThemeResource ControlCornerRadius}"
+            Visibility="{x:Bind local:NewDownloadDialog.TorrentFilesToVisibility(ViewModel.TaskType, ViewModel.HasTorrent), Mode=OneWay}">
+            <Grid RowDefinitions="Auto,Auto,*">
+                <TextBlock
+                    x:Name="TorrentSummaryText"
+                    Grid.Row="0"
+                    Margin="12,8"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}" />
+                <Grid
+                    Grid.Row="1"
+                    MinHeight="36"
+                    Padding="8,0"
+                    Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                    ColumnDefinitions="40,54,*,96">
+                    <CheckBox
+                        x:Name="SelectAllTorrentFilesCheckBox"
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        AutomationProperties.AutomationId="NewDownloadSelectAllTorrentFiles"
+                        Click="SelectAllTorrentFilesCheckBox_Click"
+                        IsChecked="{x:Bind ViewModel.SelectAllTorrentFilesState, Mode=OneWay}"
+                        IsThreeState="True" />
+                    <TextBlock
+                        x:Name="TorrentIndexHeaderText"
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    <TextBlock
+                        x:Name="TorrentNameHeaderText"
+                        Grid.Column="2"
+                        VerticalAlignment="Center"
+                        Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    <TextBlock
+                        x:Name="TorrentSizeHeaderText"
+                        Grid.Column="3"
+                        VerticalAlignment="Center"
+                        Style="{StaticResource BodyStrongTextBlockStyle}" />
+                </Grid>
+                <ListView
+                    x:Name="TorrentFilesListView"
+                    Grid.Row="2"
+                    Height="96"
+                    AutomationProperties.AutomationId="NewDownloadTorrentFilesList"
+                    ItemsSource="{x:Bind ViewModel.TorrentFiles, Mode=OneWay}"
+                    ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                    SelectionMode="None">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="models:TorrentFileEntry">
+                            <Grid
+                                MinHeight="38"
+                                Padding="8,0"
+                                ColumnDefinitions="40,54,*,96">
+                                <CheckBox
+                                    Grid.Column="0"
+                                    VerticalAlignment="Center"
+                                    AutomationProperties.AutomationId="{x:Bind local:NewDownloadDialog.TorrentFileAutomationId(Index), Mode=OneTime}"
+                                    AutomationProperties.Name="{x:Bind Path, Mode=OneTime}"
+                                    IsChecked="{x:Bind IsSelected, Mode=TwoWay}" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    Text="{x:Bind Index, Mode=OneTime}" />
+                                <TextBlock
+                                    Grid.Column="2"
+                                    VerticalAlignment="Center"
+                                    Text="{x:Bind Path, Mode=OneTime}"
+                                    TextTrimming="CharacterEllipsis" />
+                                <TextBlock
+                                    Grid.Column="3"
+                                    VerticalAlignment="Center"
+                                    Text="{x:Bind SizeText, Mode=OneTime}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+        </Border>
+
+        <StackPanel
+            x:Name="CommonFieldsPanel"
+            Grid.Row="3"
+            Spacing="12">
+            <TextBox
+                x:Name="TaskNameTextBox"
+                AutomationProperties.AutomationId="NewDownloadTaskNameTextBox"
+                Text="{x:Bind ViewModel.TaskName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                <TextBox
+                    x:Name="DirectoryTextBox"
+                    Grid.Column="0"
+                    AutomationProperties.AutomationId="NewDownloadDirectoryTextBox"
+                    Text="{x:Bind ViewModel.DownloadDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <Button
+                    x:Name="BrowseDirectoryButton"
+                    Grid.Column="1"
+                    Width="40"
+                    Height="32"
+                    MinWidth="40"
+                    MinHeight="32"
+                    Padding="0"
+                    VerticalAlignment="Bottom"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    AutomationProperties.AutomationId="NewDownloadBrowseDirectoryButton"
+                    Click="BrowseDirectoryButton_Click"
+                    ToolTipService.ToolTip="Browse download directory">
+                    <FontIcon
+                        FontSize="14"
+                        Glyph="&#xE8B7;" />
+                </Button>
+            </Grid>
+            <NumberBox
+                x:Name="SplitCountNumberBox"
+                HorizontalAlignment="Stretch"
+                AutomationProperties.AutomationId="NewDownloadSplitCountNumberBox"
+                LargeChange="8"
+                Maximum="256"
+                Minimum="1"
+                SmallChange="1"
+                SpinButtonPlacementMode="Inline"
+                Value="{x:Bind ViewModel.SplitCount, Mode=TwoWay}" />
+        </StackPanel>
+
+        <Grid
+            x:Name="DropOverlay"
+            Grid.Row="0"
+            Grid.RowSpan="4"
+            AutomationProperties.LiveSetting="Polite"
+            Background="{ThemeResource SmokeFillColorDefaultBrush}"
+            CornerRadius="{ThemeResource OverlayCornerRadius}"
+            Visibility="Collapsed">
+            <StackPanel
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Spacing="8">
+                <FontIcon
+                    HorizontalAlignment="Center"
+                    FontSize="28"
+                    Glyph="&#xE8E5;" />
+                <TextBlock
+                    x:Name="TorrentDropOverlayText"
+                    HorizontalAlignment="Center"
+                    Style="{StaticResource SubtitleTextBlockStyle}" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</ContentDialog>

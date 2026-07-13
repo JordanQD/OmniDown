@@ -763,6 +763,7 @@ namespace OmniDown
         private async void MainWindow_Closed(object sender, WindowEventArgs args)
         {
             AppLogger.Info("App", "MainWindow closing");
+            RemoveMinimumWindowSizeHook();
             _refreshTimer.Stop();
             Clipboard.ContentChanged -= Clipboard_ContentChanged;
             ReleaseSystemSleepOverride();

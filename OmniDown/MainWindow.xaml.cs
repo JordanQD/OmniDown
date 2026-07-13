@@ -137,6 +137,7 @@ namespace OmniDown
             SetTaskListLoading(true);
             _windowHandle = WindowNative.GetWindowHandle(this);
             SetWindowIcon();
+            ConfigureMinimumWindowSize();
             LoadGeneralSettings();
             SyncAutoStartToggle();
             ApplyWindowPlacementOrDefault();

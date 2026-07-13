@@ -12,7 +12,6 @@
                 <!-- Other merged dictionaries here -->
             </ResourceDictionary.MergedDictionaries>
             <x:String x:Key="AppTitleName">OmniDown</x:String>
-            <Style x:Key="DefaultContentDialogStyle" TargetType="ContentDialog" />
             <!-- Override InfoBar informational severity to be opaque (default is too transparent) -->
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Light">
