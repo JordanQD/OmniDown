@@ -1,6 +1,7 @@
 # aria2 sidecar
 
-Place the bundled aria2 executable here when shipping OmniDown.
+Release packages do not bundle aria2 executables. This directory may contain
+developer-only engines for local Debug/F5 builds.
 
 Recommended Windows layout:
 
@@ -13,4 +14,8 @@ Engines/
       aria2c.exe
 ```
 
-Users can still override this in Settings with a custom `aria2c.exe` path.
+Executable files in this tree are ignored by Git, copied only in Debug builds,
+and never copied to publish output. Users import their own engine in Settings;
+OmniDown stores that copy under the package-managed
+`%LOCALAPPDATA%\Packages\<package-family>\LocalState\engines\aria2`, so a
+normal MSIX uninstall removes it.

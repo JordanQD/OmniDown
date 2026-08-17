@@ -2,6 +2,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
 using OmniDown.Services.Localization;
+using OmniDown.Services.Settings;
 using System;
 using System.Collections.Generic;
 
@@ -13,7 +14,6 @@ public sealed partial class AdvancedSettingsSectionControl : UserControl
     {
         InitializeComponent();
         BuildAriaEngineDescription();
-        BuildAriaPathDescription();
         ApplyEngineAutoUpdate();
     }
 
@@ -40,22 +40,6 @@ public sealed partial class AdvancedSettingsSectionControl : UserControl
         AriaEngineDescriptionBlock.Blocks.Add(paragraph);
     }
 
-    private void BuildAriaPathDescription()
-    {
-        var paragraph = new Paragraph();
-
-        paragraph.Inlines.Add(new Run { Text = Strings.Get("AriaPathDescriptionPart1.Text") });
-
-        var link = new Hyperlink();
-        link.Inlines.Add(new Run { Text = "aria2-next" });
-        link.Click += (_, _) => _ = Windows.System.Launcher.LaunchUriAsync(new Uri("https://github.com/AnInsomniacy/aria2-next"));
-        paragraph.Inlines.Add(link);
-
-        paragraph.Inlines.Add(new Run { Text = Strings.Get("AriaPathDescriptionPart2.Text") });
-
-        AriaPathDescriptionBlock.Blocks.Add(paragraph);
-    }
-
     internal IEnumerable<SettingSearchEntry> SearchEntries =>
     [
         new(AriaEngineSettingsExpander, "aria2", "aria2-next", "engine", "kernel", "引擎", "内核", "路径", "版本"),
@@ -78,7 +62,6 @@ public sealed partial class AdvancedSettingsSectionControl : UserControl
 
     internal StackPanel AdvancedSettingsContentControl => AdvancedSettingsContent;
     internal ComboBox EngineTypeComboBoxControl => EngineTypeComboBox;
-    internal TextBox AriaPathTextBoxControl => AriaPathTextBox;
     internal TextBlock EngineVersionTextControl => EngineVersionText;
     internal ToggleSwitch EngineAutoUpdateToggleControl => EngineAutoUpdateToggle;
     internal NumberBox RpcPortNumberBoxControl => RpcPortNumberBox;
@@ -178,11 +161,6 @@ public sealed partial class AdvancedSettingsSectionControl : UserControl
         RestartAriaRequested?.Invoke(sender, args);
     }
 
-    private void AdvancedSettingTextBox_TextChanged(object sender, TextChangedEventArgs args)
-    {
-        AdvancedSettingChanged?.Invoke(sender, new RoutedEventArgs());
-    }
-
     private void AdvancedSettingPasswordBox_PasswordChanged(object sender, RoutedEventArgs args)
     {
         AdvancedSettingChanged?.Invoke(sender, args);
@@ -200,15 +178,7 @@ public sealed partial class AdvancedSettingsSectionControl : UserControl
 
     private void EngineTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs args)
     {
-        UpdateAriaPathVisibility();
         AdvancedSettingChanged?.Invoke(sender, new RoutedEventArgs());
-    }
-
-    internal void UpdateAriaPathVisibility()
-    {
-        bool isCustom = EngineTypeComboBox.SelectedItem is ComboBoxItem item &&
-            item.Tag?.ToString() == "Custom";
-        AriaPathSettingCard.Visibility = isCustom ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void AdvancedSettingToggleSwitch_Toggled(object sender, RoutedEventArgs args)
@@ -219,21 +189,12 @@ public sealed partial class AdvancedSettingsSectionControl : UserControl
 
     private void EngineAutoUpdateToggle_Toggled(object sender, RoutedEventArgs args)
     {
-        try { Windows.Storage.ApplicationData.Current.LocalSettings.Values["EngineAutoUpdateEnabled"] = EngineAutoUpdateToggle.IsOn; }
-        catch { }
+        AppPreferencesStore.EngineAutoUpdateEnabled = EngineAutoUpdateToggle.IsOn;
     }
 
     internal void ApplyEngineAutoUpdate()
     {
-        try
-        {
-            object? value = Windows.Storage.ApplicationData.Current.LocalSettings.Values["EngineAutoUpdateEnabled"];
-            EngineAutoUpdateToggle.IsOn = value is true;
-        }
-        catch
-        {
-            EngineAutoUpdateToggle.IsOn = true;
-        }
+        EngineAutoUpdateToggle.IsOn = AppPreferencesStore.EngineAutoUpdateEnabled;
     }
 
     private void UpdateToggleStateText(ToggleSwitch? toggleSwitch)

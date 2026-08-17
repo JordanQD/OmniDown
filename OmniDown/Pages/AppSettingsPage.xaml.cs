@@ -389,7 +389,6 @@ public sealed partial class AppSettingsPage : Page
     // ── Advanced individual controls ──
 
     internal ComboBox EngineTypeComboBoxControl => AdvancedSettingsContentControl.EngineTypeComboBoxControl;
-    internal TextBox AriaPathTextBoxControl => AdvancedSettingsContentControl.AriaPathTextBoxControl;
     internal TextBlock EngineVersionTextControl => AdvancedSettingsContentControl.EngineVersionTextControl;
     internal ToggleSwitch EngineAutoUpdateToggleControl => AdvancedSettingsContentControl.EngineAutoUpdateToggleControl;
     internal NumberBox RpcPortNumberBoxControl => AdvancedSettingsContentControl.RpcPortNumberBoxControl;
@@ -440,9 +439,6 @@ public sealed partial class AppSettingsPage : Page
         GeneralSettingsContentControl.SetAutoStartEnabled(isEnabled);
 
     internal bool IsAutoStartEnabled => GeneralSettingsContentControl.IsAutoStartEnabled;
-
-    internal void UpdateAriaPathVisibility() =>
-        AdvancedSettingsContentControl.UpdateAriaPathVisibility();
 
     internal ScrollViewer? SettingsContentScrollViewerControl { get; set; }
 

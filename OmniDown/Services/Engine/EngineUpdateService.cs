@@ -156,51 +156,21 @@ public sealed class EngineUpdateService
         }
     }
 
-    public string GetBundledEnginePath()
+    public string GetImportedEnginePath()
     {
-        string architecture = RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
-        return Path.Combine(AppPaths.LocalDataDirectory, "Engines", "aria2", $"win-{architecture}", "aria2-next.exe");
+        return Aria2EngineStore.GetImportedEnginePath(OmniDown.Models.Settings.Aria2EngineType.Aria2Next);
     }
 
-    public static string AppxBundledEnginePath
+    public bool IsImportedEngineAvailable()
     {
-        get
+        string localPath = GetImportedEnginePath();
+        bool exists = File.Exists(localPath);
+        if (!exists)
         {
-            string architecture = RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
-            string appBase = AppContext.BaseDirectory;
-            return Path.Combine(appBase, "Engines", "aria2", $"win-{architecture}", "aria2-next.exe");
+            AppLogger.Warning("EngineUpdater", "no imported aria2-next engine found");
         }
-    }
 
-    public async Task<bool> EnsureEngineAvailableAsync()
-    {
-        string localPath = GetBundledEnginePath();
-        if (File.Exists(localPath)) return true;
-
-        try
-        {
-            string appxPath = AppxBundledEnginePath;
-            if (File.Exists(appxPath))
-            {
-                string? directory = Path.GetDirectoryName(localPath);
-                if (!string.IsNullOrEmpty(directory))
-                {
-                    Directory.CreateDirectory(directory);
-                }
-
-                File.Copy(appxPath, localPath);
-                AppLogger.Info("EngineUpdater", $"copied engine from AppX to {localPath}");
-                return true;
-            }
-
-            AppLogger.Warning("EngineUpdater", "no bundled engine found in AppX or LocalData");
-            return false;
-        }
-        catch (Exception ex)
-        {
-            AppLogger.Warning("EngineUpdater", $"failed to copy engine to local data: {ex.Message}");
-            return false;
-        }
+        return exists;
     }
 
     private static bool IsNewer(string latest, string current)

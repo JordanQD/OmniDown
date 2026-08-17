@@ -100,7 +100,6 @@ namespace OmniDown
         private NumberBox ConnectTimeoutNumberBox => SettingsPage.ConnectTimeoutNumberBoxControl;
         private NumberBox TimeoutNumberBox => SettingsPage.TimeoutNumberBoxControl;
         private ComboBox FileAllocationComboBox => SettingsPage.FileAllocationComboBoxControl;
-        private TextBox AriaPathTextBox => SettingsPage.AriaPathTextBoxControl;
         private ComboBox EngineTypeComboBox => SettingsPage.EngineTypeComboBoxControl;
         private TextBlock EngineVersionText => SettingsPage.EngineVersionTextControl;
         private NumberBox RpcPortNumberBox => SettingsPage.RpcPortNumberBoxControl;
@@ -811,7 +810,7 @@ namespace OmniDown
         private void ApplyAdvancedSettingsToUi()
         {
             AdvancedSettings settings = _settingsPageViewModel.AdvancedSettings;
-            AriaPathTextBox.Text = settings.Aria2Path;
+            _ariaPath = settings.Aria2Path;
             SetEngineTypeSelection(settings.EngineType);
             RpcPortNumberBox.Value = settings.RpcPort;
             RpcSecretPasswordBox.Password = settings.RpcSecret;
@@ -846,9 +845,10 @@ namespace OmniDown
             ShowSettingsSaveTeachingTip();
             UpdateClipboardTypeControls();
 
-            if (ReferenceEquals(sender, EngineTypeComboBox) ||
-                ReferenceEquals(sender, AriaPathTextBox))
+            if (ReferenceEquals(sender, EngineTypeComboBox))
             {
+                string importedPath = Aria2EngineStore.GetImportedEnginePath(GetSelectedEngineType());
+                _ariaPath = File.Exists(importedPath) ? importedPath : string.Empty;
                 await RefreshEngineVersionAsync();
             }
 
@@ -868,7 +868,7 @@ namespace OmniDown
             try
             {
                 await _aria2EngineHost.DetectVersionAsync(
-                    string.IsNullOrWhiteSpace(AriaPathTextBox.Text) ? null : AriaPathTextBox.Text.Trim(),
+                    string.IsNullOrWhiteSpace(_ariaPath) ? null : _ariaPath,
                     GetSelectedEngineType());
             }
             catch
@@ -896,8 +896,18 @@ namespace OmniDown
                 return;
             }
 
-            AriaPathTextBox.Text = file.Path;
-            ShowSettingsSaveTeachingTip();
+            try
+            {
+                string importedPath = Aria2EngineStore.Import(file.Path, GetSelectedEngineType());
+                _ariaPath = importedPath;
+                await RefreshEngineVersionAsync();
+                ShowSettingsSaveTeachingTip();
+                ShowMessage("内核已导入到 OmniDown 的应用数据目录；原始文件可以安全移动或删除。", InfoBarSeverity.Success);
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"导入内核失败：{ex.Message}", InfoBarSeverity.Error);
+            }
         }
 
         private void CopyRpcSecretButton_Click(object sender, RoutedEventArgs e)
@@ -1001,7 +1011,7 @@ namespace OmniDown
         private AdvancedSettings GetAdvancedSettingsFromUi()
         {
             return new AdvancedSettings(
-                AriaPathTextBox.Text.Trim(),
+                _ariaPath,
                 GetSelectedEngineType(),
                 GetValidIntNumberBoxValue(RpcPortNumberBox, 1024, 65535, AdvancedSettings.Default.RpcPort),
                 string.IsNullOrWhiteSpace(RpcSecretPasswordBox.Password)
@@ -1356,13 +1366,11 @@ namespace OmniDown
                     item.Tag?.ToString()?.Equals(tag, StringComparison.OrdinalIgnoreCase) == true)
                 {
                     EngineTypeComboBox.SelectedIndex = index;
-                    SettingsPage.UpdateAriaPathVisibility();
                     return;
                 }
             }
 
             EngineTypeComboBox.SelectedIndex = 1;
-            SettingsPage.UpdateAriaPathVisibility();
         }
 
         private Aria2EngineType GetSelectedEngineType()

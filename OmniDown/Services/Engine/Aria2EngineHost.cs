@@ -60,7 +60,7 @@ public sealed class Aria2EngineHost : IDisposable
         if (string.IsNullOrWhiteSpace(resolvedPath))
         {
             return Aria2EngineStartResult.Failure(
-                "aria2 executable was not found. Set a path in Settings, add aria2c to PATH, or place it under Engines\\aria2.");
+                "aria2 executable was not found. Import an engine in Settings or add a compatible executable to PATH.");
         }
 
         _isAria2Next = await DetectEngineAsync(resolvedPath);
@@ -314,10 +314,10 @@ public sealed class Aria2EngineHost : IDisposable
 
         return
         [
-            // 1. LocalData (writable copy, used for updates)
-            Path.Combine(AppPaths.LocalDataDirectory, "Engines", "aria2", $"win-{architecture}", exeName),
-            Path.Combine(AppPaths.LocalDataDirectory, "Engines", "aria2", exeName),
-            // 2. AppX / installation directory (read-only, fallback)
+            // User-imported engines live in stable, writable local app data.
+            Path.Combine(AppPaths.EngineDirectory, $"win-{architecture}", exeName),
+            Path.Combine(AppPaths.EngineDirectory, exeName),
+            // Debug/F5 builds may copy a developer-only engine beside the app.
             Path.Combine(appBase, "Engines", "aria2", $"win-{architecture}", exeName),
             Path.Combine(appBase, "Engines", "aria2", exeName),
             Path.Combine(executableDirectory, "Engines", "aria2", $"win-{architecture}", exeName),

@@ -32,15 +32,15 @@ OmniDown 本身是下载管理界面，实际传输由独立的 aria2 兼容进�
 - [aria2-next](https://github.com/AnInsomniacy/aria2-next)：与 aria2 RPC 兼容的维护分支，也是 OmniDown 当前的默认引擎类型
 - 自定义引擎：选择一个与 aria2 JSON-RPC 兼容的可执行文件
 
-如果发行包没有附带引擎，请自行下载适合设备架构的 Windows 版本，然后在 OmniDown 中打开 `设置 → 高级 → aria2 引擎`，选择引擎类型并指定 `aria2c.exe` 或 `aria2-next.exe` 的路径。也可以把相应程序加入 `PATH`。
+发行包不附带下载引擎。请自行下载适合设备架构的 Windows 版本，然后在 OmniDown 中打开 `设置 → 高级 → aria2 引擎`，选择引擎类型并导入 `aria2c.exe` 或 `aria2-next.exe`。OmniDown 会把所选文件复制到 MSIX 管理的 `%LOCALAPPDATA%\Packages\<包系列名>\LocalState\engines\aria2\win-<架构>`，之后不再依赖原始下载位置；正常卸载应用时，这份内核也会被删除。也可以把相应程序加入 `PATH`。
 
 OmniDown 只连接由自身启动、监听于 `127.0.0.1` 的 RPC 服务。RPC 端口和密钥可在高级设置中修改。
 
-### 当前仓库的引擎状态
+### 开发调试内核
 
-当前源码树包含用于开发的 x64 `aria2c.exe` 和 `aria2-next.exe`。项目文件会把它们复制到构建输出和发布目录，因此按当前配置生成的 x64 发行包会包含下载引擎，并非“仅提供前端、由用户自行安装引擎”。x86 和 ARM64 目录目前没有对应的内置程序。
+aria2 可执行文件不纳入 Git。开发者可以把本机调试用内核放在 `OmniDown/Engines/aria2/win-<架构>`；Debug 构建会把它复制到输出目录，Release 构建和发布包始终忽略这些文件。这样重新编译调试时可继续使用本机内核，同时不会误发到正式包。
 
-应用可以检查并更新已有的 aria2-next，但在完全没有内核时不会自动完成首次下载。若正式发行采用“用户自行下载引擎”的策略，应在发布前移除这些二进制文件及其发布复制规则，并保留自定义路径和 `PATH` 查找方式。
+应用可以检查并更新已经导入的 aria2-next，但不会自动完成首次下载。配置、任务缓存和会话保存在稳定的 `%LOCALAPPDATA%\OmniDown`，不会因为重新生成或更换调试输出目录而被覆盖；导入的内核单独保存在 MSIX `LocalState`，同一包标识下重新编译/F5 会保留，正常卸载则会删除。升级后首次启动会把旧版 `%LOCALAPPDATA%\OmniDown\engines` 中的内核迁入 `LocalState`，成功后清除旧副本。
 
 ## 从源码构建
 
@@ -74,7 +74,7 @@ dotnet build OmniDown.slnx
 OmniDown/
 ├─ Controls/        可复用 WinUI 控件
 ├─ Dialogs/         新建下载等对话框
-├─ Engines/aria2/   引擎配置及当前开发用二进制文件
+├─ Engines/aria2/   引擎配置及可选的本机 Debug 内核（不纳入 Git）
 ├─ Models/          下载任务和设置模型
 ├─ Pages/           下载与设置页面
 ├─ Services/        aria2 RPC、引擎、通知、托盘和小组件等服务

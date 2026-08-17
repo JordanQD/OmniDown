@@ -81,6 +81,13 @@ internal sealed class AppSettingsStore
             }
         }
 
+        string normalizedEnginePath = AppPaths.NormalizeImportedEnginePath(settings.Aria2Path);
+        if (!string.Equals(normalizedEnginePath, settings.Aria2Path, StringComparison.OrdinalIgnoreCase))
+        {
+            settings = settings with { Aria2Path = normalizedEnginePath };
+            SaveAdvancedSettings(settings);
+        }
+
         return settings;
     }
 

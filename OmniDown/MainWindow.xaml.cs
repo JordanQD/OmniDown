@@ -55,6 +55,7 @@ namespace OmniDown
         private readonly DispatcherTimer _refreshTimer = new();
         private readonly DispatcherTimer _statusMessageTimer = new();
         private string _rpcSecret = AdvancedSettings.Default.RpcSecret;
+        private string _ariaPath = string.Empty;
         private readonly DownloadsPageViewModel _downloadsViewModel = new();
         private readonly ObservableCollection<DownloadTask> _visibleTasks = new();
         private readonly ObservableCollection<AppStatusMessage> _statusMessages = new();
@@ -197,36 +198,31 @@ namespace OmniDown
         {
             if (!isManual)
             {
-                try
-                {
-                    object? value = Windows.Storage.ApplicationData.Current.LocalSettings.Values["EngineAutoUpdateEnabled"];
-                    if (value is not true) return;
-                }
-                catch { return; }
+                if (!AppPreferencesStore.EngineAutoUpdateEnabled) return;
             }
 
             try
             {
                 EngineUpdateService updater = new();
 
-                // Ensure engine is in writable local data (copy from AppX on first run)
-                bool engineAvailable = await updater.EnsureEngineAvailableAsync();
+                // Updates apply only to an aria2-next engine imported into writable app data.
+                bool engineAvailable = updater.IsImportedEngineAvailable();
                 if (!engineAvailable)
                 {
-                    if (isManual) ShowMessage("未找到可更新的内置引擎。", InfoBarSeverity.Error);
+                    if (isManual) ShowMessage("请先导入 aria2-next 内核，再检查更新。", InfoBarSeverity.Error);
                     return;
                 }
 
-                string bundledPath = updater.GetBundledEnginePath();
+                string importedPath = updater.GetImportedEnginePath();
 
-                if (!File.Exists(bundledPath))
+                if (!File.Exists(importedPath))
                 {
-                    AppLogger.Info("EngineUpdater", "no bundled engine found, skipping update check");
-                    if (isManual) ShowMessage("未找到内置引擎。", InfoBarSeverity.Error);
+                    AppLogger.Info("EngineUpdater", "no imported engine found, skipping update check");
+                    if (isManual) ShowMessage("未找到已导入的 aria2-next 内核。", InfoBarSeverity.Error);
                     return;
                 }
 
-                string currentVersion = await DetectEngineVersionAsync(bundledPath);
+                string currentVersion = await DetectEngineVersionAsync(importedPath);
                 if (string.IsNullOrWhiteSpace(currentVersion))
                 {
                     AppLogger.Info("EngineUpdater", "could not detect current engine version");
@@ -257,7 +253,7 @@ namespace OmniDown
                     await StopAriaAsync(showMessage: false);
                 }
 
-                bool installed = await updater.DownloadAndInstallAsync(update, bundledPath);
+                bool installed = await updater.DownloadAndInstallAsync(update, importedPath);
 
                 if (wasRunning)
                 {

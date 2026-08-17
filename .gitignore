@@ -35,6 +35,9 @@ artifacts/
 TestResults/
 [Tt]est[Rr]esult*/
 
+## Developer-only aria2 engines (Debug builds can still copy local files)
+OmniDown/Engines/aria2/**/*.exe
+
 ## Compiler, linker, and build diagnostics
 *.log
 *.binlog

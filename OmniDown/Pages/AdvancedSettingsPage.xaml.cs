@@ -36,8 +36,6 @@ public sealed partial class AdvancedSettingsPage : Page
     internal event RoutedEventHandler? RestartAriaRequested;
     internal event RoutedEventHandler? ManualUpdateRequested;
 
-    internal void UpdateAriaPathVisibility() => _content?.UpdateAriaPathVisibility();
-
     public AdvancedSettingsPage()
     {
         InitializeComponent();

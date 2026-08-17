@@ -56,7 +56,6 @@
   <data name="SettingsTitleText.Text" xml:space="preserve"><value>设置</value></data>
   <data name="SettingsSubtitleText.Text" xml:space="preserve"><value>管理本地 aria2 进程和默认下载行为。</value></data>
   <data name="AriaPathLabel.Text" xml:space="preserve"><value>aria2 路径</value></data>
-  <data name="AriaPathTextBox.PlaceholderText" xml:space="preserve"><value>留空则使用应用内置引擎</value></data>
   <data name="RpcPortLabel.Text" xml:space="preserve"><value>RPC 端口</value></data>
   <data name="DefaultDirectoryLabel.Text" xml:space="preserve"><value>默认目录</value></data>
   <data name="ProxyLabel.Text" xml:space="preserve"><value>代理</value></data>
@@ -377,11 +376,12 @@
   <data name="AriaEngineDescriptionPart1.Text" xml:space="preserve"><value>支持 </value></data>
   <data name="AriaEngineDescriptionPart2.Text" xml:space="preserve"><value>、</value></data>
   <data name="AriaEngineDescriptionPart3.Text" xml:space="preserve"><value> 内核。</value></data>
-  <data name="AriaPathSettingCard.Header" xml:space="preserve"><value>可执行文件路径</value></data>
+  <data name="EngineTypeCustomItem.Content" xml:space="preserve"><value>其他兼容内核</value></data>
+  <data name="AriaPathSettingCard.Header" xml:space="preserve"><value>aria2 引擎导入</value></data>
+  <data name="ImportAriaButton.AutomationProperties.Name" xml:space="preserve"><value>导入 aria2 引擎</value></data>
+  <data name="ImportAriaButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>导入内核</value></data>
   <data name="EngineVersionSettingCard.Header" xml:space="preserve"><value>内核版本</value></data>
   <data name="EngineAutoUpdateSettingCard.Header" xml:space="preserve"><value>自动更新内核</value></data>
-  <data name="AriaPathDescriptionPart1.Text" xml:space="preserve"><value>留空时，使用应用内置引擎</value></data>
-  <data name="AriaPathDescriptionPart2.Text" xml:space="preserve"><value>。</value></data>
   <data name="RpcPortSettingCard.Header" xml:space="preserve"><value>RPC 端口</value></data>
   <data name="RpcPortSettingCard.Description" xml:space="preserve"><value>OmniDown 与本地 aria2 通讯使用的 JSON-RPC 端口。</value></data>
   <data name="RpcSecretSettingCard.Header" xml:space="preserve"><value>RPC 密钥</value></data>

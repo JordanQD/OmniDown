@@ -41,42 +41,29 @@
                         SelectionChanged="EngineTypeComboBox_SelectionChanged">
                         <ComboBoxItem x:Uid="EngineTypeAria2cItem" Content="aria2c" Tag="Aria2c" />
                         <ComboBoxItem x:Uid="EngineTypeAria2NextItem" Content="aria2-next" Tag="Aria2Next" />
-                        <ComboBoxItem x:Uid="EngineTypeCustomItem" Content="自定义路径" Tag="Custom" />
+                        <ComboBoxItem x:Uid="EngineTypeCustomItem" Content="其他兼容内核" Tag="Custom" />
                     </ComboBox>
                 </controls:SettingsCard>
                 <controls:SettingsCard
                     x:Name="AriaPathSettingCard"
                     x:Uid="AriaPathSettingCard"
-                    Header="可执行文件路径">
-                    <controls:SettingsCard.Description>
-                        <RichTextBlock
-                            x:Name="AriaPathDescriptionBlock"
-                            TextWrapping="WrapWholeWords"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                    </controls:SettingsCard.Description>
-                    <Grid
-                        Width="300"
+                    Header="aria2 引擎导入">
+                    <Button
+                        x:Name="ImportAriaButton"
+                        x:Uid="ImportAriaButton"
+                        AutomationProperties.AutomationId="ImportAriaButton"
+                        AutomationProperties.Name="导入 aria2 引擎"
+                        Width="40"
                         Height="32"
-                        ColumnDefinitions="*,Auto"
-                        ColumnSpacing="8">
-                        <TextBox
-                            x:Name="AriaPathTextBox"
-                            Height="32"
-                            VerticalAlignment="Center"
-                            TextChanged="AdvancedSettingTextBox_TextChanged" />
-                        <Button
-                            Grid.Column="1"
-                            Width="40"
-                            Height="32"
-                            MinWidth="40"
-                            Padding="0"
-                            VerticalAlignment="Center"
-                            Click="BrowseAriaPathButton_Click">
-                            <FontIcon
-                                FontSize="14"
-                                Glyph="&#xE838;" />
-                        </Button>
-                    </Grid>
+                        MinWidth="40"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Click="BrowseAriaPathButton_Click"
+                        ToolTipService.ToolTip="导入内核">
+                        <FontIcon
+                            FontSize="14"
+                            Glyph="&#xE838;" />
+                    </Button>
                 </controls:SettingsCard>
                 <controls:SettingsCard
                     x:Uid="EngineVersionSettingCard"
