@@ -1,9 +1,15 @@
 # OmniDown
 
-OmniDown 是一款面向 Windows 的现代下载管理器，使用 WinUI 3 构建，并通过本地 JSON-RPC 调用 aria2 或 aria2-next 完成下载。
+**原生 WinUI 3 Windows 下载管理器。**
+
+OmniDown 是一款使用 Windows App SDK、WinUI 3、C# 与 XAML 构建的原生 Windows 桌面应用，通过本地 JSON-RPC 调用 aria2 或 aria2-next 完成下载。界面不是 Electron 或 WebView 套壳。
 
 > [!WARNING]
 > 项目仍处于早期开发阶段，界面和配置格式可能发生变化。目前暂无稳定发行版，请勿将其用于没有备份的重要下载任务。
+
+## 原生 WinUI 3
+
+OmniDown 的桌面界面直接使用 WinUI 3 控件和 Windows App SDK API 实现，遵循 Windows 的 Fluent Design，并原生适配浅色、深色及系统主题。系统通知、任务栏进度、托盘运行、协议关联和 Windows 小组件等功能也直接集成 Windows 平台能力，不依赖跨平台 Web UI 运行时。
 
 ## 功能
 
@@ -88,14 +94,27 @@ OmniDown/
 
 ## 许可证
 
-OmniDown 当前尚未添加正式的开源许可证。在许可证确定前，公开仓库并不自动代表允许复制、修改或再分发代码。
+OmniDown 源代码采用宽松的 [MIT License](LICENSE) 开源，允许使用、复制、修改和再分发，但需要保留原始版权及许可声明。
 
-aria2 与 aria2-next 是独立的第三方项目，使用 GNU GPL v2 或更高版本授权。无论 OmniDown 最终采用何种许可证，下载、使用或再分发这些引擎时都需要分别遵守其许可证及第三方依赖条款。
+MIT License 仅适用于 OmniDown 自身代码。发行包不包含 aria2 或 aria2-next；用户自行导入的下载引擎是独立的第三方程序，采用 GNU GPL v2 授权，下载、使用或再分发时需要分别遵守对应项目的许可证及第三方依赖条款。
 
-## 致谢
+## 依赖与参考
 
-- [aria2](https://github.com/aria2/aria2)
-- [aria2-next](https://github.com/AnInsomniacy/aria2-next)
-- [Windows App SDK](https://github.com/microsoft/WindowsAppSDK)
-- [Windows Community Toolkit](https://github.com/CommunityToolkit/Windows)
-- [WinUI Gallery](https://github.com/microsoft/WinUI-Gallery)
+OmniDown 的实现、界面设计和功能规划参考或使用了以下开源项目：
+
+- [files-community/Files](https://github.com/files-community/Files)
+- [AnInsomniacy/motrix-next](https://github.com/AnInsomniacy/motrix-next)
+- [aria2/aria2](https://github.com/aria2/aria2)
+- [AnInsomniacy/aria2-next](https://github.com/AnInsomniacy/aria2-next)
+- [Devolutions/UniGetUI](https://github.com/Devolutions/UniGetUI)
+- [microsoft/WinUI-Gallery](https://github.com/microsoft/WinUI-Gallery)
+- [microsoft/WindowsAppSDK](https://github.com/microsoft/WindowsAppSDK)
+- [microsoft/microsoft-ui-xaml](https://github.com/microsoft/microsoft-ui-xaml)
+- [CommunityToolkit/Windows](https://github.com/CommunityToolkit/Windows)
+
+## Tracker 来源
+
+内置 Tracker 来源选项由以下公开项目提供：
+
+- [XIU2/TrackersListCollection](https://github.com/XIU2/TrackersListCollection)
+- [ngosang/trackerslist](https://github.com/ngosang/trackerslist)
