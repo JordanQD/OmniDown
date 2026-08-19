@@ -8,6 +8,7 @@ public sealed record Ed2kSettings(
     string KadBootstrapUrl,
     bool KadBootstrapEnabled,
     string ServerList,
+    string DisabledServerList,
     bool AutoSyncEnabled,
     string SyncInterval,
     long LastSyncTime,
@@ -16,9 +17,9 @@ public sealed record Ed2kSettings(
     int MinSources,
     int SearchTimeout)
 {
-    public const int DefaultListenPort = 4662;
-    public const int DefaultUdpListenPort = 4672;
-    public const int DefaultUploadSlots = 10;
+    public const int DefaultListenPort = 29140;
+    public const int DefaultUdpListenPort = 29150;
+    public const int DefaultUploadSlots = 3;
     public const string DefaultServerListUrl = "https://upd.emule-security.org/server.met";
     public const string DefaultKadBootstrapUrl = "https://upd.emule-security.org/nodes.dat";
     public const string DefaultSyncInterval = "Daily";
@@ -34,7 +35,8 @@ public sealed record Ed2kSettings(
         DefaultKadBootstrapUrl,
         true,
         string.Empty,
-        false,
+        string.Empty,
+        true,
         DefaultSyncInterval,
         0,
         string.Empty,

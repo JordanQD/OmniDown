@@ -786,6 +786,7 @@ namespace OmniDown
             _browserExtensionApiServer.Dispose();
             await _aria2EngineHost.ShutdownAsync(_aria2RpcClient);
             _aria2RpcClient.Dispose();
+            _ed2kBootstrapService.Dispose();
             _aria2EngineHost.Dispose();
             AppLogger.Info("App", "MainWindow closed");
         }

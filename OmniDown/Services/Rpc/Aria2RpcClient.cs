@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Sockets;
 using System.Text;
@@ -24,6 +25,7 @@ public sealed class Aria2RpcClient : IDisposable
     private Uri _endpoint = new("http://127.0.0.1:6800/jsonrpc");
     private string _secret = string.Empty;
     private int _nextRequestId;
+    private bool? _supportsEd2k;
 
     public string Endpoint => _endpoint.ToString();
 
@@ -31,12 +33,31 @@ public sealed class Aria2RpcClient : IDisposable
     {
         _endpoint = new Uri($"http://127.0.0.1:{rpcPort}/jsonrpc");
         _secret = rpcSecret;
+        _supportsEd2k = null;
         AppLogger.Info("Aria2Rpc", $"configured endpoint={_endpoint} secretSet={!string.IsNullOrWhiteSpace(_secret)}");
     }
 
     public Task PingAsync(CancellationToken cancellationToken = default)
     {
         return SendAsync<object>("aria2.getVersion", [], cancellationToken);
+    }
+
+    public Task<Aria2VersionInfo> GetVersionAsync(CancellationToken cancellationToken = default)
+    {
+        return SendAsync<Aria2VersionInfo>("aria2.getVersion", [], cancellationToken);
+    }
+
+    public async Task<bool> SupportsEd2kAsync(CancellationToken cancellationToken = default)
+    {
+        if (_supportsEd2k.HasValue)
+        {
+            return _supportsEd2k.Value;
+        }
+
+        Aria2VersionInfo version = await GetVersionAsync(cancellationToken);
+        _supportsEd2k = version.EnabledFeatures.Any(feature =>
+            feature.Contains("ed2k", StringComparison.OrdinalIgnoreCase));
+        return _supportsEd2k.Value;
     }
 
     public async Task<string> AddUriAsync(
@@ -515,6 +536,7 @@ public sealed class Aria2RpcClient : IDisposable
         "downloadSpeed",
         "uploadSpeed",
         "bittorrent",
+        "ed2k",
         "dir",
         "files"
     ];

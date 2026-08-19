@@ -21,6 +21,12 @@ public static class AppPaths
 
     public static string Aria2LogPath => Path.Combine(LogDirectory, "aria2c.log");
 
+    public static string Ed2kBootstrapDirectory => Path.Combine(LocalDataDirectory, "ed2k");
+
+    public static string Ed2kServerMetPath => Path.Combine(Ed2kBootstrapDirectory, "server.met");
+
+    public static string Ed2kNodesDatPath => Path.Combine(Ed2kBootstrapDirectory, "nodes.dat");
+
     public static string DefaultDownloadDirectory
     {
         get

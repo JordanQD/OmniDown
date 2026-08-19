@@ -324,15 +324,15 @@
   <data name="BtMaxPeersSettingCard.Header" xml:space="preserve"><value>Max peers</value></data>
   <data name="BtMaxPeersSettingCard.Description" xml:space="preserve"><value>Maximum number of peers per torrent.</value></data>
   <data name="BitTorrentTrackerServerHeader.Text" xml:space="preserve"><value>Tracker server</value></data>
-  <data name="BtTrackerSourceSettingCard.Header" xml:space="preserve"><value>Tracker source</value></data>
-  <data name="BtTrackerSourceSettingCard.Description" xml:space="preserve"><value>Sync Tracker list from HTTP/HTTPS text sources.</value></data>
+  <data name="BtTrackerSourceSettingCard.Header" xml:space="preserve"><value>Tracker sources</value></data>
+  <data name="BtTrackerSourceSettingCard.Description" xml:space="preserve"><value>Manage HTTP/HTTPS text sources used to sync the Tracker list.</value></data>
   <data name="CdnBadgeText.Text" xml:space="preserve"><value>CDN</value></data>
   <data name="BtTrackerCustomSourceSettingCard.Header" xml:space="preserve"><value>Custom source</value></data>
   <data name="BtTrackerCustomSourceSettingCard.Description" xml:space="preserve"><value>Add your own Tracker list URL. Multi-select to sync together.</value></data>
   <data name="BtCustomTrackerSourceTextBox.PlaceholderText" xml:space="preserve"><value>Enter custom Tracker list URL</value></data>
   <data name="BtSyncTrackerButton.ToolTipService.ToolTip" xml:space="preserve"><value>Sync Tracker</value></data>
   <data name="BtTrackerListSettingCard.Header" xml:space="preserve"><value>Tracker list</value></data>
-  <data name="BtTrackerListSettingCard.Description" xml:space="preserve"><value>One Tracker per line. Converted to comma-separated config when starting aria2.</value></data>
+  <data name="BtTrackerListSettingCard.Description" xml:space="preserve"><value>Manage Tracker addresses used by aria2.</value></data>
   <data name="BtTrackerListTextBox.PlaceholderText" xml:space="preserve"><value>udp://tracker.example:6969/announce</value></data>
   <data name="BtAutoSyncTrackerSettingCard.Header" xml:space="preserve"><value>Auto sync Tracker</value></data>
   <data name="BtLastTrackerSyncText.Text" xml:space="preserve"><value>Last sync time is retained when opening settings page.</value></data>
@@ -519,4 +519,97 @@
   <data name="EngineUpdateInstalledMessage" xml:space="preserve"><value>aria2-next was updated to {0} and restarted.</value></data>
   <data name="EngineUpdateInstallFailedMessage" xml:space="preserve"><value>aria2-next {0} could not be installed. Check the logs for details.</value></data>
 
+  <data name="Ed2kSettingsTitle.Text" xml:space="preserve"><value>ED2K</value></data>
+  <data name="Ed2kEngineRequirementInfoBar.Title" xml:space="preserve"><value>Engine requirement</value></data>
+  <data name="Ed2kEngineRequirementInfoBar.Message" xml:space="preserve"><value>ED2K downloads and the engine options below require aria2-next. Official aria2 does not support them.</value></data>
+  <data name="Ed2kBasicOptionsHeader.Text" xml:space="preserve"><value>ED2K</value></data>
+  <data name="Ed2kListenPortSettingCard.Header" xml:space="preserve"><value>ED2K listening port</value></data>
+  <data name="Ed2kListenPortSettingCard.Description" xml:space="preserve"><value>Listening port for the ED2K client. Restart aria2 after changing it.</value></data>
+  <data name="Ed2kUdpListenPortSettingCard.Header" xml:space="preserve"><value>ED2K UDP listening port</value></data>
+  <data name="Ed2kUdpListenPortSettingCard.Description" xml:space="preserve"><value>UDP listening port for ED2K. Restart aria2 after changing it.</value></data>
+  <data name="RandomEd2kPortButton.ToolTipService.ToolTip" xml:space="preserve"><value>Random port</value></data>
+  <data name="RandomEd2kUdpPortButton.ToolTipService.ToolTip" xml:space="preserve"><value>Random port</value></data>
+  <data name="Ed2kUploadSlotsSettingCard.Header" xml:space="preserve"><value>Upload slots</value></data>
+  <data name="Ed2kUploadSlotsSettingCard.Description" xml:space="preserve"><value>Maximum number of simultaneous upload slots.</value></data>
+  <data name="Ed2kNetworkBootstrapHeader.Text" xml:space="preserve"><value>Network bootstrap</value></data>
+  <data name="Ed2kServerListUrlSettingCard.Header" xml:space="preserve"><value>server.met source</value></data>
+  <data name="Ed2kServerListUrlSettingCard.Description" xml:space="preserve"><value>Source used to discover ED2K servers.</value></data>
+  <data name="Ed2kKadBootstrapUrlSettingCard.Header" xml:space="preserve"><value>nodes.dat source</value></data>
+  <data name="Ed2kKadBootstrapUrlSettingCard.Description" xml:space="preserve"><value>Source used to discover Kad nodes.</value></data>
+  <data name="Ed2kServerListSettingCard.Header" xml:space="preserve"><value>ED2K servers</value></data>
+  <data name="Ed2kServerListSettingCard.Description" xml:space="preserve"><value>Manually specify ED2K server addresses.</value></data>
+  <data name="Ed2kAutoSyncSettingCard.Header" xml:space="preserve"><value>Automatic synchronization</value></data>
+  <data name="Ed2kAutoSyncSettingCard.Description" xml:space="preserve"><value>Automatically synchronize the server.met and nodes.dat sources.</value></data>
+  <data name="Ed2kSyncIntervalCard.Header" xml:space="preserve"><value>Synchronization frequency</value></data>
+  <data name="Ed2kSyncIntervalEveryStartItem.Content" xml:space="preserve"><value>Every launch</value></data>
+  <data name="Ed2kSyncInterval6HoursItem.Content" xml:space="preserve"><value>Every 6 hours</value></data>
+  <data name="Ed2kSyncInterval12HoursItem.Content" xml:space="preserve"><value>Every 12 hours</value></data>
+  <data name="Ed2kSyncIntervalDailyItem.Content" xml:space="preserve"><value>Daily</value></data>
+  <data name="Ed2kSyncIntervalWeeklyItem.Content" xml:space="preserve"><value>Weekly</value></data>
+  <data name="Ed2kSyncNowCard.Header" xml:space="preserve"><value>Synchronize now</value></data>
+  <data name="Ed2kSyncNowButton.ToolTipService.ToolTip" xml:space="preserve"><value>Synchronize now</value></data>
+  <data name="Ed2kLastSyncText.Text" xml:space="preserve"><value>Never synchronized</value></data>
+  <data name="Ed2kSearchHeader.Text" xml:space="preserve"><value>ED2K search (later phase)</value></data>
+  <data name="Ed2kSearchKeywordSettingCard.Header" xml:space="preserve"><value>Keyword</value></data>
+  <data name="Ed2kSearchKeywordSettingCard.Description" xml:space="preserve"><value>Search the ED2K network for a keyword.</value></data>
+  <data name="Ed2kSearchKeywordButton.ToolTipService.ToolTip" xml:space="preserve"><value>Search</value></data>
+  <data name="Ed2kFileTypeSettingCard.Header" xml:space="preserve"><value>File type</value></data>
+  <data name="Ed2kFileTypeSettingCard.Description" xml:space="preserve"><value>Filter search results by file type.</value></data>
+  <data name="Ed2kFileTypeAnyItem.Content" xml:space="preserve"><value>Any</value></data>
+  <data name="Ed2kFileTypeAudioItem.Content" xml:space="preserve"><value>Audio</value></data>
+  <data name="Ed2kFileTypeVideoItem.Content" xml:space="preserve"><value>Video</value></data>
+  <data name="Ed2kFileTypeDocumentItem.Content" xml:space="preserve"><value>Document</value></data>
+  <data name="Ed2kFileTypeArchiveItem.Content" xml:space="preserve"><value>Archive</value></data>
+  <data name="Ed2kMinSourcesSettingCard.Header" xml:space="preserve"><value>Minimum sources</value></data>
+  <data name="Ed2kMinSourcesSettingCard.Description" xml:space="preserve"><value>Only show results with at least this many sources.</value></data>
+  <data name="Ed2kSearchTimeoutSettingCard.Header" xml:space="preserve"><value>Search duration</value></data>
+  <data name="Ed2kSearchTimeoutSettingCard.Description" xml:space="preserve"><value>Maximum time in seconds to wait for a search.</value></data>
+  <data name="Ed2kBootstrapSyncSucceededMessage" xml:space="preserve"><value>The ED2K server and Kad bootstrap data were synchronized. Restart the engine to load the new data.</value></data>
+  <data name="Ed2kBootstrapSyncFailedMessage" xml:space="preserve"><value>The ED2K bootstrap data could not be synchronized.</value></data>
+  <data name="Ed2kSettingsInvalidMessage" xml:space="preserve"><value>Enter valid HTTP or HTTPS bootstrap URLs and ED2K servers in host:port format.</value></data>
+  <data name="Ed2kNeverSyncedText" xml:space="preserve"><value>Never synchronized</value></data>
+  <data name="Ed2kLastSyncStatusText" xml:space="preserve"><value>Last synchronized: {0} · server.met {1:N0} B · nodes.dat {2:N0} B</value></data>
+  <data name="Ed2kLastSyncTimeText" xml:space="preserve"><value>Last synchronized: {0}; local bootstrap files are unavailable.</value></data>
+  <data name="UserErrorDetailUnsupportedFeature" xml:space="preserve"><value>The selected download engine does not support this protocol. Use aria2-next for ED2K links.</value></data>
+  <data name="Ed2kServerListEmptyText.Text" xml:space="preserve"><value>No servers have been added.</value></data>
+  <data name="AddEd2kServerButton.Content" xml:space="preserve"><value>Add server</value></data>
+  <data name="AddEd2kServerButton.AutomationProperties.Name" xml:space="preserve"><value>Add ED2K server</value></data>
+  <data name="EditEd2kServerButton.ToolTipService.ToolTip" xml:space="preserve"><value>Edit server</value></data>
+  <data name="EditEd2kServerButton.AutomationProperties.Name" xml:space="preserve"><value>Edit ED2K server</value></data>
+  <data name="DeleteEd2kServerButton.ToolTipService.ToolTip" xml:space="preserve"><value>Delete server</value></data>
+  <data name="DeleteEd2kServerButton.AutomationProperties.Name" xml:space="preserve"><value>Delete ED2K server</value></data>
+  <data name="Ed2kAddServerDialogTitle" xml:space="preserve"><value>Add ED2K server</value></data>
+  <data name="Ed2kEditServerDialogTitle" xml:space="preserve"><value>Edit ED2K server</value></data>
+  <data name="Ed2kServerAddressFieldHeader" xml:space="preserve"><value>Server address</value></data>
+  <data name="Ed2kServerAddressPlaceholder" xml:space="preserve"><value>For example: server.example:4661</value></data>
+  <data name="Ed2kServerAddressInvalidMessage" xml:space="preserve"><value>Enter a server in host:port format with a port from 1 to 65535.</value></data>
+  <data name="Ed2kServerAddressDuplicateMessage" xml:space="preserve"><value>This server is already in the list.</value></data>
+  <data name="SaveButtonText" xml:space="preserve"><value>Save</value></data>
+
+  <data name="AddBtTrackerSourceButton.Content" xml:space="preserve"><value>Add custom source</value></data>
+  <data name="AddBtTrackerSourceButton.AutomationProperties.Name" xml:space="preserve"><value>Add Tracker source</value></data>
+  <data name="EditBtTrackerSourceButton.ToolTipService.ToolTip" xml:space="preserve"><value>Edit Tracker source</value></data>
+  <data name="EditBtTrackerSourceButton.AutomationProperties.Name" xml:space="preserve"><value>Edit Tracker source</value></data>
+  <data name="DeleteBtTrackerSourceButton.ToolTipService.ToolTip" xml:space="preserve"><value>Delete Tracker source</value></data>
+  <data name="DeleteBtTrackerSourceButton.AutomationProperties.Name" xml:space="preserve"><value>Delete Tracker source</value></data>
+  <data name="BtTrackerListEmptyText.Text" xml:space="preserve"><value>No Trackers have been added.</value></data>
+  <data name="AddBtTrackerButton.Content" xml:space="preserve"><value>Add Tracker</value></data>
+  <data name="AddBtTrackerButton.AutomationProperties.Name" xml:space="preserve"><value>Add Tracker</value></data>
+  <data name="EditBtTrackerButton.ToolTipService.ToolTip" xml:space="preserve"><value>Edit Tracker</value></data>
+  <data name="EditBtTrackerButton.AutomationProperties.Name" xml:space="preserve"><value>Edit Tracker</value></data>
+  <data name="DeleteBtTrackerButton.ToolTipService.ToolTip" xml:space="preserve"><value>Delete Tracker</value></data>
+  <data name="DeleteBtTrackerButton.AutomationProperties.Name" xml:space="preserve"><value>Delete Tracker</value></data>
+  <data name="BtSyncTrackerButton.AutomationProperties.Name" xml:space="preserve"><value>Sync Tracker</value></data>
+  <data name="BtTrackerSourceEnabledToggleSwitch.AutomationProperties.Name" xml:space="preserve"><value>Enable Tracker source</value></data>
+  <data name="BtTrackerEnabledToggleSwitch.AutomationProperties.Name" xml:space="preserve"><value>Enable Tracker</value></data>
+  <data name="Ed2kServerEnabledToggleSwitch.AutomationProperties.Name" xml:space="preserve"><value>Enable ED2K server</value></data>
+  <data name="TrackerSourceUrlFieldHeader" xml:space="preserve"><value>Source address</value></data>
+  <data name="TrackerAddSourceDialogTitle" xml:space="preserve"><value>Add Tracker source</value></data>
+  <data name="TrackerEditSourceDialogTitle" xml:space="preserve"><value>Edit Tracker source</value></data>
+  <data name="TrackerSourceUrlDuplicateMessage" xml:space="preserve"><value>This Tracker source already exists.</value></data>
+  <data name="TrackerAddressFieldHeader" xml:space="preserve"><value>Tracker address</value></data>
+  <data name="TrackerAddDialogTitle" xml:space="preserve"><value>Add Tracker</value></data>
+  <data name="TrackerEditDialogTitle" xml:space="preserve"><value>Edit Tracker</value></data>
+  <data name="TrackerAddressInvalidMessage" xml:space="preserve"><value>Enter a valid UDP, HTTP, HTTPS, WS, or WSS Tracker address.</value></data>
+  <data name="TrackerAddressDuplicateMessage" xml:space="preserve"><value>This Tracker already exists in the list.</value></data>
 </root>

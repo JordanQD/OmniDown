@@ -24,7 +24,6 @@ public sealed partial class BitTorrentSettingsPage : Page
         _content?.SearchEntries ?? [];
 
     internal event RoutedEventHandler? BitTorrentSettingChanged;
-    internal event RoutedEventHandler? AddBtCustomTrackerRequested;
     internal event RoutedEventHandler? SyncBtTrackerRequested;
 
     public BitTorrentSettingsPage()
@@ -38,7 +37,6 @@ public sealed partial class BitTorrentSettingsPage : Page
     {
         if (_content is null) return;
         _content.BitTorrentSettingChanged += (s, e) => BitTorrentSettingChanged?.Invoke(this, e);
-        _content.AddBtCustomTrackerRequested += (s, e) => AddBtCustomTrackerRequested?.Invoke(this, e);
         _content.SyncBtTrackerRequested += (s, e) => SyncBtTrackerRequested?.Invoke(this, e);
     }
 }

@@ -18,6 +18,7 @@ public sealed record Aria2EngineOptions(
     int RetryWaitSeconds,
     NetworkSettings NetworkSettings,
     BitTorrentSettings BitTorrentSettings,
+    Ed2kSettings Ed2kSettings,
     AdvancedSettings AdvancedSettings);
 
 public enum Aria2EngineStartFailureKind

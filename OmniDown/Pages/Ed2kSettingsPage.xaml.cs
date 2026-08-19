@@ -24,6 +24,9 @@ public sealed partial class Ed2kSettingsPage : Page
         _content?.SearchEntries ?? [];
 
     internal event RoutedEventHandler? Ed2kSettingChanged;
+    internal event RoutedEventHandler? RandomEd2kPortRequested;
+    internal event RoutedEventHandler? RandomEd2kUdpPortRequested;
+    internal event RoutedEventHandler? SyncEd2kRequested;
     internal event RoutedEventHandler? SearchEd2kRequested;
 
     public Ed2kSettingsPage()
@@ -37,6 +40,9 @@ public sealed partial class Ed2kSettingsPage : Page
     {
         if (_content is null) return;
         _content.Ed2kSettingChanged += (s, e) => Ed2kSettingChanged?.Invoke(this, e);
+        _content.RandomEd2kPortRequested += (s, e) => RandomEd2kPortRequested?.Invoke(this, e);
+        _content.RandomEd2kUdpPortRequested += (s, e) => RandomEd2kUdpPortRequested?.Invoke(this, e);
+        _content.SyncEd2kRequested += (s, e) => SyncEd2kRequested?.Invoke(this, e);
         _content.SearchEd2kRequested += (s, e) => SearchEd2kRequested?.Invoke(this, e);
     }
 }

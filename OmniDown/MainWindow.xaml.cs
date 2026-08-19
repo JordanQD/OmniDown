@@ -5,6 +5,7 @@ using OmniDown.Models;
 using OmniDown.Models.Settings;
 using OmniDown.Services.BrowserExtension;
 using OmniDown.Services.Downloads;
+using OmniDown.Services.Ed2k;
 using OmniDown.Services.Engine;
 using OmniDown.Services.Localization;
 using OmniDown.Services.Logging;
@@ -38,6 +39,7 @@ namespace OmniDown
             DownloadSettings Download,
             BitTorrentSettings BitTorrent,
             NetworkSettings Network,
+            Ed2kSettings Ed2k,
             AdvancedSettings Advanced);
 
         private enum SpeedLimitTargetMode
@@ -49,6 +51,7 @@ namespace OmniDown
         private const string CloneCommand = "git clone https://github.com/JordanQD/OmniDown.git";
         private readonly Aria2EngineHost _aria2EngineHost = new();
         private readonly Aria2RpcClient _aria2RpcClient = new();
+        private readonly Ed2kBootstrapService _ed2kBootstrapService = new();
         private readonly DownloadCoordinator _downloadCoordinator;
         private readonly SystemNotificationService _notifications;
         private readonly TaskbarProgressService _taskbarProgress;
@@ -90,6 +93,7 @@ namespace OmniDown
         private bool _isLoadingGeneralSettings;
         private bool _isLoadingDownloadSettings;
         private bool _isLoadingBitTorrentSettings;
+        private bool _isLoadingEd2kSettings;
         private bool _isLoadingNetworkSettings;
         private bool _isLoadingAdvancedSettings;
         private bool _isNewDownloadDialogOpen;
@@ -174,11 +178,13 @@ namespace OmniDown
 
             LoadDownloadSettings();
             LoadBitTorrentSettings();
+            LoadEd2kSettings();
             LoadNetworkSettings();
             LoadAdvancedSettings();
             StartBrowserExtensionApiServer();
             Clipboard.ContentChanged += Clipboard_ContentChanged;
             _ = AutoSyncBitTorrentTrackersIfNeededAsync();
+            _ = AutoSyncEd2kBootstrapIfNeededAsync();
             LoadSpeedLimitSettings();
             LoadCloseBehaviorSettings();
             UpdateSearchPlaceholder();

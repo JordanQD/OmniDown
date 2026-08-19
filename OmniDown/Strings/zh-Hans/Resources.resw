@@ -324,15 +324,15 @@
   <data name="BtMaxPeersSettingCard.Header" xml:space="preserve"><value>最大 Peer 数</value></data>
   <data name="BtMaxPeersSettingCard.Description" xml:space="preserve"><value>每个种子最多连接的 Peer 数量。</value></data>
   <data name="BitTorrentTrackerServerHeader.Text" xml:space="preserve"><value>Tracker 服务器</value></data>
-  <data name="BtTrackerSourceSettingCard.Header" xml:space="preserve"><value>Tracker 源</value></data>
-  <data name="BtTrackerSourceSettingCard.Description" xml:space="preserve"><value>从 HTTP/HTTPS 文本源同步 Tracker 列表。</value></data>
+  <data name="BtTrackerSourceSettingCard.Header" xml:space="preserve"><value>Tracker 来源</value></data>
+  <data name="BtTrackerSourceSettingCard.Description" xml:space="preserve"><value>管理用于同步 Tracker 列表的 HTTP/HTTPS 文本来源。</value></data>
   <data name="CdnBadgeText.Text" xml:space="preserve"><value>CDN</value></data>
   <data name="BtTrackerCustomSourceSettingCard.Header" xml:space="preserve"><value>自定义来源</value></data>
   <data name="BtTrackerCustomSourceSettingCard.Description" xml:space="preserve"><value>添加自己的 Tracker 列表 URL，可多选后一起同步。</value></data>
   <data name="BtCustomTrackerSourceTextBox.PlaceholderText" xml:space="preserve"><value>输入自定义 Tracker 列表 URL</value></data>
   <data name="BtSyncTrackerButton.ToolTipService.ToolTip" xml:space="preserve"><value>同步 Tracker</value></data>
   <data name="BtTrackerListSettingCard.Header" xml:space="preserve"><value>Tracker 列表</value></data>
-  <data name="BtTrackerListSettingCard.Description" xml:space="preserve"><value>每行一个 Tracker，启动 aria2 时会转为逗号分隔配置。</value></data>
+  <data name="BtTrackerListSettingCard.Description" xml:space="preserve"><value>管理 aria2 使用的 Tracker 地址。</value></data>
   <data name="BtTrackerListTextBox.PlaceholderText" xml:space="preserve"><value>udp://tracker.example:6969/announce</value></data>
   <data name="BtAutoSyncTrackerSettingCard.Header" xml:space="preserve"><value>自动同步 Tracker</value></data>
   <data name="BtLastTrackerSyncText.Text" xml:space="preserve"><value>启动设置页时保留上次同步时间。</value></data>
@@ -519,4 +519,96 @@
   <data name="EngineUpdateInstalledMessage" xml:space="preserve"><value>aria2-next 已更新到 {0}，并已重新启动。</value></data>
   <data name="EngineUpdateInstallFailedMessage" xml:space="preserve"><value>aria2-next {0} 安装失败，请查看日志了解详情。</value></data>
 
+  <data name="Ed2kSettingsTitle.Text" xml:space="preserve"><value>ED2K</value></data>
+  <data name="Ed2kEngineRequirementInfoBar.Title" xml:space="preserve"><value>引擎要求</value></data>
+  <data name="Ed2kEngineRequirementInfoBar.Message" xml:space="preserve"><value>ED2K 下载和以下引擎设置需要 aria2-next；官方 aria2 不支持。</value></data>
+  <data name="Ed2kBasicOptionsHeader.Text" xml:space="preserve"><value>ED2K</value></data>
+  <data name="Ed2kListenPortSettingCard.Header" xml:space="preserve"><value>ED2K 监听端口</value></data>
+  <data name="Ed2kListenPortSettingCard.Description" xml:space="preserve"><value>ED2K 客户端监听端口。修改后需重启 aria2 生效。</value></data>
+  <data name="Ed2kUdpListenPortSettingCard.Header" xml:space="preserve"><value>ED2K UDP 监听端口</value></data>
+  <data name="Ed2kUdpListenPortSettingCard.Description" xml:space="preserve"><value>ED2K UDP 监听端口。修改后需重启 aria2 生效。</value></data>
+  <data name="RandomEd2kPortButton.ToolTipService.ToolTip" xml:space="preserve"><value>随机端口</value></data>
+  <data name="RandomEd2kUdpPortButton.ToolTipService.ToolTip" xml:space="preserve"><value>随机端口</value></data>
+  <data name="Ed2kUploadSlotsSettingCard.Header" xml:space="preserve"><value>上传槽位</value></data>
+  <data name="Ed2kUploadSlotsSettingCard.Description" xml:space="preserve"><value>同时上传的最大槽位数。</value></data>
+  <data name="Ed2kNetworkBootstrapHeader.Text" xml:space="preserve"><value>网络引导</value></data>
+  <data name="Ed2kServerListUrlSettingCard.Header" xml:space="preserve"><value>server.met 来源</value></data>
+  <data name="Ed2kServerListUrlSettingCard.Description" xml:space="preserve"><value>用于发现 ED2K 服务器的来源。</value></data>
+  <data name="Ed2kKadBootstrapUrlSettingCard.Header" xml:space="preserve"><value>nodes.dat 来源</value></data>
+  <data name="Ed2kKadBootstrapUrlSettingCard.Description" xml:space="preserve"><value>用于发现 Kad 节点的来源。</value></data>
+  <data name="Ed2kServerListSettingCard.Header" xml:space="preserve"><value>ED2K 服务器</value></data>
+  <data name="Ed2kServerListSettingCard.Description" xml:space="preserve"><value>手动指定 ED2K 服务器地址。</value></data>
+  <data name="Ed2kAutoSyncSettingCard.Header" xml:space="preserve"><value>自动同步</value></data>
+  <data name="Ed2kAutoSyncSettingCard.Description" xml:space="preserve"><value>自动同步 server.met 和 nodes.dat 来源。</value></data>
+  <data name="Ed2kSyncIntervalCard.Header" xml:space="preserve"><value>同步频率</value></data>
+  <data name="Ed2kSyncIntervalEveryStartItem.Content" xml:space="preserve"><value>每次启动</value></data>
+  <data name="Ed2kSyncInterval6HoursItem.Content" xml:space="preserve"><value>每 6 小时</value></data>
+  <data name="Ed2kSyncInterval12HoursItem.Content" xml:space="preserve"><value>每 12 小时</value></data>
+  <data name="Ed2kSyncIntervalDailyItem.Content" xml:space="preserve"><value>每天</value></data>
+  <data name="Ed2kSyncIntervalWeeklyItem.Content" xml:space="preserve"><value>每周</value></data>
+  <data name="Ed2kSyncNowCard.Header" xml:space="preserve"><value>马上同步</value></data>
+  <data name="Ed2kSyncNowButton.ToolTipService.ToolTip" xml:space="preserve"><value>马上同步</value></data>
+  <data name="Ed2kLastSyncText.Text" xml:space="preserve"><value>从未同步</value></data>
+  <data name="Ed2kSearchHeader.Text" xml:space="preserve"><value>ED2K 搜索（后续阶段）</value></data>
+  <data name="Ed2kSearchKeywordSettingCard.Header" xml:space="preserve"><value>关键词</value></data>
+  <data name="Ed2kSearchKeywordSettingCard.Description" xml:space="preserve"><value>在 ED2K 网络中搜索指定关键词。</value></data>
+  <data name="Ed2kSearchKeywordButton.ToolTipService.ToolTip" xml:space="preserve"><value>搜索</value></data>
+  <data name="Ed2kFileTypeSettingCard.Header" xml:space="preserve"><value>文件类型</value></data>
+  <data name="Ed2kFileTypeSettingCard.Description" xml:space="preserve"><value>按文件类型过滤搜索结果。</value></data>
+  <data name="Ed2kFileTypeAnyItem.Content" xml:space="preserve"><value>任意</value></data>
+  <data name="Ed2kFileTypeAudioItem.Content" xml:space="preserve"><value>音频</value></data>
+  <data name="Ed2kFileTypeVideoItem.Content" xml:space="preserve"><value>视频</value></data>
+  <data name="Ed2kFileTypeDocumentItem.Content" xml:space="preserve"><value>文档</value></data>
+  <data name="Ed2kFileTypeArchiveItem.Content" xml:space="preserve"><value>压缩包</value></data>
+  <data name="Ed2kMinSourcesSettingCard.Header" xml:space="preserve"><value>最少来源数</value></data>
+  <data name="Ed2kMinSourcesSettingCard.Description" xml:space="preserve"><value>仅显示来源数不少于该值的结果。</value></data>
+  <data name="Ed2kSearchTimeoutSettingCard.Header" xml:space="preserve"><value>搜索时长</value></data>
+  <data name="Ed2kSearchTimeoutSettingCard.Description" xml:space="preserve"><value>搜索请求最大等待秒数。</value></data>
+  <data name="Ed2kBootstrapSyncSucceededMessage" xml:space="preserve"><value>已同步 ED2K 服务器与 Kad 引导数据；重启引擎后载入新数据。</value></data>
+  <data name="Ed2kBootstrapSyncFailedMessage" xml:space="preserve"><value>无法同步 ED2K 网络引导数据。</value></data>
+  <data name="Ed2kSettingsInvalidMessage" xml:space="preserve"><value>请输入有效的 HTTP/HTTPS 引导地址，并按“主机:端口”填写 ED2K 服务器。</value></data>
+  <data name="Ed2kNeverSyncedText" xml:space="preserve"><value>从未同步</value></data>
+  <data name="Ed2kLastSyncStatusText" xml:space="preserve"><value>上次同步：{0} · server.met {1:N0} B · nodes.dat {2:N0} B</value></data>
+  <data name="Ed2kLastSyncTimeText" xml:space="preserve"><value>上次同步：{0}；本地引导文件当前不可用。</value></data>
+  <data name="UserErrorDetailUnsupportedFeature" xml:space="preserve"><value>当前下载引擎不支持此协议。ED2K 链接需要使用 aria2-next。</value></data>
+  <data name="Ed2kServerListEmptyText.Text" xml:space="preserve"><value>尚未添加服务器。</value></data>
+  <data name="AddEd2kServerButton.Content" xml:space="preserve"><value>添加服务器</value></data>
+  <data name="AddEd2kServerButton.AutomationProperties.Name" xml:space="preserve"><value>添加 ED2K 服务器</value></data>
+  <data name="EditEd2kServerButton.ToolTipService.ToolTip" xml:space="preserve"><value>编辑服务器</value></data>
+  <data name="EditEd2kServerButton.AutomationProperties.Name" xml:space="preserve"><value>编辑 ED2K 服务器</value></data>
+  <data name="DeleteEd2kServerButton.ToolTipService.ToolTip" xml:space="preserve"><value>删除服务器</value></data>
+  <data name="DeleteEd2kServerButton.AutomationProperties.Name" xml:space="preserve"><value>删除 ED2K 服务器</value></data>
+  <data name="Ed2kAddServerDialogTitle" xml:space="preserve"><value>添加 ED2K 服务器</value></data>
+  <data name="Ed2kEditServerDialogTitle" xml:space="preserve"><value>编辑 ED2K 服务器</value></data>
+  <data name="Ed2kServerAddressFieldHeader" xml:space="preserve"><value>服务器地址</value></data>
+  <data name="Ed2kServerAddressPlaceholder" xml:space="preserve"><value>例如：server.example:4661</value></data>
+  <data name="Ed2kServerAddressInvalidMessage" xml:space="preserve"><value>请按“主机:端口”格式输入，端口范围为 1–65535。</value></data>
+  <data name="Ed2kServerAddressDuplicateMessage" xml:space="preserve"><value>该服务器已存在于列表中。</value></data>
+  <data name="SaveButtonText" xml:space="preserve"><value>保存</value></data>
+  <data name="AddBtTrackerSourceButton.Content" xml:space="preserve"><value>添加自定义来源</value></data>
+  <data name="AddBtTrackerSourceButton.AutomationProperties.Name" xml:space="preserve"><value>添加 Tracker 来源</value></data>
+  <data name="EditBtTrackerSourceButton.ToolTipService.ToolTip" xml:space="preserve"><value>编辑 Tracker 来源</value></data>
+  <data name="EditBtTrackerSourceButton.AutomationProperties.Name" xml:space="preserve"><value>编辑 Tracker 来源</value></data>
+  <data name="DeleteBtTrackerSourceButton.ToolTipService.ToolTip" xml:space="preserve"><value>删除 Tracker 来源</value></data>
+  <data name="DeleteBtTrackerSourceButton.AutomationProperties.Name" xml:space="preserve"><value>删除 Tracker 来源</value></data>
+  <data name="BtTrackerListEmptyText.Text" xml:space="preserve"><value>尚未添加 Tracker。</value></data>
+  <data name="AddBtTrackerButton.Content" xml:space="preserve"><value>添加 Tracker</value></data>
+  <data name="AddBtTrackerButton.AutomationProperties.Name" xml:space="preserve"><value>添加 Tracker</value></data>
+  <data name="EditBtTrackerButton.ToolTipService.ToolTip" xml:space="preserve"><value>编辑 Tracker</value></data>
+  <data name="EditBtTrackerButton.AutomationProperties.Name" xml:space="preserve"><value>编辑 Tracker</value></data>
+  <data name="DeleteBtTrackerButton.ToolTipService.ToolTip" xml:space="preserve"><value>删除 Tracker</value></data>
+  <data name="DeleteBtTrackerButton.AutomationProperties.Name" xml:space="preserve"><value>删除 Tracker</value></data>
+  <data name="BtSyncTrackerButton.AutomationProperties.Name" xml:space="preserve"><value>同步 Tracker</value></data>
+  <data name="BtTrackerSourceEnabledToggleSwitch.AutomationProperties.Name" xml:space="preserve"><value>启用 Tracker 来源</value></data>
+  <data name="BtTrackerEnabledToggleSwitch.AutomationProperties.Name" xml:space="preserve"><value>启用 Tracker</value></data>
+  <data name="Ed2kServerEnabledToggleSwitch.AutomationProperties.Name" xml:space="preserve"><value>启用 ED2K 服务器</value></data>
+  <data name="TrackerSourceUrlFieldHeader" xml:space="preserve"><value>来源地址</value></data>
+  <data name="TrackerAddSourceDialogTitle" xml:space="preserve"><value>添加 Tracker 来源</value></data>
+  <data name="TrackerEditSourceDialogTitle" xml:space="preserve"><value>编辑 Tracker 来源</value></data>
+  <data name="TrackerSourceUrlDuplicateMessage" xml:space="preserve"><value>该 Tracker 来源已存在。</value></data>
+  <data name="TrackerAddressFieldHeader" xml:space="preserve"><value>Tracker 地址</value></data>
+  <data name="TrackerAddDialogTitle" xml:space="preserve"><value>添加 Tracker</value></data>
+  <data name="TrackerEditDialogTitle" xml:space="preserve"><value>编辑 Tracker</value></data>
+  <data name="TrackerAddressInvalidMessage" xml:space="preserve"><value>请输入有效的 UDP、HTTP、HTTPS、WS 或 WSS Tracker 地址。</value></data>
+  <data name="TrackerAddressDuplicateMessage" xml:space="preserve"><value>该 Tracker 已存在于列表中。</value></data>
 </root>

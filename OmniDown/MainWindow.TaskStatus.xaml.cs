@@ -70,6 +70,18 @@ namespace OmniDown
             AppLogger.Info("Aria2Startup", $"ensure-start rpcPort={rpcPort} downloadDir={downloadSettings.DownloadDirectory}");
             _aria2RpcClient.Configure(rpcPort, _rpcSecret);
 
+            if (advancedSettings.EngineType != Aria2EngineType.Aria2c)
+            {
+                try
+                {
+                    await _ed2kBootstrapService.EnsureAvailableAsync(_settingsPageViewModel.Ed2kSettings);
+                }
+                catch (Exception ex)
+                {
+                    AppLogger.Warning("ED2K", $"bootstrap preparation skipped: {ex.Message}");
+                }
+            }
+
             Aria2EngineStartResult result = await _aria2EngineHost.StartAsync(new Aria2EngineOptions(
                 string.IsNullOrWhiteSpace(advancedSettings.Aria2Path) ? null : advancedSettings.Aria2Path,
                 advancedSettings.EngineType,
@@ -86,6 +98,7 @@ namespace OmniDown
                 downloadSettings.RetryWaitSeconds,
                 _settingsPageViewModel.NetworkSettings,
                 _settingsPageViewModel.BitTorrentSettings,
+                _settingsPageViewModel.Ed2kSettings,
                 advancedSettings));
 
             if (!result.Started)

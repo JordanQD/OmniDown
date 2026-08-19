@@ -13,6 +13,7 @@ public sealed record BitTorrentSettings(
     string[] SelectedTrackerSourceUrls,
     string[] CustomTrackerUrls,
     string TrackerList,
+    string DisabledTrackerList,
     bool AutoSyncTracker,
     long LastSyncTrackerTime)
 {
@@ -30,6 +31,7 @@ public sealed record BitTorrentSettings(
         DefaultTrackerSourceUrl,
         [DefaultTrackerSourceUrl],
         [],
+        string.Empty,
         string.Empty,
         false,
         0);

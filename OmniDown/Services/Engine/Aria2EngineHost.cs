@@ -30,6 +30,8 @@ public sealed class Aria2EngineHost : IDisposable
     public string EngineVariant { get; private set; } = string.Empty;
     public string EngineVersion { get; private set; } = string.Empty;
 
+    public bool SupportsEd2k => _isAria2Next;
+
     public string DiagnosticText { get; private set; } = "No aria2 process has been started.";
 
     public async Task DetectVersionAsync(string? executablePath, Aria2EngineType engineType)
@@ -376,6 +378,7 @@ public sealed class Aria2EngineHost : IDisposable
         }
 
         AddBitTorrentArguments(arguments, options, isAria2Next);
+        AddEd2kArguments(arguments, options, isAria2Next);
 
         if (!isAria2Next)
         {
@@ -422,6 +425,47 @@ public sealed class Aria2EngineHost : IDisposable
         AddCustomProxyArguments(arguments, options.NetworkSettings);
 
         return arguments;
+    }
+
+    private static void AddEd2kArguments(List<string> arguments, Aria2EngineOptions options, bool isAria2Next)
+    {
+        if (!isAria2Next)
+        {
+            return;
+        }
+
+        Ed2kSettings settings = options.Ed2kSettings;
+        arguments.Add($"--ed2k-listen-port={Math.Clamp(settings.ListenPort, 0, 65535)}");
+        arguments.Add($"--ed2k-udp-listen-port={Math.Clamp(settings.UdpListenPort, 0, 65535)}");
+        arguments.Add($"--ed2k-upload-slots={Math.Clamp(settings.UploadSlots, 1, 100)}");
+
+        HashSet<string> disabledServers = (settings.DisabledServerList ?? string.Empty)
+            .Split(new[] { '\r', '\n', ',' }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(server => server.Trim())
+            .Where(server => !string.IsNullOrWhiteSpace(server))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        string servers = string.Join(",", (settings.ServerList ?? string.Empty)
+            .Split(new[] { '\r', '\n', ',' }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(server => server.Trim())
+            .Where(server => !string.IsNullOrWhiteSpace(server))
+            .Where(server => !disabledServers.Contains(server))
+            .Distinct(StringComparer.OrdinalIgnoreCase));
+        if (!string.IsNullOrWhiteSpace(servers))
+        {
+            arguments.Add($"--ed2k-server={servers}");
+        }
+
+        if (File.Exists(AppPaths.Ed2kServerMetPath) && new FileInfo(AppPaths.Ed2kServerMetPath).Length > 0)
+        {
+            arguments.Add($"--ed2k-server-list={AppPaths.Ed2kServerMetPath}");
+        }
+
+        if (settings.KadBootstrapEnabled &&
+            File.Exists(AppPaths.Ed2kNodesDatPath) &&
+            new FileInfo(AppPaths.Ed2kNodesDatPath).Length > 0)
+        {
+            arguments.Add($"--ed2k-node-list={AppPaths.Ed2kNodesDatPath}");
+        }
     }
 
     private static void AddCustomProxyArguments(List<string> arguments, OmniDown.Models.Settings.NetworkSettings settings)
@@ -487,7 +531,12 @@ public sealed class Aria2EngineHost : IDisposable
             ]);
         }
 
-        string trackers = ToAriaTrackerList(settings.TrackerList);
+        HashSet<string> disabledTrackers = ToAriaTrackerList(settings.DisabledTrackerList)
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        string trackers = string.Join(",", ToAriaTrackerList(settings.TrackerList)
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(tracker => !disabledTrackers.Contains(tracker)));
         if (!string.IsNullOrWhiteSpace(trackers))
         {
             arguments.Add($"--bt-tracker={trackers}");

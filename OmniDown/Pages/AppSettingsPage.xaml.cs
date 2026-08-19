@@ -193,11 +193,6 @@ public sealed partial class AppSettingsPage : Page
         add => _bitTorrentPage.BitTorrentSettingChanged += value;
         remove => _bitTorrentPage.BitTorrentSettingChanged -= value;
     }
-    internal event RoutedEventHandler? AddBtCustomTrackerRequested
-    {
-        add => _bitTorrentPage.AddBtCustomTrackerRequested += value;
-        remove => _bitTorrentPage.AddBtCustomTrackerRequested -= value;
-    }
     internal event RoutedEventHandler? SyncBtTrackerRequested
     {
         add => _bitTorrentPage.SyncBtTrackerRequested += value;
@@ -207,6 +202,21 @@ public sealed partial class AppSettingsPage : Page
     {
         add => _ed2kPage.Ed2kSettingChanged += value;
         remove => _ed2kPage.Ed2kSettingChanged -= value;
+    }
+    internal event RoutedEventHandler? SyncEd2kRequested
+    {
+        add => _ed2kPage.SyncEd2kRequested += value;
+        remove => _ed2kPage.SyncEd2kRequested -= value;
+    }
+    internal event RoutedEventHandler? RandomEd2kPortRequested
+    {
+        add => _ed2kPage.RandomEd2kPortRequested += value;
+        remove => _ed2kPage.RandomEd2kPortRequested -= value;
+    }
+    internal event RoutedEventHandler? RandomEd2kUdpPortRequested
+    {
+        add => _ed2kPage.RandomEd2kUdpPortRequested += value;
+        remove => _ed2kPage.RandomEd2kUdpPortRequested -= value;
     }
     internal event RoutedEventHandler? SearchEd2kRequested
     {
@@ -337,26 +347,7 @@ public sealed partial class AppSettingsPage : Page
     internal NumberBox BtSeedRatioNumberBoxControl => BitTorrentSettingsContentControl.BtSeedRatioNumberBoxControl;
     internal NumberBox BtSeedTimeNumberBoxControl => BitTorrentSettingsContentControl.BtSeedTimeNumberBoxControl;
     internal NumberBox BtMaxPeersNumberBoxControl => BitTorrentSettingsContentControl.BtMaxPeersNumberBoxControl;
-    internal Button BtTrackerSourceDropDownButtonControl => BitTorrentSettingsContentControl.BtTrackerSourceDropDownButtonControl;
-    internal CheckBox BtTrackerNgosangBestCheckBoxControl => BitTorrentSettingsContentControl.BtTrackerNgosangBestCheckBoxControl;
-    internal CheckBox BtTrackerNgosangBestIpCheckBoxControl => BitTorrentSettingsContentControl.BtTrackerNgosangBestIpCheckBoxControl;
-    internal CheckBox BtTrackerNgosangAllCheckBoxControl => BitTorrentSettingsContentControl.BtTrackerNgosangAllCheckBoxControl;
-    internal CheckBox BtTrackerNgosangAllIpCheckBoxControl => BitTorrentSettingsContentControl.BtTrackerNgosangAllIpCheckBoxControl;
-    internal CheckBox BtTrackerNgosangCdnBestCheckBoxControl => BitTorrentSettingsContentControl.BtTrackerNgosangCdnBestCheckBoxControl;
-    internal CheckBox BtTrackerNgosangCdnBestIpCheckBoxControl => BitTorrentSettingsContentControl.BtTrackerNgosangCdnBestIpCheckBoxControl;
-    internal CheckBox BtTrackerNgosangCdnAllCheckBoxControl => BitTorrentSettingsContentControl.BtTrackerNgosangCdnAllCheckBoxControl;
-    internal CheckBox BtTrackerNgosangCdnAllIpCheckBoxControl => BitTorrentSettingsContentControl.BtTrackerNgosangCdnAllIpCheckBoxControl;
-    internal CheckBox BtTrackerXiu2BestCheckBoxControl => BitTorrentSettingsContentControl.BtTrackerXiu2BestCheckBoxControl;
-    internal CheckBox BtTrackerXiu2AllCheckBoxControl => BitTorrentSettingsContentControl.BtTrackerXiu2AllCheckBoxControl;
-    internal CheckBox BtTrackerXiu2HttpCheckBoxControl => BitTorrentSettingsContentControl.BtTrackerXiu2HttpCheckBoxControl;
-    internal CheckBox BtTrackerXiu2CdnBestCheckBoxControl => BitTorrentSettingsContentControl.BtTrackerXiu2CdnBestCheckBoxControl;
-    internal CheckBox BtTrackerXiu2CdnAllCheckBoxControl => BitTorrentSettingsContentControl.BtTrackerXiu2CdnAllCheckBoxControl;
-    internal CheckBox BtTrackerXiu2CdnHttpCheckBoxControl => BitTorrentSettingsContentControl.BtTrackerXiu2CdnHttpCheckBoxControl;
-    internal TextBox BtCustomTrackerSourceTextBoxControl => BitTorrentSettingsContentControl.BtCustomTrackerSourceTextBoxControl;
-    internal ListView BtCustomTrackerSourceListViewControl => BitTorrentSettingsContentControl.BtCustomTrackerSourceListViewControl;
-    internal TextBox BtTrackerSourceTextBoxControl => BitTorrentSettingsContentControl.BtTrackerSourceTextBoxControl;
     internal Button BtSyncTrackerButtonControl => BitTorrentSettingsContentControl.BtSyncTrackerButtonControl;
-    internal TextBox BtTrackerListTextBoxControl => BitTorrentSettingsContentControl.BtTrackerListTextBoxControl;
     internal ToggleSwitch BtAutoSyncTrackerToggleSwitchControl => BitTorrentSettingsContentControl.BtAutoSyncTrackerToggleSwitchControl;
     internal TextBlock BtAutoSyncTrackerStateTextControl => BitTorrentSettingsContentControl.BtAutoSyncTrackerStateTextControl;
     internal TextBlock BtLastTrackerSyncTextControl => BitTorrentSettingsContentControl.BtLastTrackerSyncTextControl;

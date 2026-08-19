@@ -18,6 +18,11 @@ internal static class DownloadSourceParser
 
     public static bool IsLikelyDownloadSourceUri(string text)
     {
+        if (Ed2kLinkParser.IsEd2kLink(text))
+        {
+            return Ed2kLinkParser.TryParseFileLink(text, out _);
+        }
+
         if (text.StartsWith("magnet:", StringComparison.OrdinalIgnoreCase))
         {
             return true;

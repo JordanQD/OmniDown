@@ -117,6 +117,11 @@ public static class UserErrorMessages
             {
                 return "UserErrorDetailInvalidData";
             }
+
+            if (current is NotSupportedException)
+            {
+                return "UserErrorDetailUnsupportedFeature";
+            }
         }
 
         return "UserErrorDetailUnknown";

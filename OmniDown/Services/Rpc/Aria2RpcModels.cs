@@ -33,11 +33,38 @@ public sealed record Aria2TaskStatus
     [JsonPropertyName("bittorrent")]
     public JsonElement? BitTorrent { get; init; }
 
+    [JsonPropertyName("ed2k")]
+    public Aria2Ed2kInfo? Ed2k { get; init; }
+
     [JsonPropertyName("dir")]
     public string Directory { get; init; } = string.Empty;
 
     [JsonPropertyName("files")]
     public IReadOnlyList<Aria2FileStatus> Files { get; init; } = [];
+}
+
+public sealed record Aria2Ed2kInfo
+{
+    [JsonPropertyName("ed2kLink")]
+    public string Ed2kLink { get; init; } = string.Empty;
+
+    [JsonPropertyName("hash")]
+    public string Hash { get; init; } = string.Empty;
+
+    [JsonPropertyName("name")]
+    public string Name { get; init; } = string.Empty;
+
+    [JsonPropertyName("length")]
+    public string Length { get; init; } = "0";
+}
+
+public sealed record Aria2VersionInfo
+{
+    [JsonPropertyName("version")]
+    public string Version { get; init; } = string.Empty;
+
+    [JsonPropertyName("enabledFeatures")]
+    public IReadOnlyList<string> EnabledFeatures { get; init; } = [];
 }
 
 public sealed record Aria2FileStatus

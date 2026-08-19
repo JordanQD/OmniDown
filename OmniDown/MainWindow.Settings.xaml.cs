@@ -4,6 +4,7 @@ using Microsoft.Win32;
 using OmniDown.Controls;
 using OmniDown.Models.Settings;
 using OmniDown.Services.Engine;
+using OmniDown.Services.Ed2k;
 using OmniDown.Services.Localization;
 using OmniDown.Services.Logging;
 using OmniDown.Services.Settings;
@@ -55,29 +56,24 @@ namespace OmniDown
         private NumberBox BtSeedRatioNumberBox => SettingsPage.BtSeedRatioNumberBoxControl;
         private NumberBox BtSeedTimeNumberBox => SettingsPage.BtSeedTimeNumberBoxControl;
         private NumberBox BtMaxPeersNumberBox => SettingsPage.BtMaxPeersNumberBoxControl;
-        private Button BtTrackerSourceDropDownButton => SettingsPage.BtTrackerSourceDropDownButtonControl;
-        private CheckBox BtTrackerNgosangBestCheckBox => SettingsPage.BtTrackerNgosangBestCheckBoxControl;
-        private CheckBox BtTrackerNgosangBestIpCheckBox => SettingsPage.BtTrackerNgosangBestIpCheckBoxControl;
-        private CheckBox BtTrackerNgosangAllCheckBox => SettingsPage.BtTrackerNgosangAllCheckBoxControl;
-        private CheckBox BtTrackerNgosangAllIpCheckBox => SettingsPage.BtTrackerNgosangAllIpCheckBoxControl;
-        private CheckBox BtTrackerNgosangCdnBestCheckBox => SettingsPage.BtTrackerNgosangCdnBestCheckBoxControl;
-        private CheckBox BtTrackerNgosangCdnBestIpCheckBox => SettingsPage.BtTrackerNgosangCdnBestIpCheckBoxControl;
-        private CheckBox BtTrackerNgosangCdnAllCheckBox => SettingsPage.BtTrackerNgosangCdnAllCheckBoxControl;
-        private CheckBox BtTrackerNgosangCdnAllIpCheckBox => SettingsPage.BtTrackerNgosangCdnAllIpCheckBoxControl;
-        private CheckBox BtTrackerXiu2BestCheckBox => SettingsPage.BtTrackerXiu2BestCheckBoxControl;
-        private CheckBox BtTrackerXiu2AllCheckBox => SettingsPage.BtTrackerXiu2AllCheckBoxControl;
-        private CheckBox BtTrackerXiu2HttpCheckBox => SettingsPage.BtTrackerXiu2HttpCheckBoxControl;
-        private CheckBox BtTrackerXiu2CdnBestCheckBox => SettingsPage.BtTrackerXiu2CdnBestCheckBoxControl;
-        private CheckBox BtTrackerXiu2CdnAllCheckBox => SettingsPage.BtTrackerXiu2CdnAllCheckBoxControl;
-        private CheckBox BtTrackerXiu2CdnHttpCheckBox => SettingsPage.BtTrackerXiu2CdnHttpCheckBoxControl;
-        private TextBox BtCustomTrackerSourceTextBox => SettingsPage.BtCustomTrackerSourceTextBoxControl;
-        private ListView BtCustomTrackerSourceListView => SettingsPage.BtCustomTrackerSourceListViewControl;
-        private TextBox BtTrackerSourceTextBox => SettingsPage.BtTrackerSourceTextBoxControl;
         private Button BtSyncTrackerButton => SettingsPage.BtSyncTrackerButtonControl;
-        private TextBox BtTrackerListTextBox => SettingsPage.BtTrackerListTextBoxControl;
         private ToggleSwitch BtAutoSyncTrackerToggleSwitch => SettingsPage.BtAutoSyncTrackerToggleSwitchControl;
         private TextBlock BtAutoSyncTrackerStateText => SettingsPage.BtAutoSyncTrackerStateTextControl;
         private TextBlock BtLastTrackerSyncText => SettingsPage.BtLastTrackerSyncTextControl;
+        private NumberBox Ed2kListenPortNumberBox => SettingsPage.Ed2kSettingsContentControl.Ed2kListenPortNumberBoxControl;
+        private NumberBox Ed2kUdpListenPortNumberBox => SettingsPage.Ed2kSettingsContentControl.Ed2kUdpListenPortNumberBoxControl;
+        private NumberBox Ed2kUploadSlotsNumberBox => SettingsPage.Ed2kSettingsContentControl.Ed2kUploadSlotsNumberBoxControl;
+        private TextBox Ed2kServerListUrlTextBox => SettingsPage.Ed2kSettingsContentControl.Ed2kServerListUrlTextBoxControl;
+        private TextBox Ed2kKadBootstrapUrlTextBox => SettingsPage.Ed2kSettingsContentControl.Ed2kKadBootstrapUrlTextBoxControl;
+        private ToggleSwitch Ed2kAutoSyncToggleSwitch => SettingsPage.Ed2kSettingsContentControl.Ed2kAutoSyncToggleSwitchControl;
+        private TextBlock Ed2kAutoSyncStateText => SettingsPage.Ed2kSettingsContentControl.Ed2kAutoSyncStateTextControl;
+        private ComboBox Ed2kSyncIntervalComboBox => SettingsPage.Ed2kSettingsContentControl.Ed2kSyncIntervalComboBoxControl;
+        private Button Ed2kSyncNowButton => SettingsPage.Ed2kSettingsContentControl.Ed2kSyncNowButtonControl;
+        private TextBlock Ed2kLastSyncText => SettingsPage.Ed2kSettingsContentControl.Ed2kLastSyncTextControl;
+        private TextBox Ed2kSearchKeywordTextBox => SettingsPage.Ed2kSettingsContentControl.Ed2kSearchKeywordTextBoxControl;
+        private ComboBox Ed2kFileTypeComboBox => SettingsPage.Ed2kSettingsContentControl.Ed2kFileTypeComboBoxControl;
+        private NumberBox Ed2kMinSourcesNumberBox => SettingsPage.Ed2kSettingsContentControl.Ed2kMinSourcesNumberBoxControl;
+        private NumberBox Ed2kSearchTimeoutNumberBox => SettingsPage.Ed2kSettingsContentControl.Ed2kSearchTimeoutNumberBoxControl;
         private ToggleSwitch UseSystemProxyCheckBox => SettingsPage.UseSystemProxyCheckBoxControl;
         private TextBlock UseSystemProxyStateText => SettingsPage.UseSystemProxyStateTextControl;
         private ToggleSwitch CustomProxyToggleSwitch => SettingsPage.CustomProxyToggleSwitchControl;
@@ -140,6 +136,9 @@ namespace OmniDown
             SettingsPage.DownloadSettingChanged += DownloadSetting_Changed;
             SettingsPage.BitTorrentSettingChanged += BitTorrentSetting_Changed;
             SettingsPage.Ed2kSettingChanged += Ed2kSetting_Changed;
+            SettingsPage.RandomEd2kPortRequested += RandomEd2kPortButton_Click;
+            SettingsPage.RandomEd2kUdpPortRequested += RandomEd2kUdpPortButton_Click;
+            SettingsPage.SyncEd2kRequested += SyncEd2kButton_Click;
             SettingsPage.NetworkSettingChanged += NetworkSetting_Changed;
             SettingsPage.DetectSystemProxyRequested += DetectSystemProxyButton_Click;
             SettingsPage.RandomBtPortRequested += RandomBtPortButton_Click;
@@ -154,7 +153,6 @@ namespace OmniDown
             SettingsPage.OpenConfigFolderRequested += OpenConfigFolderButton_Click;
             SettingsPage.OpenLogFolderRequested += OpenLogFolderButton_Click;
             SettingsPage.ClearSessionRequested += ClearSessionButton_Click;
-            SettingsPage.AddBtCustomTrackerRequested += AddBtCustomTrackerButton_Click;
             SettingsPage.SyncBtTrackerRequested += SyncBtTrackerButton_Click;
             SettingsPage.StartStopAriaRequested += StartStopAriaButton_Click;
             SettingsPage.RestartAriaRequested += RestartAriaButton_Click;
@@ -210,18 +208,233 @@ namespace OmniDown
             }
 
             UpdateBitTorrentDependentUi();
-            UpdateTrackerSourceSummary();
             ShowSettingsSaveTeachingTip();
         }
 
         private void Ed2kSetting_Changed(object sender, RoutedEventArgs e)
         {
+            if (_isLoadingEd2kSettings)
+            {
+                return;
+            }
+
             ShowSettingsSaveTeachingTip();
         }
 
-        private void AddBtCustomTrackerButton_Click(object sender, RoutedEventArgs e)
+        private void RandomEd2kPortButton_Click(object sender, RoutedEventArgs e)
         {
-            AddCustomTrackerSource();
+            Ed2kListenPortNumberBox.Value = Random.Shared.Next(29000, 30000);
+        }
+
+        private void RandomEd2kUdpPortButton_Click(object sender, RoutedEventArgs e)
+        {
+            Ed2kUdpListenPortNumberBox.Value = Random.Shared.Next(30000, 31000);
+        }
+
+        private async void SyncEd2kButton_Click(object sender, RoutedEventArgs e)
+        {
+            Ed2kSettings? candidate = TryGetEd2kSettingsFromUi(showValidationError: true);
+            if (candidate is null)
+            {
+                return;
+            }
+
+            Ed2kSyncNowButton.IsEnabled = false;
+            try
+            {
+                Ed2kBootstrapStatus status = await _ed2kBootstrapService.SyncAsync(
+                    candidate.ServerListUrl,
+                    candidate.KadBootstrapUrl);
+                long syncTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                Ed2kSettings persisted = _settingsPageViewModel.Ed2kSettings with { LastSyncTime = syncTime };
+                _settingsPageViewModel.SaveEd2kSettings(persisted);
+                UpdateEd2kLastSyncText(syncTime, status);
+                ShowMessage(Strings.Get("Ed2kBootstrapSyncSucceededMessage"), InfoBarSeverity.Success);
+            }
+            catch (Exception ex)
+            {
+                AppLogger.Error("ED2K.BootstrapSync", ex);
+                ShowMessage(Strings.Get("Ed2kBootstrapSyncFailedMessage"), InfoBarSeverity.Error, ex.Message);
+            }
+            finally
+            {
+                Ed2kSyncNowButton.IsEnabled = true;
+            }
+        }
+
+        private void LoadEd2kSettings()
+        {
+            _settingsPageViewModel.LoadEd2kSettings();
+            _isLoadingEd2kSettings = true;
+            try
+            {
+                ApplyEd2kSettingsToUi();
+            }
+            finally
+            {
+                _isLoadingEd2kSettings = false;
+            }
+        }
+
+        private void ApplyEd2kSettingsToUi()
+        {
+            Ed2kSettings settings = _settingsPageViewModel.Ed2kSettings;
+            Ed2kListenPortNumberBox.Value = settings.ListenPort;
+            Ed2kUdpListenPortNumberBox.Value = settings.UdpListenPort;
+            Ed2kUploadSlotsNumberBox.Value = settings.UploadSlots;
+            Ed2kServerListUrlTextBox.Text = settings.ServerListUrl;
+            Ed2kKadBootstrapUrlTextBox.Text = settings.KadBootstrapUrl;
+            SettingsPage.Ed2kSettingsContentControl.SetEd2kServerAddresses(
+                (settings.ServerList ?? string.Empty)
+                    .Split(new[] { '\r', '\n', ',' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(server => server.Trim()),
+                (settings.DisabledServerList ?? string.Empty)
+                    .Split(new[] { '\r', '\n', ',' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(server => server.Trim()));
+            SetToggleSwitch(Ed2kAutoSyncToggleSwitch, settings.AutoSyncEnabled);
+            Ed2kAutoSyncStateText.Text = settings.AutoSyncEnabled
+                ? Strings.Get("ToggleOnState.Text")
+                : Strings.Get("ToggleOffState.Text");
+            SetComboBoxSelectionByTag(Ed2kSyncIntervalComboBox, settings.SyncInterval, Ed2kSettings.DefaultSyncInterval);
+            Ed2kSearchKeywordTextBox.Text = settings.SearchKeyword;
+            SetComboBoxSelectionByTag(Ed2kFileTypeComboBox, settings.FileType, Ed2kSettings.DefaultFileType);
+            Ed2kMinSourcesNumberBox.Value = settings.MinSources;
+            Ed2kSearchTimeoutNumberBox.Value = settings.SearchTimeout;
+            UpdateEd2kLastSyncText(settings.LastSyncTime, _ed2kBootstrapService.GetStatus());
+        }
+
+        private Ed2kSettings? TryGetEd2kSettingsFromUi(bool showValidationError)
+        {
+            int listenPort = GetValidIntNumberBoxValue(Ed2kListenPortNumberBox, 0, 65535, Ed2kSettings.DefaultListenPort);
+            int udpPort = GetValidIntNumberBoxValue(Ed2kUdpListenPortNumberBox, 0, 65535, Ed2kSettings.DefaultUdpListenPort);
+            int uploadSlots = GetValidIntNumberBoxValue(Ed2kUploadSlotsNumberBox, 1, 100, Ed2kSettings.DefaultUploadSlots);
+            string serverUrl = Ed2kServerListUrlTextBox.Text.Trim();
+            string nodesUrl = Ed2kKadBootstrapUrlTextBox.Text.Trim();
+            string servers = string.Join(",", SettingsPage.Ed2kSettingsContentControl.Ed2kServerAddresses);
+            string disabledServers = string.Join(",", SettingsPage.Ed2kSettingsContentControl.DisabledEd2kServerAddresses);
+
+            bool valid = IsHttpUrl(serverUrl) && IsHttpUrl(nodesUrl) && ValidateEd2kServers(servers);
+            if (!valid)
+            {
+                if (showValidationError)
+                {
+                    ShowMessage(Strings.Get("Ed2kSettingsInvalidMessage"), InfoBarSeverity.Error);
+                }
+
+                return null;
+            }
+
+            Ed2kSettings current = _settingsPageViewModel.Ed2kSettings;
+            return new Ed2kSettings(
+                listenPort,
+                udpPort,
+                uploadSlots,
+                serverUrl,
+                nodesUrl,
+                true,
+                servers,
+                disabledServers,
+                Ed2kAutoSyncToggleSwitch.IsOn,
+                GetSelectedTag(Ed2kSyncIntervalComboBox, Ed2kSettings.DefaultSyncInterval),
+                current.LastSyncTime,
+                Ed2kSearchKeywordTextBox.Text.Trim(),
+                GetSelectedTag(Ed2kFileTypeComboBox, Ed2kSettings.DefaultFileType),
+                GetValidIntNumberBoxValue(Ed2kMinSourcesNumberBox, 1, 9999, Ed2kSettings.DefaultMinSources),
+                GetValidIntNumberBoxValue(Ed2kSearchTimeoutNumberBox, 10, 600, Ed2kSettings.DefaultSearchTimeout));
+        }
+
+        private bool SaveEd2kSettings()
+        {
+            if (_isLoadingEd2kSettings)
+            {
+                return true;
+            }
+
+            Ed2kSettings? settings = TryGetEd2kSettingsFromUi(showValidationError: true);
+            if (settings is null)
+            {
+                return false;
+            }
+
+            _settingsPageViewModel.SaveEd2kSettings(settings);
+            return true;
+        }
+
+        private async Task AutoSyncEd2kBootstrapIfNeededAsync()
+        {
+            Ed2kSettings settings = _settingsPageViewModel.Ed2kSettings;
+            if (_settingsPageViewModel.AdvancedSettings.EngineType == Aria2EngineType.Aria2c ||
+                !Ed2kBootstrapService.IsSyncDue(settings, DateTimeOffset.UtcNow))
+            {
+                return;
+            }
+
+            try
+            {
+                Ed2kBootstrapStatus status = await _ed2kBootstrapService.SyncAsync(
+                    settings.ServerListUrl,
+                    settings.KadBootstrapUrl);
+                long syncTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                _settingsPageViewModel.SaveEd2kSettings(settings with { LastSyncTime = syncTime });
+                UpdateEd2kLastSyncText(syncTime, status);
+                AppLogger.Info("ED2K", "bootstrap files auto-synced");
+            }
+            catch (Exception ex)
+            {
+                AppLogger.Warning("ED2K", $"automatic bootstrap sync failed: {ex.Message}");
+            }
+        }
+
+        private void UpdateEd2kLastSyncText(long lastSyncTime, Ed2kBootstrapStatus status)
+        {
+            if (lastSyncTime <= 0)
+            {
+                Ed2kLastSyncText.Text = Strings.Get("Ed2kNeverSyncedText");
+                return;
+            }
+
+            string time = DateTimeOffset.FromUnixTimeMilliseconds(lastSyncTime).ToLocalTime().ToString("g");
+            Ed2kLastSyncText.Text = status.IsReady
+                ? Strings.Format("Ed2kLastSyncStatusText", time, status.ServerMetSize ?? 0, status.NodesDatSize ?? 0)
+                : Strings.Format("Ed2kLastSyncTimeText", time);
+        }
+
+        private static bool IsHttpUrl(string value) =>
+            Uri.TryCreate(value, UriKind.Absolute, out Uri? uri) &&
+            (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+
+        private static bool ValidateEd2kServers(string value)
+        {
+            foreach (string server in value.Split(',', StringSplitOptions.RemoveEmptyEntries))
+            {
+                int separator = server.LastIndexOf(':');
+                if (separator <= 0 || separator == server.Length - 1 ||
+                    !int.TryParse(server[(separator + 1)..], out int port) || port is <= 0 or > 65535)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static string GetSelectedTag(ComboBox comboBox, string fallback) =>
+            comboBox.SelectedItem is ComboBoxItem item ? item.Tag?.ToString() ?? fallback : fallback;
+
+        private static void SetComboBoxSelectionByTag(ComboBox comboBox, string value, string fallback)
+        {
+            string expected = string.IsNullOrWhiteSpace(value) ? fallback : value;
+            for (int index = 0; index < comboBox.Items.Count; index++)
+            {
+                if (comboBox.Items[index] is ComboBoxItem item &&
+                    item.Tag?.ToString()?.Equals(expected, StringComparison.OrdinalIgnoreCase) == true)
+                {
+                    comboBox.SelectedIndex = index;
+                    return;
+                }
+            }
+
+            comboBox.SelectedIndex = 0;
         }
 
         private async void SyncBtTrackerButton_Click(object sender, RoutedEventArgs e)
@@ -605,8 +818,14 @@ namespace OmniDown
             BtSeedRatioNumberBox.Value = settings.SeedRatio;
             BtSeedTimeNumberBox.Value = settings.SeedTimeMinutes;
             BtMaxPeersNumberBox.Value = settings.MaxPeers;
-            ApplyTrackerSourceSelectionToUi(settings);
-            BtTrackerListTextBox.Text = settings.TrackerList;
+            string[] selectedSources = NormalizeTrackerSourceUrls(
+                settings.SelectedTrackerSourceUrls,
+                settings.TrackerSourceUrl,
+                settings.CustomTrackerUrls);
+            SettingsPage.BitTorrentSettingsContentControl.SetTrackerSources(selectedSources, settings.CustomTrackerUrls);
+            SettingsPage.BitTorrentSettingsContentControl.SetTrackerAddresses(
+                settings.TrackerList.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries),
+                settings.DisabledTrackerList.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
             UpdateBitTorrentDependentUi();
             UpdateTrackerSyncTimeText(settings.LastSyncTrackerTime);
         }
@@ -1076,6 +1295,11 @@ namespace OmniDown
 
                 SaveDownloadSettings();
                 SaveBitTorrentSettings();
+                if (!SaveEd2kSettings())
+                {
+                    SettingsSaveTeachingTip.IsOpen = true;
+                    return;
+                }
                 SaveAdvancedSettings();
             }
             finally
@@ -1145,6 +1369,7 @@ namespace OmniDown
                 _settingsPageViewModel.DownloadSettings,
                 _settingsPageViewModel.BitTorrentSettings,
                 _settingsPageViewModel.NetworkSettings,
+                _settingsPageViewModel.Ed2kSettings,
                 _settingsPageViewModel.AdvancedSettings);
         }
 
@@ -1159,6 +1384,7 @@ namespace OmniDown
                 GetDownloadSettingsFromUi(),
                 GetBitTorrentSettingsFromUi(),
                 GetNetworkSettingsFromUi(),
+                TryGetEd2kSettingsFromUi(showValidationError: false) ?? _settingsPageViewModel.Ed2kSettings,
                 GetAdvancedSettingsFromUi());
 
             return !string.Equals(pendingSignature, _runningAriaSettingsSignature, StringComparison.Ordinal);
@@ -1174,6 +1400,7 @@ namespace OmniDown
             return GetDownloadSettingsFromUi() != _pendingAriaSettingsRollback.Download ||
                 !BitTorrentSettingsEqual(GetBitTorrentSettingsFromUi(), _pendingAriaSettingsRollback.BitTorrent) ||
                 GetNetworkSettingsFromUi() != _pendingAriaSettingsRollback.Network ||
+                (TryGetEd2kSettingsFromUi(showValidationError: false) ?? _settingsPageViewModel.Ed2kSettings) != _pendingAriaSettingsRollback.Ed2k ||
                 GetAdvancedSettingsFromUi() != _pendingAriaSettingsRollback.Advanced;
         }
 
@@ -1191,6 +1418,7 @@ namespace OmniDown
                 left.SelectedTrackerSourceUrls.SequenceEqual(right.SelectedTrackerSourceUrls, StringComparer.OrdinalIgnoreCase) &&
                 left.CustomTrackerUrls.SequenceEqual(right.CustomTrackerUrls, StringComparer.OrdinalIgnoreCase) &&
                 string.Equals(NormalizeTrackerList(left.TrackerList), NormalizeTrackerList(right.TrackerList), StringComparison.Ordinal) &&
+                string.Equals(NormalizeTrackerList(left.DisabledTrackerList), NormalizeTrackerList(right.DisabledTrackerList), StringComparison.Ordinal) &&
                 left.AutoSyncTracker == right.AutoSyncTracker &&
                 left.LastSyncTrackerTime == right.LastSyncTrackerTime;
         }
@@ -1202,11 +1430,13 @@ namespace OmniDown
                 _settingsPageViewModel.SaveDownloadSettings(snapshot.Download);
                 _settingsPageViewModel.SaveBitTorrentSettings(snapshot.BitTorrent);
                 _settingsPageViewModel.SaveNetworkSettings(snapshot.Network);
+                _settingsPageViewModel.SaveEd2kSettings(snapshot.Ed2k);
                 _settingsPageViewModel.SaveAdvancedSettings(snapshot.Advanced);
             }
 
             _isLoadingDownloadSettings = true;
             _isLoadingBitTorrentSettings = true;
+            _isLoadingEd2kSettings = true;
             _isLoadingNetworkSettings = true;
             _isLoadingAdvancedSettings = true;
             try
@@ -1216,11 +1446,13 @@ namespace OmniDown
                     _settingsPageViewModel.SaveDownloadSettings(snapshot.Download);
                     _settingsPageViewModel.SaveBitTorrentSettings(snapshot.BitTorrent);
                     _settingsPageViewModel.SaveNetworkSettings(snapshot.Network);
+                    _settingsPageViewModel.SaveEd2kSettings(snapshot.Ed2k);
                     _settingsPageViewModel.SaveAdvancedSettings(snapshot.Advanced);
                 }
 
                 ApplyDownloadSettingsToUi();
                 ApplyBitTorrentSettingsToUi();
+                ApplyEd2kSettingsToUi();
                 ApplyNetworkSettingsToUi();
                 ApplyAdvancedSettingsToUi();
             }
@@ -1228,6 +1460,7 @@ namespace OmniDown
             {
                 _isLoadingDownloadSettings = false;
                 _isLoadingBitTorrentSettings = false;
+                _isLoadingEd2kSettings = false;
                 _isLoadingNetworkSettings = false;
                 _isLoadingAdvancedSettings = false;
             }
@@ -1291,6 +1524,7 @@ namespace OmniDown
                 _settingsPageViewModel.DownloadSettings,
                 _settingsPageViewModel.BitTorrentSettings,
                 _settingsPageViewModel.NetworkSettings,
+                _settingsPageViewModel.Ed2kSettings,
                 _settingsPageViewModel.AdvancedSettings);
         }
 
@@ -1298,6 +1532,7 @@ namespace OmniDown
             DownloadSettings download,
             BitTorrentSettings bitTorrent,
             NetworkSettings network,
+            Ed2kSettings ed2k,
             AdvancedSettings advanced)
         {
 
@@ -1331,6 +1566,13 @@ namespace OmniDown
                 bitTorrent.SeedTimeMinutes.ToString(CultureInfo.InvariantCulture),
                 bitTorrent.MaxPeers.ToString(CultureInfo.InvariantCulture),
                 NormalizeTrackerList(bitTorrent.TrackerList),
+                NormalizeTrackerList(bitTorrent.DisabledTrackerList),
+                ed2k.ListenPort.ToString(CultureInfo.InvariantCulture),
+                ed2k.UdpListenPort.ToString(CultureInfo.InvariantCulture),
+                ed2k.UploadSlots.ToString(CultureInfo.InvariantCulture),
+                ed2k.ServerList,
+                ed2k.DisabledServerList,
+                ed2k.KadBootstrapEnabled.ToString(CultureInfo.InvariantCulture),
                 advanced.Aria2Path,
                 advanced.EngineType.ToString(),
                 advanced.RpcPort.ToString(CultureInfo.InvariantCulture),
@@ -1715,7 +1957,7 @@ namespace OmniDown
 
         private BitTorrentSettings GetBitTorrentSettingsFromUi()
         {
-            string[] selectedSources = GetSelectedTrackerSourceUrls();
+            string[] selectedSources = SettingsPage.BitTorrentSettingsContentControl.SelectedTrackerSourceUrls.ToArray();
             return NormalizeBitTorrentSettings(new BitTorrentSettings(
                 true,
                 BtAutoDownloadToggleSwitch?.IsOn == true,
@@ -1727,15 +1969,16 @@ namespace OmniDown
                 BitTorrentSettings.Default.ListenPort,
                 selectedSources.FirstOrDefault() ?? BitTorrentSettings.DefaultTrackerSourceUrl,
                 selectedSources,
-                GetCustomTrackerUrls(),
-                NormalizeTrackerList(BtTrackerListTextBox.Text),
+                SettingsPage.BitTorrentSettingsContentControl.CustomTrackerSourceUrls.ToArray(),
+                NormalizeTrackerList(string.Join(Environment.NewLine, SettingsPage.BitTorrentSettingsContentControl.TrackerAddresses)),
+                NormalizeTrackerList(string.Join(Environment.NewLine, SettingsPage.BitTorrentSettingsContentControl.DisabledTrackerAddresses)),
                 BtAutoSyncTrackerToggleSwitch?.IsOn == true,
                 _settingsPageViewModel.BitTorrentSettings.LastSyncTrackerTime));
         }
 
         private async Task SyncBitTorrentTrackersAsync()
         {
-            string[] sourceUrls = GetSelectedTrackerSourceUrls();
+            string[] sourceUrls = SettingsPage.BitTorrentSettingsContentControl.SelectedTrackerSourceUrls.ToArray();
             if (sourceUrls.Length == 0)
             {
                 ShowMessage(Strings.Get("TrackerSourceRequiredMessage"), InfoBarSeverity.Warning);
@@ -1767,7 +2010,8 @@ namespace OmniDown
                     return;
                 }
 
-                BtTrackerListTextBox.Text = trackers;
+                SettingsPage.BitTorrentSettingsContentControl.SetTrackerAddresses(
+                    trackers.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
                 BitTorrentSettings settings = NormalizeBitTorrentSettings(new BitTorrentSettings(
                     true,
                     BtAutoDownloadToggleSwitch?.IsOn == true,
@@ -1779,8 +2023,9 @@ namespace OmniDown
                     BitTorrentSettings.Default.ListenPort,
                     sourceUrls[0],
                     sourceUrls,
-                    GetCustomTrackerUrls(),
+                    SettingsPage.BitTorrentSettingsContentControl.CustomTrackerSourceUrls.ToArray(),
                     trackers,
+                    string.Empty,
                     BtAutoSyncTrackerToggleSwitch?.IsOn == true,
                     DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()));
                 _settingsPageViewModel.SaveBitTorrentSettings(settings);
@@ -1841,145 +2086,18 @@ namespace OmniDown
                 BitTorrentSettings updated = current with
                 {
                     TrackerList = trackers,
+                    DisabledTrackerList = string.Empty,
                     LastSyncTrackerTime = now
                 };
                 _settingsPageViewModel.SaveBitTorrentSettings(updated);
-                BtTrackerListTextBox.Text = trackers;
+                SettingsPage.BitTorrentSettingsContentControl.SetTrackerAddresses(
+                    trackers.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
                 UpdateTrackerSyncTimeText(now);
             }
             catch
             {
                 // Auto-sync is best-effort; manual sync still reports failures.
             }
-        }
-
-        private void AddCustomTrackerSource()
-        {
-            string url = BtCustomTrackerSourceTextBox.Text.Trim();
-            if (!IsValidHttpUrl(url))
-            {
-                ShowMessage(Strings.Get("TrackerSourceUrlInvalidMessage"), InfoBarSeverity.Warning);
-                return;
-            }
-
-            string[] customUrls = GetCustomTrackerUrls();
-            if (customUrls.Contains(url, StringComparer.OrdinalIgnoreCase))
-            {
-                BtCustomTrackerSourceTextBox.Text = string.Empty;
-                return;
-            }
-
-            BtCustomTrackerSourceListView.Items.Add(url);
-            BtCustomTrackerSourceListView.SelectedItems.Add(url);
-            BtCustomTrackerSourceTextBox.Text = string.Empty;
-            UpdateTrackerSourceSummary();
-            ShowSettingsSaveTeachingTip();
-        }
-
-        private void ApplyTrackerSourceSelectionToUi(BitTorrentSettings settings)
-        {
-            string[] selectedSources = NormalizeTrackerSourceUrls(settings.SelectedTrackerSourceUrls, settings.TrackerSourceUrl, settings.CustomTrackerUrls);
-            foreach ((_, string url, CheckBox checkBox) in GetBuiltInTrackerSourceCheckBoxes())
-            {
-                SetCheckBox(checkBox, selectedSources.Contains(url, StringComparer.OrdinalIgnoreCase));
-            }
-
-            BtCustomTrackerSourceListView.Items.Clear();
-            foreach (string url in GetNormalizedUrls(settings.CustomTrackerUrls))
-            {
-                BtCustomTrackerSourceListView.Items.Add(url);
-                if (selectedSources.Contains(url, StringComparer.OrdinalIgnoreCase))
-                {
-                    BtCustomTrackerSourceListView.SelectedItems.Add(url);
-                }
-            }
-
-            BtTrackerSourceTextBox.Text = selectedSources.FirstOrDefault() ?? BitTorrentSettings.DefaultTrackerSourceUrl;
-            UpdateTrackerSourceSummary();
-        }
-
-        private string[] GetSelectedTrackerSourceUrls()
-        {
-            List<string> urls = [];
-            foreach ((_, string url, CheckBox checkBox) in GetBuiltInTrackerSourceCheckBoxes())
-            {
-                if (checkBox?.IsChecked == true)
-                {
-                    urls.Add(url);
-                }
-            }
-
-            foreach (object item in BtCustomTrackerSourceListView.SelectedItems)
-            {
-                if (item?.ToString() is string url && IsValidHttpUrl(url))
-                {
-                    urls.Add(url);
-                }
-            }
-
-            return GetNormalizedUrls(urls);
-        }
-
-        private (string Label, string Url, CheckBox CheckBox)[] GetBuiltInTrackerSourceCheckBoxes()
-        {
-            return
-            [
-                ("trackers_best.txt", GetTrackerSourceUrl(BtTrackerNgosangBestCheckBox), BtTrackerNgosangBestCheckBox),
-                ("trackers_best_ip.txt", GetTrackerSourceUrl(BtTrackerNgosangBestIpCheckBox), BtTrackerNgosangBestIpCheckBox),
-                ("trackers_all.txt", GetTrackerSourceUrl(BtTrackerNgosangAllCheckBox), BtTrackerNgosangAllCheckBox),
-                ("trackers_all_ip.txt", GetTrackerSourceUrl(BtTrackerNgosangAllIpCheckBox), BtTrackerNgosangAllIpCheckBox),
-                ("trackers_best.txt CDN", GetTrackerSourceUrl(BtTrackerNgosangCdnBestCheckBox), BtTrackerNgosangCdnBestCheckBox),
-                ("trackers_best_ip.txt CDN", GetTrackerSourceUrl(BtTrackerNgosangCdnBestIpCheckBox), BtTrackerNgosangCdnBestIpCheckBox),
-                ("trackers_all.txt CDN", GetTrackerSourceUrl(BtTrackerNgosangCdnAllCheckBox), BtTrackerNgosangCdnAllCheckBox),
-                ("trackers_all_ip.txt CDN", GetTrackerSourceUrl(BtTrackerNgosangCdnAllIpCheckBox), BtTrackerNgosangCdnAllIpCheckBox),
-                ("best.txt", GetTrackerSourceUrl(BtTrackerXiu2BestCheckBox), BtTrackerXiu2BestCheckBox),
-                ("all.txt", GetTrackerSourceUrl(BtTrackerXiu2AllCheckBox), BtTrackerXiu2AllCheckBox),
-                ("http.txt", GetTrackerSourceUrl(BtTrackerXiu2HttpCheckBox), BtTrackerXiu2HttpCheckBox),
-                ("best.txt CDN", GetTrackerSourceUrl(BtTrackerXiu2CdnBestCheckBox), BtTrackerXiu2CdnBestCheckBox),
-                ("all.txt CDN", GetTrackerSourceUrl(BtTrackerXiu2CdnAllCheckBox), BtTrackerXiu2CdnAllCheckBox),
-                ("http.txt CDN", GetTrackerSourceUrl(BtTrackerXiu2CdnHttpCheckBox), BtTrackerXiu2CdnHttpCheckBox)
-            ];
-        }
-
-        private static string GetTrackerSourceUrl(CheckBox checkBox)
-        {
-            return checkBox?.Tag?.ToString() ?? string.Empty;
-        }
-
-        private void UpdateTrackerSourceSummary()
-        {
-            List<string> selectedLabels = [];
-            foreach ((string label, _, CheckBox checkBox) in GetBuiltInTrackerSourceCheckBoxes())
-            {
-                if (checkBox?.IsChecked == true)
-                {
-                    selectedLabels.Add(label);
-                }
-            }
-
-            foreach (object item in BtCustomTrackerSourceListView.SelectedItems)
-            {
-                if (item?.ToString() is string url && IsValidHttpUrl(url))
-                {
-                    selectedLabels.Add(new Uri(url).Host);
-                }
-            }
-
-            SettingsPage.BitTorrentSettingsContentControl.UpdateTrackerSourceSummary(selectedLabels);
-        }
-
-        private string[] GetCustomTrackerUrls()
-        {
-            List<string> urls = [];
-            foreach (object item in BtCustomTrackerSourceListView.Items)
-            {
-                if (item?.ToString() is string url && IsValidHttpUrl(url))
-                {
-                    urls.Add(url);
-                }
-            }
-
-            return GetNormalizedUrls(urls);
         }
 
         private static string[] NormalizeTrackerSourceUrls(string[]? selectedUrls, string? legacyUrl, string[]? customUrls)
@@ -2007,14 +2125,6 @@ namespace OmniDown
                 .Where(IsValidHttpUrl)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToArray();
-        }
-
-        private static void SetCheckBox(CheckBox checkBox, bool isChecked)
-        {
-            if (checkBox is not null)
-            {
-                checkBox.IsChecked = isChecked;
-            }
         }
 
         private bool IsKeepSeedingSelected()
@@ -2055,17 +2165,7 @@ namespace OmniDown
             BtSeedRatioNumberBox.IsEnabled = isEnabled && !keepSeeding;
             BtSeedTimeNumberBox.IsEnabled = isEnabled && !keepSeeding;
             BtMaxPeersNumberBox.IsEnabled = isEnabled;
-            BtTrackerSourceDropDownButton.IsEnabled = isEnabled;
-            foreach ((_, _, CheckBox checkBox) in GetBuiltInTrackerSourceCheckBoxes())
-            {
-                checkBox.IsEnabled = isEnabled;
-            }
-
-            BtCustomTrackerSourceTextBox.IsEnabled = isEnabled;
-            BtCustomTrackerSourceListView.IsEnabled = isEnabled;
-            BtTrackerSourceTextBox.IsEnabled = isEnabled;
-            BtSyncTrackerButton.IsEnabled = isEnabled;
-            BtTrackerListTextBox.IsEnabled = isEnabled;
+            SettingsPage.BitTorrentSettingsContentControl.SetTrackerControlsEnabled(isEnabled);
             BtAutoSyncTrackerToggleSwitch.IsEnabled = isEnabled;
         }
 
@@ -2100,7 +2200,8 @@ namespace OmniDown
                 TrackerSourceUrl = sourceUrl,
                 SelectedTrackerSourceUrls = NormalizeTrackerSourceUrls(settings.SelectedTrackerSourceUrls, sourceUrl, settings.CustomTrackerUrls),
                 CustomTrackerUrls = GetNormalizedUrls(settings.CustomTrackerUrls),
-                TrackerList = NormalizeTrackerList(settings.TrackerList)
+                TrackerList = NormalizeTrackerList(settings.TrackerList),
+                DisabledTrackerList = NormalizeTrackerList(settings.DisabledTrackerList)
             };
         }
 

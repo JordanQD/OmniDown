@@ -217,7 +217,19 @@ internal sealed class NewDownloadDialogViewModel : INotifyPropertyChanged
             TorrentFiles.Count);
     }
 
-    public List<string> ParseSourceUris() => DownloadSourceParser.ParseLines(UrlText);
+    public List<string> ParseSourceUris()
+    {
+        List<string> sources = DownloadSourceParser.ParseLines(UrlText);
+        foreach (string source in sources)
+        {
+            if (Ed2kLinkParser.IsEd2kLink(source) && !Ed2kLinkParser.TryParseFileLink(source, out _))
+            {
+                throw new FormatException("ED2K file link is invalid.");
+            }
+        }
+
+        return sources;
+    }
 
     public void SetValidationException(Exception exception)
     {

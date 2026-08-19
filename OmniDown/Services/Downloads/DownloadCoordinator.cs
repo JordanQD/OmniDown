@@ -39,6 +39,16 @@ public sealed class DownloadCoordinator
         string? cookie = null,
         CancellationToken cancellationToken = default)
     {
+        Ed2kFileLink? ed2kLink = null;
+        if (Ed2kLinkParser.IsEd2kLink(sourceUri))
+        {
+            ed2kLink = Ed2kLinkParser.ParseFileLink(sourceUri);
+            if (!await _rpcClient.SupportsEd2kAsync(cancellationToken))
+            {
+                throw new NotSupportedException("The active aria2 engine does not support ED2K.");
+            }
+        }
+
         string name = ResolveTaskName(sourceUri, requestedName);
         string? outputFileName = string.IsNullOrWhiteSpace(requestedName) ? null : name;
         string gid = await _rpcClient.AddUriAsync(sourceUri, outputFileName, saveDirectory, splitCount, referer, cookie, cancellationToken);
@@ -56,6 +66,11 @@ public sealed class DownloadCoordinator
             IsAria2SessionAttached = true,
             Progress = 0
         };
+
+        if (ed2kLink is not null)
+        {
+            task.TotalLength = ed2kLink.FileSize;
+        }
 
         _tasks.Insert(0, task);
         SaveTaskCache();
@@ -712,6 +727,11 @@ public sealed class DownloadCoordinator
             }
         }
 
+        if (Ed2kLinkParser.TryParseFileLink(sourceUri, out Ed2kFileLink? ed2kLink))
+        {
+            return ed2kLink!.DisplayName;
+        }
+
         if (Uri.TryCreate(sourceUri, UriKind.Absolute, out Uri? uri))
         {
             string fileName = Path.GetFileName(uri.LocalPath);
@@ -726,6 +746,11 @@ public sealed class DownloadCoordinator
 
     private static string ResolveRemoteName(Aria2TaskStatus task)
     {
+        if (!string.IsNullOrWhiteSpace(task.Ed2k?.Name))
+        {
+            return task.Ed2k.Name.Trim();
+        }
+
         string torrentName = ResolveBitTorrentName(task);
         if (!string.IsNullOrWhiteSpace(torrentName))
         {
@@ -827,6 +852,11 @@ public sealed class DownloadCoordinator
 
     private static string ResolveRemoteUri(Aria2TaskStatus task)
     {
+        if (!string.IsNullOrWhiteSpace(task.Ed2k?.Ed2kLink))
+        {
+            return task.Ed2k.Ed2kLink.Trim();
+        }
+
         return task.Files
             .SelectMany(file => file.Uris)
             .Select(uri => uri.Uri)
@@ -847,7 +877,7 @@ public sealed class DownloadCoordinator
 
     private static bool IsPeerTransfer(Aria2TaskStatus task)
     {
-        if (task.BitTorrent.HasValue)
+        if (task.BitTorrent.HasValue || task.Ed2k is not null)
         {
             return true;
         }
@@ -858,7 +888,8 @@ public sealed class DownloadCoordinator
 
     private static bool IsPeerTransfer(string sourceUri)
     {
-        return sourceUri.StartsWith("magnet:", StringComparison.OrdinalIgnoreCase);
+        return sourceUri.StartsWith("magnet:", StringComparison.OrdinalIgnoreCase) ||
+            Ed2kLinkParser.IsEd2kLink(sourceUri);
     }
 
     private static bool IsMetadataTransfer(Aria2TaskStatus task)

@@ -1,15 +1,22 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using OmniDown.Services.Localization;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace OmniDown.Controls;
 
 public sealed partial class Ed2kSettingsSectionControl : UserControl
 {
+    public ObservableCollection<Ed2kServerEntry> ServerEntries { get; } = [];
+
     public Ed2kSettingsSectionControl()
     {
         InitializeComponent();
+        UpdateServerListEmptyState();
     }
 
     internal IEnumerable<SettingSearchEntry> SearchEntries =>
@@ -33,7 +40,11 @@ public sealed partial class Ed2kSettingsSectionControl : UserControl
     internal NumberBox Ed2kUploadSlotsNumberBoxControl => Ed2kUploadSlotsNumberBox;
     internal TextBox Ed2kServerListUrlTextBoxControl => Ed2kServerListUrlTextBox;
     internal TextBox Ed2kKadBootstrapUrlTextBoxControl => Ed2kKadBootstrapUrlTextBox;
-    internal TextBox Ed2kServerListTextBoxControl => Ed2kServerListTextBox;
+    internal IReadOnlyList<string> Ed2kServerAddresses => ServerEntries.Select(entry => entry.Address).ToArray();
+    internal IReadOnlyList<string> DisabledEd2kServerAddresses => ServerEntries
+        .Where(entry => !entry.IsSelected)
+        .Select(entry => entry.Address)
+        .ToArray();
     internal ToggleSwitch Ed2kAutoSyncToggleSwitchControl => Ed2kAutoSyncToggleSwitch;
     internal TextBlock Ed2kAutoSyncStateTextControl => Ed2kAutoSyncStateText;
     internal ComboBox Ed2kSyncIntervalComboBoxControl => Ed2kSyncIntervalComboBox;
@@ -50,6 +61,21 @@ public sealed partial class Ed2kSettingsSectionControl : UserControl
     internal event RoutedEventHandler? RandomEd2kUdpPortRequested;
     internal event RoutedEventHandler? SyncEd2kRequested;
     internal event RoutedEventHandler? SearchEd2kRequested;
+
+    internal void SetEd2kServerAddresses(IEnumerable<string> addresses, IEnumerable<string>? disabledAddresses = null)
+    {
+        HashSet<string> disabled = disabledAddresses?.ToHashSet(StringComparer.OrdinalIgnoreCase) ?? [];
+        ServerEntries.Clear();
+        foreach (string address in addresses
+            .Select(NormalizeServerAddress)
+            .Where(address => !string.IsNullOrWhiteSpace(address))
+            .Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            ServerEntries.Add(new Ed2kServerEntry(address, !disabled.Contains(address)));
+        }
+
+        UpdateServerListEmptyState();
+    }
 
     private void Ed2kSettingToggleSwitch_Toggled(object sender, RoutedEventArgs args)
     {
@@ -90,6 +116,170 @@ public sealed partial class Ed2kSettingsSectionControl : UserControl
     private void SearchEd2kButton_Click(object sender, RoutedEventArgs args)
     {
         SearchEd2kRequested?.Invoke(sender, args);
+    }
+
+    private async void AddEd2kServerButton_Click(object sender, RoutedEventArgs args)
+    {
+        string? address = await ShowServerEditorAsync(null);
+        if (address is null)
+        {
+            return;
+        }
+
+        ServerEntries.Add(new Ed2kServerEntry(address));
+        UpdateServerListEmptyState();
+        Ed2kSettingChanged?.Invoke(this, new RoutedEventArgs());
+    }
+
+    private async void EditEd2kServerButton_Click(object sender, RoutedEventArgs args)
+    {
+        string originalAddress = (sender as FrameworkElement)?.Tag?.ToString() ?? string.Empty;
+        int index = FindServerIndex(originalAddress);
+        if (index < 0)
+        {
+            return;
+        }
+
+        string? address = await ShowServerEditorAsync(originalAddress);
+        if (address is null || address.Equals(originalAddress, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        ServerEntries[index] = new Ed2kServerEntry(address, ServerEntries[index].IsSelected);
+        Ed2kSettingChanged?.Invoke(this, new RoutedEventArgs());
+    }
+
+    private void DeleteEd2kServerButton_Click(object sender, RoutedEventArgs args)
+    {
+        string address = (sender as FrameworkElement)?.Tag?.ToString() ?? string.Empty;
+        int index = FindServerIndex(address);
+        if (index < 0)
+        {
+            return;
+        }
+
+        ServerEntries.RemoveAt(index);
+        UpdateServerListEmptyState();
+        Ed2kSettingChanged?.Invoke(this, new RoutedEventArgs());
+    }
+
+    private void Ed2kServerEnabledToggleSwitch_Toggled(object sender, RoutedEventArgs args)
+    {
+        if (sender is not ToggleSwitch toggleSwitch)
+        {
+            return;
+        }
+
+        string address = toggleSwitch.Tag?.ToString() ?? string.Empty;
+        int index = FindServerIndex(address);
+        if (index < 0 || ServerEntries[index].IsSelected == toggleSwitch.IsOn)
+        {
+            return;
+        }
+
+        ServerEntries[index].IsSelected = toggleSwitch.IsOn;
+        Ed2kSettingChanged?.Invoke(this, new RoutedEventArgs());
+    }
+
+    private async Task<string?> ShowServerEditorAsync(string? originalAddress)
+    {
+        TextBox addressTextBox = new()
+        {
+            Header = Strings.Get("Ed2kServerAddressFieldHeader"),
+            PlaceholderText = Strings.Get("Ed2kServerAddressPlaceholder"),
+            Text = originalAddress ?? string.Empty,
+            SelectionStart = originalAddress?.Length ?? 0
+        };
+        InfoBar validationInfoBar = new()
+        {
+            IsClosable = false,
+            IsOpen = false,
+            Severity = InfoBarSeverity.Error
+        };
+        StackPanel content = new()
+        {
+            Spacing = 12,
+            Children =
+            {
+                addressTextBox,
+                validationInfoBar
+            }
+        };
+        ContentDialog dialog = new()
+        {
+            XamlRoot = XamlRoot,
+            Title = Strings.Get(originalAddress is null ? "Ed2kAddServerDialogTitle" : "Ed2kEditServerDialogTitle"),
+            Content = content,
+            PrimaryButtonText = Strings.Get(originalAddress is null ? "AddButtonText" : "SaveButtonText"),
+            CloseButtonText = Strings.Get("CancelButtonText"),
+            DefaultButton = ContentDialogButton.Primary
+        };
+
+        void ValidateInput()
+        {
+            string candidate = NormalizeServerAddress(addressTextBox.Text);
+            string message = GetServerValidationMessage(candidate, originalAddress);
+            dialog.IsPrimaryButtonEnabled = string.IsNullOrEmpty(message);
+            validationInfoBar.Message = message;
+            validationInfoBar.IsOpen = !string.IsNullOrEmpty(message) && !string.IsNullOrWhiteSpace(candidate);
+        }
+
+        addressTextBox.TextChanged += (_, _) => ValidateInput();
+        dialog.Opened += (_, _) =>
+        {
+            _ = addressTextBox.Focus(FocusState.Programmatic);
+            addressTextBox.SelectAll();
+        };
+        ValidateInput();
+
+        return await dialog.ShowAsync() == ContentDialogResult.Primary
+            ? NormalizeServerAddress(addressTextBox.Text)
+            : null;
+    }
+
+    private string GetServerValidationMessage(string candidate, string? originalAddress)
+    {
+        if (!IsValidServerAddress(candidate))
+        {
+            return Strings.Get("Ed2kServerAddressInvalidMessage");
+        }
+
+        bool isDuplicate = ServerEntries.Any(entry =>
+            entry.Address.Equals(candidate, StringComparison.OrdinalIgnoreCase) &&
+            !entry.Address.Equals(originalAddress, StringComparison.OrdinalIgnoreCase));
+        return isDuplicate ? Strings.Get("Ed2kServerAddressDuplicateMessage") : string.Empty;
+    }
+
+    private int FindServerIndex(string address)
+    {
+        for (int index = 0; index < ServerEntries.Count; index++)
+        {
+            if (ServerEntries[index].Address.Equals(address, StringComparison.OrdinalIgnoreCase))
+            {
+                return index;
+            }
+        }
+
+        return -1;
+    }
+
+    private static string NormalizeServerAddress(string? value) => value?.Trim() ?? string.Empty;
+
+    private static bool IsValidServerAddress(string value)
+    {
+        int separator = value.LastIndexOf(':');
+        return separator > 0 &&
+            separator < value.Length - 1 &&
+            int.TryParse(value[(separator + 1)..], out int port) &&
+            port is > 0 and <= 65535;
+    }
+
+    private void UpdateServerListEmptyState()
+    {
+        Ed2kServerListEmptyText.Visibility = ServerEntries.Count == 0
+            ? Visibility.Visible
+            : Visibility.Collapsed;
     }
 
     private void UpdateToggleStateText(ToggleSwitch? toggleSwitch)
