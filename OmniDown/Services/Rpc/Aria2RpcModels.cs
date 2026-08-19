@@ -24,6 +24,12 @@ public sealed record Aria2TaskStatus
     [JsonPropertyName("uploadSpeed")]
     public string UploadSpeed { get; init; } = "0";
 
+    [JsonPropertyName("errorCode")]
+    public string ErrorCode { get; init; } = string.Empty;
+
+    [JsonPropertyName("errorMessage")]
+    public string ErrorMessage { get; init; } = string.Empty;
+
     [JsonPropertyName("bittorrent")]
     public JsonElement? BitTorrent { get; init; }
 

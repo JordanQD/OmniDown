@@ -223,12 +223,18 @@ public sealed class Aria2RpcClient : IDisposable
         catch (TaskCanceledException ex) when (!cancellationToken.IsCancellationRequested)
         {
             AppLogger.Warning("Aria2Rpc", $"timeout method={method} seconds={_httpClient.Timeout.TotalSeconds:0}");
-            throw new TimeoutException($"aria2 RPC method {method} timed out after {_httpClient.Timeout.TotalSeconds:0} seconds.", ex);
+            throw new Aria2RpcException(
+                Aria2RpcFailureKind.Timeout,
+                $"aria2 RPC method {method} timed out after {_httpClient.Timeout.TotalSeconds:0} seconds.",
+                ex);
         }
         catch (HttpRequestException ex)
         {
             AppLogger.Warning("Aria2Rpc", $"unreachable method={method} endpoint={_endpoint} reason={FormatRequestError(ex)}");
-            throw new InvalidOperationException($"aria2 RPC method {method} could not reach {_endpoint}: {FormatRequestError(ex)}", ex);
+            throw new Aria2RpcException(
+                Aria2RpcFailureKind.Unavailable,
+                $"aria2 RPC method {method} could not reach {_endpoint}: {FormatRequestError(ex)}",
+                ex);
         }
 
         using (response)
@@ -240,8 +246,10 @@ public sealed class Aria2RpcClient : IDisposable
                     ? response.ReasonPhrase ?? "No response body."
                     : TruncateResponseBody(responseBody);
                 AppLogger.Warning("Aria2Rpc", $"http-error method={method} status={(int)response.StatusCode} detail={detail}");
-                throw new InvalidOperationException(
-                    $"aria2 RPC method {method} returned HTTP {(int)response.StatusCode} ({response.ReasonPhrase}): {detail}");
+                throw new Aria2RpcException(
+                    Aria2RpcFailureKind.HttpError,
+                    $"aria2 RPC method {method} returned HTTP {(int)response.StatusCode} ({response.ReasonPhrase}): {detail}",
+                    httpStatusCode: response.StatusCode);
             }
 
             await using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
@@ -249,7 +257,9 @@ public sealed class Aria2RpcClient : IDisposable
             JsonElement root = rpcResponse.RootElement;
             if (root.ValueKind is not JsonValueKind.Object)
             {
-                throw new InvalidOperationException("aria2 returned an empty RPC response.");
+                throw new Aria2RpcException(
+                    Aria2RpcFailureKind.InvalidResponse,
+                    "aria2 returned an empty RPC response.");
             }
 
             if (root.TryGetProperty("error", out JsonElement error) &&
@@ -258,12 +268,17 @@ public sealed class Aria2RpcClient : IDisposable
                 int code = TryGetInt32(error, "code");
                 string message = TryGetString(error, "message");
                 AppLogger.Warning("Aria2Rpc", $"rpc-error method={method} code={code} message={message}");
-                throw new InvalidOperationException($"aria2 RPC error {code}: {message}");
+                throw new Aria2RpcException(
+                    Aria2RpcFailureKind.RpcRejected,
+                    $"aria2 RPC error {code}: {message}",
+                    rpcCode: code);
             }
 
             if (!root.TryGetProperty("result", out JsonElement result))
             {
-                throw new InvalidOperationException("aria2 RPC response did not include a result.");
+                throw new Aria2RpcException(
+                    Aria2RpcFailureKind.InvalidResponse,
+                    "aria2 RPC response did not include a result.");
             }
 
             T value = ReadResult<T>(result);

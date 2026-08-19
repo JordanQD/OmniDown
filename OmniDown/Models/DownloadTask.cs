@@ -27,6 +27,8 @@ public sealed class DownloadTask : INotifyPropertyChanged
     private long _totalLength;
     private long _downloadSpeed;
     private long _uploadSpeed;
+    private string _errorCode = string.Empty;
+    private string _errorMessage = string.Empty;
     private bool _isPeerTransfer;
     private bool _isMetadataTransfer;
     private bool _isAria2SessionAttached;
@@ -73,6 +75,7 @@ public sealed class DownloadTask : INotifyPropertyChanged
             if (SetProperty(ref _status, value))
             {
                 OnPropertyChanged(nameof(StatusText));
+                OnPropertyChanged(nameof(StatusDetailText));
                 OnPropertyChanged(nameof(StatusBrushKey));
                 OnPropertyChanged(nameof(NameBrush));
                 OnPropertyChanged(nameof(StatusBrush));
@@ -100,6 +103,28 @@ public sealed class DownloadTask : INotifyPropertyChanged
         "removed" => Strings.Get("TaskStatusRemoved"),
         _ => Status
     };
+
+    public string StatusDetailText => IsError
+        ? Aria2ErrorMessages.FormatTaskError(ErrorCode)
+        : StatusText;
+
+    public string ErrorCode
+    {
+        get => _errorCode;
+        set
+        {
+            if (SetProperty(ref _errorCode, value))
+            {
+                OnPropertyChanged(nameof(StatusDetailText));
+            }
+        }
+    }
+
+    public string ErrorMessage
+    {
+        get => _errorMessage;
+        set => SetProperty(ref _errorMessage, value);
+    }
 
     public double Progress
     {

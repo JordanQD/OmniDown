@@ -420,4 +420,103 @@
   <data name="AriaStartStopButton.ToolTipService.ToolTip" xml:space="preserve"><value>启动</value></data>
   <data name="AriaRestartButton.ToolTipService.ToolTip" xml:space="preserve"><value>重启</value></data>
 
+  <!-- 面向用户的错误均使用本地化文案；原始异常仅作为技术详情保留。 -->
+  <data name="UserErrorCombinedMessage" xml:space="preserve"><value>{0} {1}</value></data>
+  <data name="UserErrorActionGeneral" xml:space="preserve"><value>无法完成此操作。</value></data>
+  <data name="UserErrorActionAddTask" xml:space="preserve"><value>无法添加下载任务。</value></data>
+  <data name="UserErrorActionTaskOperation" xml:space="preserve"><value>无法完成任务操作。</value></data>
+  <data name="UserErrorActionRpcRefresh" xml:space="preserve"><value>无法刷新下载状态。</value></data>
+  <data name="UserErrorActionSpeedLimit" xml:space="preserve"><value>无法应用限速设置。</value></data>
+  <data name="UserErrorActionTaskSpeedLimit" xml:space="preserve"><value>无法应用任务限速。</value></data>
+  <data name="UserErrorActionDownloadSettingsSync" xml:space="preserve"><value>无法将下载设置同步到 aria2。</value></data>
+  <data name="UserErrorActionEngineImport" xml:space="preserve"><value>无法导入下载引擎。</value></data>
+  <data name="UserErrorActionSessionClear" xml:space="preserve"><value>无法清空 aria2 会话。</value></data>
+  <data name="UserErrorActionTrackerSync" xml:space="preserve"><value>无法同步 Tracker 列表。</value></data>
+  <data name="UserErrorActionBrowserExtensionApi" xml:space="preserve"><value>无法启动浏览器扩展 API。</value></data>
+  <data name="UserErrorActionBrowserExtensionAdd" xml:space="preserve"><value>浏览器扩展无法添加下载任务。</value></data>
+  <data name="UserErrorActionAutoShutdown" xml:space="preserve"><value>无法自动关闭 Windows。</value></data>
+  <data name="UserErrorActionRestoreTasks" xml:space="preserve"><value>无法恢复下载任务。</value></data>
+  <data name="UserErrorActionEngineUpdateCheck" xml:space="preserve"><value>无法检查引擎更新。</value></data>
+  <data name="UserErrorDetailUnknown" xml:space="preserve"><value>请重试；如果问题持续出现，请复制技术详情并查看日志。</value></data>
+  <data name="UserErrorDetailTimeout" xml:space="preserve"><value>操作超时，请检查网络连接后重试。</value></data>
+  <data name="UserErrorDetailPermissionDenied" xml:space="preserve"><value>访问被拒绝，请检查文件或文件夹权限。</value></data>
+  <data name="UserErrorDetailPathUnavailable" xml:space="preserve"><value>所需的文件或文件夹不可用。</value></data>
+  <data name="UserErrorDetailDiskFull" xml:space="preserve"><value>磁盘剩余空间不足。</value></data>
+  <data name="UserErrorDetailFileIo" xml:space="preserve"><value>无法读写文件，请检查路径、权限以及文件是否被其他应用占用。</value></data>
+  <data name="UserErrorDetailNetworkUnavailable" xml:space="preserve"><value>无法连接网络服务，请检查网络和代理设置。</value></data>
+  <data name="UserErrorDetailInvalidData" xml:space="preserve"><value>收到的数据无效或不完整。</value></data>
+  <data name="UserErrorDetailRpcTimeout" xml:space="preserve"><value>aria2 未及时响应，请检查下载引擎是否仍在运行。</value></data>
+  <data name="UserErrorDetailRpcUnavailable" xml:space="preserve"><value>无法连接 aria2，请启动或重启下载引擎。</value></data>
+  <data name="UserErrorDetailRpcHttpError" xml:space="preserve"><value>aria2 返回了异常的 HTTP 响应，请检查 RPC 端口和代理设置。</value></data>
+  <data name="UserErrorDetailRpcRejected" xml:space="preserve"><value>aria2 拒绝了请求，请检查任务状态和相关设置。</value></data>
+  <data name="UserErrorDetailRpcInvalidResponse" xml:space="preserve"><value>aria2 返回了无效响应，请重启引擎后重试。</value></data>
+  <data name="StatusToastCopyTechnicalDetailsButtonLabel" xml:space="preserve"><value>复制详情</value></data>
+  <data name="TechnicalDetailsLabel" xml:space="preserve"><value>技术详情</value></data>
+  <data name="AriaStartedMessage" xml:space="preserve"><value>aria2 已启动（PID {0}）。</value></data>
+  <data name="AriaEngineExecutableNotFoundMessage" xml:space="preserve"><value>未找到 aria2 可执行文件，请在设置中导入引擎或选择有效的可执行文件。</value></data>
+  <data name="AriaEngineStartFailedMessage" xml:space="preserve"><value>无法启动 aria2，请检查引擎文件及其权限。</value></data>
+  <data name="AriaEngineRpcPortNotReadyMessage" xml:space="preserve"><value>aria2 已启动，但 RPC 端口未就绪，请检查端口是否被占用。</value></data>
+  <data name="AriaEngineRpcUnavailableMessage" xml:space="preserve"><value>aria2 已启动，但 OmniDown 无法连接其 RPC 服务，请重启引擎并检查 RPC 设置。</value></data>
+  <data name="TaskStatusErrorWithReason" xml:space="preserve"><value>错误：{0}</value></data>
+  <data name="TaskStatusErrorWithCode" xml:space="preserve"><value>错误（代码 {0}）：{1}</value></data>
+  <data name="Aria2TaskErrorUnknown" xml:space="preserve"><value>下载发生未知错误，请查看技术详情或 aria2 日志。</value></data>
+  <data name="Aria2TaskError1" xml:space="preserve"><value>发生未知错误。</value></data>
+  <data name="Aria2TaskError2" xml:space="preserve"><value>下载超时。</value></data>
+  <data name="Aria2TaskError3" xml:space="preserve"><value>找不到请求的资源。</value></data>
+  <data name="Aria2TaskError4" xml:space="preserve"><value>达到允许的重试次数后仍未找到资源。</value></data>
+  <data name="Aria2TaskError5" xml:space="preserve"><value>下载速度低于设定的最低速度，任务已停止。</value></data>
+  <data name="Aria2TaskError6" xml:space="preserve"><value>网络问题导致下载中断。</value></data>
+  <data name="Aria2TaskError7" xml:space="preserve"><value>下载尚未完成。</value></data>
+  <data name="Aria2TaskError8" xml:space="preserve"><value>服务器不支持断点续传。</value></data>
+  <data name="Aria2TaskError9" xml:space="preserve"><value>磁盘剩余空间不足。</value></data>
+  <data name="Aria2TaskError10" xml:space="preserve"><value>分片长度与现有 aria2 控制文件不一致。</value></data>
+  <data name="Aria2TaskError11" xml:space="preserve"><value>相同文件已在下载。</value></data>
+  <data name="Aria2TaskError12" xml:space="preserve"><value>相同信息哈希的种子任务已在下载。</value></data>
+  <data name="Aria2TaskError13" xml:space="preserve"><value>目标文件已存在且无法覆盖。</value></data>
+  <data name="Aria2TaskError14" xml:space="preserve"><value>无法重命名目标文件。</value></data>
+  <data name="Aria2TaskError15" xml:space="preserve"><value>无法打开现有目标文件。</value></data>
+  <data name="Aria2TaskError16" xml:space="preserve"><value>无法创建或截断目标文件。</value></data>
+  <data name="Aria2TaskError17" xml:space="preserve"><value>发生文件输入/输出错误。</value></data>
+  <data name="Aria2TaskError18" xml:space="preserve"><value>无法创建目标文件夹。</value></data>
+  <data name="Aria2TaskError19" xml:space="preserve"><value>无法解析服务器名称。</value></data>
+  <data name="Aria2TaskError20" xml:space="preserve"><value>无法解析 Metalink 文档。</value></data>
+  <data name="Aria2TaskError21" xml:space="preserve"><value>FTP 命令执行失败。</value></data>
+  <data name="Aria2TaskError22" xml:space="preserve"><value>服务器返回了无效或异常的 HTTP 响应。</value></data>
+  <data name="Aria2TaskError23" xml:space="preserve"><value>下载遇到过多重定向。</value></data>
+  <data name="Aria2TaskError24" xml:space="preserve"><value>HTTP 身份验证失败。</value></data>
+  <data name="Aria2TaskError25" xml:space="preserve"><value>无法解析 Bencode 文件。</value></data>
+  <data name="Aria2TaskError26" xml:space="preserve"><value>种子文件已损坏或缺少必要信息。</value></data>
+  <data name="Aria2TaskError27" xml:space="preserve"><value>磁力链接无效。</value></data>
+  <data name="Aria2TaskError28" xml:space="preserve"><value>选项名称或参数无效。</value></data>
+  <data name="Aria2TaskError29" xml:space="preserve"><value>服务器暂时过载或正在维护。</value></data>
+  <data name="Aria2TaskError30" xml:space="preserve"><value>无法解析 JSON-RPC 请求。</value></data>
+  <data name="Aria2TaskError32" xml:space="preserve"><value>校验和验证失败。</value></data>
+  <data name="BrowserExtensionNoValidUrlMessage" xml:space="preserve"><value>浏览器扩展没有传入有效的下载链接。</value></data>
+  <data name="BrowserExtensionTaskAddedMessage" xml:space="preserve"><value>已通过浏览器扩展添加下载任务。</value></data>
+  <data name="BrowserExtensionTasksAddedMessage" xml:space="preserve"><value>已通过浏览器扩展添加 {0} 个下载任务。</value></data>
+  <data name="SystemProxyNotFoundMessage" xml:space="preserve"><value>没有检测到可用的 Windows 系统代理。</value></data>
+  <data name="SystemProxyAppliedMessage" xml:space="preserve"><value>已填入 Windows 系统代理设置。</value></data>
+  <data name="ProtocolRegisteredMessage" xml:space="preserve"><value>已注册协议入口。若链接仍未打开 OmniDown，请在 Windows 默认应用中选择 OmniDown。</value></data>
+  <data name="EngineImportedMessage" xml:space="preserve"><value>内核已导入到 OmniDown 的应用数据目录；原始文件可以安全移动或删除。</value></data>
+  <data name="RpcSecretCopiedMessage" xml:space="preserve"><value>RPC 密钥已复制。</value></data>
+  <data name="ExtensionApiSecretCopiedMessage" xml:space="preserve"><value>扩展 API 密钥已复制。</value></data>
+  <data name="ClearSessionDialogTitle" xml:space="preserve"><value>清空 aria2 会话？</value></data>
+  <data name="ClearSessionDialogContent" xml:space="preserve"><value>这会删除本地 download.session 和 tasks.json。正在运行的下载不会被删除，但建议先停止 aria2。</value></data>
+  <data name="ClearButtonText" xml:space="preserve"><value>清空</value></data>
+  <data name="SessionClearedMessage" xml:space="preserve"><value>aria2 会话和任务缓存已清空。</value></data>
+  <data name="InvalidProxyUrlMessage" xml:space="preserve"><value>代理地址格式不正确，请使用 http:// 或 https:// 地址。</value></data>
+  <data name="TrackerSourceRequiredMessage" xml:space="preserve"><value>请至少选择一个 Tracker 来源。</value></data>
+  <data name="TrackerNoUsableAddressMessage" xml:space="preserve"><value>Tracker 源没有返回可用地址。</value></data>
+  <data name="TrackerSyncSuccessMessage" xml:space="preserve"><value>Tracker 列表已同步。</value></data>
+  <data name="TrackerSyncPartialMessage" xml:space="preserve"><value>Tracker 列表已部分同步，{0} 个来源失败。</value></data>
+  <data name="TrackerSourceUrlInvalidMessage" xml:space="preserve"><value>请输入有效的 HTTP 或 HTTPS Tracker 源地址。</value></data>
+  <data name="AutoStartPermissionRequiredMessage" xml:space="preserve"><value>自动启动未启用，请在 Windows 启动应用设置中允许 OmniDown。</value></data>
+  <data name="EngineUpdateImportRequiredMessage" xml:space="preserve"><value>请先导入 aria2-next 内核，再检查更新。</value></data>
+  <data name="EngineUpdateImportedEngineMissingMessage" xml:space="preserve"><value>未找到已导入的 aria2-next 内核。</value></data>
+  <data name="EngineUpdateVersionUnknownMessage" xml:space="preserve"><value>无法检测当前引擎版本。</value></data>
+  <data name="EngineUpdateCurrentMessage" xml:space="preserve"><value>aria2-next {0} 已是最新版本。</value></data>
+  <data name="EngineUpdateDownloadingMessage" xml:space="preserve"><value>正在下载 aria2-next {0}…</value></data>
+  <data name="EngineUpdateInstalledMessage" xml:space="preserve"><value>aria2-next 已更新到 {0}，并已重新启动。</value></data>
+  <data name="EngineUpdateInstallFailedMessage" xml:space="preserve"><value>aria2-next {0} 安装失败，请查看日志了解详情。</value></data>
+
 </root>

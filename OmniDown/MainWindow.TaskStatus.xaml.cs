@@ -107,7 +107,9 @@ namespace OmniDown
                 AppLogger.Error("Aria2Startup", ex);
                 _aria2EngineHost.Stop();
                 UpdateDebugStatus();
-                return Aria2EngineStartResult.Failure($"aria2 started but RPC is not reachable: {ex.Message}");
+                return Aria2EngineStartResult.Failure(
+                    Aria2EngineStartFailureKind.RpcUnavailable,
+                    $"aria2 started but RPC is not reachable: {ex}");
             }
 
             _runningAriaSettingsSignature = CreateAriaRestartSettingsSignature();
@@ -180,7 +182,7 @@ namespace OmniDown
             {
                 AppLogger.Warning("Aria2Refresh", ex.Message);
                 UpdateDebugStatus();
-                ShowMessageOnce(Strings.Format("RpcRefreshFailedMessage", ex.Message), InfoBarSeverity.Warning);
+                ShowUserErrorOnce(UserErrorContext.RpcRefresh, ex, InfoBarSeverity.Warning);
             }
             finally
             {
@@ -597,7 +599,7 @@ namespace OmniDown
             }
             catch (Exception ex)
             {
-                ShowMessage($"自动关机失败：{ex.Message}", InfoBarSeverity.Warning);
+                ShowUserError(UserErrorContext.AutoShutdown, ex, InfoBarSeverity.Warning);
             }
         }
 
@@ -670,7 +672,7 @@ namespace OmniDown
             Aria2EngineStartResult startResult = await EnsureAria2StartedAsync();
             if (!startResult.Started)
             {
-                ShowMessage(startResult.Message, InfoBarSeverity.Error);
+                ShowEngineStartFailure(startResult);
                 return;
             }
 
@@ -688,7 +690,7 @@ namespace OmniDown
             }
             catch (Exception ex)
             {
-                ShowMessage(Strings.Format("SpeedLimitApplyFailedMessage", ex.Message), InfoBarSeverity.Error);
+                ShowUserError(UserErrorContext.SpeedLimit, ex);
             }
         }
 
@@ -704,7 +706,7 @@ namespace OmniDown
             Aria2EngineStartResult startResult = await EnsureAria2StartedAsync();
             if (!startResult.Started)
             {
-                ShowMessage(startResult.Message, InfoBarSeverity.Error);
+                ShowEngineStartFailure(startResult);
                 return;
             }
 
@@ -724,7 +726,7 @@ namespace OmniDown
             }
             catch (Exception ex)
             {
-                ShowMessage(Strings.Format("TaskSpeedLimitApplyFailedMessage", ex.Message), InfoBarSeverity.Error);
+                ShowUserError(UserErrorContext.TaskSpeedLimit, ex);
             }
         }
 
@@ -758,9 +760,10 @@ namespace OmniDown
             UpdateDebugStatus();
         }
 
-        private void ShowMessage(string message, InfoBarSeverity severity)
+        private void ShowMessage(string message, InfoBarSeverity severity, string? technicalDetails = null)
         {
             _lastStatusMessage = message;
+            _lastStatusTechnicalDetails = technicalDetails ?? string.Empty;
             _statusMessages.Insert(0, new AppStatusMessage(
                 message,
                 FormatStatusMessageDetail(DateTimeOffset.Now),
@@ -772,9 +775,15 @@ namespace OmniDown
             StatusToastInfoBar.Severity = severity;
             _statusToastActionRestartsAria = false;
             StatusToastActionIcon.Glyph = "\uE8C8";
-            StatusToastActionText.Text = Strings.Get("StatusToastCopyButtonLabel.Text");
+            StatusToastActionText.Text = string.IsNullOrWhiteSpace(_lastStatusTechnicalDetails)
+                ? Strings.Get("StatusToastCopyButtonLabel.Text")
+                : Strings.Get("StatusToastCopyTechnicalDetailsButtonLabel");
             StatusToastActionButton.Visibility = IsCopyableStatusMessage(severity) ? Visibility.Visible : Visibility.Collapsed;
             AppLogger.Write(ToLogLevel(severity), "UI", message);
+            if (!string.IsNullOrWhiteSpace(_lastStatusTechnicalDetails))
+            {
+                AppLogger.Write(ToLogLevel(severity), "UI.Technical", _lastStatusTechnicalDetails);
+            }
             _statusMessageTimer.Stop();
             _statusMessageTimer.Start();
             AnimateInfoBarShow();
@@ -788,6 +797,58 @@ namespace OmniDown
             }
 
             ShowMessage(message, severity);
+        }
+
+        private void ShowUserError(
+            UserErrorContext context,
+            Exception exception,
+            InfoBarSeverity severity = InfoBarSeverity.Error)
+        {
+            UserErrorPresentation presentation = UserErrorMessages.Create(context, exception);
+            ShowMessage(presentation.Message, severity, presentation.TechnicalDetails);
+        }
+
+        private void ShowUserError(
+            UserErrorContext context,
+            string? technicalDetails,
+            InfoBarSeverity severity = InfoBarSeverity.Error)
+        {
+            UserErrorPresentation presentation = UserErrorMessages.Create(context, technicalDetails);
+            ShowMessage(presentation.Message, severity, presentation.TechnicalDetails);
+        }
+
+        private void ShowUserErrorOnce(
+            UserErrorContext context,
+            Exception exception,
+            InfoBarSeverity severity = InfoBarSeverity.Error)
+        {
+            UserErrorPresentation presentation = UserErrorMessages.Create(context, exception);
+            if (presentation.Message.Equals(_lastStatusMessage, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            ShowMessage(presentation.Message, severity, presentation.TechnicalDetails);
+        }
+
+        private void ShowEngineStartFailure(
+            Aria2EngineStartResult result,
+            InfoBarSeverity severity = InfoBarSeverity.Error)
+        {
+            ShowMessage(GetEngineStartFailureMessage(result), severity, result.TechnicalDetails);
+        }
+
+        private static string GetEngineStartFailureMessage(Aria2EngineStartResult result)
+        {
+            string resourceKey = result.FailureKind switch
+            {
+                Aria2EngineStartFailureKind.ExecutableNotFound => "AriaEngineExecutableNotFoundMessage",
+                Aria2EngineStartFailureKind.RpcPortNotReady => "AriaEngineRpcPortNotReadyMessage",
+                Aria2EngineStartFailureKind.RpcUnavailable => "AriaEngineRpcUnavailableMessage",
+                _ => "AriaEngineStartFailedMessage"
+            };
+
+            return Strings.Get(resourceKey);
         }
 
         private void AnimateInfoBarShow()
@@ -859,7 +920,10 @@ namespace OmniDown
             {
                 RequestedOperation = DataPackageOperation.Copy
             };
-            package.SetText(StatusToastInfoBar.Message);
+            package.SetText(string.IsNullOrWhiteSpace(_lastStatusTechnicalDetails)
+                ? StatusToastInfoBar.Message
+                : $"{StatusToastInfoBar.Message}{Environment.NewLine}{Environment.NewLine}" +
+                    $"{Strings.Get("TechnicalDetailsLabel")}:{Environment.NewLine}{_lastStatusTechnicalDetails}");
             Clipboard.SetContent(package);
         }
 
@@ -955,6 +1019,9 @@ namespace OmniDown
                     }
                     else if (!IsErrorTaskStatus(previousStatus) && IsErrorTaskStatus(task.Status))
                     {
+                        AppLogger.Warning(
+                            "DownloadTask",
+                            $"failed gid={task.Gid} errorCode={task.ErrorCode} message={task.ErrorMessage}");
                         ShowDownloadFailedNotification(task);
                     }
                 }

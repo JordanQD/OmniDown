@@ -221,12 +221,12 @@ internal sealed class NewDownloadDialogViewModel : INotifyPropertyChanged
 
     public void SetValidationException(Exception exception)
     {
-        UriValidationMessage = Strings.Format("AddTaskFailedMessage", exception.Message);
+        UriValidationMessage = UserErrorMessages.Create(UserErrorContext.AddTask, exception).Message;
     }
 
     public void SetTorrentValidationException(Exception exception)
     {
-        TorrentValidationMessage = Strings.Format("AddTaskFailedMessage", exception.Message);
+        TorrentValidationMessage = UserErrorMessages.Create(UserErrorContext.AddTask, exception).Message;
     }
 
     private void TorrentFile_PropertyChanged(object? sender, PropertyChangedEventArgs e)

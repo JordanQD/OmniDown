@@ -124,7 +124,7 @@ namespace OmniDown
                 Aria2EngineStartResult startResult = await EnsureAria2StartedAsync();
                 if (!startResult.Started)
                 {
-                    ShowMessage(startResult.Message, InfoBarSeverity.Error);
+                    ShowEngineStartFailure(startResult);
                     return;
                 }
 
@@ -172,7 +172,7 @@ namespace OmniDown
                 }
                 catch (Exception ex)
                 {
-                    ShowMessage(Strings.Format("AddTaskFailedMessage", ex.Message), InfoBarSeverity.Error);
+                    ShowUserError(UserErrorContext.AddTask, ex);
                 }
 
                 UpdateDashboard();

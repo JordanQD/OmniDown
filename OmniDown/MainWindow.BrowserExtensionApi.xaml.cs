@@ -4,6 +4,7 @@ using OmniDown.Models.Settings;
 using OmniDown.Services.BrowserExtension;
 using OmniDown.Services.Downloads;
 using OmniDown.Services.Engine;
+using OmniDown.Services.Localization;
 using OmniDown.Services.Rpc;
 using System;
 using System.Collections.Generic;
@@ -25,7 +26,7 @@ namespace OmniDown
             }
             catch (Exception ex)
             {
-                ShowMessage($"浏览器扩展 API 启动失败：{ex.Message}", InfoBarSeverity.Warning);
+                ShowUserError(UserErrorContext.BrowserExtensionApi, ex, InfoBarSeverity.Warning);
             }
         }
 
@@ -38,7 +39,7 @@ namespace OmniDown
             }
             catch (Exception ex)
             {
-                ShowMessage($"浏览器扩展 API 重启失败：{ex.Message}", InfoBarSeverity.Warning);
+                ShowUserError(UserErrorContext.BrowserExtensionApi, ex, InfoBarSeverity.Warning);
             }
         }
 
@@ -54,7 +55,10 @@ namespace OmniDown
                 }
                 catch (Exception ex)
                 {
-                    completion.TrySetResult(new BrowserExtensionAddResponse("error", null, ex.Message));
+                    completion.TrySetResult(new BrowserExtensionAddResponse(
+                        "error",
+                        null,
+                        UserErrorMessages.Create(UserErrorContext.BrowserExtensionAdd, ex).Message));
                 }
             });
 
@@ -133,7 +137,9 @@ namespace OmniDown
                 }
                 catch (Exception ex)
                 {
-                    completion.TrySetResult(new BrowserExtensionActionResponse("error", ex.Message));
+                    completion.TrySetResult(new BrowserExtensionActionResponse(
+                        "error",
+                        UserErrorMessages.Create(UserErrorContext.TaskOperation, ex).Message));
                 }
             });
 
@@ -162,8 +168,9 @@ namespace OmniDown
 
             if (sourceUris.Count == 0)
             {
-                ShowMessage("浏览器扩展没有传入可用链接。", InfoBarSeverity.Warning);
-                return new BrowserExtensionAddResponse("error", null, "No valid download URL was provided.");
+                string message = Strings.Get("BrowserExtensionNoValidUrlMessage");
+                ShowMessage(message, InfoBarSeverity.Warning);
+                return new BrowserExtensionAddResponse("error", null, message);
             }
 
             string downloadText = string.Join(Environment.NewLine, sourceUris) + Environment.NewLine;
@@ -184,8 +191,9 @@ namespace OmniDown
             Aria2EngineStartResult startResult = await EnsureAria2StartedAsync();
             if (!startResult.Started)
             {
-                ShowMessage(startResult.Message, InfoBarSeverity.Error);
-                return new BrowserExtensionAddResponse("error", null, startResult.Message);
+                string message = GetEngineStartFailureMessage(startResult);
+                ShowEngineStartFailure(startResult);
+                return new BrowserExtensionAddResponse("error", null, message);
             }
 
             DownloadSettings downloadSettings = _settingsPageViewModel.DownloadSettings;
@@ -208,8 +216,8 @@ namespace OmniDown
 
                 ShowMessage(
                     addedTasks.Count == 1
-                        ? "已通过浏览器扩展添加下载任务。"
-                        : $"已通过浏览器扩展添加 {addedTasks.Count} 个下载任务。",
+                        ? Strings.Get("BrowserExtensionTaskAddedMessage")
+                        : Strings.Format("BrowserExtensionTasksAddedMessage", addedTasks.Count),
                     InfoBarSeverity.Success);
                 await RefreshDownloadsAsync();
                 UpdateDashboard();
@@ -217,8 +225,12 @@ namespace OmniDown
             }
             catch (Exception ex)
             {
-                ShowMessage($"浏览器扩展添加任务失败：{ex.Message}", InfoBarSeverity.Error);
-                return new BrowserExtensionAddResponse("error", addedTasks.Count == 1 ? addedTasks[0].Gid : null, ex.Message);
+                UserErrorPresentation presentation = UserErrorMessages.Create(UserErrorContext.BrowserExtensionAdd, ex);
+                ShowMessage(presentation.Message, InfoBarSeverity.Error, presentation.TechnicalDetails);
+                return new BrowserExtensionAddResponse(
+                    "error",
+                    addedTasks.Count == 1 ? addedTasks[0].Gid : null,
+                    presentation.Message);
             }
         }
     }

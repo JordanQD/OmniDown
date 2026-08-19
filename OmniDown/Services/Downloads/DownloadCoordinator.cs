@@ -547,6 +547,8 @@ public sealed class DownloadCoordinator
 
         task.DownloadSpeed = isDownloading ? ParseLong(remoteTask.DownloadSpeed) : 0;
         task.UploadSpeed = isDownloading ? ParseLong(remoteTask.UploadSpeed) : 0;
+        task.ErrorCode = remoteTask.ErrorCode;
+        task.ErrorMessage = remoteTask.ErrorMessage;
         task.IsPeerTransfer = IsPeerTransfer(remoteTask);
         task.IsMetadataTransfer = IsMetadataTransfer(remoteTask);
         task.Progress = task.TotalLength <= 0 ? task.Progress : Math.Clamp(task.CompletedLength * 100d / task.TotalLength, 0, 100);

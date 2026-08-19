@@ -247,7 +247,7 @@ namespace OmniDown
             Aria2EngineStartResult startResult = await EnsureAria2StartedAsync();
             if (!startResult.Started)
             {
-                ShowMessage(startResult.Message, InfoBarSeverity.Error);
+                ShowEngineStartFailure(startResult);
                 return;
             }
 
@@ -265,7 +265,7 @@ namespace OmniDown
             }
             catch (Exception ex)
             {
-                ShowMessage(Strings.Format("SpeedLimitApplyFailedMessage", ex.Message), InfoBarSeverity.Error);
+                ShowUserError(UserErrorContext.SpeedLimit, ex);
             }
         }
 
@@ -273,7 +273,7 @@ namespace OmniDown
         {
             if (string.IsNullOrWhiteSpace(_speedLimitTaskGid))
             {
-                ShowMessage("请选择一个任务后再设置任务限速。", InfoBarSeverity.Warning);
+                ShowMessage(Strings.Get("TaskSpeedLimitNoTaskMessage"), InfoBarSeverity.Warning);
                 return;
             }
 
@@ -289,7 +289,7 @@ namespace OmniDown
             Aria2EngineStartResult startResult = await EnsureAria2StartedAsync();
             if (!startResult.Started)
             {
-                ShowMessage(startResult.Message, InfoBarSeverity.Error);
+                ShowEngineStartFailure(startResult);
                 return;
             }
 
@@ -306,11 +306,11 @@ namespace OmniDown
                     SpeedLimitButton.Flyout?.Hide();
                 }
 
-                ShowMessage("任务限速已应用。", InfoBarSeverity.Success);
+                ShowMessage(Strings.Get("TaskSpeedLimitAppliedMessage"), InfoBarSeverity.Success);
             }
             catch (Exception ex)
             {
-                ShowMessage($"任务限速应用失败：{ex.Message}", InfoBarSeverity.Error);
+                ShowUserError(UserErrorContext.TaskSpeedLimit, ex);
             }
         }
 
@@ -334,7 +334,7 @@ namespace OmniDown
             }
             catch (Exception ex)
             {
-                ShowMessage($"同步下载设置到 aria2 失败：{ex.Message}", InfoBarSeverity.Warning);
+                ShowUserError(UserErrorContext.DownloadSettingsSync, ex, InfoBarSeverity.Warning);
             }
         }
 
@@ -673,7 +673,7 @@ namespace OmniDown
             SystemProxySettings proxySettings = SystemProxyResolver.Resolve();
             if (!proxySettings.HasProxy)
             {
-                ShowMessage("没有检测到可用的 Windows 系统代理。", InfoBarSeverity.Informational);
+                ShowMessage(Strings.Get("SystemProxyNotFoundMessage"), InfoBarSeverity.Informational);
                 return;
             }
 
@@ -681,7 +681,7 @@ namespace OmniDown
             ProxyBypassTextBox.Text = proxySettings.NoProxy ?? string.Empty;
             SetToggleSwitch(CustomProxyToggleSwitch, true);
             ShowSettingsSaveTeachingTip();
-            ShowMessage("已填入系统代理。", InfoBarSeverity.Success);
+            ShowMessage(Strings.Get("SystemProxyAppliedMessage"), InfoBarSeverity.Success);
         }
 
         private void RandomBtPortButton_Click(object sender, RoutedEventArgs e)
@@ -859,7 +859,7 @@ namespace OmniDown
                     ReferenceEquals(toggleSwitch, ProtocolOmniDownToggleSwitch)))
             {
                 _ = Launcher.LaunchUriAsync(new Uri("ms-settings:defaultapps"));
-                ShowMessage("已注册协议入口。若浏览器仍未打开 OmniDown，请在 Windows 默认应用中把该协议设为 OmniDown。", InfoBarSeverity.Informational);
+                ShowMessage(Strings.Get("ProtocolRegisteredMessage"), InfoBarSeverity.Informational);
             }
         }
 
@@ -902,18 +902,18 @@ namespace OmniDown
                 _ariaPath = importedPath;
                 await RefreshEngineVersionAsync();
                 ShowSettingsSaveTeachingTip();
-                ShowMessage("内核已导入到 OmniDown 的应用数据目录；原始文件可以安全移动或删除。", InfoBarSeverity.Success);
+                ShowMessage(Strings.Get("EngineImportedMessage"), InfoBarSeverity.Success);
             }
             catch (Exception ex)
             {
-                ShowMessage($"导入内核失败：{ex.Message}", InfoBarSeverity.Error);
+                ShowUserError(UserErrorContext.EngineImport, ex);
             }
         }
 
         private void CopyRpcSecretButton_Click(object sender, RoutedEventArgs e)
         {
             CopyTextToClipboard(RpcSecretPasswordBox.Password);
-            ShowMessage("RPC 密钥已复制。", InfoBarSeverity.Success);
+            ShowMessage(Strings.Get("RpcSecretCopiedMessage"), InfoBarSeverity.Success);
         }
 
         private void GenerateRpcSecretButton_Click(object sender, RoutedEventArgs e)
@@ -925,7 +925,7 @@ namespace OmniDown
         private void CopyExtensionApiSecretButton_Click(object sender, RoutedEventArgs e)
         {
             CopyTextToClipboard(ExtensionApiSecretPasswordBox.Password);
-            ShowMessage("扩展 API 密钥已复制。", InfoBarSeverity.Success);
+            ShowMessage(Strings.Get("ExtensionApiSecretCopiedMessage"), InfoBarSeverity.Success);
         }
 
         private void GenerateExtensionApiSecretButton_Click(object sender, RoutedEventArgs e)
@@ -951,10 +951,10 @@ namespace OmniDown
             ContentDialog dialog = new()
             {
                 XamlRoot = Content.XamlRoot,
-                Title = "清空 aria2 会话？",
-                Content = "这会删除本地 download.session 和 tasks.json。正在运行的下载不会被删除，但建议先停止 aria2 后再清空。",
-                PrimaryButtonText = "清空",
-                CloseButtonText = "取消",
+                Title = Strings.Get("ClearSessionDialogTitle"),
+                Content = Strings.Get("ClearSessionDialogContent"),
+                PrimaryButtonText = Strings.Get("ClearButtonText"),
+                CloseButtonText = Strings.Get("CancelButtonText"),
                 DefaultButton = ContentDialogButton.Close
             };
 
@@ -978,11 +978,11 @@ namespace OmniDown
                 UpdateTaskbarProgressFromTasks();
                 UpdateSystemSleepOverride();
 
-                ShowMessage("aria2 会话和任务缓存已清空。", InfoBarSeverity.Success);
+                ShowMessage(Strings.Get("SessionClearedMessage"), InfoBarSeverity.Success);
             }
             catch (Exception ex)
             {
-                ShowMessage($"清空会话失败：{ex.Message}", InfoBarSeverity.Error);
+                ShowUserError(UserErrorContext.SessionClear, ex);
             }
         }
 
@@ -1487,7 +1487,7 @@ namespace OmniDown
                 !string.IsNullOrWhiteSpace(settings.ProxyServer) &&
                 !IsValidProxyUrl(settings.ProxyServer))
             {
-                ShowMessage("代理地址格式不正确，请使用 http:// 或 https://。", InfoBarSeverity.Warning);
+                ShowMessage(Strings.Get("InvalidProxyUrlMessage"), InfoBarSeverity.Warning);
                 return false;
             }
 
@@ -1738,7 +1738,7 @@ namespace OmniDown
             string[] sourceUrls = GetSelectedTrackerSourceUrls();
             if (sourceUrls.Length == 0)
             {
-                ShowMessage("请至少选择一个 Tracker 来源。", InfoBarSeverity.Warning);
+                ShowMessage(Strings.Get("TrackerSourceRequiredMessage"), InfoBarSeverity.Warning);
                 return;
             }
 
@@ -1763,7 +1763,7 @@ namespace OmniDown
                 string trackers = NormalizeTrackerList(string.Join(Environment.NewLine, trackerBlocks));
                 if (string.IsNullOrWhiteSpace(trackers))
                 {
-                    ShowMessage("Tracker 源没有返回可用地址。", InfoBarSeverity.Warning);
+                    ShowMessage(Strings.Get("TrackerNoUsableAddressMessage"), InfoBarSeverity.Warning);
                     return;
                 }
 
@@ -1785,11 +1785,15 @@ namespace OmniDown
                     DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()));
                 _settingsPageViewModel.SaveBitTorrentSettings(settings);
                 UpdateTrackerSyncTimeText(settings.LastSyncTrackerTime);
-                ShowMessage(failedSources.Count == 0 ? "Tracker 已同步。" : $"Tracker 已部分同步，{failedSources.Count} 个来源失败。", failedSources.Count == 0 ? InfoBarSeverity.Success : InfoBarSeverity.Warning);
+                ShowMessage(
+                    failedSources.Count == 0
+                        ? Strings.Get("TrackerSyncSuccessMessage")
+                        : Strings.Format("TrackerSyncPartialMessage", failedSources.Count),
+                    failedSources.Count == 0 ? InfoBarSeverity.Success : InfoBarSeverity.Warning);
             }
             catch (Exception ex)
             {
-                ShowMessage($"Tracker 同步失败：{ex.Message}", InfoBarSeverity.Error);
+                ShowUserError(UserErrorContext.TrackerSync, ex);
             }
             finally
             {
@@ -1854,7 +1858,7 @@ namespace OmniDown
             string url = BtCustomTrackerSourceTextBox.Text.Trim();
             if (!IsValidHttpUrl(url))
             {
-                ShowMessage("请输入有效的 HTTP/HTTPS Tracker 源地址。", InfoBarSeverity.Warning);
+                ShowMessage(Strings.Get("TrackerSourceUrlInvalidMessage"), InfoBarSeverity.Warning);
                 return;
             }
 
@@ -2170,7 +2174,7 @@ namespace OmniDown
             SettingsPage.SetAutoStartEnabled(result.IsEnabled);
             if (result.RequiresUserPermission)
             {
-                ShowMessage("自动启动未启用，请在 Windows 启动应用设置中允许 OmniDown。", InfoBarSeverity.Warning);
+                ShowMessage(Strings.Get("AutoStartPermissionRequiredMessage"), InfoBarSeverity.Warning);
             }
         }
 

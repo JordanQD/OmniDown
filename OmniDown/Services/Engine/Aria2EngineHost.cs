@@ -60,6 +60,7 @@ public sealed class Aria2EngineHost : IDisposable
         if (string.IsNullOrWhiteSpace(resolvedPath))
         {
             return Aria2EngineStartResult.Failure(
+                Aria2EngineStartFailureKind.ExecutableNotFound,
                 "aria2 executable was not found. Import an engine in Settings or add a compatible executable to PATH.");
         }
 
@@ -98,7 +99,9 @@ public sealed class Aria2EngineHost : IDisposable
             {
                 DiagnosticText = "Process.Start returned null.";
                 AppLogger.Error("Aria2Engine", DiagnosticText);
-                return Aria2EngineStartResult.Failure("aria2 failed to start.");
+                return Aria2EngineStartResult.Failure(
+                    Aria2EngineStartFailureKind.ProcessStartFailed,
+                    "aria2 failed to start.");
             }
 
             _process.EnableRaisingEvents = true;
@@ -116,7 +119,9 @@ public sealed class Aria2EngineHost : IDisposable
                     : string.Empty;
                 AppLogger.Warning("Aria2Engine", $"RPC port {options.RpcPort} did not become ready.{exitMessage}");
                 Stop();
-                return Aria2EngineStartResult.Failure($"aria2 RPC port did not become ready.{exitMessage}");
+                return Aria2EngineStartResult.Failure(
+                    Aria2EngineStartFailureKind.RpcPortNotReady,
+                    $"aria2 RPC port did not become ready.{exitMessage}");
             }
 
             DiagnosticText = $"aria2 RPC is listening on 127.0.0.1:{options.RpcPort}.";
@@ -128,7 +133,9 @@ public sealed class Aria2EngineHost : IDisposable
             _process = null;
             DiagnosticText = ex.Message;
             AppLogger.Error("Aria2Engine", ex);
-            return Aria2EngineStartResult.Failure($"aria2 failed to start: {ex.Message}");
+            return Aria2EngineStartResult.Failure(
+                Aria2EngineStartFailureKind.ProcessStartFailed,
+                $"aria2 failed to start: {ex}");
         }
     }
 

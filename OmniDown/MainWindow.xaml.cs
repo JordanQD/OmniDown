@@ -6,6 +6,7 @@ using OmniDown.Models.Settings;
 using OmniDown.Services.BrowserExtension;
 using OmniDown.Services.Downloads;
 using OmniDown.Services.Engine;
+using OmniDown.Services.Localization;
 using OmniDown.Services.Logging;
 using OmniDown.Services.Notifications;
 using OmniDown.Services.Rpc;
@@ -105,6 +106,7 @@ namespace OmniDown
         private bool _statusToastActionRestartsAria;
         private bool _isHiding;
         private string _lastStatusMessage = string.Empty;
+        private string _lastStatusTechnicalDetails = string.Empty;
         private string _lastClipboardDownloadText = string.Empty;
         private readonly Dictionary<string, bool> _observedTaskDownloadCompletions = new(StringComparer.OrdinalIgnoreCase);
         private readonly WidgetSnapshotStore _widgetSnapshotStore = new();
@@ -209,7 +211,7 @@ namespace OmniDown
                 bool engineAvailable = updater.IsImportedEngineAvailable();
                 if (!engineAvailable)
                 {
-                    if (isManual) ShowMessage("请先导入 aria2-next 内核，再检查更新。", InfoBarSeverity.Error);
+                    if (isManual) ShowMessage(Strings.Get("EngineUpdateImportRequiredMessage"), InfoBarSeverity.Error);
                     return;
                 }
 
@@ -218,7 +220,7 @@ namespace OmniDown
                 if (!File.Exists(importedPath))
                 {
                     AppLogger.Info("EngineUpdater", "no imported engine found, skipping update check");
-                    if (isManual) ShowMessage("未找到已导入的 aria2-next 内核。", InfoBarSeverity.Error);
+                    if (isManual) ShowMessage(Strings.Get("EngineUpdateImportedEngineMissingMessage"), InfoBarSeverity.Error);
                     return;
                 }
 
@@ -226,7 +228,7 @@ namespace OmniDown
                 if (string.IsNullOrWhiteSpace(currentVersion))
                 {
                     AppLogger.Info("EngineUpdater", "could not detect current engine version");
-                    if (isManual) ShowMessage("无法检测当前引擎版本。", InfoBarSeverity.Error);
+                    if (isManual) ShowMessage(Strings.Get("EngineUpdateVersionUnknownMessage"), InfoBarSeverity.Error);
                     return;
                 }
 
@@ -234,18 +236,18 @@ namespace OmniDown
 
                 if (!result.Succeeded)
                 {
-                    if (isManual) ShowMessage($"检查更新失败：{result.ErrorMessage ?? "未知错误"}", InfoBarSeverity.Error);
+                    if (isManual) ShowUserError(UserErrorContext.EngineUpdateCheck, result.ErrorMessage);
                     return;
                 }
 
                 if (!result.UpdateAvailable)
                 {
-                    if (isManual) ShowMessage($"aria2-next {currentVersion} 已是最新版本。", InfoBarSeverity.Success);
+                    if (isManual) ShowMessage(Strings.Format("EngineUpdateCurrentMessage", currentVersion), InfoBarSeverity.Success);
                     return;
                 }
 
                 EngineUpdateInfo update = result.Update!;
-                ShowMessage($"正在下载 aria2-next {update.Version}…", InfoBarSeverity.Success);
+                ShowMessage(Strings.Format("EngineUpdateDownloadingMessage", update.Version), InfoBarSeverity.Success);
 
                 bool wasRunning = _aria2EngineHost.IsRunning;
                 if (wasRunning)
@@ -264,17 +266,17 @@ namespace OmniDown
                 {
                     // Bust cache so next check reflects the new version
                     TryBustUpdateCache();
-                    ShowMessage($"aria2-next 已更新到 {update.Version}，已自动重启。", InfoBarSeverity.Success);
+                    ShowMessage(Strings.Format("EngineUpdateInstalledMessage", update.Version), InfoBarSeverity.Success);
                 }
                 else
                 {
-                    ShowMessage($"aria2-next {update.Version} 安装失败，请查看日志。", InfoBarSeverity.Error);
+                    ShowMessage(Strings.Format("EngineUpdateInstallFailedMessage", update.Version), InfoBarSeverity.Error);
                 }
             }
             catch (Exception ex)
             {
                 AppLogger.Warning("EngineUpdater", $"update check failed: {ex.Message}");
-                if (isManual) ShowMessage($"内核更新检查失败：{ex.Message}", InfoBarSeverity.Error);
+                if (isManual) ShowUserError(UserErrorContext.EngineUpdateCheck, ex);
             }
         }
 

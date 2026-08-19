@@ -20,15 +20,25 @@ public sealed record Aria2EngineOptions(
     BitTorrentSettings BitTorrentSettings,
     AdvancedSettings AdvancedSettings);
 
+public enum Aria2EngineStartFailureKind
+{
+    None,
+    ExecutableNotFound,
+    ProcessStartFailed,
+    RpcPortNotReady,
+    RpcUnavailable
+}
+
 public sealed record Aria2EngineStartResult(
     bool Started,
-    string Message,
+    Aria2EngineStartFailureKind FailureKind,
+    string TechnicalDetails,
     string? ResolvedExecutablePath,
     int? ProcessId)
 {
-    public static Aria2EngineStartResult Success(string message, string resolvedExecutablePath, int processId) =>
-        new(true, message, resolvedExecutablePath, processId);
+    public static Aria2EngineStartResult Success(string technicalDetails, string resolvedExecutablePath, int processId) =>
+        new(true, Aria2EngineStartFailureKind.None, technicalDetails, resolvedExecutablePath, processId);
 
-    public static Aria2EngineStartResult Failure(string message) =>
-        new(false, message, null, null);
+    public static Aria2EngineStartResult Failure(Aria2EngineStartFailureKind failureKind, string technicalDetails) =>
+        new(false, failureKind, technicalDetails, null, null);
 }

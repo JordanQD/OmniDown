@@ -188,7 +188,7 @@ public sealed partial class TaskDetailsPaneControl : UserControl
         TaskDetailsHeroIcon.Foreground = task.StatusBrush;
         TaskDetailsSizeText.Text = task.SizeText;
         TaskDetailsProgressPercentText.Text = task.ProgressText;
-        TaskDetailsStatusDetailText.Text = task.StatusText;
+        TaskDetailsStatusDetailText.Text = task.StatusDetailText;
         TaskDetailsCreatedAtText.Text = task.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss");
         TaskDetailsSourceText.Text = string.IsNullOrWhiteSpace(task.SourceUri) ? "-" : task.SourceUri;
 

@@ -420,4 +420,103 @@
   <data name="AriaStartStopButton.ToolTipService.ToolTip" xml:space="preserve"><value>Start</value></data>
   <data name="AriaRestartButton.ToolTipService.ToolTip" xml:space="preserve"><value>Restart</value></data>
 
+  <!-- Localized user-facing errors. Raw exception text is retained only as technical details. -->
+  <data name="UserErrorCombinedMessage" xml:space="preserve"><value>{0} {1}</value></data>
+  <data name="UserErrorActionGeneral" xml:space="preserve"><value>The operation could not be completed.</value></data>
+  <data name="UserErrorActionAddTask" xml:space="preserve"><value>The download task could not be added.</value></data>
+  <data name="UserErrorActionTaskOperation" xml:space="preserve"><value>The task operation could not be completed.</value></data>
+  <data name="UserErrorActionRpcRefresh" xml:space="preserve"><value>The download status could not be refreshed.</value></data>
+  <data name="UserErrorActionSpeedLimit" xml:space="preserve"><value>The speed limits could not be applied.</value></data>
+  <data name="UserErrorActionTaskSpeedLimit" xml:space="preserve"><value>The task speed limit could not be applied.</value></data>
+  <data name="UserErrorActionDownloadSettingsSync" xml:space="preserve"><value>The download settings could not be synchronized with aria2.</value></data>
+  <data name="UserErrorActionEngineImport" xml:space="preserve"><value>The download engine could not be imported.</value></data>
+  <data name="UserErrorActionSessionClear" xml:space="preserve"><value>The aria2 session could not be cleared.</value></data>
+  <data name="UserErrorActionTrackerSync" xml:space="preserve"><value>The tracker list could not be synchronized.</value></data>
+  <data name="UserErrorActionBrowserExtensionApi" xml:space="preserve"><value>The browser extension API could not be started.</value></data>
+  <data name="UserErrorActionBrowserExtensionAdd" xml:space="preserve"><value>The browser extension could not add the download.</value></data>
+  <data name="UserErrorActionAutoShutdown" xml:space="preserve"><value>Windows could not be shut down automatically.</value></data>
+  <data name="UserErrorActionRestoreTasks" xml:space="preserve"><value>The download tasks could not be restored.</value></data>
+  <data name="UserErrorActionEngineUpdateCheck" xml:space="preserve"><value>The engine update could not be checked.</value></data>
+  <data name="UserErrorDetailUnknown" xml:space="preserve"><value>Try again. If the problem continues, copy the technical details and check the logs.</value></data>
+  <data name="UserErrorDetailTimeout" xml:space="preserve"><value>The operation timed out. Check the network connection and try again.</value></data>
+  <data name="UserErrorDetailPermissionDenied" xml:space="preserve"><value>Access was denied. Check the file or folder permissions.</value></data>
+  <data name="UserErrorDetailPathUnavailable" xml:space="preserve"><value>A required file or folder is unavailable.</value></data>
+  <data name="UserErrorDetailDiskFull" xml:space="preserve"><value>There is not enough free disk space.</value></data>
+  <data name="UserErrorDetailFileIo" xml:space="preserve"><value>A file could not be read or written. Check the path, permissions, and whether another app is using it.</value></data>
+  <data name="UserErrorDetailNetworkUnavailable" xml:space="preserve"><value>The network service could not be reached. Check the connection and proxy settings.</value></data>
+  <data name="UserErrorDetailInvalidData" xml:space="preserve"><value>The received data is invalid or incomplete.</value></data>
+  <data name="UserErrorDetailRpcTimeout" xml:space="preserve"><value>aria2 did not respond in time. Check whether the engine is still running.</value></data>
+  <data name="UserErrorDetailRpcUnavailable" xml:space="preserve"><value>OmniDown could not connect to aria2. Start or restart the download engine.</value></data>
+  <data name="UserErrorDetailRpcHttpError" xml:space="preserve"><value>aria2 returned an unexpected HTTP response. Check the RPC port and proxy settings.</value></data>
+  <data name="UserErrorDetailRpcRejected" xml:space="preserve"><value>aria2 rejected the request. Check the task state and related settings.</value></data>
+  <data name="UserErrorDetailRpcInvalidResponse" xml:space="preserve"><value>aria2 returned an invalid response. Restart the engine and try again.</value></data>
+  <data name="StatusToastCopyTechnicalDetailsButtonLabel" xml:space="preserve"><value>Copy details</value></data>
+  <data name="TechnicalDetailsLabel" xml:space="preserve"><value>Technical details</value></data>
+  <data name="AriaStartedMessage" xml:space="preserve"><value>aria2 started (PID {0}).</value></data>
+  <data name="AriaEngineExecutableNotFoundMessage" xml:space="preserve"><value>The aria2 executable was not found. Import an engine in Settings or select a valid executable.</value></data>
+  <data name="AriaEngineStartFailedMessage" xml:space="preserve"><value>aria2 could not be started. Check the engine file and its permissions.</value></data>
+  <data name="AriaEngineRpcPortNotReadyMessage" xml:space="preserve"><value>aria2 started but its RPC port did not become available. Check whether the port is already in use.</value></data>
+  <data name="AriaEngineRpcUnavailableMessage" xml:space="preserve"><value>aria2 started but OmniDown could not connect to its RPC service. Restart the engine and check the RPC settings.</value></data>
+  <data name="TaskStatusErrorWithReason" xml:space="preserve"><value>Error: {0}</value></data>
+  <data name="TaskStatusErrorWithCode" xml:space="preserve"><value>Error {0}: {1}</value></data>
+  <data name="Aria2TaskErrorUnknown" xml:space="preserve"><value>An unknown download error occurred. Check the technical details or aria2 log.</value></data>
+  <data name="Aria2TaskError1" xml:space="preserve"><value>An unknown error occurred.</value></data>
+  <data name="Aria2TaskError2" xml:space="preserve"><value>The download timed out.</value></data>
+  <data name="Aria2TaskError3" xml:space="preserve"><value>The requested resource was not found.</value></data>
+  <data name="Aria2TaskError4" xml:space="preserve"><value>The resource was not found after the allowed number of attempts.</value></data>
+  <data name="Aria2TaskError5" xml:space="preserve"><value>The download stopped because its speed was below the configured minimum.</value></data>
+  <data name="Aria2TaskError6" xml:space="preserve"><value>A network problem interrupted the download.</value></data>
+  <data name="Aria2TaskError7" xml:space="preserve"><value>The download was left unfinished.</value></data>
+  <data name="Aria2TaskError8" xml:space="preserve"><value>The server does not support resuming this download.</value></data>
+  <data name="Aria2TaskError9" xml:space="preserve"><value>There is not enough free disk space.</value></data>
+  <data name="Aria2TaskError10" xml:space="preserve"><value>The piece length does not match the existing aria2 control file.</value></data>
+  <data name="Aria2TaskError11" xml:space="preserve"><value>The same file is already being downloaded.</value></data>
+  <data name="Aria2TaskError12" xml:space="preserve"><value>A torrent with the same info hash is already being downloaded.</value></data>
+  <data name="Aria2TaskError13" xml:space="preserve"><value>The destination file already exists and cannot be overwritten.</value></data>
+  <data name="Aria2TaskError14" xml:space="preserve"><value>The destination file could not be renamed.</value></data>
+  <data name="Aria2TaskError15" xml:space="preserve"><value>The existing destination file could not be opened.</value></data>
+  <data name="Aria2TaskError16" xml:space="preserve"><value>The destination file could not be created or truncated.</value></data>
+  <data name="Aria2TaskError17" xml:space="preserve"><value>A file input/output error occurred.</value></data>
+  <data name="Aria2TaskError18" xml:space="preserve"><value>The destination folder could not be created.</value></data>
+  <data name="Aria2TaskError19" xml:space="preserve"><value>The server name could not be resolved.</value></data>
+  <data name="Aria2TaskError20" xml:space="preserve"><value>The Metalink document could not be parsed.</value></data>
+  <data name="Aria2TaskError21" xml:space="preserve"><value>An FTP command failed.</value></data>
+  <data name="Aria2TaskError22" xml:space="preserve"><value>The server returned an invalid or unexpected HTTP response.</value></data>
+  <data name="Aria2TaskError23" xml:space="preserve"><value>The download encountered too many redirects.</value></data>
+  <data name="Aria2TaskError24" xml:space="preserve"><value>HTTP authentication failed.</value></data>
+  <data name="Aria2TaskError25" xml:space="preserve"><value>The bencoded file could not be parsed.</value></data>
+  <data name="Aria2TaskError26" xml:space="preserve"><value>The torrent file is corrupted or missing required information.</value></data>
+  <data name="Aria2TaskError27" xml:space="preserve"><value>The Magnet link is invalid.</value></data>
+  <data name="Aria2TaskError28" xml:space="preserve"><value>An option name or value is invalid.</value></data>
+  <data name="Aria2TaskError29" xml:space="preserve"><value>The server is temporarily overloaded or under maintenance.</value></data>
+  <data name="Aria2TaskError30" xml:space="preserve"><value>The JSON-RPC request could not be parsed.</value></data>
+  <data name="Aria2TaskError32" xml:space="preserve"><value>Checksum validation failed.</value></data>
+  <data name="BrowserExtensionNoValidUrlMessage" xml:space="preserve"><value>The browser extension did not provide a valid download link.</value></data>
+  <data name="BrowserExtensionTaskAddedMessage" xml:space="preserve"><value>The browser extension added the download task.</value></data>
+  <data name="BrowserExtensionTasksAddedMessage" xml:space="preserve"><value>The browser extension added {0} download tasks.</value></data>
+  <data name="SystemProxyNotFoundMessage" xml:space="preserve"><value>No usable Windows system proxy was detected.</value></data>
+  <data name="SystemProxyAppliedMessage" xml:space="preserve"><value>The Windows system proxy settings were filled in.</value></data>
+  <data name="ProtocolRegisteredMessage" xml:space="preserve"><value>The protocol handler is registered. If links still do not open OmniDown, select OmniDown in Windows Default apps.</value></data>
+  <data name="EngineImportedMessage" xml:space="preserve"><value>The engine was imported into OmniDown app data. The original file can now be moved or deleted safely.</value></data>
+  <data name="RpcSecretCopiedMessage" xml:space="preserve"><value>The RPC secret was copied.</value></data>
+  <data name="ExtensionApiSecretCopiedMessage" xml:space="preserve"><value>The extension API secret was copied.</value></data>
+  <data name="ClearSessionDialogTitle" xml:space="preserve"><value>Clear the aria2 session?</value></data>
+  <data name="ClearSessionDialogContent" xml:space="preserve"><value>This deletes the local download.session and tasks.json files. Running downloads are not deleted, but stopping aria2 first is recommended.</value></data>
+  <data name="ClearButtonText" xml:space="preserve"><value>Clear</value></data>
+  <data name="SessionClearedMessage" xml:space="preserve"><value>The aria2 session and task cache were cleared.</value></data>
+  <data name="InvalidProxyUrlMessage" xml:space="preserve"><value>The proxy address is invalid. Use an http:// or https:// address.</value></data>
+  <data name="TrackerSourceRequiredMessage" xml:space="preserve"><value>Select at least one tracker source.</value></data>
+  <data name="TrackerNoUsableAddressMessage" xml:space="preserve"><value>The tracker sources did not return any usable addresses.</value></data>
+  <data name="TrackerSyncSuccessMessage" xml:space="preserve"><value>The tracker list was synchronized.</value></data>
+  <data name="TrackerSyncPartialMessage" xml:space="preserve"><value>The tracker list was partially synchronized; {0} sources failed.</value></data>
+  <data name="TrackerSourceUrlInvalidMessage" xml:space="preserve"><value>Enter a valid HTTP or HTTPS tracker source address.</value></data>
+  <data name="AutoStartPermissionRequiredMessage" xml:space="preserve"><value>Startup is not enabled. Allow OmniDown in Windows Startup apps.</value></data>
+  <data name="EngineUpdateImportRequiredMessage" xml:space="preserve"><value>Import an aria2-next engine before checking for updates.</value></data>
+  <data name="EngineUpdateImportedEngineMissingMessage" xml:space="preserve"><value>The imported aria2-next engine could not be found.</value></data>
+  <data name="EngineUpdateVersionUnknownMessage" xml:space="preserve"><value>The current engine version could not be detected.</value></data>
+  <data name="EngineUpdateCurrentMessage" xml:space="preserve"><value>aria2-next {0} is up to date.</value></data>
+  <data name="EngineUpdateDownloadingMessage" xml:space="preserve"><value>Downloading aria2-next {0}…</value></data>
+  <data name="EngineUpdateInstalledMessage" xml:space="preserve"><value>aria2-next was updated to {0} and restarted.</value></data>
+  <data name="EngineUpdateInstallFailedMessage" xml:space="preserve"><value>aria2-next {0} could not be installed. Check the logs for details.</value></data>
+
 </root>

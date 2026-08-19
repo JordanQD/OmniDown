@@ -51,7 +51,14 @@ namespace OmniDown
             AppLogger.Info("Aria2Command", "start requested");
             Aria2EngineStartResult result = await EnsureAria2StartedAsync();
             UpdateAriaStatus();
-            ShowMessage(result.Message, result.Started ? InfoBarSeverity.Success : InfoBarSeverity.Error);
+            if (result.Started)
+            {
+                ShowMessage(Strings.Format("AriaStartedMessage", result.ProcessId ?? 0), InfoBarSeverity.Success);
+            }
+            else
+            {
+                ShowEngineStartFailure(result);
+            }
         }
 
         private async Task StopAriaAsync(bool showMessage = true)
@@ -635,7 +642,7 @@ namespace OmniDown
                 {
                     ApplyTaskFilter(_currentTaskFilter);
                     UpdateDashboard();
-                    ShowMessage(result.Message, InfoBarSeverity.Warning);
+                    ShowEngineStartFailure(result, InfoBarSeverity.Warning);
                 }
                 else
                 {
@@ -718,7 +725,7 @@ namespace OmniDown
             }
             catch (Exception ex)
             {
-                ShowMessage($"恢复下载任务失败：{ex.Message}", InfoBarSeverity.Warning);
+                ShowUserError(UserErrorContext.RestoreTasks, ex, InfoBarSeverity.Warning);
             }
         }
 

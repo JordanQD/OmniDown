@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Input;
 using OmniDown.Models;
 using OmniDown.Services.Downloads;
 using OmniDown.Services.Localization;
+using OmniDown.Services.Logging;
 using OmniDown.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -159,6 +160,7 @@ public sealed partial class NewDownloadDialog : ContentDialog
         }
         catch (Exception ex)
         {
+            AppLogger.Error("NewDownloadDialog.Torrent", ex);
             ViewModel.SetTorrentValidationException(ex);
             _ = OpenTorrentButton.Focus(FocusState.Programmatic);
         }
@@ -231,6 +233,7 @@ public sealed partial class NewDownloadDialog : ContentDialog
             }
             catch (Exception ex)
             {
+                AppLogger.Error("NewDownloadDialog.Torrent", ex);
                 ViewModel.SetTorrentValidationException(ex);
                 _ = OpenTorrentButton.Focus(FocusState.Programmatic);
             }
@@ -286,6 +289,7 @@ public sealed partial class NewDownloadDialog : ContentDialog
         }
         catch (Exception ex)
         {
+            AppLogger.Error("NewDownloadDialog.Validation", ex);
             ViewModel.SetValidationException(ex);
             _ = UriTextBox.Focus(FocusState.Programmatic);
         }
