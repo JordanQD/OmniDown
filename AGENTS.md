@@ -13,10 +13,11 @@ These instructions apply to this repository and are intended to be reusable for 
 
 ## Build And Restore
 
-- Use the solution file when one exists:
+- Local verification targets x64 only. Do not build or validate ARM64 unless the user explicitly requests it.
+- Use the solution file with an explicit x64 platform when one exists:
 
 ```powershell
-dotnet build OmniDown.slnx
+dotnet build OmniDown.slnx -p:Platform=x64
 ```
 
 - If only restore is needed, use:
@@ -71,7 +72,7 @@ After dependency or WinUI infrastructure changes:
 
 1. Restore/build the solution.
 2. Report warnings separately from errors.
-3. If the change affects startup, packaging, protocol activation, tray behavior, or widgets, launch and manually verify that surface when possible.
+3. Do not use computer-use or other UI automation to launch, inspect, or operate this app. Ask the user to perform runtime and visual verification manually, and provide a focused checklist.
 4. Do not claim a runtime feature is verified from build success alone.
 
 ## Git Hygiene

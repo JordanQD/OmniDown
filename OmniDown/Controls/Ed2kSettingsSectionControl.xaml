@@ -40,13 +40,13 @@
                 <FontIcon Glyph="&#xE95A;" />
             </controls:SettingsCard.HeaderIcon>
             <Grid
+                Width="280"
+                HorizontalAlignment="Right"
                 ColumnDefinitions="*,Auto"
                 ColumnSpacing="8">
                 <NumberBox
                     x:Name="Ed2kListenPortNumberBox"
-                    Width="120"
                     Height="32"
-                    HorizontalAlignment="Right"
                     Minimum="0"
                     Maximum="65535"
                     SmallChange="1"
@@ -76,13 +76,13 @@
                 <FontIcon Glyph="&#xE95A;" />
             </controls:SettingsCard.HeaderIcon>
             <Grid
+                Width="280"
+                HorizontalAlignment="Right"
                 ColumnDefinitions="*,Auto"
                 ColumnSpacing="8">
                 <NumberBox
                     x:Name="Ed2kUdpListenPortNumberBox"
-                    Width="120"
                     Height="32"
-                    HorizontalAlignment="Right"
                     Minimum="0"
                     Maximum="65535"
                     SmallChange="1"

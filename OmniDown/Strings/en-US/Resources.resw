@@ -170,6 +170,34 @@
   <data name="TaskStatusPausing" xml:space="preserve"><value>Pausing...</value></data>
   <data name="TaskStatusResuming" xml:space="preserve"><value>Resuming...</value></data>
   <data name="TaskStatusCompleted" xml:space="preserve"><value>Completed</value></data>
+  <data name="TaskStatusSharing" xml:space="preserve"><value>Downloaded · sharing on ED2K</value></data>
+  <data name="StopSharingActionText" xml:space="preserve"><value>Stop sharing</value></data>
+  <data name="Ed2kSharingStoppedMessage" xml:space="preserve"><value>ED2K sharing stopped; the completed download remains in history.</value></data>
+  <data name="TaskDetailsSourceKindLabel.Text" xml:space="preserve"><value>Source type</value></data>
+  <data name="TaskDetailsEd2kLinkLabel.Text" xml:space="preserve"><value>ED2K link</value></data>
+  <data name="TaskDetailsEd2kHashLabel.Text" xml:space="preserve"><value>File hash</value></data>
+  <data name="TaskDetailsEd2kIdentityLabel.Text" xml:space="preserve"><value>Verification</value></data>
+  <data name="TaskDetailsEd2kServerLabel.Text" xml:space="preserve"><value>Servers</value></data>
+  <data name="TaskDetailsEd2kPeerLabel.Text" xml:space="preserve"><value>Peers</value></data>
+  <data name="TaskDetailsEd2kKadLabel.Text" xml:space="preserve"><value>Kad / firewall</value></data>
+  <data name="TaskDetailsEd2kUploadQueueLabel.Text" xml:space="preserve"><value>Upload queue</value></data>
+  <data name="TaskDetailsEd2kPeerMode" xml:space="preserve"><value>ED2K peer transfer</value></data>
+  <data name="TaskDetailsEd2kPeerHint" xml:space="preserve"><value>See Status for ED2K peer statistics.</value></data>
+  <data name="TaskDetailsSourceUriKind" xml:space="preserve"><value>Standard URI source</value></data>
+  <data name="TaskDetailsNoEd2kIdentity" xml:space="preserve"><value>This task has no ED2K identity information.</value></data>
+  <data name="TaskDetailsEd2kFileKind" xml:space="preserve"><value>ED2K file link</value></data>
+  <data name="TaskDetailsEd2kNoAich" xml:space="preserve"><value>No AICH</value></data>
+  <data name="TaskDetailsEd2kIdentityFormat" xml:space="preserve"><value>{0} · {1} part hashes</value></data>
+  <data name="TaskDetailsEd2kOnlyStatus" xml:space="preserve"><value>This status view currently shows ED2K network details only.</value></data>
+  <data name="TaskDetailsEd2kServerFormat" xml:space="preserve"><value>{0} connected / {1} total</value></data>
+  <data name="TaskDetailsEd2kPeerFormat" xml:space="preserve"><value>{0} total · {1} accepted · {2} queued · {3} dead · {4} Low ID · {5} awaiting callback</value></data>
+  <data name="TaskDetailsEd2kFirewalled" xml:space="preserve"><value>Firewalled</value></data>
+  <data name="TaskDetailsEd2kNotFirewalled" xml:space="preserve"><value>Not firewalled</value></data>
+  <data name="TaskDetailsEd2kFirewallUnknown" xml:space="preserve"><value>Firewall state unknown</value></data>
+  <data name="TaskDetailsEd2kKadFormat" xml:space="preserve"><value>{0} nodes · {1} routers · {2} observed addresses · {3}</value></data>
+  <data name="TaskDetailsEd2kUploadQueueFormat" xml:space="preserve"><value>{0} uploading · {1} waiting · {2} peer credits</value></data>
+  <data name="TaskDetailsEd2kSharingKind" xml:space="preserve"><value>ED2K sharing task</value></data>
+  <data name="TaskDetailsEd2kDownloadKind" xml:space="preserve"><value>ED2K download task</value></data>
   <data name="TaskStatusError" xml:space="preserve"><value>Error</value></data>
   <data name="TaskStatusRemoved" xml:space="preserve"><value>Removed</value></data>
   <data name="DownloadSpeedPrefix" xml:space="preserve"><value>Down</value></data>
@@ -352,7 +380,7 @@
   <data name="ProxyTrackersCheckBox.Content" xml:space="preserve"><value>Tracker sync</value></data>
   <data name="NetworkPortSectionHeader.Text" xml:space="preserve"><value>Port</value></data>
   <data name="UpnpSettingCard.Header" xml:space="preserve"><value>UPnP/NAT-PMP</value></data>
-  <data name="UpnpSettingCard.Description" xml:space="preserve"><value>Save port mapping preference. Current Windows aria2 startup uses the ports below.</value></data>
+  <data name="UpnpSettingCard.Description" xml:space="preserve"><value>Best-effort UPnP mapping for ED2K TCP/UDP ports; unsupported routers are ignored.</value></data>
   <data name="BtPortSettingCard.Header" xml:space="preserve"><value>BT listen port</value></data>
   <data name="BtPortSettingCard.Description" xml:space="preserve"><value>Used to receive BitTorrent peer connections. Requires aria2 restart to apply.</value></data>
   <data name="RandomBtPortButton.ToolTipService.ToolTip" xml:space="preserve"><value>Random port</value></data>
@@ -411,6 +439,10 @@
   <data name="AdvancedDefaultProgramsSectionHeader.Text" xml:space="preserve"><value>Default programs</value></data>
   <data name="ProtocolMagnetSettingCard.Header" xml:space="preserve"><value>magnet:// links</value></data>
   <data name="ProtocolMagnetSettingCard.Description" xml:space="preserve"><value>Open magnet links with OmniDown.</value></data>
+  <data name="ClipboardEd2kToggleSwitch.AutomationProperties.Name" xml:space="preserve"><value>Detect ED2K links on the clipboard</value></data>
+  <data name="ProtocolEd2kSettingCard.Header" xml:space="preserve"><value>ed2k:// links</value></data>
+  <data name="ProtocolEd2kSettingCard.Description" xml:space="preserve"><value>Open ED2K file links with OmniDown.</value></data>
+  <data name="ProtocolEd2kToggleSwitch.AutomationProperties.Name" xml:space="preserve"><value>Associate ED2K links with OmniDown</value></data>
   <data name="ProtocolThunderSettingCard.Header" xml:space="preserve"><value>thunder:// links</value></data>
   <data name="ProtocolThunderSettingCard.Description" xml:space="preserve"><value>Open Xunlei links with OmniDown.</value></data>
   <data name="ProtocolOmniDownSettingCard.Header" xml:space="preserve"><value>omnidown:// extension links</value></data>
@@ -458,6 +490,7 @@
   <data name="AriaEngineExecutableNotFoundMessage" xml:space="preserve"><value>The aria2 executable was not found. Import an engine in Settings or select a valid executable.</value></data>
   <data name="AriaEngineStartFailedMessage" xml:space="preserve"><value>aria2 could not be started. Check the engine file and its permissions.</value></data>
   <data name="AriaEngineRpcPortNotReadyMessage" xml:space="preserve"><value>aria2 started but its RPC port did not become available. Check whether the port is already in use.</value></data>
+  <data name="AriaEnginePortConflictMessage" xml:space="preserve"><value>An ED2K TCP or UDP port is already in use. Choose another port in ED2K settings.</value></data>
   <data name="AriaEngineRpcUnavailableMessage" xml:space="preserve"><value>aria2 started but OmniDown could not connect to its RPC service. Restart the engine and check the RPC settings.</value></data>
   <data name="TaskStatusErrorWithReason" xml:space="preserve"><value>Error: {0}</value></data>
   <data name="TaskStatusErrorWithCode" xml:space="preserve"><value>Error {0}: {1}</value></data>

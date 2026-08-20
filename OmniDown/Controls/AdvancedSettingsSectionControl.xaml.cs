@@ -54,8 +54,9 @@ public sealed partial class AdvancedSettingsSectionControl : UserControl
         new(LogPathsSettingCard, "log", "file", "folder", "diagnostic", "日志", "文件", "目录"),
         new(SessionResetSettingCard, "session", "reset", "clear", "aria2", "会话", "清空"),
         new(ClipboardDetectionSettingCard, "clipboard", "detect", "paste", "剪贴板", "检测", "粘贴"),
-        new(ClipboardTypesSettingCard, "clipboard", "http", "ftp", "magnet", "thunder", "hash", "剪贴板", "磁力", "迅雷"),
+        new(ClipboardTypesSettingCard, "clipboard", "http", "ftp", "magnet", "ed2k", "thunder", "hash", "剪贴板", "磁力", "电驴", "迅雷"),
         new(ProtocolMagnetSettingCard, "default", "program", "protocol", "magnet", "默认程序", "协议", "磁力"),
+        new(ProtocolEd2kSettingCard, "default", "program", "protocol", "ed2k", "默认程序", "协议", "电驴"),
         new(ProtocolThunderSettingCard, "default", "program", "protocol", "thunder", "默认程序", "协议", "迅雷"),
         new(ProtocolOmniDownSettingCard, "default", "program", "protocol", "omnidown", "extension", "默认程序", "协议", "扩展")
     ];
@@ -78,10 +79,13 @@ public sealed partial class AdvancedSettingsSectionControl : UserControl
     internal ToggleSwitch ClipboardHttpToggleSwitchControl => ClipboardHttpToggleSwitch;
     internal ToggleSwitch ClipboardFtpToggleSwitchControl => ClipboardFtpToggleSwitch;
     internal ToggleSwitch ClipboardMagnetToggleSwitchControl => ClipboardMagnetToggleSwitch;
+    internal ToggleSwitch ClipboardEd2kToggleSwitchControl => ClipboardEd2kToggleSwitch;
     internal ToggleSwitch ClipboardThunderToggleSwitchControl => ClipboardThunderToggleSwitch;
     internal ToggleSwitch ClipboardBtHashToggleSwitchControl => ClipboardBtHashToggleSwitch;
     internal ToggleSwitch ProtocolMagnetToggleSwitchControl => ProtocolMagnetToggleSwitch;
     internal TextBlock ProtocolMagnetStateTextControl => ProtocolMagnetStateText;
+    internal ToggleSwitch ProtocolEd2kToggleSwitchControl => ProtocolEd2kToggleSwitch;
+    internal TextBlock ProtocolEd2kStateTextControl => ProtocolEd2kStateText;
     internal ToggleSwitch ProtocolThunderToggleSwitchControl => ProtocolThunderToggleSwitch;
     internal TextBlock ProtocolThunderStateTextControl => ProtocolThunderStateText;
     internal ToggleSwitch ProtocolOmniDownToggleSwitchControl => ProtocolOmniDownToggleSwitch;
@@ -213,6 +217,7 @@ public sealed partial class AdvancedSettingsSectionControl : UserControl
         if (ReferenceEquals(toggleSwitch, ExtensionAutoSubmitToggleSwitch)) return ExtensionAutoSubmitStateText;
         if (ReferenceEquals(toggleSwitch, ClipboardDetectionToggleSwitch)) return ClipboardDetectionStateText;
         if (ReferenceEquals(toggleSwitch, ProtocolMagnetToggleSwitch)) return ProtocolMagnetStateText;
+        if (ReferenceEquals(toggleSwitch, ProtocolEd2kToggleSwitch)) return ProtocolEd2kStateText;
         if (ReferenceEquals(toggleSwitch, ProtocolThunderToggleSwitch)) return ProtocolThunderStateText;
         if (ReferenceEquals(toggleSwitch, ProtocolOmniDownToggleSwitch)) return ProtocolOmniDownStateText;
         return null;

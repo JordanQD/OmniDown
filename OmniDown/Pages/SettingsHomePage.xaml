@@ -76,7 +76,7 @@
                 IsClickEnabled="True"
                 Tag="Ed2k">
                 <controls:SettingsCard.HeaderIcon>
-                    <FontIcon Glyph="&#xE774;" />
+                    <FontIcon Glyph="&#xE72D;" />
                 </controls:SettingsCard.HeaderIcon>
             </controls:SettingsCard>
 

@@ -4,6 +4,7 @@ using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using OmniDown.Services.Localization;
+using OmniDown.Services.Rpc;
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -32,6 +33,7 @@ public sealed class DownloadTask : INotifyPropertyChanged
     private bool _isPeerTransfer;
     private bool _isMetadataTransfer;
     private bool _isAria2SessionAttached;
+    private Ed2kTaskInfo? _ed2kInfo;
     private DateTimeOffset _createdAt = DateTimeOffset.Now;
     private bool _isSelected;
 
@@ -52,7 +54,13 @@ public sealed class DownloadTask : INotifyPropertyChanged
     public string SourceUri
     {
         get => _sourceUri;
-        set => SetProperty(ref _sourceUri, value);
+        set
+        {
+            if (SetProperty(ref _sourceUri, value))
+            {
+                OnPropertyChanged(nameof(IsEd2kTransfer));
+            }
+        }
     }
 
     public string SaveDirectory
@@ -87,6 +95,7 @@ public sealed class DownloadTask : INotifyPropertyChanged
                 OnPropertyChanged(nameof(ShowProgressNormal));
                 OnPropertyChanged(nameof(ToggleActionGlyph));
                 OnPropertyChanged(nameof(ToggleActionText));
+                OnPropertyChanged(nameof(IsSharing));
             }
         }
     }
@@ -99,6 +108,7 @@ public sealed class DownloadTask : INotifyPropertyChanged
         "pausing" => Strings.Get("TaskStatusPausing"),
         "resuming" => Strings.Get("TaskStatusResuming"),
         "completed" => Strings.Get("TaskStatusCompleted"),
+        "sharing" => Strings.Get("TaskStatusSharing"),
         "error" => Strings.Get("TaskStatusError"),
         "removed" => Strings.Get("TaskStatusRemoved"),
         _ => Status
@@ -299,6 +309,24 @@ public sealed class DownloadTask : INotifyPropertyChanged
         set => SetProperty(ref _isAria2SessionAttached, value);
     }
 
+    public Ed2kTaskInfo? Ed2kInfo
+    {
+        get => _ed2kInfo;
+        set
+        {
+            if (SetProperty(ref _ed2kInfo, value))
+            {
+                OnPropertyChanged(nameof(IsEd2kTransfer));
+                OnPropertyChanged(nameof(IsSharing));
+            }
+        }
+    }
+
+    public bool IsEd2kTransfer => Ed2kInfo is not null ||
+        SourceUri.StartsWith("ed2k://", StringComparison.OrdinalIgnoreCase);
+
+    public bool IsSharing => Status.Equals("Sharing", StringComparison.OrdinalIgnoreCase);
+
     public Visibility NormalSpeedVisibility => IsPeerTransfer ? Visibility.Collapsed : Visibility.Visible;
 
     public Visibility PeerSpeedVisibility => IsPeerTransfer ? Visibility.Visible : Visibility.Collapsed;
@@ -315,10 +343,13 @@ public sealed class DownloadTask : INotifyPropertyChanged
 
     public string ToggleActionGlyph => IsError
         ? "\uE72C"
+        : IsSharing ? "\uE71A"
         : IsPaused ? "\uE768" : "\uE769";
 
     public string ToggleActionText => IsError
         ? Strings.Get("RecoverTasksButton.Label")
+        : IsSharing
+        ? Strings.Get("StopSharingActionText")
         : IsPaused
         ? Strings.Get("ResumeTasksButton.Label")
         : Strings.Get("PauseTasksButton.Label");

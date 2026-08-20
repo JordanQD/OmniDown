@@ -197,6 +197,11 @@ public sealed class Aria2RpcClient : IDisposable
         return SendAsync<string>("aria2.pause", [gid], cancellationToken);
     }
 
+    public Task ForcePauseAsync(string gid, CancellationToken cancellationToken = default)
+    {
+        return SendAsync<object>("aria2.forcePause", [gid], cancellationToken);
+    }
+
     public Task UnpauseAsync(string gid, CancellationToken cancellationToken = default)
     {
         return SendAsync<string>("aria2.unpause", [gid], cancellationToken);
@@ -463,11 +468,13 @@ public sealed class Aria2RpcClient : IDisposable
             CompletedLength = TryGetString(item, "completedLength"),
             DownloadSpeed = TryGetString(item, "downloadSpeed"),
             UploadSpeed = TryGetString(item, "uploadSpeed"),
+            UploadLength = TryGetString(item, "uploadLength"),
+            Seeder = TryGetString(item, "seeder"),
             ErrorCode = TryGetString(item, "errorCode"),
             ErrorMessage = TryGetString(item, "errorMessage"),
             BitTorrent = item.TryGetProperty("bittorrent", out JsonElement bitTorrent) ? bitTorrent.Clone() : null,
             Ed2k = item.TryGetProperty("ed2k", out JsonElement ed2k) && ed2k.ValueKind == JsonValueKind.Object
-                ? JsonSerializer.Deserialize<Aria2Ed2kInfo>(ed2k.GetRawText())
+                ? JsonSerializer.Deserialize<Ed2kTaskInfo>(ed2k.GetRawText())
                 : null,
             Directory = TryGetString(item, "dir"),
             Files = ReadFiles(item)
@@ -567,6 +574,8 @@ public sealed class Aria2RpcClient : IDisposable
         "completedLength",
         "downloadSpeed",
         "uploadSpeed",
+        "uploadLength",
+        "seeder",
         "bittorrent",
         "ed2k",
         "dir",

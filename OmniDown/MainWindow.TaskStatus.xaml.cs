@@ -471,6 +471,7 @@ namespace OmniDown
                         if (activeTasks.Length > 0)
                         {
                             await _downloadCoordinator.PauseAsync(activeTasks);
+                            await ConfirmOperationAsync(activeTasks);
                         }
                     }
                 }
@@ -856,6 +857,7 @@ namespace OmniDown
             string resourceKey = result.FailureKind switch
             {
                 Aria2EngineStartFailureKind.ExecutableNotFound => "AriaEngineExecutableNotFoundMessage",
+                Aria2EngineStartFailureKind.PortConflict => "AriaEnginePortConflictMessage",
                 Aria2EngineStartFailureKind.RpcPortNotReady => "AriaEngineRpcPortNotReadyMessage",
                 Aria2EngineStartFailureKind.RpcUnavailable => "AriaEngineRpcUnavailableMessage",
                 _ => "AriaEngineStartFailedMessage"
@@ -1083,7 +1085,7 @@ namespace OmniDown
 
         private bool ShouldShowTaskCompletedAfterSeedingNotification(DownloadTask task)
         {
-            if (!task.IsPeerTransfer || task.IsMetadataTransfer)
+            if (!task.IsPeerTransfer || task.IsMetadataTransfer || task.IsEd2kTransfer)
             {
                 return false;
             }

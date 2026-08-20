@@ -24,6 +24,12 @@ public sealed record Aria2TaskStatus
     [JsonPropertyName("uploadSpeed")]
     public string UploadSpeed { get; init; } = "0";
 
+    [JsonPropertyName("uploadLength")]
+    public string UploadLength { get; init; } = "0";
+
+    [JsonPropertyName("seeder")]
+    public string Seeder { get; init; } = "false";
+
     [JsonPropertyName("errorCode")]
     public string ErrorCode { get; init; } = string.Empty;
 
@@ -34,7 +40,7 @@ public sealed record Aria2TaskStatus
     public JsonElement? BitTorrent { get; init; }
 
     [JsonPropertyName("ed2k")]
-    public Aria2Ed2kInfo? Ed2k { get; init; }
+    public Ed2kTaskInfo? Ed2k { get; init; }
 
     [JsonPropertyName("dir")]
     public string Directory { get; init; } = string.Empty;
@@ -43,7 +49,7 @@ public sealed record Aria2TaskStatus
     public IReadOnlyList<Aria2FileStatus> Files { get; init; } = [];
 }
 
-public sealed record Aria2Ed2kInfo
+public sealed record Ed2kTaskInfo
 {
     [JsonPropertyName("searchActive")]
     public bool SearchActive { get; init; }
@@ -65,6 +71,60 @@ public sealed record Aria2Ed2kInfo
 
     [JsonPropertyName("length")]
     public string Length { get; init; } = "0";
+
+    [JsonPropertyName("completedLength")]
+    public string CompletedLength { get; init; } = "0";
+
+    [JsonPropertyName("partHashCount")]
+    public string PartHashCount { get; init; } = "0";
+
+    [JsonPropertyName("aichRoot")]
+    public string AichRoot { get; init; } = string.Empty;
+
+    [JsonPropertyName("serverCount")]
+    public string ServerCount { get; init; } = "0";
+
+    [JsonPropertyName("connectedServerCount")]
+    public string ConnectedServerCount { get; init; } = "0";
+
+    [JsonPropertyName("peerCount")]
+    public string PeerCount { get; init; } = "0";
+
+    [JsonPropertyName("queuedPeerCount")]
+    public string QueuedPeerCount { get; init; } = "0";
+
+    [JsonPropertyName("acceptedPeerCount")]
+    public string AcceptedPeerCount { get; init; } = "0";
+
+    [JsonPropertyName("deadPeerCount")]
+    public string DeadPeerCount { get; init; } = "0";
+
+    [JsonPropertyName("lowIdPeerCount")]
+    public string LowIdPeerCount { get; init; } = "0";
+
+    [JsonPropertyName("callbackWaitingPeerCount")]
+    public string CallbackWaitingPeerCount { get; init; } = "0";
+
+    [JsonPropertyName("kadNodeCount")]
+    public string KadNodeCount { get; init; } = "0";
+
+    [JsonPropertyName("kadRouterCount")]
+    public string KadRouterCount { get; init; } = "0";
+
+    [JsonPropertyName("kadFirewalled")]
+    public bool? KadFirewalled { get; init; }
+
+    [JsonPropertyName("kadObservedAddressCount")]
+    public string KadObservedAddressCount { get; init; } = "0";
+
+    [JsonPropertyName("uploadingPeerCount")]
+    public string UploadingPeerCount { get; init; } = "0";
+
+    [JsonPropertyName("waitingUploadPeerCount")]
+    public string WaitingUploadPeerCount { get; init; } = "0";
+
+    [JsonPropertyName("peerCreditCount")]
+    public string PeerCreditCount { get; init; } = "0";
 }
 
 public sealed record Aria2VersionInfo

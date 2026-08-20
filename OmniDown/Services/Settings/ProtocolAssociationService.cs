@@ -2,6 +2,7 @@ using Microsoft.Win32;
 using System;
 using System.Diagnostics;
 using System.IO;
+using Windows.ApplicationModel;
 
 namespace OmniDown.Services.Settings;
 
@@ -9,9 +10,16 @@ public static class ProtocolAssociationService
 {
     private const string ApplicationName = "OmniDown";
 
-    public static void Synchronize(bool magnetEnabled, bool thunderEnabled, bool omniDownEnabled)
+    public static void Synchronize(bool magnetEnabled, bool ed2kEnabled, bool thunderEnabled, bool omniDownEnabled)
     {
+        if (HasPackageIdentity())
+        {
+            // Packaged protocol declarations are owned by Package.appxmanifest and Windows default-app UI.
+            return;
+        }
+
         SynchronizeProtocol("magnet", "Magnet", magnetEnabled);
+        SynchronizeProtocol("ed2k", "ED2K", ed2kEnabled);
         SynchronizeProtocol("thunder", "Thunder", thunderEnabled);
         SynchronizeProtocol("omnidown", "OmniDown", omniDownEnabled);
     }
@@ -91,5 +99,18 @@ public static class ProtocolAssociationService
     {
         return Process.GetCurrentProcess().MainModule?.FileName ??
             Path.Combine(AppContext.BaseDirectory, "OmniDown.exe");
+    }
+
+    private static bool HasPackageIdentity()
+    {
+        try
+        {
+            _ = Package.Current.Id.FullName;
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 }

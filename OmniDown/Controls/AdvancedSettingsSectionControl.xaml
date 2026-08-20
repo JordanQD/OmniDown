@@ -449,6 +449,18 @@
                         OnContent=""
                         Toggled="AdvancedSettingToggleSwitch_Toggled" />
                 </controls:SettingsCard>
+                <controls:SettingsCard Header="ED2K">
+                    <ToggleSwitch
+                        x:Name="ClipboardEd2kToggleSwitch"
+                        x:Uid="ClipboardEd2kToggleSwitch"
+                        Width="48"
+                        MinWidth="0"
+                        AutomationProperties.Name="检测 ED2K 剪贴板链接"
+                        Padding="0"
+                        OffContent=""
+                        OnContent=""
+                        Toggled="AdvancedSettingToggleSwitch_Toggled" />
+                </controls:SettingsCard>
                 <controls:SettingsCard Header="Thunder">
                     <ToggleSwitch
                         x:Name="ClipboardThunderToggleSwitch"
@@ -500,6 +512,36 @@
                     x:Name="ProtocolMagnetToggleSwitch"
                     Width="48"
                     MinWidth="0"
+                    Padding="0"
+                    OffContent=""
+                    OnContent=""
+                    Toggled="AdvancedSettingToggleSwitch_Toggled" />
+            </StackPanel>
+        </controls:SettingsCard>
+
+        <controls:SettingsCard
+            x:Name="ProtocolEd2kSettingCard"
+            x:Uid="ProtocolEd2kSettingCard"
+            Description="将 ED2K 文件链接交给 OmniDown 打开。"
+            Header="ed2k:// 链接">
+            <controls:SettingsCard.HeaderIcon>
+                <FontIcon Glyph="&#xE896;" />
+            </controls:SettingsCard.HeaderIcon>
+            <StackPanel
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Orientation="Horizontal"
+                Spacing="8">
+                <TextBlock
+                    x:Name="ProtocolEd2kStateText"
+                    VerticalAlignment="Center"
+                    Text="关" />
+                <ToggleSwitch
+                    x:Name="ProtocolEd2kToggleSwitch"
+                    x:Uid="ProtocolEd2kToggleSwitch"
+                    Width="48"
+                    MinWidth="0"
+                    AutomationProperties.Name="将 ED2K 链接关联到 OmniDown"
                     Padding="0"
                     OffContent=""
                     OnContent=""

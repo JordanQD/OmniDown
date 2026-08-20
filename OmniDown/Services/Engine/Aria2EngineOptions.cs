@@ -25,6 +25,7 @@ public enum Aria2EngineStartFailureKind
 {
     None,
     ExecutableNotFound,
+    PortConflict,
     ProcessStartFailed,
     RpcPortNotReady,
     RpcUnavailable

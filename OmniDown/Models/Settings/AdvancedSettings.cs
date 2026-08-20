@@ -22,9 +22,11 @@ public sealed record AdvancedSettings(
     bool ClipboardHttpEnabled,
     bool ClipboardFtpEnabled,
     bool ClipboardMagnetEnabled,
+    bool ClipboardEd2kEnabled,
     bool ClipboardThunderEnabled,
     bool ClipboardBtHashEnabled,
     bool ProtocolMagnetEnabled,
+    bool ProtocolEd2kEnabled,
     bool ProtocolThunderEnabled,
     bool ProtocolOmniDownEnabled)
 {
@@ -41,9 +43,11 @@ public sealed record AdvancedSettings(
         ClipboardHttpEnabled: true,
         ClipboardFtpEnabled: true,
         ClipboardMagnetEnabled: true,
+        ClipboardEd2kEnabled: true,
         ClipboardThunderEnabled: false,
         ClipboardBtHashEnabled: false,
         ProtocolMagnetEnabled: false,
+        ProtocolEd2kEnabled: false,
         ProtocolThunderEnabled: false,
         ProtocolOmniDownEnabled: true);
 

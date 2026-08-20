@@ -170,6 +170,34 @@
   <data name="TaskStatusPausing" xml:space="preserve"><value>暂停中...</value></data>
   <data name="TaskStatusResuming" xml:space="preserve"><value>恢复中...</value></data>
   <data name="TaskStatusCompleted" xml:space="preserve"><value>完成</value></data>
+  <data name="TaskStatusSharing" xml:space="preserve"><value>已下载完成 · 正在 ED2K 共享</value></data>
+  <data name="StopSharingActionText" xml:space="preserve"><value>停止共享</value></data>
+  <data name="Ed2kSharingStoppedMessage" xml:space="preserve"><value>已停止 ED2K 共享，完成记录仍保留在历史中。</value></data>
+  <data name="TaskDetailsSourceKindLabel.Text" xml:space="preserve"><value>来源类型</value></data>
+  <data name="TaskDetailsEd2kLinkLabel.Text" xml:space="preserve"><value>ED2K 链接</value></data>
+  <data name="TaskDetailsEd2kHashLabel.Text" xml:space="preserve"><value>文件 Hash</value></data>
+  <data name="TaskDetailsEd2kIdentityLabel.Text" xml:space="preserve"><value>校验信息</value></data>
+  <data name="TaskDetailsEd2kServerLabel.Text" xml:space="preserve"><value>服务器</value></data>
+  <data name="TaskDetailsEd2kPeerLabel.Text" xml:space="preserve"><value>Peer</value></data>
+  <data name="TaskDetailsEd2kKadLabel.Text" xml:space="preserve"><value>Kad / 防火墙</value></data>
+  <data name="TaskDetailsEd2kUploadQueueLabel.Text" xml:space="preserve"><value>上传队列</value></data>
+  <data name="TaskDetailsEd2kPeerMode" xml:space="preserve"><value>ED2K Peer 传输</value></data>
+  <data name="TaskDetailsEd2kPeerHint" xml:space="preserve"><value>ED2K 节点统计请查看“状态”页。</value></data>
+  <data name="TaskDetailsSourceUriKind" xml:space="preserve"><value>普通 URI 来源</value></data>
+  <data name="TaskDetailsNoEd2kIdentity" xml:space="preserve"><value>该任务没有 ED2K 标识信息。</value></data>
+  <data name="TaskDetailsEd2kFileKind" xml:space="preserve"><value>ED2K 文件链接</value></data>
+  <data name="TaskDetailsEd2kNoAich" xml:space="preserve"><value>无 AICH</value></data>
+  <data name="TaskDetailsEd2kIdentityFormat" xml:space="preserve"><value>{0} · Part Hash {1} 个</value></data>
+  <data name="TaskDetailsEd2kOnlyStatus" xml:space="preserve"><value>该状态页当前仅显示 ED2K 网络明细。</value></data>
+  <data name="TaskDetailsEd2kServerFormat" xml:space="preserve"><value>已连接 {0} / 共 {1}</value></data>
+  <data name="TaskDetailsEd2kPeerFormat" xml:space="preserve"><value>共 {0} · 已接受 {1} · 排队 {2} · 无效 {3} · Low ID {4} · 等待回调 {5}</value></data>
+  <data name="TaskDetailsEd2kFirewalled" xml:space="preserve"><value>受防火墙限制</value></data>
+  <data name="TaskDetailsEd2kNotFirewalled" xml:space="preserve"><value>未检测到防火墙限制</value></data>
+  <data name="TaskDetailsEd2kFirewallUnknown" xml:space="preserve"><value>防火墙状态未知</value></data>
+  <data name="TaskDetailsEd2kKadFormat" xml:space="preserve"><value>节点 {0} · 路由 {1} · 已观察地址 {2} · {3}</value></data>
+  <data name="TaskDetailsEd2kUploadQueueFormat" xml:space="preserve"><value>上传中 {0} · 等待 {1} · 信用记录 {2}</value></data>
+  <data name="TaskDetailsEd2kSharingKind" xml:space="preserve"><value>ED2K 共享任务</value></data>
+  <data name="TaskDetailsEd2kDownloadKind" xml:space="preserve"><value>ED2K 下载任务</value></data>
   <data name="TaskStatusError" xml:space="preserve"><value>错误</value></data>
   <data name="TaskStatusRemoved" xml:space="preserve"><value>移除</value></data>
   <data name="DownloadSpeedPrefix" xml:space="preserve"><value>下行</value></data>
@@ -352,7 +380,7 @@
   <data name="ProxyTrackersCheckBox.Content" xml:space="preserve"><value>Tracker 同步</value></data>
   <data name="NetworkPortSectionHeader.Text" xml:space="preserve"><value>端口</value></data>
   <data name="UpnpSettingCard.Header" xml:space="preserve"><value>UPnP/NAT-PMP</value></data>
-  <data name="UpnpSettingCard.Description" xml:space="preserve"><value>保存端口映射偏好；当前 Windows 版 aria2 启动参数会使用下方端口。</value></data>
+  <data name="UpnpSettingCard.Description" xml:space="preserve"><value>尝试通过 UPnP 映射 ED2K TCP/UDP 端口；路由器不支持时不会阻止引擎启动。</value></data>
   <data name="BtPortSettingCard.Header" xml:space="preserve"><value>BT 监听端口</value></data>
   <data name="BtPortSettingCard.Description" xml:space="preserve"><value>用于接收 BitTorrent 对等连接。修改后需重启 aria2 生效。</value></data>
   <data name="RandomBtPortButton.ToolTipService.ToolTip" xml:space="preserve"><value>随机端口</value></data>
@@ -411,6 +439,10 @@
   <data name="AdvancedDefaultProgramsSectionHeader.Text" xml:space="preserve"><value>默认程序</value></data>
   <data name="ProtocolMagnetSettingCard.Header" xml:space="preserve"><value>magnet:// 链接</value></data>
   <data name="ProtocolMagnetSettingCard.Description" xml:space="preserve"><value>将磁力链接交给 OmniDown 打开。</value></data>
+  <data name="ClipboardEd2kToggleSwitch.AutomationProperties.Name" xml:space="preserve"><value>检测剪贴板中的 ED2K 链接</value></data>
+  <data name="ProtocolEd2kSettingCard.Header" xml:space="preserve"><value>ed2k:// 链接</value></data>
+  <data name="ProtocolEd2kSettingCard.Description" xml:space="preserve"><value>将 ED2K 文件链接交给 OmniDown 打开。</value></data>
+  <data name="ProtocolEd2kToggleSwitch.AutomationProperties.Name" xml:space="preserve"><value>将 ED2K 链接关联到 OmniDown</value></data>
   <data name="ProtocolThunderSettingCard.Header" xml:space="preserve"><value>thunder:// 链接</value></data>
   <data name="ProtocolThunderSettingCard.Description" xml:space="preserve"><value>将迅雷链接交给 OmniDown 打开。</value></data>
   <data name="ProtocolOmniDownSettingCard.Header" xml:space="preserve"><value>omnidown:// 扩展链接</value></data>
@@ -458,6 +490,7 @@
   <data name="AriaEngineExecutableNotFoundMessage" xml:space="preserve"><value>未找到 aria2 可执行文件，请在设置中导入引擎或选择有效的可执行文件。</value></data>
   <data name="AriaEngineStartFailedMessage" xml:space="preserve"><value>无法启动 aria2，请检查引擎文件及其权限。</value></data>
   <data name="AriaEngineRpcPortNotReadyMessage" xml:space="preserve"><value>aria2 已启动，但 RPC 端口未就绪，请检查端口是否被占用。</value></data>
+  <data name="AriaEnginePortConflictMessage" xml:space="preserve"><value>ED2K TCP 或 UDP 端口已被占用，请在 ED2K 设置中更换端口。</value></data>
   <data name="AriaEngineRpcUnavailableMessage" xml:space="preserve"><value>aria2 已启动，但 OmniDown 无法连接其 RPC 服务，请重启引擎并检查 RPC 设置。</value></data>
   <data name="TaskStatusErrorWithReason" xml:space="preserve"><value>错误：{0}</value></data>
   <data name="TaskStatusErrorWithCode" xml:space="preserve"><value>错误（代码 {0}）：{1}</value></data>

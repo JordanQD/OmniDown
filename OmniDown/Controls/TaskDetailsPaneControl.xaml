@@ -698,20 +698,64 @@
                         x:Name="TaskDetailsSourceContent"
                         Spacing="0"
                         Visibility="Collapsed">
-                        <TextBlock
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="来源明细尚未接入。"
-                            TextWrapping="WrapWholeWords" />
+                        <StackPanel>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock x:Uid="TaskDetailsSourceKindLabel" Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="来源类型" />
+                                    <TextBlock x:Name="TaskDetailsSourceKindText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock x:Uid="TaskDetailsEd2kLinkLabel" Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="ED2K 链接" />
+                                    <TextBlock x:Name="TaskDetailsEd2kLinkText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock x:Uid="TaskDetailsEd2kHashLabel" Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="文件 Hash" />
+                                    <TextBlock x:Name="TaskDetailsEd2kHashText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Padding="0,8">
+                                <StackPanel Spacing="4">
+                                    <TextBlock x:Uid="TaskDetailsEd2kIdentityLabel" Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="校验信息" />
+                                    <TextBlock x:Name="TaskDetailsEd2kIdentityText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
                     </StackPanel>
 
                     <StackPanel
                         x:Name="TaskDetailsStatusContent"
                         Spacing="0"
                         Visibility="Collapsed">
-                        <TextBlock
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="BT 状态明细尚未接入。"
-                            TextWrapping="WrapWholeWords" />
+                        <StackPanel>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock x:Uid="TaskDetailsEd2kServerLabel" Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="服务器" />
+                                    <TextBlock x:Name="TaskDetailsEd2kServerText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock x:Uid="TaskDetailsEd2kPeerLabel" Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="Peer" />
+                                    <TextBlock x:Name="TaskDetailsEd2kPeerText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource TaskDetailsPropertyRowBorderStyle}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock x:Uid="TaskDetailsEd2kKadLabel" Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="Kad / 防火墙" />
+                                    <TextBlock x:Name="TaskDetailsEd2kKadText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Padding="0,8">
+                                <StackPanel Spacing="4">
+                                    <TextBlock x:Uid="TaskDetailsEd2kUploadQueueLabel" Style="{StaticResource TaskDetailsPropertyNameTextBlockStyle}" Text="上传队列" />
+                                    <TextBlock x:Name="TaskDetailsEd2kUploadQueueText" Style="{StaticResource TaskDetailsPropertyValueTextBlockStyle}" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
                     </StackPanel>
 
                     <StackPanel

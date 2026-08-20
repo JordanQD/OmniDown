@@ -114,6 +114,13 @@ namespace OmniDown
                     tasks => _downloadCoordinator.RecoverAsync(tasks, GetDefaultRecoverySplitCount()),
                     Strings.Get("TasksRecoveredMessage"));
             }
+            else if (task.IsSharing)
+            {
+                await RunTaskOperationAsync(
+                    task,
+                    tasks => _downloadCoordinator.StopEd2kSharingAsync(tasks),
+                    Strings.Get("Ed2kSharingStoppedMessage"));
+            }
             else if (task.IsPaused)
             {
                 await RunTaskOperationAsync(
@@ -377,6 +384,18 @@ namespace OmniDown
             DownloadTask[] activeTasks = selectedTasks.Where(IsActiveTransferTask).ToArray();
             DownloadTask[] pausedTasks = selectedTasks.Where(IsPausedTask).ToArray();
             DownloadTask[] recoverableTasks = selectedTasks.Where(IsRecoverableTask).ToArray();
+            DownloadTask[] sharingTasks = selectedTasks.Where(task => task.IsSharing && task.IsEd2kTransfer).ToArray();
+
+            if (sharingTasks.Length > 0)
+            {
+                flyout.Items.Add(CreateTaskContextMenuItem(
+                    Strings.Get("StopSharingActionText"),
+                    "\uE71A",
+                    async () => await RunTaskOperationSetAsync(
+                        sharingTasks,
+                        tasks => _downloadCoordinator.StopEd2kSharingAsync(tasks),
+                        Strings.Get("Ed2kSharingStoppedMessage"))));
+            }
 
             if (activeTasks.Length > 0)
             {

@@ -70,6 +70,13 @@ public sealed class DownloadCoordinator
         if (ed2kLink is not null)
         {
             task.TotalLength = ed2kLink.FileSize;
+            task.Ed2kInfo = new Ed2kTaskInfo
+            {
+                Ed2kLink = ed2kLink.OriginalLink,
+                Hash = ed2kLink.FileHash,
+                Name = ed2kLink.DisplayName,
+                Length = ed2kLink.FileSize.ToString(CultureInfo.InvariantCulture)
+            };
         }
 
         _tasks.Insert(0, task);
@@ -185,6 +192,7 @@ public sealed class DownloadCoordinator
         }
 
         ThrowIfOnlyDetachedTasks(operatedCount, detachedCount);
+        await SaveAria2SessionAsync(cancellationToken);
     }
 
     public async Task ResumeAsync(IEnumerable<DownloadTask> tasks, CancellationToken cancellationToken = default)
@@ -215,6 +223,24 @@ public sealed class DownloadCoordinator
         }
 
         ThrowIfOnlyDetachedTasks(operatedCount, detachedCount);
+        await SaveAria2SessionAsync(cancellationToken);
+    }
+
+    public async Task StopEd2kSharingAsync(
+        IEnumerable<DownloadTask> tasks,
+        CancellationToken cancellationToken = default)
+    {
+        foreach (DownloadTask task in tasks.Where(task => task.IsSharing && task.IsEd2kTransfer).ToArray())
+        {
+            await StopEd2kSharingTaskAsync(task, cancellationToken);
+            task.Status = "Completed";
+            task.IsAria2SessionAttached = false;
+            task.DownloadSpeed = 0;
+            task.UploadSpeed = 0;
+        }
+
+        SaveTaskCache();
+        await SaveAria2SessionAsync(cancellationToken);
     }
 
     public async Task RecoverAsync(IEnumerable<DownloadTask> tasks, int splitCount = 16, CancellationToken cancellationToken = default)
@@ -309,6 +335,11 @@ public sealed class DownloadCoordinator
         {
             await RemoveTaskFromAria2Async(task, cancellationToken);
 
+            if (task.IsEd2kTransfer)
+            {
+                DeleteControlFiles(task, remoteTask: null);
+            }
+
             if (deleteFiles)
             {
                 DeleteLocalFiles(task);
@@ -325,6 +356,12 @@ public sealed class DownloadCoordinator
     {
         if (!task.IsAria2SessionAttached)
         {
+            return;
+        }
+
+        if (task.IsSharing && task.IsEd2kTransfer)
+        {
+            await StopEd2kSharingTaskAsync(task, cancellationToken);
             return;
         }
 
@@ -366,6 +403,22 @@ public sealed class DownloadCoordinator
         }
     }
 
+    private async Task StopEd2kSharingTaskAsync(DownloadTask task, CancellationToken cancellationToken)
+    {
+        await _rpcClient.ForcePauseAsync(task.Gid, cancellationToken);
+        await _rpcClient.RemoveAsync(task.Gid, cancellationToken);
+        try
+        {
+            await _rpcClient.RemoveDownloadResultAsync(task.Gid, cancellationToken);
+        }
+        catch (Exception ex) when (IsGidNotFoundException(ex))
+        {
+            // remove may purge the result immediately on some aria2-next builds.
+        }
+
+        DeleteControlFiles(task, remoteTask: null);
+    }
+
     public async Task<int> ClearCompletedAsync(bool deleteFiles = false, CancellationToken cancellationToken = default)
     {
         DownloadTask[] completedTasks = _tasks
@@ -374,6 +427,11 @@ public sealed class DownloadCoordinator
 
         foreach (DownloadTask task in completedTasks)
         {
+            if (task.IsEd2kTransfer)
+            {
+                DeleteControlFiles(task, remoteTask: null);
+            }
+
             if (deleteFiles)
             {
                 DeleteLocalFiles(task);
@@ -528,7 +586,7 @@ public sealed class DownloadCoordinator
             return;
         }
 
-        DownloadTask? task = _tasks.FirstOrDefault(item => item.Gid == remoteTask.Gid);
+        DownloadTask? task = FindMatchingTask(remoteTask);
         if (task is null)
         {
             task = new DownloadTask
@@ -541,12 +599,17 @@ public sealed class DownloadCoordinator
             };
             _tasks.Add(task);
         }
+        else if (!task.Gid.Equals(remoteTask.Gid, StringComparison.OrdinalIgnoreCase))
+        {
+            task.Gid = remoteTask.Gid;
+        }
 
         task.IsAria2SessionAttached = true;
         long totalLength = ParseLong(remoteTask.TotalLength);
         long completedLength = ParseLong(remoteTask.CompletedLength);
-        string normalizedStatus = NormalizeStatus(remoteTask.Status);
+        string normalizedStatus = NormalizeStatus(remoteTask);
         bool isDownloading = normalizedStatus.Contains("download", StringComparison.OrdinalIgnoreCase);
+        bool isActive = remoteTask.Status.Equals("active", StringComparison.OrdinalIgnoreCase);
         if (ShouldPersistPendingStatus(task.Status, normalizedStatus))
         {
             task.Status = normalizedStatus;
@@ -561,12 +624,13 @@ public sealed class DownloadCoordinator
             task.CompletedLength = completedLength;
         }
 
-        task.DownloadSpeed = isDownloading ? ParseLong(remoteTask.DownloadSpeed) : 0;
-        task.UploadSpeed = isDownloading ? ParseLong(remoteTask.UploadSpeed) : 0;
+        task.DownloadSpeed = isActive ? ParseLong(remoteTask.DownloadSpeed) : 0;
+        task.UploadSpeed = isActive ? ParseLong(remoteTask.UploadSpeed) : 0;
         task.ErrorCode = remoteTask.ErrorCode;
         task.ErrorMessage = remoteTask.ErrorMessage;
         task.IsPeerTransfer = IsPeerTransfer(remoteTask);
         task.IsMetadataTransfer = IsMetadataTransfer(remoteTask);
+        task.Ed2kInfo = remoteTask.Ed2k;
         task.Progress = task.TotalLength <= 0 ? task.Progress : Math.Clamp(task.CompletedLength * 100d / task.TotalLength, 0, 100);
 
         string resolvedRemoteName = ResolveRemoteName(remoteTask);
@@ -646,8 +710,20 @@ public sealed class DownloadCoordinator
 
     private static string NormalizeCachedStatus(string status)
     {
-        if (status.Equals("Pausing", StringComparison.OrdinalIgnoreCase) ||
-            status.Equals("Resuming", StringComparison.OrdinalIgnoreCase))
+        if (status.Equals("Sharing", StringComparison.OrdinalIgnoreCase))
+        {
+            // Sharing is live engine state. Treat the cached record as completed until aria2 confirms it again.
+            return "Completed";
+        }
+
+        if (status.Equals("Pausing", StringComparison.OrdinalIgnoreCase))
+        {
+            // A persisted pause request represents user intent. aria2 remains the
+            // source of truth and will confirm the status during the first refresh.
+            return "Paused";
+        }
+
+        if (status.Equals("Resuming", StringComparison.OrdinalIgnoreCase))
         {
             return "Waiting";
         }
@@ -864,6 +940,27 @@ public sealed class DownloadCoordinator
             .FirstOrDefault(uri => !string.IsNullOrWhiteSpace(uri)) ?? string.Empty;
     }
 
+    private DownloadTask? FindMatchingTask(Aria2TaskStatus remoteTask)
+    {
+        DownloadTask? byGid = _tasks.FirstOrDefault(item =>
+            item.Gid.Equals(remoteTask.Gid, StringComparison.OrdinalIgnoreCase));
+        if (byGid is not null || remoteTask.Ed2k is null)
+        {
+            return byGid;
+        }
+
+        string hash = remoteTask.Ed2k.Hash.Trim();
+        string link = NormalizeEd2kLink(remoteTask.Ed2k.Ed2kLink);
+        return _tasks.FirstOrDefault(item =>
+            (!string.IsNullOrWhiteSpace(hash) &&
+                hash.Equals(item.Ed2kInfo?.Hash, StringComparison.OrdinalIgnoreCase)) ||
+            (!string.IsNullOrWhiteSpace(link) &&
+                link.Equals(NormalizeEd2kLink(item.Ed2kInfo?.Ed2kLink ?? item.SourceUri), StringComparison.OrdinalIgnoreCase)));
+    }
+
+    private static string NormalizeEd2kLink(string? link) =>
+        (link ?? string.Empty).Trim().TrimEnd('/').ToLowerInvariant();
+
     private static bool IsPlaceholderTaskName(string name)
     {
         return name.Equals("New download", StringComparison.OrdinalIgnoreCase) ||
@@ -915,6 +1012,32 @@ public sealed class DownloadCoordinator
             "removed" => "Removed",
             _ => status
         };
+    }
+
+    private static string NormalizeStatus(Aria2TaskStatus task)
+    {
+        if (task.Status.Equals("active", StringComparison.OrdinalIgnoreCase) &&
+            task.Ed2k is not null &&
+            task.Seeder.Equals("true", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Sharing";
+        }
+
+        return NormalizeStatus(task.Status);
+    }
+
+    private static string GetCachedIdentity(CachedDownloadTask task)
+    {
+        string hash = task.Ed2kInfo?.Hash?.Trim() ?? string.Empty;
+        if (!string.IsNullOrWhiteSpace(hash))
+        {
+            return $"ed2k-hash:{hash.ToLowerInvariant()}";
+        }
+
+        string link = NormalizeEd2kLink(task.Ed2kInfo?.Ed2kLink ?? task.SourceUri);
+        return !string.IsNullOrWhiteSpace(link) && link.StartsWith("ed2k://", StringComparison.Ordinal)
+            ? $"ed2k-link:{link}"
+            : $"gid:{task.Gid}";
     }
 
     private static long ParseLong(string value)
@@ -984,9 +1107,15 @@ public sealed class DownloadCoordinator
 
         DeleteFileIfExists(path);
         DeleteFileIfExists($"{path}.aria2");
+
+        if (!string.IsNullOrWhiteSpace(task.SaveDirectory) &&
+            !string.IsNullOrWhiteSpace(task.Ed2kInfo?.Hash))
+        {
+            TryDeleteFileIfExists(Path.Combine(task.SaveDirectory, $"{task.Ed2kInfo.Hash}.aria2"));
+        }
     }
 
-    private static void DeleteControlFiles(DownloadTask task, Aria2TaskStatus remoteTask)
+    private static void DeleteControlFiles(DownloadTask task, Aria2TaskStatus? remoteTask)
     {
         HashSet<string> candidatePaths = new(StringComparer.OrdinalIgnoreCase);
         AddControlFileCandidate(candidatePaths, task.LocalFilePath);
@@ -997,9 +1126,15 @@ public sealed class DownloadCoordinator
             AddControlFileCandidate(candidatePaths, Path.Combine(task.SaveDirectory, task.Name));
         }
 
-        foreach (Aria2FileStatus file in remoteTask.Files)
+        foreach (Aria2FileStatus file in remoteTask?.Files ?? [])
         {
             AddControlFileCandidate(candidatePaths, file.Path);
+        }
+
+        if (!string.IsNullOrWhiteSpace(task.SaveDirectory) &&
+            !string.IsNullOrWhiteSpace(task.Ed2kInfo?.Hash))
+        {
+            AddControlFileCandidate(candidatePaths, Path.Combine(task.SaveDirectory, task.Ed2kInfo.Hash));
         }
 
         foreach (string candidatePath in candidatePaths)
@@ -1074,9 +1209,12 @@ public sealed class DownloadCoordinator
                 return;
             }
 
-            foreach (CachedDownloadTask cachedTask in cachedTasks.Where(task =>
-                !string.IsNullOrWhiteSpace(task.Gid) &&
-                !task.Status.Contains("removed", StringComparison.OrdinalIgnoreCase)))
+            foreach (CachedDownloadTask cachedTask in cachedTasks
+                .Where(task =>
+                    !string.IsNullOrWhiteSpace(task.Gid) &&
+                    !task.Status.Contains("removed", StringComparison.OrdinalIgnoreCase))
+                .GroupBy(GetCachedIdentity, StringComparer.OrdinalIgnoreCase)
+                .Select(group => group.First()))
             {
                 _tasks.Add(new DownloadTask
                 {
@@ -1091,6 +1229,7 @@ public sealed class DownloadCoordinator
                     TotalLength = cachedTask.TotalLength,
                     IsPeerTransfer = cachedTask.IsPeerTransfer,
                     IsMetadataTransfer = cachedTask.IsMetadataTransfer,
+                    Ed2kInfo = cachedTask.Ed2kInfo,
                     IsAria2SessionAttached = false,
                     CreatedAt = cachedTask.CreatedAt
                 });
@@ -1123,7 +1262,10 @@ public sealed class DownloadCoordinator
                     task.TotalLength,
                     task.IsPeerTransfer,
                     task.IsMetadataTransfer,
+                    task.Ed2kInfo,
                     task.CreatedAt))
+                .GroupBy(GetCachedIdentity, StringComparer.OrdinalIgnoreCase)
+                .Select(group => group.First())
                 .ToList();
 
             File.WriteAllText(_taskCachePath, JsonSerializer.Serialize(cachedTasks, new JsonSerializerOptions
@@ -1270,4 +1412,5 @@ internal sealed record CachedDownloadTask(
     long TotalLength,
     bool IsPeerTransfer,
     bool IsMetadataTransfer,
+    Ed2kTaskInfo? Ed2kInfo,
     DateTimeOffset CreatedAt);

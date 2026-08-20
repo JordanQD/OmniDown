@@ -21,6 +21,7 @@ public sealed class Aria2EngineHost : IDisposable
 {
     private Process? _process;
     private readonly Queue<string> _recentOutput = new();
+    private readonly UpnpPortMappingService _upnpPortMappingService = new();
     private bool _isAria2Next;
 
     public bool IsRunning => _process is { HasExited: false };
@@ -75,8 +76,35 @@ public sealed class Aria2EngineHost : IDisposable
         AppLogger.Configure(options.AdvancedSettings.LogLevel);
         AppLogger.PrepareLogFile(AppPaths.Aria2LogPath);
         AppLogger.Info("Aria2Engine", $"starting executable={resolvedPath} rpcPort={options.RpcPort} downloadDir={options.DownloadDirectory}");
-        RemoveStaleTasksFromSession(appDataDirectory, options.EngineType);
+
         await CleanupRpcPortAsync(options.RpcPort);
+        if (!await WaitForTcpPortAvailableAsync(options.RpcPort))
+        {
+            return Aria2EngineStartResult.Failure(
+                Aria2EngineStartFailureKind.RpcPortNotReady,
+                $"aria2 RPC port {options.RpcPort} is still in use after stale-engine cleanup.");
+        }
+
+        if (_isAria2Next)
+        {
+            int ed2kTcpPort = options.Ed2kSettings.ListenPort;
+            int ed2kUdpPort = options.Ed2kSettings.UdpListenPort;
+            if (!PortAvailabilityService.IsTcpAvailable(ed2kTcpPort))
+            {
+                return Aria2EngineStartResult.Failure(
+                    Aria2EngineStartFailureKind.PortConflict,
+                    $"ED2K TCP port {ed2kTcpPort} is already in use.");
+            }
+
+            if (!PortAvailabilityService.IsUdpAvailable(ed2kUdpPort))
+            {
+                return Aria2EngineStartResult.Failure(
+                    Aria2EngineStartFailureKind.PortConflict,
+                    $"ED2K UDP port {ed2kUdpPort} is already in use.");
+            }
+        }
+
+        RemoveStaleTasksFromSession(appDataDirectory, options.EngineType);
 
         var startInfo = new ProcessStartInfo
         {
@@ -127,6 +155,12 @@ public sealed class Aria2EngineHost : IDisposable
             }
 
             DiagnosticText = $"aria2 RPC is listening on 127.0.0.1:{options.RpcPort}.";
+            if (_isAria2Next && options.NetworkSettings.EnableUpnp)
+            {
+                await _upnpPortMappingService.ConfigureEd2kAsync(
+                    options.Ed2kSettings.ListenPort,
+                    options.Ed2kSettings.UdpListenPort);
+            }
             AppLogger.Info("Aria2Engine", $"started pid={_process.Id} rpcPort={options.RpcPort}");
             return Aria2EngineStartResult.Success($"aria2 started, PID {_process.Id}.", resolvedPath, _process.Id);
         }
@@ -143,6 +177,7 @@ public sealed class Aria2EngineHost : IDisposable
 
     public void Stop()
     {
+        _upnpPortMappingService.Dispose();
         if (_process is null)
         {
             return;
@@ -154,6 +189,7 @@ public sealed class Aria2EngineHost : IDisposable
             {
                 AppLogger.Info("Aria2Engine", $"stopping pid={_process.Id}");
                 _process.Kill(entireProcessTree: true);
+                _process.WaitForExit(2000);
             }
 
             _process.Dispose();
@@ -161,6 +197,7 @@ public sealed class Aria2EngineHost : IDisposable
         }
         finally
         {
+            _upnpPortMappingService.Dispose();
             _process = null;
         }
     }
@@ -189,6 +226,7 @@ public sealed class Aria2EngineHost : IDisposable
             using CancellationTokenSource cts = new(TimeSpan.FromSeconds(5));
             await _process.WaitForExitAsync(cts.Token);
             AppLogger.Info("Aria2Engine", $"process exited gracefully pid={_process.Id} code={_process.ExitCode}");
+            _upnpPortMappingService.Dispose();
             _process.Dispose();
             _process = null;
         }
@@ -231,6 +269,7 @@ public sealed class Aria2EngineHost : IDisposable
     public void Dispose()
     {
         Stop();
+        _upnpPortMappingService.Dispose();
         _process?.Dispose();
     }
 
@@ -691,6 +730,7 @@ public sealed class Aria2EngineHost : IDisposable
             string output = await netstat.StandardOutput.ReadToEndAsync();
             await netstat.WaitForExitAsync();
 
+            HashSet<int> listenerProcessIds = [];
             foreach (string line in output.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries))
             {
                 string[] parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -702,6 +742,11 @@ public sealed class Aria2EngineHost : IDisposable
                     continue;
                 }
 
+                listenerProcessIds.Add(pid);
+            }
+
+            foreach (int pid in listenerProcessIds)
+            {
                 TryKillLeftoverAria2Process(pid);
             }
         }
@@ -712,18 +757,35 @@ public sealed class Aria2EngineHost : IDisposable
         }
     }
 
+    private static async Task<bool> WaitForTcpPortAvailableAsync(int port)
+    {
+        for (int attempt = 0; attempt < 20; attempt++)
+        {
+            if (PortAvailabilityService.IsTcpAvailable(port))
+            {
+                return true;
+            }
+
+            await Task.Delay(100);
+        }
+
+        return PortAvailabilityService.IsTcpAvailable(port);
+    }
+
     private static void TryKillLeftoverAria2Process(int pid)
     {
         try
         {
             using Process process = Process.GetProcessById(pid);
-            if (!process.ProcessName.Contains("aria2c", StringComparison.OrdinalIgnoreCase))
+            if (!process.ProcessName.Equals("aria2c", StringComparison.OrdinalIgnoreCase) &&
+                !process.ProcessName.Equals("aria2-next", StringComparison.OrdinalIgnoreCase))
             {
                 return;
             }
 
+            AppLogger.Warning("Aria2Engine", $"stopping stale {process.ProcessName} process pid={pid}");
             process.Kill(entireProcessTree: true);
-            process.WaitForExit(1000);
+            process.WaitForExit(2000);
         }
         catch
         {

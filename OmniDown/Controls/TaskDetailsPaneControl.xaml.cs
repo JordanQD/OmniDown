@@ -2,6 +2,9 @@ using CommunityToolkit.WinUI.Animations;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using OmniDown.Models;
+using OmniDown.Services.Downloads;
+using OmniDown.Services.Localization;
+using OmniDown.Services.Rpc;
 using OmniDown.ViewModels;
 using System;
 using System.ComponentModel;
@@ -203,6 +206,8 @@ public sealed partial class TaskDetailsPaneControl : UserControl
         RefreshOptionDetails(task);
         RefreshPeerDetails(task);
         RefreshTrackerDetails(task);
+        RefreshSourceDetails(task);
+        RefreshStatusDetails(task);
 
         ShowTaskDetailsSection(SelectedSectionTag);
     }
@@ -227,14 +232,85 @@ public sealed partial class TaskDetailsPaneControl : UserControl
 
     private void RefreshPeerDetails(DownloadTask task)
     {
-        TaskDetailsPeerModeText.Text = task.IsPeerTransfer
+        TaskDetailsPeerModeText.Text = task.IsEd2kTransfer
+            ? Strings.Get("TaskDetailsEd2kPeerMode")
+            : task.IsPeerTransfer
             ? task.IsMetadataTransfer ? "BitTorrent 元数据获取" : "BitTorrent / 磁力传输"
             : "普通 HTTP/FTP 下载";
         TaskDetailsPeerUploadText.Text = task.UploadSpeedText;
         TaskDetailsPeerDownloadText.Text = task.DownloadSpeedText;
-        TaskDetailsPeerDetailText.Text = task.IsPeerTransfer
+        TaskDetailsPeerDetailText.Text = task.IsEd2kTransfer
+            ? Strings.Get("TaskDetailsEd2kPeerHint")
+            : task.IsPeerTransfer
             ? "节点列表尚未接入 aria2.getPeers；当前可查看该任务的上下行速度和传输模式。"
             : "该任务不是 BT 或磁力传输，通常没有 Peer 节点。";
+    }
+
+    private void RefreshSourceDetails(DownloadTask task)
+    {
+        Ed2kTaskInfo? info = task.Ed2kInfo;
+        if (!task.IsEd2kTransfer)
+        {
+            TaskDetailsSourceKindText.Text = Strings.Get("TaskDetailsSourceUriKind");
+            TaskDetailsEd2kLinkText.Text = string.IsNullOrWhiteSpace(task.SourceUri) ? "-" : task.SourceUri;
+            TaskDetailsEd2kHashText.Text = "-";
+            TaskDetailsEd2kIdentityText.Text = Strings.Get("TaskDetailsNoEd2kIdentity");
+            return;
+        }
+
+        TaskDetailsSourceKindText.Text = Strings.Get("TaskDetailsEd2kFileKind");
+        TaskDetailsEd2kLinkText.Text = FirstNonEmpty(info?.Ed2kLink, task.SourceUri);
+        TaskDetailsEd2kHashText.Text = FirstNonEmpty(info?.Hash, ResolveEd2kHash(task.SourceUri));
+        string aich = string.IsNullOrWhiteSpace(info?.AichRoot)
+            ? Strings.Get("TaskDetailsEd2kNoAich")
+            : $"AICH {info.AichRoot}";
+        TaskDetailsEd2kIdentityText.Text = Strings.Format(
+            "TaskDetailsEd2kIdentityFormat",
+            aich,
+            ParseEd2kCount(info?.PartHashCount));
+    }
+
+    private void RefreshStatusDetails(DownloadTask task)
+    {
+        Ed2kTaskInfo? info = task.Ed2kInfo;
+        if (!task.IsEd2kTransfer || info is null)
+        {
+            TaskDetailsEd2kServerText.Text = Strings.Get("TaskDetailsEd2kOnlyStatus");
+            TaskDetailsEd2kPeerText.Text = "-";
+            TaskDetailsEd2kKadText.Text = "-";
+            TaskDetailsEd2kUploadQueueText.Text = "-";
+            return;
+        }
+
+        TaskDetailsEd2kServerText.Text = Strings.Format(
+            "TaskDetailsEd2kServerFormat",
+            ParseEd2kCount(info.ConnectedServerCount),
+            ParseEd2kCount(info.ServerCount));
+        TaskDetailsEd2kPeerText.Text = Strings.Format(
+            "TaskDetailsEd2kPeerFormat",
+            ParseEd2kCount(info.PeerCount),
+            ParseEd2kCount(info.AcceptedPeerCount),
+            ParseEd2kCount(info.QueuedPeerCount),
+            ParseEd2kCount(info.DeadPeerCount),
+            ParseEd2kCount(info.LowIdPeerCount),
+            ParseEd2kCount(info.CallbackWaitingPeerCount));
+        string firewall = info.KadFirewalled switch
+        {
+            true => Strings.Get("TaskDetailsEd2kFirewalled"),
+            false => Strings.Get("TaskDetailsEd2kNotFirewalled"),
+            null => Strings.Get("TaskDetailsEd2kFirewallUnknown")
+        };
+        TaskDetailsEd2kKadText.Text = Strings.Format(
+            "TaskDetailsEd2kKadFormat",
+            ParseEd2kCount(info.KadNodeCount),
+            ParseEd2kCount(info.KadRouterCount),
+            ParseEd2kCount(info.KadObservedAddressCount),
+            firewall);
+        TaskDetailsEd2kUploadQueueText.Text = Strings.Format(
+            "TaskDetailsEd2kUploadQueueFormat",
+            ParseEd2kCount(info.UploadingPeerCount),
+            ParseEd2kCount(info.WaitingUploadPeerCount),
+            ParseEd2kCount(info.PeerCreditCount));
     }
 
     private void RefreshTrackerDetails(DownloadTask task)
@@ -388,7 +464,7 @@ public sealed partial class TaskDetailsPaneControl : UserControl
         SetSelectorItemVisible(TaskDetailsFilesItem, mode != DetailPaneMode.Overview);
         SetSelectorItemVisible(TaskDetailsOptionsItem, mode != DetailPaneMode.Overview);
         SetSelectorItemVisible(TaskDetailsSourceItem, mode is DetailPaneMode.Normal or DetailPaneMode.Ed2k);
-        SetSelectorItemVisible(TaskDetailsStatusItem, mode is DetailPaneMode.Magnet or DetailPaneMode.Ed2k);
+        SetSelectorItemVisible(TaskDetailsStatusItem, mode == DetailPaneMode.Ed2k);
         SetSelectorItemVisible(TaskDetailsPeersItem, mode == DetailPaneMode.Magnet);
         SetSelectorItemVisible(TaskDetailsTrackersItem, mode == DetailPaneMode.Magnet);
 
@@ -460,6 +536,11 @@ public sealed partial class TaskDetailsPaneControl : UserControl
 
     private static string ResolveTaskTypeText(DownloadTask task)
     {
+        if (task.IsEd2kTransfer)
+        {
+            return Strings.Get(task.IsSharing ? "TaskDetailsEd2kSharingKind" : "TaskDetailsEd2kDownloadKind");
+        }
+
         if (task.IsPeerTransfer)
         {
             return task.IsMetadataTransfer ? "磁力链接元数据任务" : "BT / 磁力任务";
@@ -473,6 +554,15 @@ public sealed partial class TaskDetailsPaneControl : UserControl
 
         return "下载任务";
     }
+
+    private static string FirstNonEmpty(string? primary, string? fallback) =>
+        !string.IsNullOrWhiteSpace(primary) ? primary : string.IsNullOrWhiteSpace(fallback) ? "-" : fallback;
+
+    private static int ParseEd2kCount(string? value) =>
+        int.TryParse(value, out int result) && result > 0 ? result : 0;
+
+    private static string ResolveEd2kHash(string sourceUri) =>
+        Ed2kLinkParser.TryParseFileLink(sourceUri, out Ed2kFileLink? link) ? link!.FileHash : string.Empty;
 
     private static DetailPaneMode ResolveDetailPaneMode(DownloadTask task)
     {

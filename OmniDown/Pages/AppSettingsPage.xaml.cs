@@ -402,10 +402,13 @@ public sealed partial class AppSettingsPage : Page
     internal ToggleSwitch ClipboardHttpToggleSwitchControl => AdvancedSettingsContentControl.ClipboardHttpToggleSwitchControl;
     internal ToggleSwitch ClipboardFtpToggleSwitchControl => AdvancedSettingsContentControl.ClipboardFtpToggleSwitchControl;
     internal ToggleSwitch ClipboardMagnetToggleSwitchControl => AdvancedSettingsContentControl.ClipboardMagnetToggleSwitchControl;
+    internal ToggleSwitch ClipboardEd2kToggleSwitchControl => AdvancedSettingsContentControl.ClipboardEd2kToggleSwitchControl;
     internal ToggleSwitch ClipboardThunderToggleSwitchControl => AdvancedSettingsContentControl.ClipboardThunderToggleSwitchControl;
     internal ToggleSwitch ClipboardBtHashToggleSwitchControl => AdvancedSettingsContentControl.ClipboardBtHashToggleSwitchControl;
     internal ToggleSwitch ProtocolMagnetToggleSwitchControl => AdvancedSettingsContentControl.ProtocolMagnetToggleSwitchControl;
     internal TextBlock ProtocolMagnetStateTextControl => AdvancedSettingsContentControl.ProtocolMagnetStateTextControl;
+    internal ToggleSwitch ProtocolEd2kToggleSwitchControl => AdvancedSettingsContentControl.ProtocolEd2kToggleSwitchControl;
+    internal TextBlock ProtocolEd2kStateTextControl => AdvancedSettingsContentControl.ProtocolEd2kStateTextControl;
     internal ToggleSwitch ProtocolThunderToggleSwitchControl => AdvancedSettingsContentControl.ProtocolThunderToggleSwitchControl;
     internal TextBlock ProtocolThunderStateTextControl => AdvancedSettingsContentControl.ProtocolThunderStateTextControl;
     internal ToggleSwitch ProtocolOmniDownToggleSwitchControl => AdvancedSettingsContentControl.ProtocolOmniDownToggleSwitchControl;

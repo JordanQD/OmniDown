@@ -65,14 +65,20 @@ internal sealed class AppSettingsStore
     public AdvancedSettings ReadAdvancedSettings()
     {
         AdvancedSettings settings = Read(_advancedSettingsPath, AdvancedSettings.Default);
-        if (settings.EngineType == default(Aria2EngineType) && File.Exists(_advancedSettingsPath))
+        if (File.Exists(_advancedSettingsPath))
         {
             try
             {
                 string json = File.ReadAllText(_advancedSettingsPath);
-                if (!json.Contains("\"EngineType\"", StringComparison.OrdinalIgnoreCase))
+                if (settings.EngineType == default(Aria2EngineType) &&
+                    !json.Contains("\"EngineType\"", StringComparison.OrdinalIgnoreCase))
                 {
                     settings = settings with { EngineType = Aria2EngineType.Aria2Next };
+                }
+
+                if (!json.Contains("\"ClipboardEd2kEnabled\"", StringComparison.OrdinalIgnoreCase))
+                {
+                    settings = settings with { ClipboardEd2kEnabled = AdvancedSettings.Default.ClipboardEd2kEnabled };
                 }
             }
             catch

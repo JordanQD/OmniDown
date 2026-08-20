@@ -85,6 +85,7 @@ internal static class NewDownloadDialogHelpers
         bool httpEnabled = settings?.ClipboardHttpEnabled ?? true;
         bool ftpEnabled = settings?.ClipboardFtpEnabled ?? true;
         bool magnetEnabled = settings?.ClipboardMagnetEnabled ?? true;
+        bool ed2kEnabled = settings?.ClipboardEd2kEnabled ?? true;
         bool thunderEnabled = settings?.ClipboardThunderEnabled ?? false;
         bool btHashEnabled = settings?.ClipboardBtHashEnabled ?? false;
 
@@ -96,6 +97,11 @@ internal static class NewDownloadDialogHelpers
         if (text.StartsWith("thunder://", StringComparison.OrdinalIgnoreCase))
         {
             return thunderEnabled ? text : null;
+        }
+
+        if (text.StartsWith("ed2k://", StringComparison.OrdinalIgnoreCase))
+        {
+            return ed2kEnabled && Ed2kLinkParser.TryParseFileLink(text, out _) ? text : null;
         }
 
         if (btHashEnabled && IsLikelyBtHash(text))

@@ -115,10 +115,13 @@ namespace OmniDown
         private ToggleSwitch ClipboardHttpToggleSwitch => SettingsPage.ClipboardHttpToggleSwitchControl;
         private ToggleSwitch ClipboardFtpToggleSwitch => SettingsPage.ClipboardFtpToggleSwitchControl;
         private ToggleSwitch ClipboardMagnetToggleSwitch => SettingsPage.ClipboardMagnetToggleSwitchControl;
+        private ToggleSwitch ClipboardEd2kToggleSwitch => SettingsPage.ClipboardEd2kToggleSwitchControl;
         private ToggleSwitch ClipboardThunderToggleSwitch => SettingsPage.ClipboardThunderToggleSwitchControl;
         private ToggleSwitch ClipboardBtHashToggleSwitch => SettingsPage.ClipboardBtHashToggleSwitchControl;
         private ToggleSwitch ProtocolMagnetToggleSwitch => SettingsPage.ProtocolMagnetToggleSwitchControl;
         private TextBlock ProtocolMagnetStateText => SettingsPage.ProtocolMagnetStateTextControl;
+        private ToggleSwitch ProtocolEd2kToggleSwitch => SettingsPage.ProtocolEd2kToggleSwitchControl;
+        private TextBlock ProtocolEd2kStateText => SettingsPage.ProtocolEd2kStateTextControl;
         private ToggleSwitch ProtocolThunderToggleSwitch => SettingsPage.ProtocolThunderToggleSwitchControl;
         private TextBlock ProtocolThunderStateText => SettingsPage.ProtocolThunderStateTextControl;
         private ToggleSwitch ProtocolOmniDownToggleSwitch => SettingsPage.ProtocolOmniDownToggleSwitchControl;
@@ -228,12 +231,30 @@ namespace OmniDown
 
         private void RandomEd2kPortButton_Click(object sender, RoutedEventArgs e)
         {
-            Ed2kListenPortNumberBox.Value = Random.Shared.Next(29000, 30000);
+            Ed2kListenPortNumberBox.Value = FindAvailableEd2kPort(29000, 30000, udp: false);
         }
 
         private void RandomEd2kUdpPortButton_Click(object sender, RoutedEventArgs e)
         {
-            Ed2kUdpListenPortNumberBox.Value = Random.Shared.Next(30000, 31000);
+            Ed2kUdpListenPortNumberBox.Value = FindAvailableEd2kPort(30000, 31000, udp: true);
+        }
+
+        private static int FindAvailableEd2kPort(int minimum, int maximum, bool udp)
+        {
+            int start = Random.Shared.Next(minimum, maximum);
+            for (int offset = 0; offset < maximum - minimum; offset++)
+            {
+                int port = minimum + ((start - minimum + offset) % (maximum - minimum));
+                bool available = udp
+                    ? PortAvailabilityService.IsUdpAvailable(port)
+                    : PortAvailabilityService.IsTcpAvailable(port);
+                if (available)
+                {
+                    return port;
+                }
+            }
+
+            return start;
         }
 
         private async void SyncEd2kButton_Click(object sender, RoutedEventArgs e)
@@ -1204,10 +1225,12 @@ namespace OmniDown
             SetToggleSwitch(ClipboardHttpToggleSwitch, settings.ClipboardHttpEnabled);
             SetToggleSwitch(ClipboardFtpToggleSwitch, settings.ClipboardFtpEnabled);
             SetToggleSwitch(ClipboardMagnetToggleSwitch, settings.ClipboardMagnetEnabled);
+            SetToggleSwitch(ClipboardEd2kToggleSwitch, settings.ClipboardEd2kEnabled);
             SetToggleSwitch(ClipboardThunderToggleSwitch, settings.ClipboardThunderEnabled);
             SetToggleSwitch(ClipboardBtHashToggleSwitch, settings.ClipboardBtHashEnabled);
             ProtocolAssociationService.Synchronize(
                 settings.ProtocolMagnetEnabled,
+                settings.ProtocolEd2kEnabled,
                 settings.ProtocolThunderEnabled,
                 settings.ProtocolOmniDownEnabled);
             RefreshProtocolDefaultToggles();
@@ -1237,6 +1260,7 @@ namespace OmniDown
             if (sender is ToggleSwitch toggleSwitch &&
                 toggleSwitch.IsOn &&
                 (ReferenceEquals(toggleSwitch, ProtocolMagnetToggleSwitch) ||
+                    ReferenceEquals(toggleSwitch, ProtocolEd2kToggleSwitch) ||
                     ReferenceEquals(toggleSwitch, ProtocolThunderToggleSwitch) ||
                     ReferenceEquals(toggleSwitch, ProtocolOmniDownToggleSwitch)))
             {
@@ -1381,6 +1405,7 @@ namespace OmniDown
             AppLogger.Configure(_settingsPageViewModel.AdvancedSettings.LogLevel);
             ProtocolAssociationService.Synchronize(
                 settings.ProtocolMagnetEnabled,
+                settings.ProtocolEd2kEnabled,
                 settings.ProtocolThunderEnabled,
                 settings.ProtocolOmniDownEnabled);
             _rpcSecret = _settingsPageViewModel.AdvancedSettings.RpcSecret;
@@ -1409,9 +1434,11 @@ namespace OmniDown
                 ClipboardHttpToggleSwitch?.IsOn == true,
                 ClipboardFtpToggleSwitch?.IsOn == true,
                 ClipboardMagnetToggleSwitch?.IsOn == true,
+                ClipboardEd2kToggleSwitch?.IsOn == true,
                 ClipboardThunderToggleSwitch?.IsOn == true,
                 ClipboardBtHashToggleSwitch?.IsOn == true,
                 ProtocolMagnetToggleSwitch?.IsOn == true,
+                ProtocolEd2kToggleSwitch?.IsOn == true,
                 ProtocolThunderToggleSwitch?.IsOn == true,
                 ProtocolOmniDownToggleSwitch?.IsOn == true);
         }
@@ -1800,6 +1827,7 @@ namespace OmniDown
             ClipboardHttpToggleSwitch.IsEnabled = enabled;
             ClipboardFtpToggleSwitch.IsEnabled = enabled;
             ClipboardMagnetToggleSwitch.IsEnabled = enabled;
+            ClipboardEd2kToggleSwitch.IsEnabled = enabled;
             ClipboardThunderToggleSwitch.IsEnabled = enabled;
             ClipboardBtHashToggleSwitch.IsEnabled = enabled;
         }
@@ -1811,6 +1839,10 @@ namespace OmniDown
                 settings.ProtocolMagnetEnabled ||
                 ProtocolAssociationService.IsRegistered("magnet") ||
                 IsOmniDownDefaultProtocol("magnet"));
+            SetToggleSwitch(ProtocolEd2kToggleSwitch,
+                settings.ProtocolEd2kEnabled ||
+                ProtocolAssociationService.IsRegistered("ed2k") ||
+                IsOmniDownDefaultProtocol("ed2k"));
             SetToggleSwitch(ProtocolThunderToggleSwitch,
                 settings.ProtocolThunderEnabled ||
                 ProtocolAssociationService.IsRegistered("thunder") ||

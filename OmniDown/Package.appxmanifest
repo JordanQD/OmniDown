@@ -55,6 +55,9 @@
           <uap:Protocol Name="magnet" />
         </uap:Extension>
         <uap:Extension Category="windows.protocol">
+          <uap:Protocol Name="ed2k" />
+        </uap:Extension>
+        <uap:Extension Category="windows.protocol">
           <uap:Protocol Name="thunder" />
         </uap:Extension>
         <uap:Extension Category="windows.protocol">
