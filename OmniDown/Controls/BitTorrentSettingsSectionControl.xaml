@@ -223,35 +223,32 @@
                 </DataTemplate>
             </controls:SettingsExpander.ItemTemplate>
             <controls:SettingsExpander.ItemsFooter>
-                <Border
-                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
-                    BorderThickness="0,1,0,0">
-                    <Grid MinHeight="56" Padding="16,8">
-                        <StackPanel
-                            HorizontalAlignment="Right"
-                            Orientation="Horizontal"
-                            Spacing="8">
-                            <Button
-                                x:Uid="AddBtTrackerSourceButton"
-                                AutomationProperties.Name="添加 Tracker 来源"
-                                Click="AddBtTrackerSourceButton_Click"
-                                Content="添加来源" />
-                            <Button
-                                x:Name="BtSyncTrackerButton"
-                                Width="40"
-                                Height="32"
-                                MinWidth="40"
-                                Padding="0"
-                                x:Uid="BtSyncTrackerButton"
-                                AutomationProperties.Name="同步 Tracker"
-                                Click="SyncBtTrackerButton_Click"
-                                ToolTipService.ToolTip="同步 Tracker">
-                                <FontIcon FontSize="14" Glyph="&#xE895;" />
-                            </Button>
-                        </StackPanel>
-                    </Grid>
-                </Border>
+                <controls:SettingsCard
+                    IsClickEnabled="False"
+                    Style="{StaticResource DefaultSettingsExpanderItemStyle}">
+                    <StackPanel
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal"
+                        Spacing="8">
+                        <Button
+                            x:Uid="AddBtTrackerSourceButton"
+                            AutomationProperties.Name="添加 Tracker 来源"
+                            Click="AddBtTrackerSourceButton_Click"
+                            Content="添加来源" />
+                        <Button
+                            x:Name="BtSyncTrackerButton"
+                            Width="40"
+                            Height="32"
+                            MinWidth="40"
+                            Padding="0"
+                            x:Uid="BtSyncTrackerButton"
+                            AutomationProperties.Name="同步 Tracker"
+                            Click="SyncBtTrackerButton_Click"
+                            ToolTipService.ToolTip="同步 Tracker">
+                            <FontIcon FontSize="14" Glyph="&#xE895;" />
+                        </Button>
+                    </StackPanel>
+                </controls:SettingsCard>
             </controls:SettingsExpander.ItemsFooter>
         </controls:SettingsExpander>
 
@@ -314,29 +311,21 @@
                 </DataTemplate>
             </controls:SettingsExpander.ItemTemplate>
             <controls:SettingsExpander.ItemsFooter>
-                <Border
-                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
-                    BorderThickness="0,1,0,0">
-                    <Grid
-                        MinHeight="56"
-                        Padding="16,8"
-                        ColumnDefinitions="*,Auto">
+                <controls:SettingsCard
+                    IsClickEnabled="False"
+                    Style="{StaticResource DefaultSettingsExpanderItemStyle}">
+                    <controls:SettingsCard.Header>
                         <TextBlock
                             x:Name="BtTrackerListEmptyText"
-                            VerticalAlignment="Center"
                             x:Uid="BtTrackerListEmptyText"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                             Text="尚未添加 Tracker。" />
-                        <Button
-                            Grid.Column="1"
-                            HorizontalAlignment="Right"
-                            x:Uid="AddBtTrackerButton"
-                            AutomationProperties.Name="添加 Tracker"
-                            Click="AddBtTrackerButton_Click"
-                            Content="添加 Tracker" />
-                    </Grid>
-                </Border>
+                    </controls:SettingsCard.Header>
+                    <Button
+                        x:Uid="AddBtTrackerButton"
+                        AutomationProperties.Name="添加 Tracker"
+                        Click="AddBtTrackerButton_Click"
+                        Content="添加 Tracker" />
+                </controls:SettingsCard>
             </controls:SettingsExpander.ItemsFooter>
         </controls:SettingsExpander>
 
