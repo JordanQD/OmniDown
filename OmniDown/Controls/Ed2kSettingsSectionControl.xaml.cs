@@ -1,6 +1,9 @@
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
+using OmniDown.Models;
 using OmniDown.Services.Localization;
+using OmniDown.Services.Rpc;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,28 +14,43 @@ namespace OmniDown.Controls;
 
 public sealed partial class Ed2kSettingsSectionControl : UserControl
 {
+    // Optional resource-discovery feature. ED2K link downloads do not depend on it.
+    private static readonly bool IsEd2kSearchFeatureEnabled = false;
+
     public ObservableCollection<Ed2kServerEntry> ServerEntries { get; } = [];
+    public ObservableCollection<Ed2kSearchResultEntry> SearchResults { get; } = [];
 
     public Ed2kSettingsSectionControl()
     {
         InitializeComponent();
+        Ed2kSearchSection.Visibility = IsEd2kSearchFeatureEnabled
+            ? Visibility.Visible
+            : Visibility.Collapsed;
         UpdateServerListEmptyState();
     }
 
-    internal IEnumerable<SettingSearchEntry> SearchEntries =>
-    [
-        new(Ed2kListenPortSettingCard, "ed2k", "port", "端口", "监听"),
-        new(Ed2kUdpListenPortSettingCard, "ed2k", "udp", "port", "端口"),
-        new(Ed2kUploadSlotsSettingCard, "ed2k", "upload", "slots", "上传", "槽位"),
-        new(Ed2kServerListUrlSettingCard, "ed2k", "server.met", "url", "服务器", "来源"),
-        new(Ed2kKadBootstrapUrlSettingCard, "ed2k", "nodes.dat", "kad", "url", "节点", "来源"),
-        new(Ed2kServerListSettingCard, "ed2k", "server", "服务器", "列表"),
-        new(Ed2kAutoSyncSettingCard, "ed2k", "sync", "auto", "同步", "自动"),
-        new(Ed2kSearchKeywordSettingCard, "ed2k", "search", "keyword", "搜索", "关键词"),
-        new(Ed2kFileTypeSettingCard, "ed2k", "search", "file", "type", "文件", "类型"),
-        new(Ed2kMinSourcesSettingCard, "ed2k", "search", "source", "来源", "最少"),
-        new(Ed2kSearchTimeoutSettingCard, "ed2k", "search", "timeout", "time", "时长", "搜索")
-    ];
+    internal IEnumerable<SettingSearchEntry> SearchEntries => GetSearchEntries();
+
+    private IEnumerable<SettingSearchEntry> GetSearchEntries()
+    {
+        yield return new(Ed2kListenPortSettingCard, "ed2k", "port", "端口", "监听");
+        yield return new(Ed2kUdpListenPortSettingCard, "ed2k", "udp", "port", "端口");
+        yield return new(Ed2kUploadSlotsSettingCard, "ed2k", "upload", "slots", "上传", "槽位");
+        yield return new(Ed2kServerListUrlSettingCard, "ed2k", "server.met", "url", "服务器", "来源");
+        yield return new(Ed2kKadBootstrapUrlSettingCard, "ed2k", "nodes.dat", "kad", "url", "节点", "来源");
+        yield return new(Ed2kServerListSettingCard, "ed2k", "server", "服务器", "列表");
+        yield return new(Ed2kAutoSyncSettingCard, "ed2k", "sync", "auto", "同步", "自动");
+
+        if (!IsEd2kSearchFeatureEnabled)
+        {
+            yield break;
+        }
+
+        yield return new(Ed2kSearchKeywordSettingCard, "ed2k", "search", "keyword", "搜索", "关键词");
+        yield return new(Ed2kFileTypeSettingCard, "ed2k", "search", "file", "type", "文件", "类型");
+        yield return new(Ed2kMinSourcesSettingCard, "ed2k", "search", "source", "来源", "最少");
+        yield return new(Ed2kSearchTimeoutSettingCard, "ed2k", "search", "timeout", "time", "时长", "搜索");
+    }
 
     internal StackPanel Ed2kSettingsContentControl => Ed2kSettingsContent;
     internal NumberBox Ed2kListenPortNumberBoxControl => Ed2kListenPortNumberBox;
@@ -55,12 +73,14 @@ public sealed partial class Ed2kSettingsSectionControl : UserControl
     internal ComboBox Ed2kFileTypeComboBoxControl => Ed2kFileTypeComboBox;
     internal NumberBox Ed2kMinSourcesNumberBoxControl => Ed2kMinSourcesNumberBox;
     internal NumberBox Ed2kSearchTimeoutNumberBoxControl => Ed2kSearchTimeoutNumberBox;
+    internal bool IsEd2kSearchActive { get; private set; }
 
     internal event RoutedEventHandler? Ed2kSettingChanged;
     internal event RoutedEventHandler? RandomEd2kPortRequested;
     internal event RoutedEventHandler? RandomEd2kUdpPortRequested;
     internal event RoutedEventHandler? SyncEd2kRequested;
     internal event RoutedEventHandler? SearchEd2kRequested;
+    internal event EventHandler<Ed2kSearchDownloadRequestedEventArgs>? DownloadEd2kSearchResultRequested;
 
     internal void SetEd2kServerAddresses(IEnumerable<string> addresses, IEnumerable<string>? disabledAddresses = null)
     {
@@ -116,6 +136,49 @@ public sealed partial class Ed2kSettingsSectionControl : UserControl
     private void SearchEd2kButton_Click(object sender, RoutedEventArgs args)
     {
         SearchEd2kRequested?.Invoke(sender, args);
+    }
+
+    private void DownloadEd2kSearchResultButton_Click(object sender, RoutedEventArgs args)
+    {
+        string link = (sender as FrameworkElement)?.Tag?.ToString() ?? string.Empty;
+        Ed2kSearchResultEntry? result = SearchResults.FirstOrDefault(item =>
+            item.Ed2kLink.Equals(link, StringComparison.OrdinalIgnoreCase));
+        if (result is not null)
+        {
+            DownloadEd2kSearchResultRequested?.Invoke(
+                this,
+                new Ed2kSearchDownloadRequestedEventArgs(result));
+        }
+    }
+
+    internal void SetEd2kSearchState(bool isActive, TimeSpan elapsed, TimeSpan duration, string status)
+    {
+        IsEd2kSearchActive = isActive;
+        Ed2kSearchKeywordButton.Content = Strings.Get(isActive ? "Ed2kSearchCancelButtonText" : "Ed2kSearchStartButtonText");
+        AutomationProperties.SetName(
+            Ed2kSearchKeywordButton,
+            Strings.Get(isActive ? "Ed2kSearchCancelButtonText" : "Ed2kSearchStartButtonText"));
+        Ed2kSearchStatusCard.Visibility = string.IsNullOrWhiteSpace(status)
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+        Ed2kSearchStatusText.Text = status;
+        Ed2kSearchProgressBar.Value = duration.TotalMilliseconds <= 0
+            ? 0
+            : Math.Clamp(elapsed.TotalMilliseconds / duration.TotalMilliseconds * 100, 0, 100);
+    }
+
+    internal void SetEd2kSearchResults(IEnumerable<Aria2Ed2kSearchResult> results)
+    {
+        SearchResults.Clear();
+        foreach (Aria2Ed2kSearchResult result in results)
+        {
+            SearchResults.Add(new Ed2kSearchResultEntry(result));
+        }
+
+        Ed2kSearchResultsSettingCard.Visibility = SearchResults.Count == 0
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+        Ed2kSearchResultsSettingCard.Header = Strings.Format("Ed2kSearchResultsHeaderText", SearchResults.Count);
     }
 
     private async void AddEd2kServerButton_Click(object sender, RoutedEventArgs args)
@@ -298,4 +361,9 @@ public sealed partial class Ed2kSettingsSectionControl : UserControl
         if (ReferenceEquals(toggleSwitch, Ed2kAutoSyncToggleSwitch)) return Ed2kAutoSyncStateText;
         return null;
     }
+}
+
+public sealed class Ed2kSearchDownloadRequestedEventArgs(Ed2kSearchResultEntry result) : EventArgs
+{
+    public Ed2kSearchResultEntry Result { get; } = result;
 }

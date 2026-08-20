@@ -437,6 +437,8 @@
   <data name="UserErrorActionAutoShutdown" xml:space="preserve"><value>Windows could not be shut down automatically.</value></data>
   <data name="UserErrorActionRestoreTasks" xml:space="preserve"><value>The download tasks could not be restored.</value></data>
   <data name="UserErrorActionEngineUpdateCheck" xml:space="preserve"><value>The engine update could not be checked.</value></data>
+  <data name="UserErrorActionEd2kSearch" xml:space="preserve"><value>The ED2K search could not be completed.</value></data>
+  <data name="UserErrorActionEd2kSearchDownload" xml:space="preserve"><value>The ED2K search result could not be added.</value></data>
   <data name="UserErrorDetailUnknown" xml:space="preserve"><value>Try again. If the problem continues, copy the technical details and check the logs.</value></data>
   <data name="UserErrorDetailTimeout" xml:space="preserve"><value>The operation timed out. Check the network connection and try again.</value></data>
   <data name="UserErrorDetailPermissionDenied" xml:space="preserve"><value>Access was denied. Check the file or folder permissions.</value></data>
@@ -549,9 +551,12 @@
   <data name="Ed2kSyncNowCard.Header" xml:space="preserve"><value>Synchronize now</value></data>
   <data name="Ed2kSyncNowButton.ToolTipService.ToolTip" xml:space="preserve"><value>Synchronize now</value></data>
   <data name="Ed2kLastSyncText.Text" xml:space="preserve"><value>Never synchronized</value></data>
-  <data name="Ed2kSearchHeader.Text" xml:space="preserve"><value>ED2K search (later phase)</value></data>
+  <data name="Ed2kSearchHeader.Text" xml:space="preserve"><value>ED2K search</value></data>
   <data name="Ed2kSearchKeywordSettingCard.Header" xml:space="preserve"><value>Keyword</value></data>
   <data name="Ed2kSearchKeywordSettingCard.Description" xml:space="preserve"><value>Search the ED2K network for a keyword.</value></data>
+  <data name="Ed2kSearchKeywordTextBox.PlaceholderText" xml:space="preserve"><value>Enter a search keyword</value></data>
+  <data name="Ed2kSearchKeywordButton.Content" xml:space="preserve"><value>Search</value></data>
+  <data name="Ed2kSearchKeywordButton.AutomationProperties.Name" xml:space="preserve"><value>Search ED2K</value></data>
   <data name="Ed2kSearchKeywordButton.ToolTipService.ToolTip" xml:space="preserve"><value>Search</value></data>
   <data name="Ed2kFileTypeSettingCard.Header" xml:space="preserve"><value>File type</value></data>
   <data name="Ed2kFileTypeSettingCard.Description" xml:space="preserve"><value>Filter search results by file type.</value></data>
@@ -564,6 +569,25 @@
   <data name="Ed2kMinSourcesSettingCard.Description" xml:space="preserve"><value>Only show results with at least this many sources.</value></data>
   <data name="Ed2kSearchTimeoutSettingCard.Header" xml:space="preserve"><value>Search duration</value></data>
   <data name="Ed2kSearchTimeoutSettingCard.Description" xml:space="preserve"><value>Maximum time in seconds to wait for a search.</value></data>
+  <data name="Ed2kSearchStatusCard.Header" xml:space="preserve"><value>Search status</value></data>
+  <data name="Ed2kSearchResultsSettingCard.Header" xml:space="preserve"><value>Search results</value></data>
+  <data name="Ed2kSearchResultsSettingCard.Description" xml:space="preserve"><value>Sorted by source count from highest to lowest.</value></data>
+  <data name="DownloadEd2kSearchResultButton.Content" xml:space="preserve"><value>Download</value></data>
+  <data name="DownloadEd2kSearchResultButton.AutomationProperties.Name" xml:space="preserve"><value>Download ED2K search result</value></data>
+  <data name="Ed2kSearchStartButtonText" xml:space="preserve"><value>Search</value></data>
+  <data name="Ed2kSearchCancelButtonText" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Ed2kSearchKeywordRequiredMessage" xml:space="preserve"><value>Enter a keyword before searching.</value></data>
+  <data name="Ed2kSearchProgressText" xml:space="preserve"><value>Searching… {0}/{1} seconds · {2} results</value></data>
+  <data name="Ed2kSearchStartedMessage" xml:space="preserve"><value>The ED2K search has started.</value></data>
+  <data name="Ed2kSearchEmptyMessage" xml:space="preserve"><value>No matching ED2K results were found.</value></data>
+  <data name="Ed2kSearchCompletedMessage" xml:space="preserve"><value>Search complete · {0} results</value></data>
+  <data name="Ed2kSearchCancelledMessage" xml:space="preserve"><value>The ED2K search was canceled.</value></data>
+  <data name="Ed2kSearchCancelledWithResultsMessage" xml:space="preserve"><value>Search canceled · {0} results retained</value></data>
+  <data name="Ed2kSearchFailedStatusText" xml:space="preserve"><value>The ED2K search failed.</value></data>
+  <data name="Ed2kSearchDownloadStartedMessage" xml:space="preserve"><value>The ED2K download was added.</value></data>
+  <data name="Ed2kSearchUnknownNetworkText" xml:space="preserve"><value>Unknown network</value></data>
+  <data name="Ed2kSearchResultSummaryText" xml:space="preserve"><value>{0} · {1} sources ({2} complete) · {3}</value></data>
+  <data name="Ed2kSearchResultsHeaderText" xml:space="preserve"><value>Search results ({0})</value></data>
   <data name="Ed2kBootstrapSyncSucceededMessage" xml:space="preserve"><value>The ED2K server and Kad bootstrap data were synchronized. Restart the engine to load the new data.</value></data>
   <data name="Ed2kBootstrapSyncFailedMessage" xml:space="preserve"><value>The ED2K bootstrap data could not be synchronized.</value></data>
   <data name="Ed2kSettingsInvalidMessage" xml:space="preserve"><value>Enter valid HTTP or HTTPS bootstrap URLs and ED2K servers in host:port format.</value></data>

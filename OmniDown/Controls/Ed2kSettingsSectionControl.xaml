@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:OmniDown.Controls"
+    xmlns:models="using:OmniDown.Models"
     xmlns:controls="using:CommunityToolkit.WinUI.Controls">
     <StackPanel
         x:Name="Ed2kSettingsContent"
@@ -330,19 +331,22 @@
             </controls:SettingsExpander.Items>
         </controls:SettingsExpander>
 
-        <!--  ED2K 搜索  -->
-        <TextBlock
+        <!--  Optional ED2K network search. Keep collapsed until the feature is enabled in code.  -->
+        <StackPanel
+            x:Name="Ed2kSearchSection"
+            Spacing="4"
+            Visibility="Collapsed">
+            <TextBlock
             Margin="1,30,0,6"
             Style="{StaticResource BodyStrongTextBlockStyle}"
             x:Uid="Ed2kSearchHeader"
-            Text="ED2K 搜索（后续阶段）" />
+            Text="ED2K 搜索" />
 
         <controls:SettingsCard
             x:Name="Ed2kSearchKeywordSettingCard"
             x:Uid="Ed2kSearchKeywordSettingCard"
             Description="在 ED2K 网络中搜索指定关键词。"
-            Header="关键词"
-            IsEnabled="False">
+            Header="关键词">
             <controls:SettingsCard.HeaderIcon>
                 <FontIcon Glyph="&#xE721;" />
             </controls:SettingsCard.HeaderIcon>
@@ -353,23 +357,21 @@
                     x:Name="Ed2kSearchKeywordTextBox"
                     Width="220"
                     HorizontalAlignment="Right"
+                    x:Uid="Ed2kSearchKeywordTextBox"
                     PlaceholderText="输入搜索关键词"
                     TextChanged="Ed2kSettingTextBox_TextChanged" />
                 <Button
                     x:Name="Ed2kSearchKeywordButton"
                     Grid.Column="1"
-                    Width="40"
+                    Width="88"
                     Height="32"
-                    MinWidth="40"
-                    Padding="0"
+                    MinWidth="88"
                     VerticalAlignment="Center"
                     x:Uid="Ed2kSearchKeywordButton"
+                    AutomationProperties.Name="搜索 ED2K"
                     Click="SearchEd2kButton_Click"
-                    ToolTipService.ToolTip="搜索">
-                    <FontIcon
-                        FontSize="14"
-                        Glyph="&#xE721;" />
-                </Button>
+                    Content="搜索"
+                    ToolTipService.ToolTip="搜索" />
             </Grid>
         </controls:SettingsCard>
 
@@ -377,8 +379,7 @@
             x:Name="Ed2kFileTypeSettingCard"
             x:Uid="Ed2kFileTypeSettingCard"
             Description="按文件类型过滤搜索结果。"
-            Header="文件类型"
-            IsEnabled="False">
+            Header="文件类型">
             <controls:SettingsCard.HeaderIcon>
                 <FontIcon Glyph="&#xE8A5;" />
             </controls:SettingsCard.HeaderIcon>
@@ -415,8 +416,7 @@
             x:Name="Ed2kMinSourcesSettingCard"
             x:Uid="Ed2kMinSourcesSettingCard"
             Description="仅显示来源数不少于该值的结果。"
-            Header="最少来源数"
-            IsEnabled="False">
+            Header="最少来源数">
             <controls:SettingsCard.HeaderIcon>
                 <FontIcon Glyph="&#xE716;" />
             </controls:SettingsCard.HeaderIcon>
@@ -437,8 +437,7 @@
             x:Name="Ed2kSearchTimeoutSettingCard"
             x:Uid="Ed2kSearchTimeoutSettingCard"
             Description="搜索请求最大等待秒数。"
-            Header="搜索时长"
-            IsEnabled="False">
+            Header="搜索时长">
             <controls:SettingsCard.HeaderIcon>
                 <FontIcon Glyph="&#xE823;" />
             </controls:SettingsCard.HeaderIcon>
@@ -454,5 +453,55 @@
                 Value="20"
                 ValueChanged="Ed2kSettingNumberBox_ValueChanged" />
         </controls:SettingsCard>
+
+        <controls:SettingsCard
+            x:Name="Ed2kSearchStatusCard"
+            x:Uid="Ed2kSearchStatusCard"
+            Header="搜索状态"
+            IsClickEnabled="False"
+            Visibility="Collapsed">
+            <StackPanel
+                Width="280"
+                HorizontalAlignment="Right"
+                Spacing="8">
+                <TextBlock
+                    x:Name="Ed2kSearchStatusText"
+                    AutomationProperties.LiveSetting="Polite"
+                    TextWrapping="WrapWholeWords" />
+                <ProgressBar
+                    x:Name="Ed2kSearchProgressBar"
+                    Maximum="100"
+                    Minimum="0"
+                    Value="0" />
+            </StackPanel>
+        </controls:SettingsCard>
+
+            <controls:SettingsExpander
+            x:Name="Ed2kSearchResultsSettingCard"
+            x:Uid="Ed2kSearchResultsSettingCard"
+            Description="按来源数从高到低排列。"
+            Header="搜索结果"
+            ItemsSource="{x:Bind SearchResults, Mode=OneWay}"
+            Visibility="Collapsed">
+            <controls:SettingsExpander.HeaderIcon>
+                <FontIcon Glyph="&#xE8EF;" />
+            </controls:SettingsExpander.HeaderIcon>
+            <controls:SettingsExpander.ItemTemplate>
+                <DataTemplate x:DataType="models:Ed2kSearchResultEntry">
+                    <controls:SettingsCard
+                        Description="{x:Bind Summary}"
+                        Header="{x:Bind Name}"
+                        IsClickEnabled="False">
+                        <Button
+                            x:Uid="DownloadEd2kSearchResultButton"
+                            AutomationProperties.Name="下载 ED2K 搜索结果"
+                            Click="DownloadEd2kSearchResultButton_Click"
+                            Content="下载"
+                            Tag="{x:Bind Ed2kLink}" />
+                    </controls:SettingsCard>
+                </DataTemplate>
+            </controls:SettingsExpander.ItemTemplate>
+            </controls:SettingsExpander>
+        </StackPanel>
     </StackPanel>
 </UserControl>

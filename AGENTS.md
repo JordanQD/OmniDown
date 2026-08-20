@@ -56,6 +56,12 @@ Use this only to keep local development moving. Do not permanently disable NuGet
 - Keep WinUI and Windows App SDK changes aligned with Microsoft Learn and official WindowsAppSDK samples.
 - Prefer existing project patterns over adding new frameworks or custom infrastructure.
 - For app UI, use WinUI controls and theme resources first; add CommunityToolkit controls only when built-in controls do not cover the need.
+- Avoid hand-crafted XAML controls, styles, templates, chrome, spacing, borders, and theme behavior whenever WinUI or CommunityToolkit already provides an implementation. Prefer composing or configuring the official control over approximating its appearance manually.
+- Make active use of WinUI and CommunityToolkit controls, samples, styles, templates, and theme resources before introducing custom UI code.
+- A local checkout of the Windows Community Toolkit is available at `C:\Users\Q\Data\Projects\Windows`. Use its `components`, `samples`, control source, and theme dictionaries as the primary local reference for CommunityToolkit behavior.
+- Whenever the user says that a requested UI or behavior exists in CommunityToolkit, search the local checkout first and inspect the corresponding sample, control implementation, styles, templates, and required resource dictionaries before editing this project.
+- When following a CommunityToolkit sample, reproduce the complete required pattern, including explicit styles and merged resource dictionaries. Do not copy only the visible XAML fragment or replace missing pieces with hand-crafted approximations.
+- Only implement a custom fallback after confirming that WinUI and the local CommunityToolkit checkout do not already provide a suitable implementation.
 - For Windows Widgets, do not render WinUI XAML inside the widget. Use the Windows App SDK Widgets provider APIs and Adaptive Card templates.
 - Keep widget provider logic thin. Reuse app-owned state snapshots or shared services instead of duplicating download-engine business logic in the widget process.
 

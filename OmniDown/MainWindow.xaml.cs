@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 using WinRT.Interop;
@@ -52,6 +53,7 @@ namespace OmniDown
         private readonly Aria2EngineHost _aria2EngineHost = new();
         private readonly Aria2RpcClient _aria2RpcClient = new();
         private readonly Ed2kBootstrapService _ed2kBootstrapService = new();
+        private readonly Ed2kSearchService _ed2kSearchService;
         private readonly DownloadCoordinator _downloadCoordinator;
         private readonly SystemNotificationService _notifications;
         private readonly TaskbarProgressService _taskbarProgress;
@@ -97,6 +99,7 @@ namespace OmniDown
         private bool _isLoadingNetworkSettings;
         private bool _isLoadingAdvancedSettings;
         private bool _isNewDownloadDialogOpen;
+        private CancellationTokenSource? _ed2kSearchCancellation;
         private bool _hasTriggeredAutoShutdown;
         private bool _hasSeenActiveDownloadsForAutoShutdown;
         private bool _isShutdownPrepared;
@@ -163,6 +166,7 @@ namespace OmniDown
             }
 
             _downloadCoordinator = new DownloadCoordinator(_aria2RpcClient, Tasks);
+            _ed2kSearchService = new Ed2kSearchService(_aria2RpcClient);
             _downloadCoordinator.DeleteTorrentAfterComplete = _settingsPageViewModel.DownloadSettings.DeleteTorrentAfterComplete;
             _notifications = ((App)Application.Current).Notifications;
             _notifications.NotificationInvoked += Notifications_NotificationInvoked;

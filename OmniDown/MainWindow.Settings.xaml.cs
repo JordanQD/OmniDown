@@ -2,11 +2,13 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Win32;
 using OmniDown.Controls;
+using OmniDown.Models;
 using OmniDown.Models.Settings;
 using OmniDown.Services.Engine;
 using OmniDown.Services.Ed2k;
 using OmniDown.Services.Localization;
 using OmniDown.Services.Logging;
+using OmniDown.Services.Rpc;
 using OmniDown.Services.Settings;
 using OmniDown.Services.Storage;
 using OmniDown.ViewModels;
@@ -17,6 +19,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
@@ -139,6 +142,8 @@ namespace OmniDown
             SettingsPage.RandomEd2kPortRequested += RandomEd2kPortButton_Click;
             SettingsPage.RandomEd2kUdpPortRequested += RandomEd2kUdpPortButton_Click;
             SettingsPage.SyncEd2kRequested += SyncEd2kButton_Click;
+            SettingsPage.SearchEd2kRequested += SearchEd2kButton_Click;
+            SettingsPage.DownloadEd2kSearchResultRequested += DownloadEd2kSearchResult_Click;
             SettingsPage.NetworkSettingChanged += NetworkSetting_Changed;
             SettingsPage.DetectSystemProxyRequested += DetectSystemProxyButton_Click;
             SettingsPage.RandomBtPortRequested += RandomBtPortButton_Click;
@@ -261,6 +266,164 @@ namespace OmniDown
                 Ed2kSyncNowButton.IsEnabled = true;
             }
         }
+
+        private async void SearchEd2kButton_Click(object sender, RoutedEventArgs e)
+        {
+            Ed2kSettingsSectionControl section = SettingsPage.Ed2kSettingsContentControl;
+            if (section.IsEd2kSearchActive)
+            {
+                _ed2kSearchCancellation?.Cancel();
+                return;
+            }
+
+            string keyword = Ed2kSearchKeywordTextBox.Text.Trim();
+            if (string.IsNullOrWhiteSpace(keyword))
+            {
+                ShowMessage(Strings.Get("Ed2kSearchKeywordRequiredMessage"), InfoBarSeverity.Warning);
+                _ = Ed2kSearchKeywordTextBox.Focus(FocusState.Programmatic);
+                return;
+            }
+
+            Aria2EngineStartResult startResult = await EnsureAria2StartedAsync();
+            if (!startResult.Started)
+            {
+                ShowEngineStartFailure(startResult);
+                return;
+            }
+
+            try
+            {
+                if (!await _aria2RpcClient.SupportsEd2kAsync())
+                {
+                    throw new NotSupportedException("The active aria2 engine does not support ED2K search.");
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowUserError(UserErrorContext.Ed2kSearch, ex);
+                return;
+            }
+
+            int timeoutSeconds = GetValidIntNumberBoxValue(
+                Ed2kSearchTimeoutNumberBox,
+                10,
+                600,
+                Ed2kSettings.DefaultSearchTimeout);
+            TimeSpan duration = TimeSpan.FromSeconds(timeoutSeconds);
+            string fileType = GetEd2kSearchFileType(GetSelectedTag(
+                Ed2kFileTypeComboBox,
+                Ed2kSettings.DefaultFileType));
+            int minimumSources = GetValidIntNumberBoxValue(
+                Ed2kMinSourcesNumberBox,
+                1,
+                9999,
+                Ed2kSettings.DefaultMinSources);
+
+            _ed2kSearchCancellation?.Dispose();
+            _ed2kSearchCancellation = new CancellationTokenSource();
+            CancellationToken cancellationToken = _ed2kSearchCancellation.Token;
+            section.SetEd2kSearchResults([]);
+            section.SetEd2kSearchState(
+                true,
+                TimeSpan.Zero,
+                duration,
+                Strings.Format("Ed2kSearchProgressText", 0, timeoutSeconds, 0));
+            ShowMessage(Strings.Get("Ed2kSearchStartedMessage"), InfoBarSeverity.Informational);
+
+            TimeSpan finalElapsed = TimeSpan.Zero;
+            string finalStatus = string.Empty;
+            try
+            {
+                Progress<Ed2kSearchProgress> progress = new(update =>
+                {
+                    finalElapsed = update.Elapsed;
+                    section.SetEd2kSearchResults(update.Results);
+                    section.SetEd2kSearchState(
+                        true,
+                        update.Elapsed,
+                        update.Duration,
+                        Strings.Format(
+                            "Ed2kSearchProgressText",
+                            Math.Min((int)update.Elapsed.TotalSeconds, timeoutSeconds),
+                            timeoutSeconds,
+                            update.Results.Count));
+                });
+                IReadOnlyList<Aria2Ed2kSearchResult> results = await _ed2kSearchService.SearchAsync(
+                    keyword,
+                    fileType,
+                    minimumSources,
+                    duration,
+                    progress,
+                    cancellationToken);
+                section.SetEd2kSearchResults(results);
+                finalElapsed = duration;
+                finalStatus = results.Count == 0
+                    ? Strings.Get("Ed2kSearchEmptyMessage")
+                    : Strings.Format("Ed2kSearchCompletedMessage", results.Count);
+                ShowMessage(
+                    finalStatus,
+                    results.Count == 0 ? InfoBarSeverity.Warning : InfoBarSeverity.Success);
+            }
+            catch (OperationCanceledException)
+            {
+                finalStatus = section.SearchResults.Count == 0
+                    ? Strings.Get("Ed2kSearchCancelledMessage")
+                    : Strings.Format("Ed2kSearchCancelledWithResultsMessage", section.SearchResults.Count);
+                ShowMessage(finalStatus, InfoBarSeverity.Informational);
+            }
+            catch (Exception ex)
+            {
+                finalStatus = Strings.Get("Ed2kSearchFailedStatusText");
+                AppLogger.Error("ED2K.Search", ex);
+                ShowUserError(UserErrorContext.Ed2kSearch, ex);
+            }
+            finally
+            {
+                section.SetEd2kSearchState(false, finalElapsed, duration, finalStatus);
+                _ed2kSearchCancellation?.Dispose();
+                _ed2kSearchCancellation = null;
+            }
+        }
+
+        private async void DownloadEd2kSearchResult_Click(
+            object? sender,
+            Ed2kSearchDownloadRequestedEventArgs e)
+        {
+            Aria2EngineStartResult startResult = await EnsureAria2StartedAsync();
+            if (!startResult.Started)
+            {
+                ShowEngineStartFailure(startResult);
+                return;
+            }
+
+            try
+            {
+                DownloadSettings downloadSettings = _settingsPageViewModel.DownloadSettings;
+                DownloadTask task = await _downloadCoordinator.AddDownloadAsync(
+                    e.Result.Ed2kLink,
+                    e.Result.Name,
+                    downloadSettings.DownloadDirectory,
+                    downloadSettings.SplitCount);
+                _observedTaskStatuses[task.Gid] = task.Status;
+                ShowTaskAddedNotification(task);
+                ShowMessage(Strings.Get("Ed2kSearchDownloadStartedMessage"), InfoBarSeverity.Success);
+                await RefreshDownloadsAsync();
+                UpdateDashboard();
+            }
+            catch (Exception ex)
+            {
+                ShowUserError(UserErrorContext.Ed2kSearchDownload, ex);
+            }
+        }
+
+        private static string GetEd2kSearchFileType(string value) => value.ToLowerInvariant() switch
+        {
+            "audio" => "audio",
+            "video" => "video",
+            "document" => "doc",
+            "archive" => "archive",
+            _ => string.Empty
+        };
 
         private void LoadEd2kSettings()
         {

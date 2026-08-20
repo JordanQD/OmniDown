@@ -223,6 +223,12 @@ public sealed partial class AppSettingsPage : Page
         add => _ed2kPage.SearchEd2kRequested += value;
         remove => _ed2kPage.SearchEd2kRequested -= value;
     }
+
+    internal event EventHandler<Ed2kSearchDownloadRequestedEventArgs>? DownloadEd2kSearchResultRequested
+    {
+        add => _ed2kPage.DownloadEd2kSearchResultRequested += value;
+        remove => _ed2kPage.DownloadEd2kSearchResultRequested -= value;
+    }
     internal event RoutedEventHandler? NetworkSettingChanged
     {
         add => _networkPage.NetworkSettingChanged += value;

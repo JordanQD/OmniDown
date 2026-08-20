@@ -24,7 +24,9 @@ public enum UserErrorContext
     BrowserExtensionAdd,
     AutoShutdown,
     RestoreTasks,
-    EngineUpdateCheck
+    EngineUpdateCheck,
+    Ed2kSearch,
+    Ed2kSearchDownload
 }
 
 public sealed record UserErrorPresentation(string Message, string TechnicalDetails);
@@ -65,6 +67,8 @@ public static class UserErrorMessages
         UserErrorContext.AutoShutdown => "UserErrorActionAutoShutdown",
         UserErrorContext.RestoreTasks => "UserErrorActionRestoreTasks",
         UserErrorContext.EngineUpdateCheck => "UserErrorActionEngineUpdateCheck",
+        UserErrorContext.Ed2kSearch => "UserErrorActionEd2kSearch",
+        UserErrorContext.Ed2kSearchDownload => "UserErrorActionEd2kSearchDownload",
         _ => "UserErrorActionGeneral"
     };
 

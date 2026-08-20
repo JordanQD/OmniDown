@@ -65,6 +65,7 @@ namespace OmniDown
         {
             AppLogger.Info("Aria2Command", "stop requested");
             _refreshTimer.Stop();
+            _ed2kSearchCancellation?.Cancel();
             await SaveAriaSessionIfRunningAsync();
             await _aria2EngineHost.ShutdownAsync(_aria2RpcClient);
             _runningAriaSettingsSignature = string.Empty;
@@ -772,6 +773,7 @@ namespace OmniDown
             AppLogger.Info("App", "MainWindow closing");
             RemoveMinimumWindowSizeHook();
             _refreshTimer.Stop();
+            _ed2kSearchCancellation?.Cancel();
             Clipboard.ContentChanged -= Clipboard_ContentChanged;
             ReleaseSystemSleepOverride();
             SaveWindowPlacementSettings();

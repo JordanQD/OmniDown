@@ -437,6 +437,8 @@
   <data name="UserErrorActionAutoShutdown" xml:space="preserve"><value>无法自动关闭 Windows。</value></data>
   <data name="UserErrorActionRestoreTasks" xml:space="preserve"><value>无法恢复下载任务。</value></data>
   <data name="UserErrorActionEngineUpdateCheck" xml:space="preserve"><value>无法检查引擎更新。</value></data>
+  <data name="UserErrorActionEd2kSearch" xml:space="preserve"><value>无法完成 ED2K 搜索。</value></data>
+  <data name="UserErrorActionEd2kSearchDownload" xml:space="preserve"><value>无法添加 ED2K 搜索结果。</value></data>
   <data name="UserErrorDetailUnknown" xml:space="preserve"><value>请重试；如果问题持续出现，请复制技术详情并查看日志。</value></data>
   <data name="UserErrorDetailTimeout" xml:space="preserve"><value>操作超时，请检查网络连接后重试。</value></data>
   <data name="UserErrorDetailPermissionDenied" xml:space="preserve"><value>访问被拒绝，请检查文件或文件夹权限。</value></data>
@@ -549,9 +551,12 @@
   <data name="Ed2kSyncNowCard.Header" xml:space="preserve"><value>马上同步</value></data>
   <data name="Ed2kSyncNowButton.ToolTipService.ToolTip" xml:space="preserve"><value>马上同步</value></data>
   <data name="Ed2kLastSyncText.Text" xml:space="preserve"><value>从未同步</value></data>
-  <data name="Ed2kSearchHeader.Text" xml:space="preserve"><value>ED2K 搜索（后续阶段）</value></data>
+  <data name="Ed2kSearchHeader.Text" xml:space="preserve"><value>ED2K 搜索</value></data>
   <data name="Ed2kSearchKeywordSettingCard.Header" xml:space="preserve"><value>关键词</value></data>
   <data name="Ed2kSearchKeywordSettingCard.Description" xml:space="preserve"><value>在 ED2K 网络中搜索指定关键词。</value></data>
+  <data name="Ed2kSearchKeywordTextBox.PlaceholderText" xml:space="preserve"><value>输入搜索关键词</value></data>
+  <data name="Ed2kSearchKeywordButton.Content" xml:space="preserve"><value>搜索</value></data>
+  <data name="Ed2kSearchKeywordButton.AutomationProperties.Name" xml:space="preserve"><value>搜索 ED2K</value></data>
   <data name="Ed2kSearchKeywordButton.ToolTipService.ToolTip" xml:space="preserve"><value>搜索</value></data>
   <data name="Ed2kFileTypeSettingCard.Header" xml:space="preserve"><value>文件类型</value></data>
   <data name="Ed2kFileTypeSettingCard.Description" xml:space="preserve"><value>按文件类型过滤搜索结果。</value></data>
@@ -564,6 +569,25 @@
   <data name="Ed2kMinSourcesSettingCard.Description" xml:space="preserve"><value>仅显示来源数不少于该值的结果。</value></data>
   <data name="Ed2kSearchTimeoutSettingCard.Header" xml:space="preserve"><value>搜索时长</value></data>
   <data name="Ed2kSearchTimeoutSettingCard.Description" xml:space="preserve"><value>搜索请求最大等待秒数。</value></data>
+  <data name="Ed2kSearchStatusCard.Header" xml:space="preserve"><value>搜索状态</value></data>
+  <data name="Ed2kSearchResultsSettingCard.Header" xml:space="preserve"><value>搜索结果</value></data>
+  <data name="Ed2kSearchResultsSettingCard.Description" xml:space="preserve"><value>按来源数从高到低排列。</value></data>
+  <data name="DownloadEd2kSearchResultButton.Content" xml:space="preserve"><value>下载</value></data>
+  <data name="DownloadEd2kSearchResultButton.AutomationProperties.Name" xml:space="preserve"><value>下载 ED2K 搜索结果</value></data>
+  <data name="Ed2kSearchStartButtonText" xml:space="preserve"><value>搜索</value></data>
+  <data name="Ed2kSearchCancelButtonText" xml:space="preserve"><value>取消</value></data>
+  <data name="Ed2kSearchKeywordRequiredMessage" xml:space="preserve"><value>请先输入搜索关键词。</value></data>
+  <data name="Ed2kSearchProgressText" xml:space="preserve"><value>搜索中… {0}/{1} 秒 · {2} 个结果</value></data>
+  <data name="Ed2kSearchStartedMessage" xml:space="preserve"><value>ED2K 搜索已开始。</value></data>
+  <data name="Ed2kSearchEmptyMessage" xml:space="preserve"><value>未找到匹配的 ED2K 结果。</value></data>
+  <data name="Ed2kSearchCompletedMessage" xml:space="preserve"><value>搜索完成 · {0} 个结果</value></data>
+  <data name="Ed2kSearchCancelledMessage" xml:space="preserve"><value>已取消 ED2K 搜索。</value></data>
+  <data name="Ed2kSearchCancelledWithResultsMessage" xml:space="preserve"><value>搜索已取消 · 保留 {0} 个结果</value></data>
+  <data name="Ed2kSearchFailedStatusText" xml:space="preserve"><value>ED2K 搜索失败。</value></data>
+  <data name="Ed2kSearchDownloadStartedMessage" xml:space="preserve"><value>已添加 ED2K 下载。</value></data>
+  <data name="Ed2kSearchUnknownNetworkText" xml:space="preserve"><value>未知网络</value></data>
+  <data name="Ed2kSearchResultSummaryText" xml:space="preserve"><value>{0} · {1} 个来源（{2} 个完整来源）· {3}</value></data>
+  <data name="Ed2kSearchResultsHeaderText" xml:space="preserve"><value>搜索结果（{0}）</value></data>
   <data name="Ed2kBootstrapSyncSucceededMessage" xml:space="preserve"><value>已同步 ED2K 服务器与 Kad 引导数据；重启引擎后载入新数据。</value></data>
   <data name="Ed2kBootstrapSyncFailedMessage" xml:space="preserve"><value>无法同步 ED2K 网络引导数据。</value></data>
   <data name="Ed2kSettingsInvalidMessage" xml:space="preserve"><value>请输入有效的 HTTP/HTTPS 引导地址，并按“主机:端口”填写 ED2K 服务器。</value></data>

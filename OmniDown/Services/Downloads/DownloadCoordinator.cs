@@ -131,6 +131,7 @@ public sealed class DownloadCoordinator
         remoteTasks.AddRange(await _rpcClient.TellActiveAsync(cancellationToken));
         remoteTasks.AddRange(await _rpcClient.TellWaitingAsync(cancellationToken));
         remoteTasks.AddRange(await _rpcClient.TellStoppedAsync(cancellationToken));
+        remoteTasks.RemoveAll(IsEd2kSearchTask);
         HashSet<string> remoteGids = remoteTasks
             .Select(task => task.Gid)
             .Where(gid => !string.IsNullOrWhiteSpace(gid))
@@ -1210,6 +1211,12 @@ public sealed class DownloadCoordinator
     private static bool IsCompletedStatus(string status)
     {
         return NormalizeStatus(status).Contains("complete", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsEd2kSearchTask(Aria2TaskStatus task)
+    {
+        return task.Ed2k?.SearchActive == true || task.Files.Any(file =>
+            file.Path.Contains("aria2-next-ed2k-search-", StringComparison.OrdinalIgnoreCase));
     }
 
     private static bool IsResultOnlyStatus(string status)

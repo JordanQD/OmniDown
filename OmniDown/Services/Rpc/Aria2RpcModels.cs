@@ -45,6 +45,15 @@ public sealed record Aria2TaskStatus
 
 public sealed record Aria2Ed2kInfo
 {
+    [JsonPropertyName("searchActive")]
+    public bool SearchActive { get; init; }
+
+    [JsonPropertyName("searchMoreResults")]
+    public bool SearchMoreResults { get; init; }
+
+    [JsonPropertyName("searchResultCount")]
+    public string SearchResultCount { get; init; } = "0";
+
     [JsonPropertyName("ed2kLink")]
     public string Ed2kLink { get; init; } = string.Empty;
 
@@ -65,6 +74,51 @@ public sealed record Aria2VersionInfo
 
     [JsonPropertyName("enabledFeatures")]
     public IReadOnlyList<string> EnabledFeatures { get; init; } = [];
+}
+
+public sealed record Aria2Ed2kSearchResults
+{
+    [JsonPropertyName("gid")]
+    public string Gid { get; init; } = string.Empty;
+
+    [JsonPropertyName("status")]
+    public string Status { get; init; } = string.Empty;
+
+    [JsonPropertyName("moreResults")]
+    public bool MoreResults { get; init; }
+
+    [JsonPropertyName("results")]
+    public IReadOnlyList<Aria2Ed2kSearchResult> Results { get; init; } = [];
+}
+
+public sealed record Aria2Ed2kSearchResult
+{
+    [JsonPropertyName("hash")]
+    public string Hash { get; init; } = string.Empty;
+
+    [JsonPropertyName("name")]
+    public string Name { get; init; } = string.Empty;
+
+    [JsonPropertyName("length")]
+    public string Length { get; init; } = "0";
+
+    [JsonPropertyName("sourceCount")]
+    public string SourceCount { get; init; } = "0";
+
+    [JsonPropertyName("completeSourceCount")]
+    public string CompleteSourceCount { get; init; } = "0";
+
+    [JsonPropertyName("fileType")]
+    public string FileType { get; init; } = string.Empty;
+
+    [JsonPropertyName("extension")]
+    public string Extension { get; init; } = string.Empty;
+
+    [JsonPropertyName("sourceNetwork")]
+    public string SourceNetwork { get; init; } = string.Empty;
+
+    [JsonPropertyName("ed2kLink")]
+    public string Ed2kLink { get; init; } = string.Empty;
 }
 
 public sealed record Aria2FileStatus

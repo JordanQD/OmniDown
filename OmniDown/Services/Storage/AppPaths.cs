@@ -27,6 +27,8 @@ public static class AppPaths
 
     public static string Ed2kNodesDatPath => Path.Combine(Ed2kBootstrapDirectory, "nodes.dat");
 
+    public static string Ed2kSearchDirectory => Path.Combine(Ed2kBootstrapDirectory, "search");
+
     public static string DefaultDownloadDirectory
     {
         get

@@ -60,6 +60,21 @@ public sealed class Aria2RpcClient : IDisposable
         return _supportsEd2k.Value;
     }
 
+    public Task<string> StartEd2kSearchAsync(
+        string keyword,
+        Dictionary<string, string> options,
+        CancellationToken cancellationToken = default)
+    {
+        return SendAsync<string>("aria2.ed2kSearch", [keyword.Trim(), options], cancellationToken);
+    }
+
+    public Task<Aria2Ed2kSearchResults> GetEd2kSearchResultsAsync(
+        string gid,
+        CancellationToken cancellationToken = default)
+    {
+        return SendAsync<Aria2Ed2kSearchResults>("aria2.getEd2kSearchResults", [gid], cancellationToken);
+    }
+
     public async Task<string> AddUriAsync(
         string uri,
         string? outputFileName,
@@ -192,6 +207,11 @@ public sealed class Aria2RpcClient : IDisposable
         return SendAsync<string>("aria2.remove", [gid], cancellationToken);
     }
 
+    public Task ForceRemoveAsync(string gid, CancellationToken cancellationToken = default)
+    {
+        return SendAsync<string>("aria2.forceRemove", [gid], cancellationToken);
+    }
+
     public Task RemoveDownloadResultAsync(string gid, CancellationToken cancellationToken = default)
     {
         return SendAsync<string>("aria2.removeDownloadResult", [gid], cancellationToken);
@@ -314,7 +334,8 @@ public sealed class Aria2RpcClient : IDisposable
 
     private static bool IsNoisyPollingMethod(string method)
     {
-        return method is "aria2.tellActive" or "aria2.tellWaiting" or "aria2.tellStopped" or "aria2.getGlobalStat";
+        return method is "aria2.tellActive" or "aria2.tellWaiting" or "aria2.tellStopped" or
+            "aria2.getGlobalStat" or "aria2.getEd2kSearchResults";
     }
 
     private static string BuildPayload(string id, string method, IReadOnlyList<object> parameters)
@@ -399,6 +420,12 @@ public sealed class Aria2RpcClient : IDisposable
             };
         }
 
+        if (resultType == typeof(Aria2VersionInfo) || resultType == typeof(Aria2Ed2kSearchResults))
+        {
+            T? model = JsonSerializer.Deserialize<T>(result.GetRawText());
+            return model ?? throw new NotSupportedException($"aria2 RPC result type {resultType.Name} could not be read.");
+        }
+
         if (resultType == typeof(IReadOnlyList<Aria2TaskStatus>))
         {
             List<Aria2TaskStatus> tasks = [];
@@ -436,7 +463,12 @@ public sealed class Aria2RpcClient : IDisposable
             CompletedLength = TryGetString(item, "completedLength"),
             DownloadSpeed = TryGetString(item, "downloadSpeed"),
             UploadSpeed = TryGetString(item, "uploadSpeed"),
+            ErrorCode = TryGetString(item, "errorCode"),
+            ErrorMessage = TryGetString(item, "errorMessage"),
             BitTorrent = item.TryGetProperty("bittorrent", out JsonElement bitTorrent) ? bitTorrent.Clone() : null,
+            Ed2k = item.TryGetProperty("ed2k", out JsonElement ed2k) && ed2k.ValueKind == JsonValueKind.Object
+                ? JsonSerializer.Deserialize<Aria2Ed2kInfo>(ed2k.GetRawText())
+                : null,
             Directory = TryGetString(item, "dir"),
             Files = ReadFiles(item)
         };
