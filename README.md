@@ -11,6 +11,22 @@ OmniDown 是一款使用 Windows App SDK、WinUI 3、C# 与 XAML 构建的原生
 
 OmniDown 的桌面界面直接使用 WinUI 3 控件和 Windows App SDK API 实现，遵循 Windows 的 Fluent Design，并原生适配浅色、深色及系统主题。系统通知、任务栏进度、托盘运行、协议关联和 Windows 小组件等功能也直接集成 Windows 平台能力，不依赖跨平台 Web UI 运行时。
 
+## 界面预览
+
+### 首页
+
+![OmniDown 首页](docs/images/home.png)
+
+### 添加下载
+
+| 普通下载 | 种子下载 |
+| --- | --- |
+| ![添加普通下载任务](docs/images/add-download-normal.png) | ![添加种子下载任务](docs/images/add-download-torrent.png) |
+
+### 设置
+
+![OmniDown 设置页](docs/images/settings.png)
+
 ## 功能
 
 - 管理 HTTP、HTTPS、FTP、SFTP、磁力链接和 `.torrent` 下载任务
