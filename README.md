@@ -1,122 +1,138 @@
+<div align="right">
+  <a href="README.md">English</a> | <a href="README.zh-CN.md">简体中文</a>
+</div>
+
 # OmniDown
 
-**原生 WinUI 3 Windows 下载管理器。**
+**A native WinUI 3 download manager for Windows.**
 
-OmniDown 是一款使用 Windows App SDK、WinUI 3、C# 与 XAML 构建的原生 Windows 桌面应用，通过本地 JSON-RPC 调用 aria2 或 aria2-next 完成下载。界面不是 Electron 或 WebView 套壳。
+**Engine compatibility reference versions:** [aria2 1.37.0](https://github.com/aria2/aria2/releases/tag/release-1.37.0) · [aria2-next 2.5.6](https://github.com/AnInsomniacy/aria2-next/releases/tag/v2.5.6)
+
+> [!NOTE]
+> These are documented compatibility reference versions, not hard-coded version requirements or an exhaustive test matrix. Newer aria2-next releases are available, but full compatibility with them has not been verified for OmniDown.
+
+OmniDown is a native Windows desktop application built with Windows App SDK, WinUI 3, C#, and XAML. It uses local JSON-RPC to control an aria2 or aria2-next download engine. The UI is native—not an Electron or WebView wrapper.
 
 > [!WARNING]
-> 项目仍处于早期开发阶段，界面和配置格式可能发生变化。目前暂无稳定发行版，请勿将其用于没有备份的重要下载任务。
+> This project is still in an early stage of development. The interface and configuration formats may change. There is no stable release at present; avoid relying on it for important downloads without backups.
 
-## 原生 WinUI 3
+> [!NOTE]
+> **Community maintenance welcome.** OmniDown is open source under the MIT License. The original author has limited time for ongoing maintenance and cannot guarantee regular updates or prompt reviews of issues and pull requests. Forks, improvements, and community contributions are welcome.
 
-OmniDown 的桌面界面直接使用 WinUI 3 控件和 Windows App SDK API 实现，遵循 Windows 的 Fluent Design，并原生适配浅色、深色及系统主题。系统通知、任务栏进度、托盘运行、协议关联和 Windows 小组件等功能也直接集成 Windows 平台能力，不依赖跨平台 Web UI 运行时。
+## Native WinUI 3
 
-## 界面预览
+OmniDown uses WinUI 3 controls and Windows App SDK APIs directly for its desktop interface. It follows Windows Fluent Design and supports light, dark, and system themes. System notifications, taskbar progress, tray operation, protocol associations, and Windows widgets also integrate with native Windows capabilities instead of a cross-platform web UI runtime.
 
-### 首页
+## Screenshots
 
-![OmniDown 首页](docs/images/home.png)
+### Home
 
-### 添加下载
+![OmniDown home screen](docs/images/home.png)
 
-| 普通下载 | 种子下载 |
+### Add a download
+
+| Regular download | Torrent download |
 | --- | --- |
-| ![添加普通下载任务](docs/images/add-download-normal.png) | ![添加种子下载任务](docs/images/add-download-torrent.png) |
+| ![Add a regular download](docs/images/add-download-normal.png) | ![Add a torrent](docs/images/add-download-torrent.png) |
 
-### 设置
+### Settings
 
-![OmniDown 设置页](docs/images/settings.png)
+![OmniDown settings](docs/images/settings.png)
 
-## 功能
+## Features
 
-- 管理 HTTP、HTTPS、FTP、SFTP、磁力链接和 `.torrent` 下载任务
-- 新建、暂停、继续、删除、筛选、排序和搜索任务
-- 查看下载进度、上下行速度、剩余时间及任务详情
-- 设置全局或单任务限速、并发数、分段数和重试策略
-- 配置 BitTorrent Tracker、做种、加密、代理及监听端口
-- 支持断点续传、会话恢复和任务记录清理
-- 支持系统通知、任务栏进度、托盘运行及下载时阻止休眠
-- 支持浅色、深色和跟随系统主题
-- 可选剪贴板链接检测、协议关联、本地浏览器扩展 API 和 Windows 小组件
-- 支持官方 aria2、aria2-next 以及用户指定的兼容可执行文件
+- Manage HTTP, HTTPS, FTP, SFTP, magnet link, and `.torrent` download tasks
+- Add, pause, resume, remove, filter, sort, and search downloads
+- View progress, upload/download speeds, estimated time remaining, and task details
+- Configure global and per-task speed limits, concurrency, connections, and retry behavior
+- Configure BitTorrent trackers, seeding, encryption, proxies, and listening ports
+- Resume interrupted downloads, restore sessions, and clear task history
+- Use system notifications, taskbar progress, tray operation, and sleep prevention during downloads
+- Switch between light, dark, and system themes
+- Optionally enable clipboard link detection, protocol associations, a local browser extension API, and Windows widgets
+- Select official aria2, aria2-next, or a custom compatible executable
 
-## 系统要求
+## System requirements
 
-- Windows 10 1809（版本 17763）或更高版本
-- x86、x64 或 ARM64 设备
-- aria2 兼容下载引擎，参见下一节
+- Windows 10 version 1809 (build 17763) or later
+- An x86, x64, or ARM64 device
+- An aria2-compatible download engine; see below
 
-## 下载引擎
+## Download engines
 
-OmniDown 本身是下载管理界面，实际传输由独立的 aria2 兼容进程完成。支持以下选择：
+OmniDown provides the download manager UI; transfers are handled by a separate aria2-compatible process. Available options:
 
-- [aria2](https://github.com/aria2/aria2)：成熟稳定，支持 HTTP(S)、FTP、SFTP、BitTorrent 和 Metalink
-- [aria2-next](https://github.com/AnInsomniacy/aria2-next)：与 aria2 RPC 兼容的维护分支，也是 OmniDown 当前的默认引擎类型
-- 自定义引擎：选择一个与 aria2 JSON-RPC 兼容的可执行文件
+- [aria2](https://github.com/aria2/aria2): a mature engine supporting HTTP(S), FTP, SFTP, BitTorrent, and Metalink
+- [aria2-next](https://github.com/AnInsomniacy/aria2-next): an aria2 JSON-RPC-compatible fork and the default engine type in OmniDown
+- Custom engine: a user-supplied executable compatible with aria2 JSON-RPC
 
-发行包不附带下载引擎。请自行下载适合设备架构的 Windows 版本，然后在 OmniDown 中打开 `设置 → 高级 → aria2 引擎`，选择引擎类型并导入 `aria2c.exe` 或 `aria2-next.exe`。OmniDown 会把所选文件复制到 MSIX 管理的 `%LOCALAPPDATA%\Packages\<包系列名>\LocalState\engines\aria2\win-<架构>`，之后不再依赖原始下载位置；正常卸载应用时，这份内核也会被删除。也可以把相应程序加入 `PATH`。
+The compatibility reference versions are listed at the top of this README. Selecting an engine type does not lock it to that version.
 
-OmniDown 只连接由自身启动、监听于 `127.0.0.1` 的 RPC 服务。RPC 端口和密钥可在高级设置中修改。
+**Download engines are not bundled with OmniDown releases.** Download a Windows executable for your architecture, then go to `Settings → Advanced → aria2 engine` in OmniDown. Select the engine type and import `aria2c.exe` or the appropriate aria2-next Windows executable. OmniDown copies the selected file into the MSIX-managed `%LOCALAPPDATA%\Packages\<package-family-name>\LocalState\engines\aria2\win-<architecture>` directory, so it no longer depends on the original download location. The imported engine is removed when the application is normally uninstalled. You may also make a compatible executable available through `PATH`.
 
-### 开发调试内核
+OmniDown connects only to the RPC service it starts itself on `127.0.0.1`. You can change the RPC port and secret in advanced settings.
 
-aria2 可执行文件不纳入 Git。开发者可以把本机调试用内核放在 `OmniDown/Engines/aria2/win-<架构>`；Debug 构建会把它复制到输出目录，Release 构建和发布包始终忽略这些文件。这样重新编译调试时可继续使用本机内核，同时不会误发到正式包。
+### Engine setup for development
 
-应用可以检查并更新已经导入的 aria2-next，但不会自动完成首次下载。配置、任务缓存和会话保存在稳定的 `%LOCALAPPDATA%\OmniDown`，不会因为重新生成或更换调试输出目录而被覆盖；导入的内核单独保存在 MSIX `LocalState`，同一包标识下重新编译/F5 会保留，正常卸载则会删除。升级后首次启动会把旧版 `%LOCALAPPDATA%\OmniDown\engines` 中的内核迁入 `LocalState`，成功后清除旧副本。
+Engine executables are not checked into Git. For local development, place an executable under `OmniDown/Engines/aria2/win-<architecture>`. Debug builds copy it to the output directory; Release builds and published packages always exclude these binaries. This allows convenient local debugging without accidentally distributing the engine.
 
-## 从源码构建
+OmniDown can check for and install updates to an imported aria2-next engine, but it does not automatically perform the initial engine download. App settings, task cache, and sessions are stored in `%LOCALAPPDATA%\OmniDown`, independently of build output directories. Imported engines live in MSIX `LocalState` and persist across F5/rebuilds under the same package identity, but are removed on normal uninstall. On first launch after an upgrade, engines from the older `%LOCALAPPDATA%\OmniDown\engines` location are migrated into `LocalState`, and the old copies are removed after a successful migration.
 
-### 准备环境
+## Build from source
 
-- Visual Studio 2022，并安装“使用 C++ 的桌面开发”和“通用 Windows 平台开发”相关组件
+### Prerequisites
+
+- Visual Studio 2022 with the relevant **Desktop development with C++** and **Universal Windows Platform development** components
 - .NET 8 SDK
 - Windows 10/11 SDK
 
-### 构建
+### Build
 
-克隆仓库：
+Clone the repository:
 
 ```powershell
 git clone https://github.com/JordanQD/OmniDown.git
 cd OmniDown
 ```
 
-还原依赖并构建解决方案：
+Restore dependencies and build the solution (x64 example):
 
 ```powershell
 dotnet restore OmniDown.slnx
-dotnet build OmniDown.slnx
+dotnet build OmniDown.slnx -p:Platform=x64
 ```
 
-也可以使用 Visual Studio 打开 `OmniDown.slnx`，选择目标架构后运行或打包项目。
+Alternatively, open `OmniDown.slnx` in Visual Studio, choose your target architecture, and run or package the project.
 
-## 项目结构
+## Project structure
 
 ```text
 OmniDown/
-├─ Controls/        可复用 WinUI 控件
-├─ Dialogs/         新建下载等对话框
-├─ Engines/aria2/   引擎配置及可选的本机 Debug 内核（不纳入 Git）
-├─ Models/          下载任务和设置模型
-├─ Pages/           下载与设置页面
-├─ Services/        aria2 RPC、引擎、通知、托盘和小组件等服务
-├─ Strings/         简体中文和英文资源
-└─ ViewModels/      页面与控件视图模型
+├─ Controls/        Reusable WinUI controls
+├─ Dialogs/         Dialogs, including Add Download
+├─ Engines/aria2/   Engine configs and optional local Debug binaries (not committed)
+├─ Models/          Download-task and settings models
+├─ Pages/           Download and settings pages
+├─ Services/        aria2 RPC, engine, notification, tray, and widget services
+├─ Strings/         Simplified Chinese and English resources
+└─ ViewModels/      Page and control view models
 ```
 
-## 参与开发
+## Contributing
 
-欢迎通过 [Issues](https://github.com/JordanQD/OmniDown/issues) 报告问题或提出建议。提交代码前，请确保解决方案可以成功构建，并尽量让每次改动只处理一个明确问题。
+Contributions, forks, and continued development by the community are welcome. Please use [Issues](https://github.com/JordanQD/OmniDown/issues) for bug reports and suggestions or submit a pull request for a focused change. Before submitting code, make sure the solution builds successfully and keep each change scoped to a clear purpose.
 
-## 许可证
+The project is provided as-is. The original author may not be available to respond promptly or provide ongoing support.
 
-OmniDown 源代码采用宽松的 [MIT License](LICENSE) 开源，允许使用、复制、修改和再分发，但需要保留原始版权及许可声明。
+## License
 
-MIT License 仅适用于 OmniDown 自身代码。发行包不包含 aria2 或 aria2-next；用户自行导入的下载引擎是独立的第三方程序，采用 GNU GPL v2 授权，下载、使用或再分发时需要分别遵守对应项目的许可证及第三方依赖条款。
+OmniDown's own source code is licensed under the permissive [MIT License](LICENSE). You may use, copy, modify, and redistribute it provided the original copyright and license notices are retained.
 
-## 依赖与参考
+The MIT License applies to OmniDown's code only. Neither aria2 nor aria2-next is included in the distribution. Download engines imported by users are separate third-party programs licensed under GNU GPL v2; follow their respective licenses and any applicable third-party dependency terms when downloading, using, or redistributing them.
 
-OmniDown 的实现、界面设计和功能规划参考或使用了以下开源项目：
+## Dependencies and acknowledgments
+
+OmniDown's implementation, UI design, and feature planning draw on or use the following open-source projects:
 
 - [files-community/Files](https://github.com/files-community/Files)
 - [AnInsomniacy/motrix-next](https://github.com/AnInsomniacy/motrix-next)
@@ -128,9 +144,9 @@ OmniDown 的实现、界面设计和功能规划参考或使用了以下开源�
 - [microsoft/microsoft-ui-xaml](https://github.com/microsoft/microsoft-ui-xaml)
 - [CommunityToolkit/Windows](https://github.com/CommunityToolkit/Windows)
 
-## Tracker 来源
+## Tracker sources
 
-内置 Tracker 来源选项由以下公开项目提供：
+Built-in tracker source options use these public projects:
 
 - [XIU2/TrackersListCollection](https://github.com/XIU2/TrackersListCollection)
 - [ngosang/trackerslist](https://github.com/ngosang/trackerslist)
